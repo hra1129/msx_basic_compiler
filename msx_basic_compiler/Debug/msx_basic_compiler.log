@@ -1,5 +1,2 @@
 ﻿  basic_code_loader.cpp
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\basic_code_loader.cpp(14,14): warning C4309: '初期化中': 定数値が切り捨てられました。
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\basic_code_loader.cpp(28,9): error C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  msx_basic_compiler.cpp
-  コードを生成中...
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_basic_compiler.exe
