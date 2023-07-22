@@ -1,2 +1,5 @@
-﻿  test_of_cbasic_list.cpp
-  test_of_cbasic_list.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\test_of_cbasic_list\Debug\test_of_cbasic_list.exe
+﻿  basic_code_loader.cpp
+  test_of_cbasic_list.cpp
+  コードを生成中...
+  LINK : 前回のインクリメンタル リンクで C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\test_of_cbasic_list.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
+  test_of_cbasic_list.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\test_of_cbasic_list.exe

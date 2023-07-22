@@ -1,2 +1,3 @@
-﻿  basic_code_loader.cpp
-  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_basic_compiler.exe
+﻿  variable_manager.cpp
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\variable_manager.h(49,6): error C2228: '.type' の左側はクラス、構造体、共用体でなければなりません
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\variable_manager.h(49,6): message : 型は 'CVARIABLE_TYPE' です。

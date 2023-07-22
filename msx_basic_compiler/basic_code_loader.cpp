@@ -19,7 +19,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0xE8 },				"CSRLIN" },
 	{ { 0xAE },				"DEFDBL" },
 	{ { 0xAC },				"DEFINT" },
-	{ { 0xAD },				"DEFSGN" },
+	{ { 0xAD },				"DEFSNG" },
 	{ { 0xAB },				"DEFSTR" },
 	{ { 0xA8 },				"DELETE" },
 	{ { 0xEC },				"INKEY$" },
