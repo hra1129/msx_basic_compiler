@@ -141,9 +141,11 @@
   <ItemGroup>
     <ClCompile Include="basic_code_loader.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
+    <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_code_loader.h" />
+    <ClInclude Include="variable_manager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

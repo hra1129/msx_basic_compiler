@@ -1,0 +1,7 @@
+﻿  basic_code_loader.cpp
+  test_of_cbasic_list.cpp
+  コード生成しています。
+  Previous IPDB not found, fall back to full compilation.
+  All 435 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  コード生成が終了しました。
+  test_of_cbasic_list.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\test_of_cbasic_list.exe
