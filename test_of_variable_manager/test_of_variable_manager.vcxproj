@@ -140,11 +140,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\msx_basic_compiler\basic_code_loader.cpp" />
+    <ClCompile Include="..\msx_basic_compiler\error_list.cpp" />
     <ClCompile Include="..\msx_basic_compiler\variable_manager.cpp" />
     <ClCompile Include="test_of_variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\msx_basic_compiler\basic_code_loader.h" />
+    <ClInclude Include="..\msx_basic_compiler\error_list.h" />
     <ClInclude Include="..\msx_basic_compiler\variable_manager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
