@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include "basic_code_loader.h"
+#include "error_list.h"
 
 enum class CVARIABLE_TYPE {
 	INTEGER,
@@ -40,6 +41,8 @@ private:
 	//	DEFxxx の情報を更新する
 	std::vector< CBASIC_WORD >::const_iterator update( CVARIABLE_TYPE new_type, std::vector< CBASIC_WORD >::const_iterator p_list, std::vector< CBASIC_WORD >::const_iterator p_end );
 public:
+	CERROR_LIST *p_errors;
+
 	//	コードを解釈して変数リストを作成する
 	bool analyze_defvars( std::vector< CBASIC_WORD > list );
 

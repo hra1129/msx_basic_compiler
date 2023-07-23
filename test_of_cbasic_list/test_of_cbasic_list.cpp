@@ -29,8 +29,10 @@ std::vector< CREFERENCE > test001 = {
 	{ 110, "B", CBASIC_WORD_TYPE::UNKNOWN_NAME },
 	{ 110, "+", CBASIC_WORD_TYPE::RESERVED_WORD },
 	{ 110, "1", CBASIC_WORD_TYPE::INTEGER },
-	{ 120, "GOTO", CBASIC_WORD_TYPE::RESERVED_WORD },
-	{ 120, "100", CBASIC_WORD_TYPE::LINE_NO },
+	{ 120, "'", CBASIC_WORD_TYPE::RESERVED_WORD },
+	{ 120, "A=B+2", CBASIC_WORD_TYPE::COMMENT },
+	{ 130, "GOTO", CBASIC_WORD_TYPE::RESERVED_WORD },
+	{ 130, "100", CBASIC_WORD_TYPE::LINE_NO },
 };
 
 // --------------------------------------------------------------------
@@ -47,7 +49,7 @@ int main( int argc, char *argv[] ) {
 
 	words = list_test001_bas.get_word_list();
 	i = 0;
-	test.success_condition_is( words.size() == test001.size(), "words のサイズは、test001 のサイズと一致する", __LINE__ );
+	test.success_condition_is( words.size() == test001.size(), "words のサイズ" + std::to_string(words.size()) + "は、test001 のサイズ" + std::to_string(test001.size()) + "と一致する", __LINE__ );
 	if( words.size() == test001.size() ) {
 		for( auto &p: test001 ) {
 			test.success_condition_is( words[i].line_no == p.line_no, std::to_string(i+1) + "番目の単語は " + std::to_string( test001[i].line_no ) + "行目にある", __LINE__ );
@@ -62,7 +64,7 @@ int main( int argc, char *argv[] ) {
 
 	words = list_test001_asc.get_word_list();
 	i = 0;
-	test.success_condition_is( words.size() == test001.size(), "words のサイズは、test001 のサイズと一致する", __LINE__ );
+	test.success_condition_is( words.size() == test001.size(), "words のサイズ" + std::to_string(words.size()) + "は、test001 のサイズ" + std::to_string(test001.size()) + "と一致する", __LINE__ );
 	if( words.size() == test001.size() ) {
 		for( auto &p: test001 ) {
 			test.success_condition_is( words[i].line_no == p.line_no, std::to_string(i+1) + "番目の単語は " + std::to_string( test001[i].line_no ) + "行目にある", __LINE__ );

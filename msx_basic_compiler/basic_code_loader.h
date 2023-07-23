@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include "error_list.h"
 
 enum class CBASIC_WORD_TYPE {
 	UNKNOWN,				//	0:未知
@@ -19,6 +20,7 @@ enum class CBASIC_WORD_TYPE {
 	STRING,				//	6:文字列
 	RESERVED_WORD,		//	7:予約語
 	LINE_NO,			//	8:行番号
+	COMMENT,			//	9:コメント
 };
 
 // --------------------------------------------------------------------
@@ -40,6 +42,7 @@ private:
 	std::vector< CBASIC_WORD > words;
 	std::string s_error_message;
 	int line_no;
+	CERROR_LIST errors;
 
 	bool check_binary_program( FILE *p_file );
 	bool load_file( FILE *p_file );
@@ -48,8 +51,10 @@ private:
 	int get_1byte( void );
 	int get_2bytes( void );
 	std::string get_word_in_charlist( const char *p_charlist );
+	CBASIC_WORD get_comment( void );
 	CBASIC_WORD get_word( void );
 	CBASIC_WORD get_ascii_word( void );
+
 	bool load_binary( FILE *p_file );
 	bool load_ascii( FILE *p_file );
 public:

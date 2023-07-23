@@ -34,12 +34,12 @@ std::vector< CBASIC_WORD >::const_iterator CVARIABLE_MANAGER::update( CVARIABLE_
 	while( p_list != p_end ) {
 		if( p_list->s_word.size() != 1 ) {
 			//	DEFINT AA のような、2文字以上の指定だった場合はエラー
-			printf( "ERROR: The range specification for %s is abnormal.(%d)\n", s_def.c_str(), line_no );
+			this->p_errors->add( "The range specification for " + s_def + " is abnormal.", line_no );
 			return this->skip_statement( p_list, p_end );
 		}
 		if( !isalpha( p_list->s_word[0] & 255 ) ) {
 			//	DEFINT 1 のような、アルファベット以外の指定の場合はエラー
-			printf( "ERROR: The range specification for %s is abnormal.(%d)\n", s_def.c_str(), line_no );
+			this->p_errors->add( "The range specification for " + s_def + " is abnormal.", line_no );
 			return this->skip_statement( p_list, p_end );
 		}
 		start_char = toupper( p_list->s_word[0] & 255 );
@@ -53,7 +53,7 @@ std::vector< CBASIC_WORD >::const_iterator CVARIABLE_MANAGER::update( CVARIABLE_
 			p_list++;
 			if( p_list == p_end || p_list->s_word.size() != 1 || !isalpha( p_list->s_word[0] & 255 ) ) {
 				//	DEFINT A- や DEFINT A-AA や DEFINT A-9 のような不正な記述の場合はエラー
-				printf( "ERROR: The range specification for %s is abnormal.(%d)\n", s_def.c_str(), line_no );
+				this->p_errors->add( "The range specification for " + s_def + " is abnormal.", line_no );
 				return this->skip_statement( p_list, p_end );
 			}
 			end_char = toupper( p_list->s_word[0] & 255 );
@@ -62,7 +62,7 @@ std::vector< CBASIC_WORD >::const_iterator CVARIABLE_MANAGER::update( CVARIABLE_
 		//	範囲をチェック
 		if( start_char > end_char ) {
 			//	DEFINT Z-A のような逆巡指定の場合はエラー
-			printf( "ERROR: The range specification for %s is abnormal.(%d)\n", s_def.c_str(), line_no );
+			this->p_errors->add( "The range specification for " + s_def + " is abnormal.", line_no );
 			return p_list;
 		}
 		//	範囲を登録

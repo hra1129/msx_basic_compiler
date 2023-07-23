@@ -461,6 +461,21 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 }
 
 // --------------------------------------------------------------------
+CBASIC_WORD CBASIC_LIST::get_comment( void ) {
+	CBASIC_WORD s_word;
+
+	s_word.s_word = "";
+	s_word.type = CBASIC_WORD_TYPE::COMMENT;
+	while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != 0 && this->p_file_image[0] != '\n' ) {
+		if( this->p_file_image[0] != '\r' ) {
+			s_word.s_word = s_word.s_word + (char)this->p_file_image[0];
+		}
+		this->p_file_image++;
+	}
+	return s_word;
+}
+
+// --------------------------------------------------------------------
 bool CBASIC_LIST::load_binary( FILE *p_file ) {
 	int next_address;
 	CBASIC_WORD s_word;
@@ -477,15 +492,22 @@ bool CBASIC_LIST::load_binary( FILE *p_file ) {
 		}
 		line_no = this->get_2bytes();
 		//	行内の解釈
-		while( this->p_file_image != this->file_image.end() && *(this->p_file_image) ) {
+		while( this->p_file_image != this->file_image.end() && (this->p_file_image[0] != 0) ) {
 			//	単語を1つ取得して、行番号を付与してリストに追加
 			s_word = this->get_word();
 			s_word.line_no = line_no;
 			this->words.push_back( s_word );
+			if( s_word.s_word == "'" || s_word.s_word == "REM" ) {
+				this->skip_white_space();
+				s_word = this->get_comment();
+				s_word.line_no = line_no;
+				this->words.push_back( s_word );
+				break;
+			}
 		}
 		if( this->p_file_image == this->file_image.end() ) {
 			//	行の端末コードが無い
-			printf( "ERROR: Cannot find terminator code in %d.\n", line_no );
+			this->errors.add( "Cannot find terminator code.", line_no );
 			return false;
 		}
 		this->p_file_image++;
@@ -521,6 +543,12 @@ bool CBASIC_LIST::load_ascii( FILE *p_file ) {
 			}
 			this->words.push_back( s_word );
 			this->skip_white_space();
+			if( s_word.s_word == "'" || s_word.s_word == "REM" ) {
+				s_word = this->get_comment();
+				s_word.line_no = line_no;
+				this->words.push_back( s_word );
+				break;
+			}
 		}
 		is_last_jump = false;
 		if( this->p_file_image == this->file_image.end() ) {
