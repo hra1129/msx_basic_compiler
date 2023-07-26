@@ -140,12 +140,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="basic_code_loader.cpp" />
+    <ClCompile Include="collections\comment.cpp" />
+    <ClCompile Include="collections\let.cpp" />
+    <ClCompile Include="compiler.cpp" />
     <ClCompile Include="error_list.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
     <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic_code_loader.h" />
+    <ClInclude Include="collections\comment.h" />
+    <ClInclude Include="collections\let.h" />
+    <ClInclude Include="compiler.h" />
     <ClInclude Include="error_list.h" />
     <ClInclude Include="variable_manager.h" />
   </ItemGroup>

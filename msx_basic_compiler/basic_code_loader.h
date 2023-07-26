@@ -40,9 +40,7 @@ private:
 	std::vector< unsigned char >::const_iterator p_file_image;
 
 	std::vector< CBASIC_WORD > words;
-	std::string s_error_message;
 	int line_no;
-	CERROR_LIST errors;
 
 	bool check_binary_program( FILE *p_file );
 	bool load_file( FILE *p_file );
@@ -57,8 +55,11 @@ private:
 
 	bool load_binary( FILE *p_file );
 	bool load_ascii( FILE *p_file );
+
 public:
-	CBASIC_LIST(): s_error_message(""), line_no(0) {
+	CERROR_LIST errors;
+
+	CBASIC_LIST(): line_no(0) {
 	}
 
 	bool load( const std::string &s_file_name );

@@ -107,3 +107,66 @@ bool CVARIABLE_MANAGER::analyze_defvars( std::vector< CBASIC_WORD > list ) {
 	}
 	return true;
 }
+
+// --------------------------------------------------------------------
+//	{変数名}[%|!|#|$][(...)]
+void CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
+	CVARIABLE variable;
+	std::string s_name;
+	int line_no;
+
+	line_no = p_this->p_position->line_no;
+	//	変数名を取得する
+	s_name = p_this->p_position->s_word;
+	p_this->p_position++;
+	//	3文字以上の場合、2文字に切り詰める
+	if( s_name.size() > 2 ) {
+		s_name = std::string( "" ) + s_name[0] + s_name[1];
+	}
+	//	型識別子の存在を調べる
+	if( !p_this->is_end() && p_this->p_position->s_word == "%" ) {
+		variable.type = CVARIABLE_TYPE::INTEGER;
+		s_name = s_name + "%";
+		p_this->p_position++;
+	}
+	else if( !p_this->is_end() && p_this->p_position->s_word == "!" ) {
+		variable.type = CVARIABLE_TYPE::SINGLE_REAL;
+		s_name = s_name + "!";
+		p_this->p_position++;
+	}
+	else if( !p_this->is_end() && p_this->p_position->s_word == "#" ) {
+		variable.type = CVARIABLE_TYPE::DOUBLE_REAL;
+		s_name = s_name + "#";
+		p_this->p_position++;
+	}
+	else if( !p_this->is_end() && p_this->p_position->s_word == "$" ) {
+		variable.type = CVARIABLE_TYPE::STRING;
+		s_name = s_name + "$";
+		p_this->p_position++;
+	}
+	else {
+		//	型識別子が省略されている場合は、DEFxxx の指定に従う
+		variable.type = this->def_types[ s_name[0] ];
+		switch( variable.type ) {
+		default:
+		case CVARIABLE_TYPE::INTEGER:		s_name = s_name + "%"; break;
+		case CVARIABLE_TYPE::SINGLE_REAL:	s_name = s_name + "!"; break;
+		case CVARIABLE_TYPE::DOUBLE_REAL:	s_name = s_name + "#"; break;
+		case CVARIABLE_TYPE::STRING:		s_name = s_name + "$"; break;
+		}
+	}
+	if( p_this->is_end() ) {
+		p_this->p_errors->add( "Syntax error.", line_no );
+		return;
+	}
+	//	配列か？
+	if( p_this->p_position->s_word == "(" ) {
+		s_name = s_name + "(";
+		variable.dimention = -1;		//	今始めて見つけたので、配列なのか、配列なら要素数はいくつか、はまだ分からない。
+	}
+	variable.s_name = s_name;
+	//	既に認知している変数か？
+	if( dictionary.count( s_name ) ) {
+		variable = dictionary[ s_name ];
+	}
+}
