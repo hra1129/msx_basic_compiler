@@ -568,11 +568,11 @@ bool CBASIC_LIST::load( const std::string &s_file_name ) {
 
 	fopen_s( &p_in, s_file_name.c_str(), "rb" );
 	if( p_in == NULL ) {
-		this->s_error_message = "Cannot open the input file (" + s_file_name + ").";
+		this->errors.add( "Cannot open the input file (" + s_file_name + ").", 0 );
 		return false;
 	}
 	if( !this->load_file( p_in ) ){
-		this->s_error_message = "Cannot read the input file (" + s_file_name + ").";
+		this->errors.add( "Cannot read the input file (" + s_file_name + ").", 0 );
 		return false;
 	}
 

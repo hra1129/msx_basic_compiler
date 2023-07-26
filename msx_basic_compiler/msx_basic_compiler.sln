@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.33529.622
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msx_basic_compiler", "msx_basic_compiler.vcxproj", "{EA90CFF4-79BD-4296-A617-8400F74C31DD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_of_cbasic_list", "..\test_of_cbasic_list\test_of_cbasic_list.vcxproj", "{7990C77C-4AC9-42BD-BBE2-8E690F91629F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_of_variable_manager", "..\test_of_variable_manager\test_of_variable_manager.vcxproj", "{2297F3BF-2621-45B3-B9FD-0CE866753DC5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -25,22 +21,6 @@ Global
 		{EA90CFF4-79BD-4296-A617-8400F74C31DD}.Release|x64.Build.0 = Release|x64
 		{EA90CFF4-79BD-4296-A617-8400F74C31DD}.Release|x86.ActiveCfg = Release|Win32
 		{EA90CFF4-79BD-4296-A617-8400F74C31DD}.Release|x86.Build.0 = Release|Win32
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Debug|x64.ActiveCfg = Debug|x64
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Debug|x64.Build.0 = Debug|x64
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Debug|x86.ActiveCfg = Debug|Win32
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Debug|x86.Build.0 = Debug|Win32
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Release|x64.ActiveCfg = Release|x64
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Release|x64.Build.0 = Release|x64
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Release|x86.ActiveCfg = Release|Win32
-		{7990C77C-4AC9-42BD-BBE2-8E690F91629F}.Release|x86.Build.0 = Release|Win32
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Debug|x64.ActiveCfg = Debug|x64
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Debug|x64.Build.0 = Debug|x64
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Debug|x86.ActiveCfg = Debug|Win32
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Debug|x86.Build.0 = Debug|Win32
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Release|x64.ActiveCfg = Release|x64
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Release|x64.Build.0 = Release|x64
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Release|x86.ActiveCfg = Release|Win32
-		{2297F3BF-2621-45B3-B9FD-0CE866753DC5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,9 @@
 ﻿  basic_code_loader.cpp
+  error_list.cpp
   test_of_cbasic_list.cpp
   コード生成しています。
-  20 of 446 functions ( 4.5%) were compiled, the rest were copied from previous compilation.
-    11 functions were new in current compilation
-    60 functions had inline decision re-evaluated but remain unchanged
+  69 of 493 functions (14.0%) were compiled, the rest were copied from previous compilation.
+    47 functions were new in current compilation
+    68 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   test_of_cbasic_list.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\test_of_cbasic_list\x64\Release\test_of_cbasic_list.exe
