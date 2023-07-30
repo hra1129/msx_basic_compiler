@@ -20,9 +20,17 @@ bool CCOMPILER::is_end( void ) {
 }
 
 // --------------------------------------------------------------------
+bool CCOMPILER::is_line_end( void ) {
+
+	if( this->p_position == this->words.end() ) {
+		return true;
+	}
+	return( this->current_line_no != this->p_position->line_no );
+}
+
+// --------------------------------------------------------------------
 bool CCOMPILER::exec( CBASIC_LIST &list ) {
 	bool do_exec;
-	int line_no;
 
 	this->words = list.get_word_list();
 	this->p_errors = &(list.errors);
@@ -45,13 +53,9 @@ bool CCOMPILER::exec( CBASIC_LIST &list ) {
 		}
 		if( !do_exec ) {
 			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
-			line_no = this->p_position->line_no;
-			list.errors.add( "Syntax error.", line_no );
-			while( !this->is_end() ) {
-				if( this->p_position->line_no != line_no ) {
-					//	行が変わったのでステートメントを読み飛ばし終わったと判断
-					break;
-				}
+			this->update_current_line_no();
+			list.errors.add( "Syntax error.", this->current_line_no );
+			while( !this->is_line_end() ) {
 				if( this->p_position->s_word == ":" && this->p_position->type != CBASIC_WORD_TYPE::COMMENT ) {
 					//	: が来たのでステートメントを読み飛ばし終わったと判断
 					break;

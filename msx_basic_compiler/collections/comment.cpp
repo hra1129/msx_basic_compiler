@@ -11,13 +11,13 @@
 //  REM comment
 bool CCOMMENT::exec( class CCOMPILER *p_this ) {
 	std::string s;
-	int line_no = p_this->p_position->line_no;
 
+	p_this->update_current_line_no();
 	if( p_this->p_position->s_word != "'" && p_this->p_position->s_word != "REM" ) {
 		return false;
 	}
 	p_this->p_position++;
-	if( p_this->is_end() || p_this->p_position->line_no != line_no ) {
+	if( p_this->is_line_end() ) {
 		//	' ‚â REM ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡
 		s = "";
 	}
