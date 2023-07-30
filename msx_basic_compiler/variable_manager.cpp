@@ -110,10 +110,11 @@ bool CVARIABLE_MANAGER::analyze_defvars( std::vector< CBASIC_WORD > list ) {
 
 // --------------------------------------------------------------------
 //	{変数名}[%|!|#|$][(...)]
-void CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
+CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 	CVARIABLE variable;
 	std::string s_name;
 	int line_no;
+	int dimensions = 0;
 
 	line_no = p_this->p_position->line_no;
 	//	変数名を取得する
@@ -124,22 +125,22 @@ void CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 		s_name = std::string( "" ) + s_name[0] + s_name[1];
 	}
 	//	型識別子の存在を調べる
-	if( !p_this->is_end() && p_this->p_position->s_word == "%" ) {
+	if( !p_this->is_line_end() && p_this->p_position->s_word == "%" ) {
 		variable.type = CVARIABLE_TYPE::INTEGER;
 		s_name = s_name + "%";
 		p_this->p_position++;
 	}
-	else if( !p_this->is_end() && p_this->p_position->s_word == "!" ) {
+	else if( !p_this->is_line_end() && p_this->p_position->s_word == "!" ) {
 		variable.type = CVARIABLE_TYPE::SINGLE_REAL;
 		s_name = s_name + "!";
 		p_this->p_position++;
 	}
-	else if( !p_this->is_end() && p_this->p_position->s_word == "#" ) {
+	else if( !p_this->is_line_end() && p_this->p_position->s_word == "#" ) {
 		variable.type = CVARIABLE_TYPE::DOUBLE_REAL;
 		s_name = s_name + "#";
 		p_this->p_position++;
 	}
-	else if( !p_this->is_end() && p_this->p_position->s_word == "$" ) {
+	else if( !p_this->is_line_end() && p_this->p_position->s_word == "$" ) {
 		variable.type = CVARIABLE_TYPE::STRING;
 		s_name = s_name + "$";
 		p_this->p_position++;
@@ -155,18 +156,48 @@ void CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 		case CVARIABLE_TYPE::STRING:		s_name = s_name + "$"; break;
 		}
 	}
-	if( p_this->is_end() ) {
+	if( p_this->is_line_end() ) {
 		p_this->p_errors->add( "Syntax error.", line_no );
 		return;
 	}
 	//	配列か？
 	if( p_this->p_position->s_word == "(" ) {
 		s_name = s_name + "(";
-		variable.dimention = -1;		//	今始めて見つけたので、配列なのか、配列なら要素数はいくつか、はまだ分からない。
+		variable.dimension = -1;		//	配列なのは確かだが、要素数はまだ分からない。
+		dimensions = this->evaluate_dimensions();		//	要素番号をスタックに積む
 	}
+	else if( is_dim ) {
+		//	DIM A のように、DIM宣言の中で要素数指定が省略されている場合 (10) が指定されたモノとする
+		s_name = s_name + "(";
+		variable.dimension = 1;			//	1次元配列
+		dimensions = 1;
+		//	要素番号をスタックに積む
+		p_this->body.push_back( "\t\tld\t\thl, 10" );
+		p_this->body.push_back( "\t\tpush\thl" );
+	}
+
 	variable.s_name = s_name;
-	//	既に認知している変数か？
-	if( dictionary.count( s_name ) ) {
-		variable = dictionary[ s_name ];
+	if( this->dictionary.count( s_name ) ) {
+		//	既に認知している変数の場合、配列の次元数をチェック
+		variable = this->dictionary[ s_name ];
+		if( dimensions != variable.dimension ) {
+			p_this->p_errors->add( "Redimensioned array.", line_no );
+			return;
+		}
 	}
+	else {
+		//	初めて登場する変数の場合、辞書に登録して認知
+		this->dictionary[ s_name ] = variable;
+	}
+
+	if( is_dim ) {
+		//	配列宣言DIM だった場合、HLに配列ポインタのアドレスを入れて redim を呼ぶ
+
+
+	}
+	return variable;
+}
+
+// --------------------------------------------------------------------
+int CVARIABLE_MANAGER::evaluate_dimensions( void ) {
 }
