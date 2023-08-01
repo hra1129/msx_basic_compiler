@@ -17,6 +17,9 @@ public:
 	CEXPRESSION_NODE *p_left;
 	CEXPRESSION_NODE *p_right;
 
+	CEXPRESSION_OPERATOR_DIV(): p_left(nullptr), p_right(nullptr) {
+	}
+
 	void optimization( void );
 
 	void compile( CCOMPILER *p_this );

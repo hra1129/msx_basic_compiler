@@ -41,6 +41,7 @@ private:
 
 	std::vector< CBASIC_WORD > words;
 	int line_no;
+	int current_line_no;
 
 	bool check_binary_program( FILE *p_file );
 	bool load_file( FILE *p_file );
@@ -59,8 +60,25 @@ private:
 public:
 	CERROR_LIST errors;
 
-	CBASIC_LIST(): line_no(0) {
+	std::vector< CBASIC_WORD >::const_iterator p_position;
+
+	CBASIC_LIST(): line_no(0), current_line_no(0) {
 	}
+
+	void update_current_line_no( void ) {
+		if( this->is_end() ) {
+			this->current_line_no = -1;
+			return;
+		}
+		this->current_line_no = this->p_position->line_no; 
+	}
+
+	int get_line_no( void ) const {
+		return this->current_line_no;
+	}
+
+	bool is_end( void );
+	bool is_line_end( void );
 
 	bool load( const std::string &s_file_name );
 

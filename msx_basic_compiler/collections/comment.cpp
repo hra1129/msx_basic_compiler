@@ -12,19 +12,19 @@
 bool CCOMMENT::exec( class CCOMPILER *p_this ) {
 	std::string s;
 
-	p_this->update_current_line_no();
-	if( p_this->p_position->s_word != "'" && p_this->p_position->s_word != "REM" ) {
+	p_this->p_list->update_current_line_no();
+	if( p_this->p_list->p_position->s_word != "'" && p_this->p_list->p_position->s_word != "REM" ) {
 		return false;
 	}
-	p_this->p_position++;
-	if( p_this->is_line_end() ) {
+	p_this->p_list->p_position++;
+	if( p_this->p_list->is_line_end() ) {
 		//	' や REM だけで終わってる場合
 		s = "";
 	}
 	else {
 		//	コメントの中身があった場合
-		s = p_this->p_position->s_word;
-		p_this->p_position++;
+		s = p_this->p_list->p_position->s_word;
+		p_this->p_list->p_position++;
 	}
 	//	変数を生成する
 	

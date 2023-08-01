@@ -16,6 +16,9 @@ class CEXPRESSION_OPERATOR_NOT: public CEXPRESSION_NODE {
 public:
 	CEXPRESSION_NODE *p_right;
 
+	CEXPRESSION_OPERATOR_NOT(): p_right(nullptr) {
+	}
+
 	void optimization( void );
 
 	void compile( CCOMPILER *p_this );
