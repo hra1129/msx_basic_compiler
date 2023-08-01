@@ -188,6 +188,21 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 };
 
 // --------------------------------------------------------------------
+bool CBASIC_LIST::is_end( void ) {
+
+	return( this->p_position == this->words.end() );
+}
+
+// --------------------------------------------------------------------
+bool CBASIC_LIST::is_line_end( void ) {
+
+	if( this->p_position == this->words.end() ) {
+		return true;
+	}
+	return( this->current_line_no != this->p_position->line_no );
+}
+
+// --------------------------------------------------------------------
 //	中間言語形式(バイナリファイル)か、ASCIIセーブ形式かを判定する
 //	中間言語形式であれば true を返す
 bool CBASIC_LIST::check_binary_program( FILE *p_file ) {

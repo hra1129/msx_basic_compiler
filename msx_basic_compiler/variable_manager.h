@@ -52,7 +52,7 @@ public:
 	CERROR_LIST *p_errors;
 
 	//	変数追加処理
-	CVARIABLE add_variable( CCOMPILER *p_this, bool is_dim = false );
+	CVARIABLE add_variable( class CCOMPILER *p_this, bool is_dim = false );
 
 	//	コードを解釈して変数リストを作成する
 	bool analyze_defvars( std::vector< CBASIC_WORD > list );

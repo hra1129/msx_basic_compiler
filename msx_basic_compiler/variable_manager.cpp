@@ -43,10 +43,10 @@ std::vector< CBASIC_WORD >::const_iterator CVARIABLE_MANAGER::update( CVARIABLE_
 			return this->skip_statement( p_list, p_end );
 		}
 		start_char = toupper( p_list->s_word[0] & 255 );
+		end_char = start_char;
 		p_list++;
 		if( p_list == p_end || p_list->s_word == "," || p_list->s_word == ":" ) {
 			//	DEFINT A のような単独指定の場合
-			end_char = start_char;
 		}
 		else if( p_list->s_word == "-" ) {
 			//	DEFINT A-Z のような範囲指定の場青
@@ -116,34 +116,34 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 	int line_no;
 	int dimensions = 0;
 
-	line_no = p_this->p_position->line_no;
+	line_no = p_this->p_list->p_position->line_no;
 	//	変数名を取得する
-	s_name = p_this->p_position->s_word;
-	p_this->p_position++;
+	s_name = p_this->p_list->p_position->s_word;
+	p_this->p_list->p_position++;
 	//	3文字以上の場合、2文字に切り詰める
 	if( s_name.size() > 2 ) {
 		s_name = std::string( "" ) + s_name[0] + s_name[1];
 	}
 	//	型識別子の存在を調べる
-	if( !p_this->is_line_end() && p_this->p_position->s_word == "%" ) {
+	if( !p_this->p_list->is_line_end() && p_this->p_list->p_position->s_word == "%" ) {
 		variable.type = CVARIABLE_TYPE::INTEGER;
 		s_name = s_name + "%";
-		p_this->p_position++;
+		p_this->p_list->p_position++;
 	}
-	else if( !p_this->is_line_end() && p_this->p_position->s_word == "!" ) {
+	else if( !p_this->p_list->is_line_end() && p_this->p_list->p_position->s_word == "!" ) {
 		variable.type = CVARIABLE_TYPE::SINGLE_REAL;
 		s_name = s_name + "!";
-		p_this->p_position++;
+		p_this->p_list->p_position++;
 	}
-	else if( !p_this->is_line_end() && p_this->p_position->s_word == "#" ) {
+	else if( !p_this->p_list->is_line_end() && p_this->p_list->p_position->s_word == "#" ) {
 		variable.type = CVARIABLE_TYPE::DOUBLE_REAL;
 		s_name = s_name + "#";
-		p_this->p_position++;
+		p_this->p_list->p_position++;
 	}
-	else if( !p_this->is_line_end() && p_this->p_position->s_word == "$" ) {
+	else if( !p_this->p_list->is_line_end() && p_this->p_list->p_position->s_word == "$" ) {
 		variable.type = CVARIABLE_TYPE::STRING;
 		s_name = s_name + "$";
-		p_this->p_position++;
+		p_this->p_list->p_position++;
 	}
 	else {
 		//	型識別子が省略されている場合は、DEFxxx の指定に従う
@@ -156,12 +156,12 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 		case CVARIABLE_TYPE::STRING:		s_name = s_name + "$"; break;
 		}
 	}
-	if( p_this->is_line_end() ) {
+	if( p_this->p_list->is_line_end() ) {
 		p_this->p_errors->add( "Syntax error.", line_no );
-		return;
+		return variable;
 	}
 	//	配列か？
-	if( p_this->p_position->s_word == "(" ) {
+	if( p_this->p_list->p_position->s_word == "(" ) {
 		s_name = s_name + "(";
 		variable.dimension = -1;		//	配列なのは確かだが、要素数はまだ分からない。
 		dimensions = this->evaluate_dimensions();		//	要素番号をスタックに積む
@@ -182,7 +182,7 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 		variable = this->dictionary[ s_name ];
 		if( dimensions != variable.dimension ) {
 			p_this->p_errors->add( "Redimensioned array.", line_no );
-			return;
+			return variable;
 		}
 	}
 	else {
@@ -199,5 +199,9 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILER *p_this, bool is_dim ) {
 }
 
 // --------------------------------------------------------------------
+//	配列の要素に指定されている式を評価してスタックに積む
 int CVARIABLE_MANAGER::evaluate_dimensions( void ) {
+
+	//	★
+	return 0;
 }

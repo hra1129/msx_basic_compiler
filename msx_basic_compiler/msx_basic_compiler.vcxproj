@@ -163,8 +163,10 @@
     <ClCompile Include="expression_operator_neq.cpp" />
     <ClCompile Include="expression_operator_not.cpp" />
     <ClCompile Include="expression_operator_or.cpp" />
+    <ClCompile Include="expression_operator_power.cpp" />
     <ClCompile Include="expression_operator_sub.cpp" />
     <ClCompile Include="expression_operator_xor.cpp" />
+    <ClCompile Include="expression_term.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
     <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
@@ -193,8 +195,10 @@
     <ClInclude Include="expression_operator_neq.h" />
     <ClInclude Include="expression_operator_not.h" />
     <ClInclude Include="expression_operator_or.h" />
+    <ClInclude Include="expression_operator_power.h" />
     <ClInclude Include="expression_operator_sub.h" />
     <ClInclude Include="expression_operator_xor.h" />
+    <ClInclude Include="expression_term.h" />
     <ClInclude Include="variable_manager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

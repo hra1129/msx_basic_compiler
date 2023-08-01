@@ -1,12 +1,2 @@
-﻿  basic_code_loader.cpp
-  comment.cpp
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\variable_manager.h(55,21): error C2061: 構文エラー: 識別子 'CCOMPILER'
-  let.cpp
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\variable_manager.h(55,21): error C2061: 構文エラー: 識別子 'CCOMPILER'
-  compiler.cpp
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\variable_manager.h(55,21): error C2061: 構文エラー: 識別子 'CCOMPILER'
-  error_list.cpp
-  variable_manager.cpp
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\compiler.h(26,20): error C3646: 'vm': 不明なオーバーライド指定子です
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\compiler.h(26,22): error C4430: 型指定子がありません - int と仮定しました。メモ: C++ は int を既定値としてサポートしていません
-  コードを生成中...
+﻿  variable_manager.cpp
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_basic_compiler.exe

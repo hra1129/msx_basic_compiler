@@ -12,6 +12,7 @@
 // --------------------------------------------------------------------
 class CEXPRESSION_NODE {
 public:
+
 	// ----------------------------------------------------------------
 	//	演算式ツリーの中で事前に演算可能なモノは演算してしまう
 	virtual void optimization( void ) = 0;
@@ -30,7 +31,7 @@ private:
 
 	// ----------------------------------------------------------------
 	CEXPRESSION_NODE *makeup_node_brackets( CCOMPILER *p_this );					//	( ) 括弧
-	CEXPRESSION_NODE *makeup_node_function( CCOMPILER *p_this );					//	関数, FN関数
+	CEXPRESSION_NODE *makeup_node_term( CCOMPILER *p_this );					//	関数, FN関数
 	CEXPRESSION_NODE *makeup_node_operator_power( CCOMPILER *p_this );				//	^ 累乗
 	CEXPRESSION_NODE *makeup_node_operator_minus_plus( CCOMPILER *p_this );			//	- + 符号
 	CEXPRESSION_NODE *makeup_node_operator_mul_div( CCOMPILER *p_this );			//	* / 乗算、除算
