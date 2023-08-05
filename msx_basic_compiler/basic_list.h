@@ -46,6 +46,7 @@ private:
 	bool load_ascii( FILE *p_file, CERROR_LIST &errors );
 
 public:
+	std::string s_source_type;
 	std::vector< CBASIC_WORD >::const_iterator p_position;
 
 	CBASIC_LIST(): line_no(0), current_line_no(0) {

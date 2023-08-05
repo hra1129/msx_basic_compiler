@@ -11,12 +11,6 @@
 static const char *s_version = "v0.0";
 
 // --------------------------------------------------------------------
-enum class COUTPUT_TYPES {
-	ZMA,
-	M80,
-};
-
-// --------------------------------------------------------------------
 class COPTIONS {
 public:
 	std::string s_input_name;
@@ -89,7 +83,7 @@ int main( int argc, char *argv[] ) {
 	COPTIONS options;
 	CCOMPILER compiler;
 
-	printf( "MSX-BASIC Compiler %s\n", s_version );
+	printf( "MSX-BACON %s\n", s_version );
 	printf( "=========================================================\n" );
 	printf( "Copyright (C)2023 t.hara\n" );
 
@@ -98,8 +92,22 @@ int main( int argc, char *argv[] ) {
 	}
 
 	if( !compiler.info.list.load( options.s_input_name, compiler.info.errors ) ) {
-
+		compiler.info.errors.print();
+		fprintf( stderr, "ERROR: Processing cannot continue because the file failed to load.\n" );
+		return 2;
 	}
+	printf( "\n" );
+	printf( "Target: %s (%s).\n", options.s_input_name.c_str(), compiler.info.list.s_source_type.c_str() );
 
+	compiler.exec();
+	compiler.info.errors.print();
+	if( compiler.info.errors.list.size() ) {
+		printf( "Found %d error(s).\n", (int)compiler.info.errors.list.size() );
+		return 1;
+	}
+	if( !compiler.info.assembler_list.save( options.s_output_name, options.output_type ) ) {
+		return 2;
+	}
+	printf( "Completed.\n" );
 	return 0;
 }

@@ -15,10 +15,14 @@ class CCOMPILER {
 private:
 	std::vector< CCOMPILER_CONTAINER* > collection;
 
+	void initialize( void );
+
 public:
 	CCOMPILE_INFO info;
 
-	void initialize( void );
+	CCOMPILER() {
+		initialize();
+	}
 
 	~CCOMPILER() {
 		for( auto p: this->collection ) {

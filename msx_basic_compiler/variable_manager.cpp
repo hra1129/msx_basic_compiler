@@ -8,8 +8,8 @@
 
 // --------------------------------------------------------------------
 void CVARIABLE_MANAGER::skip_statement( CCOMPILE_INFO *p_info ) {
-	int line_no = p_info->list.get_line_no();
 
+	p_info->list.update_current_line_no();
 	while( !p_info->list.is_line_end() ) {
 		if( p_info->list.p_position->s_word == ":" || p_info->list.p_position->s_word == "THEN" || p_info->list.p_position->s_word == "ELSE" ) {
 			p_info->list.p_position++;

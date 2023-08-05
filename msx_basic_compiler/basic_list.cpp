@@ -592,9 +592,11 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 	}
 
 	if( this->check_binary_program( p_in ) ) {
+		this->s_source_type = "Precompiled code";
 		result = this->load_binary( p_in, errors );
 	}
 	else {
+		this->s_source_type = "ASCII code";
 		result = this->load_ascii( p_in, errors );
 	}
 	fclose( p_in );
