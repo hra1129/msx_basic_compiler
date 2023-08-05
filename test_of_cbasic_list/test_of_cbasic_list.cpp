@@ -5,7 +5,7 @@
 // --------------------------------------------------------------------
 
 #include "../unit_test/unit_test.h"
-#include "../msx_basic_compiler/basic_code_loader.h"
+#include "../msx_basic_compiler/basic_list.h"
 
 struct CREFERENCE {
 	int line_no;
@@ -41,11 +41,12 @@ int main( int argc, char *argv[] ) {
 	CBASIC_LIST list_test001_bas;
 	CBASIC_LIST list_test001_asc;
 	CBASIC_LIST list_fail;
+	CERROR_LIST errors;
 	std::vector< CBASIC_WORD > words;
 	int i;
 
 	printf( "test001.bas ---------------\n" );
-	test.success_condition_is( list_test001_bas.load( "./test/test001.bas" ), "./test/test001.bas を読み込み、true が返る", __LINE__ );
+	test.success_condition_is( list_test001_bas.load( "./test/test001.bas", errors ), "./test/test001.bas を読み込み、true が返る", __LINE__ );
 
 	words = list_test001_bas.get_word_list();
 	i = 0;
@@ -60,7 +61,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	printf( "test001.asc ---------------\n" );
-	test.success_condition_is( list_test001_asc.load( "./test/test001.asc" ), "./test/test001.asc を読み込み、true が返る", __LINE__ );
+	test.success_condition_is( list_test001_asc.load( "./test/test001.asc", errors ), "./test/test001.asc を読み込み、true が返る", __LINE__ );
 
 	words = list_test001_asc.get_word_list();
 	i = 0;
@@ -74,7 +75,7 @@ int main( int argc, char *argv[] ) {
 		}
 	}
 	printf( "fail test -----------------\n" );
-	test.success_condition_is( !list_fail.load( "./****" ), "存在しないファイル名を指定して、false が返る", __LINE__ );
+	test.success_condition_is( !list_fail.load( "./****", errors ), "存在しないファイル名を指定して、false が返る", __LINE__ );
 
 	return 0;
 }

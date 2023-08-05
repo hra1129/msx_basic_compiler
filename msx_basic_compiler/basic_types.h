@@ -1,0 +1,23 @@
+// --------------------------------------------------------------------
+//	MSX-BASIC code loader
+// ====================================================================
+//	2023/July/20th  t.hara 
+// --------------------------------------------------------------------
+
+#ifndef __BASIC_TYPES_H__
+#define __BASIC_TYPES_H__
+
+enum class CBASIC_WORD_TYPE {
+	UNKNOWN,				//	0:未知
+	UNKNOWN_NAME,			//	1:何かの名前
+	SYMBOL,					//	2:記号
+	INTEGER,				//	3:整数
+	SINGLE_REAL,			//	4:単精度実数
+	DOUBLE_REAL,			//	5:倍精度実数
+	STRING,					//	6:文字列
+	RESERVED_WORD,			//	7:予約語
+	LINE_NO,				//	8:行番号
+	COMMENT,				//	9:コメント
+};
+
+#endif

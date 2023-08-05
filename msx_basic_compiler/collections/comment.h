@@ -9,5 +9,5 @@
 
 class CCOMMENT: public CCOMPILER_CONTAINER {
 public:
-	bool exec( class CCOMPILER *p_this );
+	bool exec( CCOMPILE_INFO *p_info );
 };

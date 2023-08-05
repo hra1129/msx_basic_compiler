@@ -5,26 +5,27 @@
 // --------------------------------------------------------------------
 
 #include "../unit_test/unit_test.h"
-#include "../msx_basic_compiler/basic_code_loader.h"
+#include "../msx_basic_compiler/basic_list.h"
 #include "../msx_basic_compiler/variable_manager.h"
 
 int main( int argc, char *argv[] ) {
 	CUNIT_TEST test;
-	CBASIC_LIST list_test001_bas;
 	CVARIABLE_MANAGER vman;
+	CERROR_LIST errors;
+	CCOMPILE_INFO info;
 	std::vector< CVARIABLE_TYPE > def_types;
 	int i;
+	test.success_condition_is( info.list.load( "./test/type.bas", errors ), "./test/type.bas を読み込み、true が返る", __LINE__ );
 
-	test.success_condition_is( list_test001_bas.load( "./test/type.bas" ), "./test/type.bas を読み込み、true が返る", __LINE__ );
-
-	def_types = vman.get_def_types();
+	def_types = info.variables.def_types;
 	for( i = 0; i < 26; i++ ) {
 		test.success_condition_is( def_types[i] == CVARIABLE_TYPE::DOUBLE_REAL, std::to_string( (char)(i + 'A') ) + " はデフォルトでは倍精度実数である", __LINE__ );
 	}
 
-	test.success_condition_is( vman.analyze_defvars( list_test001_bas.get_word_list() ), "analyze_defvars() で true が返る", __LINE__ );
+	info.list.reset_position();
+	test.success_condition_is( vman.analyze_defvars( &info ), "analyze_defvars() で true が返る", __LINE__ );
 
-	def_types = vman.get_def_types();
+	def_types = info.variables.def_types;
 	test.success_condition_is( def_types['A'-'A'] == CVARIABLE_TYPE::INTEGER, "A は INT である", __LINE__ );
 	test.success_condition_is( def_types['B'-'A'] == CVARIABLE_TYPE::INTEGER, "B は INT である", __LINE__ );
 	test.success_condition_is( def_types['C'-'A'] == CVARIABLE_TYPE::SINGLE_REAL, "C は SNG である", __LINE__ );

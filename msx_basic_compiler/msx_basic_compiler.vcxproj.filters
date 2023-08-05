@@ -18,9 +18,6 @@
     <ClCompile Include="msx_basic_compiler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="basic_code_loader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="variable_manager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -36,80 +33,80 @@
     <ClCompile Include="collections\let.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_add.cpp">
+    <ClCompile Include="expressions\expression.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression.cpp">
+    <ClCompile Include="expressions\expression_function.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_eqv.cpp">
+    <ClCompile Include="expressions\expression_operator_add.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_mod.cpp">
+    <ClCompile Include="expressions\expression_operator_and.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_function.cpp">
+    <ClCompile Include="expressions\expression_operator_div.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_and.cpp">
+    <ClCompile Include="expressions\expression_operator_equ.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_div.cpp">
+    <ClCompile Include="expressions\expression_operator_eqv.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_equ.cpp">
+    <ClCompile Include="expressions\expression_operator_ge.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_ge.cpp">
+    <ClCompile Include="expressions\expression_operator_gt.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_gt.cpp">
+    <ClCompile Include="expressions\expression_operator_imp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_imp.cpp">
+    <ClCompile Include="expressions\expression_operator_intdiv.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_intdiv.cpp">
+    <ClCompile Include="expressions\expression_operator_le.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_le.cpp">
+    <ClCompile Include="expressions\expression_operator_lt.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_lt.cpp">
+    <ClCompile Include="expressions\expression_operator_minus.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_minus.cpp">
+    <ClCompile Include="expressions\expression_operator_mod.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_mul.cpp">
+    <ClCompile Include="expressions\expression_operator_mul.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_neq.cpp">
+    <ClCompile Include="expressions\expression_operator_neq.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_not.cpp">
+    <ClCompile Include="expressions\expression_operator_not.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_or.cpp">
+    <ClCompile Include="expressions\expression_operator_or.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_sub.cpp">
+    <ClCompile Include="expressions\expression_operator_power.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_xor.cpp">
+    <ClCompile Include="expressions\expression_operator_sub.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_term.cpp">
+    <ClCompile Include="expressions\expression_operator_xor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expression_operator_power.cpp">
+    <ClCompile Include="expressions\expression_term.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="basic_list.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="basic_code_loader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="variable_manager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -125,73 +122,85 @@
     <ClInclude Include="collections\let.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression.h">
+    <ClInclude Include="expressions\expression.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_add.h">
+    <ClInclude Include="expressions\expression_function.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_eqv.h">
+    <ClInclude Include="expressions\expression_operator_add.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_mod.h">
+    <ClInclude Include="expressions\expression_operator_and.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_function.h">
+    <ClInclude Include="expressions\expression_operator_div.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_and.h">
+    <ClInclude Include="expressions\expression_operator_equ.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_div.h">
+    <ClInclude Include="expressions\expression_operator_eqv.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_equ.h">
+    <ClInclude Include="expressions\expression_operator_ge.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_ge.h">
+    <ClInclude Include="expressions\expression_operator_gt.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_gt.h">
+    <ClInclude Include="expressions\expression_operator_imp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_imp.h">
+    <ClInclude Include="expressions\expression_operator_intdiv.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_intdiv.h">
+    <ClInclude Include="expressions\expression_operator_le.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_le.h">
+    <ClInclude Include="expressions\expression_operator_lt.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_lt.h">
+    <ClInclude Include="expressions\expression_operator_minus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_minus.h">
+    <ClInclude Include="expressions\expression_operator_mod.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_mul.h">
+    <ClInclude Include="expressions\expression_operator_mul.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_neq.h">
+    <ClInclude Include="expressions\expression_operator_neq.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_not.h">
+    <ClInclude Include="expressions\expression_operator_not.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_or.h">
+    <ClInclude Include="expressions\expression_operator_or.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_sub.h">
+    <ClInclude Include="expressions\expression_operator_power.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_xor.h">
+    <ClInclude Include="expressions\expression_operator_sub.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_term.h">
+    <ClInclude Include="expressions\expression_operator_xor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expression_operator_power.h">
+    <ClInclude Include="expressions\expression_term.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_list.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_types.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="compile_info.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="variable_info.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
