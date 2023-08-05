@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
     <ClCompile Include="collections\comment.cpp" />
     <ClCompile Include="collections\let.cpp" />
@@ -171,6 +172,8 @@
     <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assembler\assembler_line.h" />
+    <ClInclude Include="assembler\assembler_list.h" />
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
     <ClInclude Include="collections\comment.h" />

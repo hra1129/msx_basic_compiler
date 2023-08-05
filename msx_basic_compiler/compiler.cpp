@@ -19,12 +19,12 @@ bool CCOMPILER::exec( void ) {
 	bool do_exec;
 	CVARIABLE_MANAGER vm;
 
-	this->info.list.reset_position();
-
 	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
 	//	実装をシンプルにするために、途中で変わることは想定しない。
+	this->info.list.reset_position();
 	vm.analyze_defvars( &(this->info) );
 
+	this->info.list.reset_position();
 	while( !this->info.list.is_end() ) {
 		do_exec = false;
 		if( this->info.list.p_position->s_word == ":" ) {

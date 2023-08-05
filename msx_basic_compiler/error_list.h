@@ -14,6 +14,7 @@ public:
 	std::vector< std::string > list;
 
 	void add( std::string s_error, int line_no );
+	void print( void );
 };
 
 #endif

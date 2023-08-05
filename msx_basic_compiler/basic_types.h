@@ -7,8 +7,9 @@
 #ifndef __BASIC_TYPES_H__
 #define __BASIC_TYPES_H__
 
+// --------------------------------------------------------------------
 enum class CBASIC_WORD_TYPE {
-	UNKNOWN,				//	0:未知
+	UNKNOWN,					//	0:未知
 	UNKNOWN_NAME,			//	1:何かの名前
 	SYMBOL,					//	2:記号
 	INTEGER,				//	3:整数
@@ -18,6 +19,12 @@ enum class CBASIC_WORD_TYPE {
 	RESERVED_WORD,			//	7:予約語
 	LINE_NO,				//	8:行番号
 	COMMENT,				//	9:コメント
+};
+
+// --------------------------------------------------------------------
+enum class COUTPUT_TYPES {
+	ZMA,
+	M80,
 };
 
 #endif

@@ -1,8 +1,6 @@
-﻿  basic_list.cpp
-  comment.cpp
+﻿  comment.cpp
   let.cpp
   compiler.cpp
-  error_list.cpp
   expression.cpp
   expression_function.cpp
   expression_operator_add.cpp
@@ -18,10 +16,10 @@
   expression_operator_lt.cpp
   expression_operator_minus.cpp
   expression_operator_mod.cpp
-  コードを生成中...
-  コンパイル中...
   expression_operator_mul.cpp
   expression_operator_neq.cpp
+  コードを生成中...
+  コンパイル中...
   expression_operator_not.cpp
   expression_operator_or.cpp
   expression_operator_power.cpp

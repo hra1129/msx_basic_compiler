@@ -8,6 +8,7 @@
 #include "basic_list.h"
 #include "error_list.h"
 #include "variable_info.h"
+#include "assembler/assembler_list.h"
 
 #ifndef __COMPILE_INFO_H__
 #define __COMPILE_INFO_H__
@@ -32,11 +33,7 @@ public:
 	// ----------------------------------------------------------------
 	//	ƒRƒ“ƒpƒCƒ‹Œ‹‰Ê‚ğ•Û
 	// ----------------------------------------------------------------
-	std::vector< std::string > header;
-	std::vector< std::string > body;
-	std::vector< std::string > datas;
-	std::vector< std::string > variables_area;
-	std::vector< std::string > footer;
+	CASSEMBLER_LIST		assembler_list;
 };
 
 // --------------------------------------------------------------------
