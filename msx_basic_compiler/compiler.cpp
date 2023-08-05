@@ -15,41 +15,40 @@ void CCOMPILER::initialize( void ) {
 }
 
 // --------------------------------------------------------------------
-bool CCOMPILER::exec( CBASIC_LIST &list, class CVARIABLE_MANAGER &vm ) {
+bool CCOMPILER::exec( void ) {
 	bool do_exec;
+	CVARIABLE_MANAGER vm;
 
-	this->words = list.get_word_list();
-	this->p_errors = &(list.errors);
+	this->info.list.reset_position();
 
 	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
 	//	実装をシンプルにするために、途中で変わることは想定しない。
-	vm.p_errors = &(list.errors);
-	vm.analyze_defvars( list.get_word_list() );
+	vm.analyze_defvars( &(this->info) );
 
-	while( !this->p_list->is_end() ) {
+	while( !this->info.list.is_end() ) {
 		do_exec = false;
-		if( this->p_list->p_position->s_word == ":" ) {
-			this->p_list->p_position++;
+		if( this->info.list.p_position->s_word == ":" ) {
+			this->info.list.p_position++;
 		}
 		for( auto p: this->collection ) {
-			do_exec = p->exec( this );
+			do_exec = p->exec( &(this->info) );
 			if( do_exec ) {
 				break;
 			}
 		}
 		if( !do_exec ) {
 			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
-			this->p_list->update_current_line_no();
-			list.errors.add( "Syntax error.", this->p_list->get_line_no() );
-			while( !this->p_list->is_line_end() ) {
-				if( this->p_list->p_position->s_word == ":" && this->p_list->p_position->type != CBASIC_WORD_TYPE::COMMENT ) {
+			this->info.list.update_current_line_no();
+			this->info.errors.add( "Syntax error.", this->info.list.get_line_no() );
+			while( !this->info.list.is_line_end() ) {
+				if( this->info.list.p_position->s_word == ":" && this->info.list.p_position->type != CBASIC_WORD_TYPE::COMMENT ) {
 					//	: が来たのでステートメントを読み飛ばし終わったと判断
 					break;
 				}
 				//	1語読み飛ばす
-				this->p_list->p_position++;
+				this->info.list.p_position++;
 			}
 		}
 	}
-	return( list.errors.list.size() == 0 );
+	return( this->info.errors.list.size() == 0 );
 }

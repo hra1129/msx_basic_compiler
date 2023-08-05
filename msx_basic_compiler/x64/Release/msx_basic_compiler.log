@@ -1,8 +1,36 @@
-﻿  basic_code_loader.cpp
+﻿  basic_list.cpp
+  comment.cpp
+  let.cpp
+  compiler.cpp
+  error_list.cpp
+  expression.cpp
+  expression_function.cpp
+  expression_operator_add.cpp
+  expression_operator_and.cpp
+  expression_operator_div.cpp
+  expression_operator_equ.cpp
+  expression_operator_eqv.cpp
+  expression_operator_ge.cpp
+  expression_operator_gt.cpp
+  expression_operator_imp.cpp
+  expression_operator_intdiv.cpp
+  expression_operator_le.cpp
+  expression_operator_lt.cpp
+  expression_operator_minus.cpp
+  expression_operator_mod.cpp
+  コンパイル中...
+  expression_operator_mul.cpp
+  expression_operator_neq.cpp
+  expression_operator_not.cpp
+  expression_operator_or.cpp
+  expression_operator_power.cpp
+  expression_operator_sub.cpp
+  expression_operator_xor.cpp
+  expression_term.cpp
   msx_basic_compiler.cpp
   variable_manager.cpp
   コード生成しています。
-  Previous IPDB not found, fall back to full compilation.
-  All 176 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Compiler switch has changed, fall back to full compilation.
+  All 520 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_basic_compiler.exe

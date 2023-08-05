@@ -18,21 +18,21 @@
     <ClCompile Include="test_of_cbasic_list.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\msx_basic_compiler\basic_code_loader.cpp">
+    <ClCompile Include="..\msx_basic_compiler\error_list.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\msx_basic_compiler\error_list.cpp">
+    <ClCompile Include="..\msx_basic_compiler\basic_list.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\msx_basic_compiler\basic_code_loader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="..\unit_test\unit_test.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\msx_basic_compiler\error_list.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\msx_basic_compiler\basic_list.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

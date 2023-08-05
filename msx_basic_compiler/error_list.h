@@ -3,10 +3,11 @@
 // ====================================================================
 //	2023/July/23rd	t.hara
 // --------------------------------------------------------------------
-#pragma once
-
 #include <string>
 #include <vector>
+
+#ifndef __CERROR_LIST_H__
+#define __CERROR_LIST_H__
 
 class CERROR_LIST {
 public:
@@ -14,3 +15,5 @@ public:
 
 	void add( std::string s_error, int line_no );
 };
+
+#endif

@@ -1,7 +1,2 @@
-﻿  basic_code_loader.cpp
-  error_list.cpp
-  variable_manager.cpp
-  test_of_variable_manager.cpp
-  コードを生成中...
-  LINK : 前回のインクリメンタル リンクで C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\test_of_variable_manager\Debug\test_of_variable_manager.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
+﻿  variable_manager.cpp
   test_of_variable_manager.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\test_of_variable_manager\Debug\test_of_variable_manager.exe
