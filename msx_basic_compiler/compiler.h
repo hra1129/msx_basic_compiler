@@ -17,6 +17,10 @@ private:
 
 	void initialize( void );
 
+	// ----------------------------------------------------------------
+	//	現在の行が飛び先として指定されている場合、ラベルを生成する
+	void insert_label( void );
+
 public:
 	CCOMPILE_INFO info;
 

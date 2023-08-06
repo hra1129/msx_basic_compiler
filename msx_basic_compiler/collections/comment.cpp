@@ -26,5 +26,11 @@ bool CCOMMENT::exec( CCOMPILE_INFO *p_info ) {
 		s = p_info->list.p_position->s_word;
 		p_info->list.p_position++;
 	}
+
+	CASSEMBLER_LINE asm_line;
+	asm_line.type = CMNEMONIC_TYPE::COMMENT;
+	asm_line.operand1.s_value = s;
+	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
+	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

@@ -10,7 +10,7 @@
 //  [LET] {•Ï”–¼}[(”z—ñ—v‘f, ”z—ñ—v‘f ...)] = Ž®
 bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	std::string s;
-	int line_no = p_info->list.p_position->line_no;
+	int line_no = p_info->list.get_line_no();
 	bool has_let = false;
 
 	if( p_info->list.p_position->s_word == "LET" ) {

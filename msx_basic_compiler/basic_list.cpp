@@ -291,8 +291,10 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 	if( *( this->p_file_image ) == 0x0E ) {
 		//	s”Ô†‚¾‚Á‚½ê‡
 		this->p_file_image++;
-		s_word.s_word = std::to_string( this->get_2bytes() );
+		number = this->get_2bytes();
+		s_word.s_word = std::to_string( number );
 		s_word.type = CBASIC_WORD_TYPE::LINE_NO;
+		this->jump_target_line_no.push_back( number );
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x0F ){
@@ -546,13 +548,17 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 			if( is_last_jump ) {
 				if( s_word.type == CBASIC_WORD_TYPE::INTEGER ) {
 					s_word.type = CBASIC_WORD_TYPE::LINE_NO;
+					this->jump_target_line_no.push_back( std::stoi( s_word.s_word ) );
 				}
-				else if( s_word.s_word != "," && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
+				else if( s_word.s_word == "ELSE" ) {
+					is_last_jump = true;
+				}
+				else if( s_word.s_word != "," && (s_word.s_word == ":" || s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD) ) {
 					is_last_jump = false;
 				}
 			}
 			else {
-				if( s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
+				if( s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
 					is_last_jump = true;
 				}
 			}
@@ -601,4 +607,19 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 	}
 	fclose( p_in );
 	return result;
+}
+
+// --------------------------------------------------------------------
+void CBASIC_LIST::skip_statement( void ) {
+
+	if( this->is_line_end() ) {
+		return;
+	}
+	this->p_position++;
+	while( !this->is_line_end() ) {
+		if( this->p_position->s_word == ":" || this->p_position->type == CBASIC_WORD_TYPE::COMMENT ) {
+			break;
+		}
+		this->p_position++;
+	}
 }

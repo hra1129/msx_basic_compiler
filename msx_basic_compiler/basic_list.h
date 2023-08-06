@@ -48,12 +48,14 @@ private:
 public:
 	std::string s_source_type;
 	std::vector< CBASIC_WORD >::const_iterator p_position;
+	std::vector< int > jump_target_line_no;
 
 	CBASIC_LIST(): line_no(0), current_line_no(0) {
 	}
 
 	void reset_position( void ) {
 		this->p_position = words.begin();
+		this->current_line_no = -1;
 	}
 
 	bool is_end( void );
@@ -75,4 +77,6 @@ public:
 	std::vector< CBASIC_WORD > get_word_list( void ) {
 		return words;
 	}
+
+	void skip_statement( void );
 };

@@ -139,10 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="assembler\assembler_line.cpp" />
     <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
+    <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\comment.cpp" />
+    <ClCompile Include="collections\defdbl.cpp" />
+    <ClCompile Include="collections\defint.cpp" />
+    <ClCompile Include="collections\defsng.cpp" />
+    <ClCompile Include="collections\defstr.cpp" />
+    <ClCompile Include="collections\gosub.cpp" />
+    <ClCompile Include="collections\goto.cpp" />
     <ClCompile Include="collections\let.cpp" />
+    <ClCompile Include="collections\return.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="error_list.cpp" />
     <ClCompile Include="expressions\expression.cpp" />
@@ -176,8 +185,16 @@
     <ClInclude Include="assembler\assembler_list.h" />
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
+    <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\comment.h" />
+    <ClInclude Include="collections\defdbl.h" />
+    <ClInclude Include="collections\defint.h" />
+    <ClInclude Include="collections\defsng.h" />
+    <ClInclude Include="collections\defstr.h" />
+    <ClInclude Include="collections\gosub.h" />
+    <ClInclude Include="collections\goto.h" />
     <ClInclude Include="collections\let.h" />
+    <ClInclude Include="collections\return.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
     <ClInclude Include="error_list.h" />
