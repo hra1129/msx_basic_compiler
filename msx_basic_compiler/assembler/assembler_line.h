@@ -5,6 +5,8 @@
 // --------------------------------------------------------------------
 
 #include <string>
+#include <cstring>
+#include "../basic_types.h"
 
 #ifndef __ASSEMBLER_LINE_H__
 #define __ASSEMBLER_LINE_H__
@@ -76,16 +78,22 @@ enum class CCONDITION {
 };
 
 enum class COPERAND_TYPE {	//	ex.
+	NONE,					//	‚È‚µ
 	CONSTANT,				//	1234h
 	MEMORY_CONSTANT,		//	(1234h)
 	REGISTER,				//	HL
 	MEMORY_REGISTER,		//	(HL)
+	LABEL,					//	LABEL1
 };
 
 class COPERAND {
 public:
 	COPERAND_TYPE		type;
 	std::string			s_value;
+
+	COPERAND() {
+		this->type = COPERAND_TYPE::NONE;
+	}
 };
 
 class CASSEMBLER_LINE {
@@ -94,6 +102,13 @@ public:
 	CCONDITION			condition;
 	COPERAND			operand1;
 	COPERAND			operand2;
+
+	CASSEMBLER_LINE() {
+		this->type = CMNEMONIC_TYPE::COMMENT;
+		this->condition = CCONDITION::NONE;
+	}
+
+	bool save( FILE *p_file, COUTPUT_TYPES output_type );
 };
 
 #endif

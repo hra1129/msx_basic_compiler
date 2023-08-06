@@ -19,7 +19,7 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\compiler.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\let.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\comment.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\basic_code_loader.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\basic_list.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\variable_manager.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_basic_compiler.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_term.obj
@@ -30,7 +30,8 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_not.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_neq.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_mul.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\basic_list.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\assembler_list.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\assembler_line.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_basic_compiler.exe
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_basic_compiler.ilk
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_basic_compiler.pdb

@@ -1,35 +1,7 @@
-﻿  comment.cpp
-  let.cpp
-  compiler.cpp
-  expression.cpp
-  expression_function.cpp
-  expression_operator_add.cpp
-  expression_operator_and.cpp
-  expression_operator_div.cpp
-  expression_operator_equ.cpp
-  expression_operator_eqv.cpp
-  expression_operator_ge.cpp
-  expression_operator_gt.cpp
-  expression_operator_imp.cpp
-  expression_operator_intdiv.cpp
-  expression_operator_le.cpp
-  expression_operator_lt.cpp
-  expression_operator_minus.cpp
-  expression_operator_mod.cpp
-  expression_operator_mul.cpp
-  expression_operator_neq.cpp
-  コンパイル中...
-  expression_operator_not.cpp
-  expression_operator_or.cpp
-  expression_operator_power.cpp
-  expression_operator_sub.cpp
-  expression_operator_xor.cpp
-  expression_term.cpp
-  msx_basic_compiler.cpp
-  variable_manager.cpp
+﻿  assembler_line.cpp
   コード生成しています。
-  76 of 587 functions (12.9%) were compiled, the rest were copied from previous compilation.
-    19 functions were new in current compilation
-    36 functions had inline decision re-evaluated but remain unchanged
+  1 of 717 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_basic_compiler.exe
