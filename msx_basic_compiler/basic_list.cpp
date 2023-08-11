@@ -203,6 +203,15 @@ bool CBASIC_LIST::is_line_end( void ) {
 }
 
 // --------------------------------------------------------------------
+bool CBASIC_LIST::is_command_end( void ) {
+
+	if( this->is_line_end() ) {
+		return true;
+	}
+	return( this->p_position->s_word == ":" || this->p_position->s_word == "'" || this->p_position->s_word == "REM" );
+}
+
+// --------------------------------------------------------------------
 //	中間言語形式(バイナリファイル)か、ASCIIセーブ形式かを判定する
 //	中間言語形式であれば true を返す
 bool CBASIC_LIST::check_binary_program( FILE *p_file ) {
@@ -612,14 +621,11 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 // --------------------------------------------------------------------
 void CBASIC_LIST::skip_statement( void ) {
 
-	if( this->is_line_end() ) {
+	if( this->is_command_end() ) {
 		return;
 	}
 	this->p_position++;
-	while( !this->is_line_end() ) {
-		if( this->p_position->s_word == ":" || this->p_position->type == CBASIC_WORD_TYPE::COMMENT ) {
-			break;
-		}
+	while( !this->is_command_end() ) {
 		this->p_position++;
 	}
 }

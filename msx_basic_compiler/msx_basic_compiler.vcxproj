@@ -143,6 +143,7 @@
     <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
     <ClCompile Include="collections\cls.cpp" />
+    <ClCompile Include="collections\color.cpp" />
     <ClCompile Include="collections\comment.cpp" />
     <ClCompile Include="collections\defdbl.cpp" />
     <ClCompile Include="collections\defint.cpp" />
@@ -151,7 +152,9 @@
     <ClCompile Include="collections\gosub.cpp" />
     <ClCompile Include="collections\goto.cpp" />
     <ClCompile Include="collections\let.cpp" />
+    <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\return.cpp" />
+    <ClCompile Include="collections\screen.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="error_list.cpp" />
     <ClCompile Include="expressions\expression.cpp" />
@@ -186,6 +189,7 @@
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
     <ClInclude Include="collections\cls.h" />
+    <ClInclude Include="collections\color.h" />
     <ClInclude Include="collections\comment.h" />
     <ClInclude Include="collections\defdbl.h" />
     <ClInclude Include="collections\defint.h" />
@@ -194,7 +198,9 @@
     <ClInclude Include="collections\gosub.h" />
     <ClInclude Include="collections\goto.h" />
     <ClInclude Include="collections\let.h" />
+    <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\return.h" />
+    <ClInclude Include="collections\screen.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
     <ClInclude Include="error_list.h" />

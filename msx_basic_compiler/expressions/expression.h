@@ -11,8 +11,41 @@
 #define __EXPRESSION_H__
 
 // --------------------------------------------------------------------
+enum class CEXPRESSION_TYPE: int {
+	UNKNOWN = 0,
+	INTEGER = 1,
+	SINGLE_REAL = 2,
+	DOUBLE_REAL = 3,
+	STRING = 4,
+};
+
+// --------------------------------------------------------------------
 class CEXPRESSION_NODE {
 public:
+	// --------------------------------------------------------------------
+	//	この式の型
+	CEXPRESSION_TYPE type;
+
+	// ----------------------------------------------------------------
+	//	コンストラクタ
+	CEXPRESSION_NODE() {
+		this->type = CEXPRESSION_TYPE::UNKNOWN;
+	}
+
+	// ----------------------------------------------------------------
+	//	解放
+	virtual void release( void ) {
+	}
+
+	// ----------------------------------------------------------------
+	//	デストラクタ
+	virtual ~CEXPRESSION_NODE() {
+		this->release();
+	}
+
+	// ----------------------------------------------------------------
+	//	コンパイル処理
+	virtual void compile( CCOMPILE_INFO *p_this ) = 0;
 
 	// ----------------------------------------------------------------
 	//	演算式ツリーの中で事前に演算可能なモノは演算してしまう
@@ -48,12 +81,34 @@ private:
 	CEXPRESSION_NODE *makeup_node_operator_eqv( CCOMPILE_INFO *p_this );				//	EQV 同値
 public:
 	// ----------------------------------------------------------------
+	//	コンストラクタ
+	CEXPRESSION() {
+		this->p_top_node = nullptr;
+	}
+
+	// ----------------------------------------------------------------
+	//	デストラクタ
+	~CEXPRESSION() {
+		this->release();
+	}
+
+	// ----------------------------------------------------------------
+	//	解放
+	void release( void ) {
+		if( this->p_top_node != nullptr ) {
+			delete (this->p_top_node);
+			this->p_top_node = nullptr;
+		}
+	}
+
+	// ----------------------------------------------------------------
 	//	ソースコードを解釈して、演算式ツリーを形成する
 	void makeup_node( CCOMPILE_INFO *p_this );
 
 	// ----------------------------------------------------------------
 	//	演算式ツリーからアセンブリコードを生成する
-	void compile( CCOMPILE_INFO *p_this );
+	//	式が省略されていた場合は、false を返す
+	bool compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target = CEXPRESSION_TYPE::INTEGER );
 };
 
 #endif

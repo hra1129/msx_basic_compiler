@@ -60,6 +60,7 @@ public:
 
 	bool is_end( void );
 	bool is_line_end( void );
+	bool is_command_end( void );
 	bool load( const std::string &s_file_name, CERROR_LIST &errors );
 
 	void update_current_line_no( void ) {

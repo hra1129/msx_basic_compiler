@@ -6,6 +6,7 @@
 
 #include "compiler.h"
 #include "collections/cls.h"
+#include "collections/color.h"
 #include "collections/comment.h"
 #include "collections/defdbl.h"
 #include "collections/defint.h"
@@ -13,7 +14,9 @@
 #include "collections/defstr.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
+#include "collections/poke.h"
 #include "collections/return.h"
+#include "collections/screen.h"
 #include "variable_manager.h"
 
 // --------------------------------------------------------------------
@@ -21,13 +24,16 @@ void CCOMPILER::initialize( void ) {
 
 	this->collection.push_back( new CCLS );
 	this->collection.push_back( new CCOMMENT );
+	this->collection.push_back( new CCOLOR );
 	this->collection.push_back( new CDEFDBL );
 	this->collection.push_back( new CDEFINT );
 	this->collection.push_back( new CDEFSNG );
 	this->collection.push_back( new CDEFSTR );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
+	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CRETURN );
+	this->collection.push_back( new CSCREEN );
 }
 
 // --------------------------------------------------------------------
@@ -77,7 +83,7 @@ bool CCOMPILER::exec( void ) {
 		if( !do_exec ) {
 			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
 			this->info.list.update_current_line_no();
-			this->info.errors.add( "Syntax error.", this->info.list.get_line_no() );
+			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
 			this->info.list.skip_statement();
 		}
 	}

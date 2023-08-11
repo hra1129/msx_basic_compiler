@@ -19,7 +19,22 @@ public:
 	CEXPRESSION_OPERATOR_EQU(): p_left(nullptr), p_right(nullptr) {
 	}
 
+	~CEXPRESSION_OPERATOR_EQU() {
+		this->release();
+	}
+
 	void optimization( void );
 
 	void compile( CCOMPILE_INFO *p_this );
+
+	void release( void ) {
+		if( this->p_left != nullptr ) {
+			delete (this->p_left);
+			this->p_left = nullptr;
+		}
+		if( this->p_right != nullptr ) {
+			delete (this->p_right);
+			this->p_right = nullptr;
+		}
+	}
 };

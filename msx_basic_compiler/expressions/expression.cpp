@@ -25,6 +25,7 @@
 #include "expression_operator_minus.h"
 #include "expression_operator_power.h"
 #include "expression_function.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -35,34 +36,58 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	CEXPRESSION_NODE *p_result;
 	std::string s_operator;
 
-	if( p_this->list.is_line_end() ) {
+	if( p_this->list.is_command_end() ) {
 		return nullptr;															//	値が無い場合は nullptr を返す
 	}
 	s_operator = p_this->list.p_position->s_word;
 	if( s_operator == "(" ) {
 		p_this->list.p_position++;
 		p_result = this->makeup_node_operator_eqv( p_this );
-		if( p_this->list.is_line_end() || p_this->list.p_position->s_word != ")" ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき閉じ括弧
+		if( p_this->list.is_command_end() || p_this->list.p_position->s_word != ")" ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき閉じ括弧
 			return p_result;
 		}
 		p_this->list.p_position++;
 		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::INTEGER ) {
+		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
+		p_term->type = CEXPRESSION_TYPE::INTEGER;
+		p_term->s_value = s_operator;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::SINGLE_REAL ) {
+		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
+		p_term->type = CEXPRESSION_TYPE::SINGLE_REAL;
+		p_term->s_value = s_operator;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::DOUBLE_REAL ) {
+		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
+		p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+		p_term->s_value = s_operator;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::STRING ) {
+		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
+		p_term->type = CEXPRESSION_TYPE::STRING;
+		p_term->s_value = s_operator;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 	}
 	else if( s_operator == ":" || s_operator == "," ) {
 		return nullptr;
 	}
-	p_this->errors.add( "Syntax error.", p_this->list.get_line_no() );
+	p_this->errors.add( SYNTAX_ERROR, p_this->list.get_line_no() );
 	return nullptr;
 }
 
@@ -79,15 +104,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_power( CCOMPILE_INFO *p_this
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "^" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -105,7 +130,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_minus_plus( CCOMPILE_INFO *p
 	CEXPRESSION_NODE *p_result;
 	std::string s_operator;
 
-	if( p_this->list.is_line_end() ) {
+	if( p_this->list.is_command_end() ) {
 		return nullptr;
 	}
 	s_operator = p_this->list.p_position->s_word;
@@ -114,8 +139,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_minus_plus( CCOMPILE_INFO *p
 		return this->makeup_node_operator_power( p_this );
 	}
 	p_this->list.p_position++;
-	if( p_this->list.is_line_end() ) {
-		p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+	if( p_this->list.is_command_end() ) {
+		p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 		return nullptr;
 	}
 	//	この演算子の処理
@@ -141,20 +166,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_mul_div( CCOMPILE_INFO *p_th
 	std::string s_operator;
 
 	//	左項を得る
-	p_left = this->makeup_node_operator_mod( p_this );
+	p_left = this->makeup_node_operator_minus_plus( p_this );
 	if( p_left == nullptr ) {
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "*" && s_operator != "/" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -188,15 +213,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_intdiv( CCOMPILE_INFO *p_thi
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "\\" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -221,15 +246,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_mod( CCOMPILE_INFO *p_this )
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "MOD" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -255,15 +280,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_add_sub( CCOMPILE_INFO *p_th
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "+" && s_operator != "-" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -302,7 +327,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "=" && s_operator != "<>" && s_operator != "><" && 
 			s_operator != ">=" && s_operator != "=>" && s_operator != ">" &&
@@ -311,8 +336,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -365,8 +390,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_not( CCOMPILE_INFO *p_this )
 		return this->makeup_node_operator_compare( p_this );
 	}
 	p_this->list.p_position++;
-	if( p_this->list.is_line_end() ) {
-		p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+	if( p_this->list.is_command_end() ) {
+		p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 		return nullptr;
 	}
 	//	この演算子のインスタンスを生成
@@ -388,15 +413,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_and( CCOMPILE_INFO *p_this )
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "AND" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -421,15 +446,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_or( CCOMPILE_INFO *p_this ) 
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "OR" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -454,15 +479,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_xor( CCOMPILE_INFO *p_this )
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "XOR" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -487,15 +512,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_imp( CCOMPILE_INFO *p_this )
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "IMP" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -520,15 +545,15 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_eqv( CCOMPILE_INFO *p_this )
 		return nullptr;				//	左項が得られなかった場合
 	}
 	p_result = p_left;
-	while( !p_this->list.is_line_end() ) {
+	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
 		if( s_operator != "EQV" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
 		p_this->list.p_position++;
-		if( p_this->list.is_line_end() ) {
-			p_this->errors.add( "Missing operand.", p_this->list.get_line_no() );	//	あるべき右項がない
+		if( p_this->list.is_command_end() ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
 		}
 		//	この演算子のインスタンスを生成
@@ -547,5 +572,20 @@ void CEXPRESSION::makeup_node( CCOMPILE_INFO *p_this ) {
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION::compile( CCOMPILE_INFO *p_this ) {
+bool CEXPRESSION::compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target ) {
+
+	this->makeup_node( p_this );
+	if( this->p_top_node == nullptr ) {
+		return false;
+	}
+	this->p_top_node->compile( p_this );
+	if( this->p_top_node->type == target ) {
+		return true;
+	}
+	//	型変換
+	if( target != CEXPRESSION_TYPE::STRING && this->p_top_node->type == CEXPRESSION_TYPE::STRING ) {
+		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		return false;
+	}
+	return true;
 }
