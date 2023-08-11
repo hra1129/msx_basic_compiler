@@ -16,5 +16,5 @@ void CEXPRESSION_OPERATOR_LE::optimization( void ) {
 
 // --------------------------------------------------------------------
 void CEXPRESSION_OPERATOR_LE::compile( CCOMPILE_INFO *p_this ) {
-	
+
 }

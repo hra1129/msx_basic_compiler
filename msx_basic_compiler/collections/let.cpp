@@ -17,7 +17,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_end() || p_info->list.p_position->line_no != line_no ) {
 			//	LET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
-			p_info->errors.add( "Syntax error.", line_no );
+			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
 		has_let = true;
@@ -26,7 +26,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		//	•Ï”–¼‚Å‚Í–³‚¢‚Ì‚Å‘ã“ü‚Å‚Í–³‚¢
 		if( has_let ) {
 			//	LET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
-			p_info->errors.add( "Syntax error.", line_no );
+			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
 		return false;

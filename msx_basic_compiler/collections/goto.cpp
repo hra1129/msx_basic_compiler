@@ -15,9 +15,9 @@ bool CGOTO::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	p_info->list.p_position++;
-	if( p_info->list.is_line_end() ) {
+	if( p_info->list.is_command_end() ) {
 		//	GOTO ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
-		p_info->errors.add( "Syntax error.", line_no );
+		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 

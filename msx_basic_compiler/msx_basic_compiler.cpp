@@ -11,21 +11,6 @@
 static const char *s_version = "v0.0";
 
 // --------------------------------------------------------------------
-class COPTIONS {
-public:
-	std::string s_input_name;
-	std::string s_output_name;
-
-	COUTPUT_TYPES output_type;
-
-	COPTIONS() {
-		this->output_type = COUTPUT_TYPES::ZMA;
-	}
-
-	bool parse_options( char *argv[], int argc );
-};
-
-// --------------------------------------------------------------------
 static void usage( const char *p_name ) {
 
 	fprintf( stderr, "Usage> %s [options] <input.bas> <output.asm>\n", p_name );
@@ -34,6 +19,11 @@ static void usage( const char *p_name ) {
 	fprintf( stderr, "  Output types.\n" );
 	fprintf( stderr, "    -zma ..... Output files are ZMA type assembly language. (default)\n" );
 	fprintf( stderr, "    -m80 ..... Output files are M80 type assembly language.\n" );
+	fprintf( stderr, "  Target types.\n" );
+	fprintf( stderr, "    -msx ..... MSX1 (default)\n");
+	fprintf( stderr, "    -msx2 .... MSX2\n");
+	fprintf( stderr, "    -msx2p ... MSX2+\n");
+	fprintf( stderr, "    -msxtr ... MSXturboR\n");
 }
 
 // --------------------------------------------------------------------
@@ -45,12 +35,24 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 	this->s_output_name = "";
 	for( int i = 1; i < argc; i++ ) {
 		s = argv[i];
-		if( s[0] == '-' || s[0] == '/' ) {
+		if( s[0] == '-' ) {
 			if( s == "-zma" ) {
 				this->output_type = COUTPUT_TYPES::ZMA;
 			}
 			else if( s == "-m80" ) {
 				this->output_type = COUTPUT_TYPES::M80;
+			}
+			else if( s == "-msx" ) {
+				this->target_type = CTARGET_TYPES::MSX1;
+			}
+			else if( s == "-msx2" ) {
+				this->target_type = CTARGET_TYPES::MSX2;
+			}
+			else if( s == "-msx2p" ) {
+				this->target_type = CTARGET_TYPES::MSX2P;
+			}
+			else if( s == "-msxtr" ) {
+				this->target_type = CTARGET_TYPES::MSXTR;
 			}
 			else {
 				fprintf( stderr, "ERROR: Unknown option '%s'.\n", s.c_str() );
@@ -80,24 +82,23 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 
 // --------------------------------------------------------------------
 int main( int argc, char *argv[] ) {
-	COPTIONS options;
 	CCOMPILER compiler;
 
 	printf( "MSX-BACON %s\n", s_version );
 	printf( "=========================================================\n" );
 	printf( "Copyright (C)2023 t.hara\n" );
 
-	if( !options.parse_options( argv, argc ) ) {
+	if( !compiler.info.options.parse_options( argv, argc ) ) {
 		return 1;
 	}
 
-	if( !compiler.info.list.load( options.s_input_name, compiler.info.errors ) ) {
+	if( !compiler.info.list.load( compiler.info.options.s_input_name, compiler.info.errors ) ) {
 		compiler.info.errors.print();
 		fprintf( stderr, "ERROR: Processing cannot continue because the file failed to load.\n" );
 		return 2;
 	}
 	printf( "\n" );
-	printf( "Target: %s (%s).\n", options.s_input_name.c_str(), compiler.info.list.s_source_type.c_str() );
+	printf( "Target: %s (%s).\n", compiler.info.options.s_input_name.c_str(), compiler.info.list.s_source_type.c_str() );
 
 	compiler.exec();
 	compiler.info.errors.print();
@@ -105,7 +106,7 @@ int main( int argc, char *argv[] ) {
 		printf( "Found %d error(s).\n", (int)compiler.info.errors.list.size() );
 		//return 1;
 	}
-	if( !compiler.info.assembler_list.save( options.s_output_name, options.output_type ) ) {
+	if( !compiler.info.assembler_list.save( compiler.info.options.s_output_name, compiler.info.options.output_type ) ) {
 		return 2;
 	}
 	printf( "Completed.\n" );

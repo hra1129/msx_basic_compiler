@@ -6,6 +6,16 @@
 
 #include "error_list.h"
 #include <cstdio>
+#include <map>
+#include <string>
+
+static std::map< int, std::string > error_name = {
+	{ SYNTAX_ERROR, "Syntax error." },
+	{ MISSING_OPERAND, "Missing operand." },
+	{ ILLEGAL_FUNCTION_CALL, "Illegal function call." },
+	{ REDIMENSIONED_ARRAY, "Redimensioned array." },
+	{ TYPE_MISMATCH, "Type mismatch." },
+};
 
 // --------------------------------------------------------------------
 void CERROR_LIST::add( std::string s_error, int line_no ) {
@@ -18,6 +28,12 @@ void CERROR_LIST::add( std::string s_error, int line_no ) {
 		s = "ERROR: " + s_error;
 	}
 	this->list.push_back( s );
+}
+
+// --------------------------------------------------------------------
+void CERROR_LIST::add( CERROR_ID error, int line_no ) {
+
+	this->add( error_name[ error ], line_no );
 }
 
 // --------------------------------------------------------------------

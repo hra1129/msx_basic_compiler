@@ -11,7 +11,7 @@ void CVARIABLE_MANAGER::skip_statement( CCOMPILE_INFO *p_info ) {
 
 	p_info->list.update_current_line_no();
 	while( !p_info->list.is_line_end() ) {
-		if( p_info->list.p_position->s_word == ":" || p_info->list.p_position->s_word == "THEN" || p_info->list.p_position->s_word == "ELSE" ) {
+		if( p_info->list.p_position->s_word == "THEN" || p_info->list.p_position->s_word == "ELSE" || p_info->list.p_position->s_word == ":" ) {
 			p_info->list.p_position++;
 			break;
 		}
@@ -27,7 +27,7 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 
 	p_info->list.update_current_line_no();
 	p_info->list.p_position++;
-	while( !p_info->list.is_line_end() ) {
+	while( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word.size() != 1 ) {
 			//	DEFINT AA のような、2文字以上の指定だった場合はエラー
 			p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
@@ -43,13 +43,13 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 		start_char = toupper( p_info->list.p_position->s_word[0] & 255 );
 		end_char = start_char;
 		p_info->list.p_position++;
-		if( p_info->list.is_line_end() || p_info->list.p_position->s_word == "," || p_info->list.p_position->s_word == ":" ) {
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word == "," ) {
 			//	DEFINT A のような単独指定の場合
 		}
 		else if( p_info->list.p_position->s_word == "-" ) {
 			//	DEFINT A-Z のような範囲指定の場青
 			p_info->list.p_position++;
-			if( p_info->list.is_line_end() || p_info->list.p_position->s_word.size() != 1 || !isalpha( p_info->list.p_position->s_word[0] & 255 ) ) {
+			if( p_info->list.is_command_end() || p_info->list.p_position->s_word.size() != 1 || !isalpha( p_info->list.p_position->s_word[0] & 255 ) ) {
 				//	DEFINT A- や DEFINT A-AA や DEFINT A-9 のような不正な記述の場合はエラー
 				p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
 				this->skip_statement( p_info );
@@ -69,12 +69,8 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 			p_info->variables.def_types[ i - 'A' ] = new_type;
 		}
 		//	次の範囲指定の , は読み飛ばす
-		if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == "," ) {
+		if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 			p_info->list.p_position++;
-		}
-		else if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == ":" ) {
-			p_info->list.p_position++;
-			break;
 		}
 	}
 }
@@ -121,22 +117,22 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 		s_name = std::string( "" ) + s_name[0] + s_name[1];
 	}
 	//	型識別子の存在を調べる
-	if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == "%" ) {
+	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "%" ) {
 		variable.type = CVARIABLE_TYPE::INTEGER;
 		s_name = s_name + "%";
 		p_info->list.p_position++;
 	}
-	else if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == "!" ) {
+	else if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "!" ) {
 		variable.type = CVARIABLE_TYPE::SINGLE_REAL;
 		s_name = s_name + "!";
 		p_info->list.p_position++;
 	}
-	else if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == "#" ) {
+	else if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "#" ) {
 		variable.type = CVARIABLE_TYPE::DOUBLE_REAL;
 		s_name = s_name + "#";
 		p_info->list.p_position++;
 	}
-	else if( !p_info->list.is_line_end() && p_info->list.p_position->s_word == "$" ) {
+	else if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "$" ) {
 		variable.type = CVARIABLE_TYPE::STRING;
 		s_name = s_name + "$";
 		p_info->list.p_position++;
@@ -152,8 +148,8 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 		case CVARIABLE_TYPE::STRING:		s_name = s_name + "$"; break;
 		}
 	}
-	if( p_info->list.is_line_end() ) {
-		p_info->errors.add( "Syntax error.", line_no );
+	if( p_info->list.is_command_end() ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return variable;
 	}
 	//	配列か？
@@ -177,7 +173,7 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 		//	既に認知している変数の場合、配列の次元数をチェック
 		variable = p_info->variables.dictionary[ s_name ];
 		if( dimensions != variable.dimension ) {
-			p_info->errors.add( "Redimensioned array.", line_no );
+			p_info->errors.add( REDIMENSIONED_ARRAY, line_no );
 			return variable;
 		}
 	}

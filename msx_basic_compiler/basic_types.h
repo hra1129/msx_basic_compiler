@@ -27,4 +27,29 @@ enum class COUTPUT_TYPES {
 	M80,
 };
 
+// --------------------------------------------------------------------
+enum class CTARGET_TYPES {
+	MSX1,
+	MSX2,
+	MSX2P,
+	MSXTR,
+};
+
+// --------------------------------------------------------------------
+class COPTIONS {
+public:
+	std::string s_input_name;
+	std::string s_output_name;
+
+	COUTPUT_TYPES output_type;
+	CTARGET_TYPES target_type;
+
+	COPTIONS() {
+		this->output_type = COUTPUT_TYPES::ZMA;
+		this->target_type = CTARGET_TYPES::MSX1;
+	}
+
+	bool parse_options( char *argv[], int argc );
+};
+
 #endif
