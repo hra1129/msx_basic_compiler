@@ -37,7 +37,9 @@ private:
 	int get_integer( void );
 	int get_1byte( void );
 	int get_2bytes( void );
-	std::string get_word_in_charlist( const char *p_charlist );
+	std::string get_word_in_charlist( const char *p_charlist, bool ignore_space = false );
+	std::string get_char_in_charlist( const char *p_charlist, bool ignore_space = false );
+	CBASIC_WORD get_decimal( const std::string s );
 	CBASIC_WORD get_comment( void );
 	CBASIC_WORD get_word( void );
 	CBASIC_WORD get_ascii_word( void );

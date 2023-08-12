@@ -16,5 +16,6 @@ void CEXPRESSION_OPERATOR_GT::optimization( void ) {
 
 // --------------------------------------------------------------------
 void CEXPRESSION_OPERATOR_GT::compile( CCOMPILE_INFO *p_this ) {
-	
+	CASSEMBLER_LINE asm_line;
+
 }

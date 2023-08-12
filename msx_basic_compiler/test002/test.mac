@@ -1,14 +1,50 @@
 bios_cls equ 000C3h
+bios_chgmod equ 0005Fh
+bios_chgmodp equ 001B5h
+bios_extrom equ 0015Fh
+bios_imult equ 03193h
+bios_chgclr equ 00062h
+work_forclr equ 0F3E9h
+work_bakclr equ 0F3EAh
+work_bdrclr equ 0F3EBh
+bios_wrtpsg equ 00093h
 line_100:
 	CALL	bios_cls
+	LD		HL, 2
+	PUSH	HL
+	LD		HL, 3
+	PUSH	HL
+	LD		HL, 2
+	POP		DE
+	CALL	bios_imult
+	POP		DE
+	ADD		HL, DE
+	PUSH	HL
+	LD		HL, 4
+	POP		DE
+	EX		DE, HL
+	OR		A
+	SBC		HL, DE
+	LD		A, L
+	CALL	bios_chgmod
+	LD		HL, 15
+	LD		A, L
+	LD		[work_forclr], A
+	LD		HL, 0
+	LD		A, L
+	LD		[work_bakclr], A
+	LD		HL, 0
+	LD		A, L
+	LD		[work_bdrclr], A
+	CALL	bios_chgclr
 	CALL	line_1000
+	CALL	line_2000
 	JP		line_200
 	; --- MAIN LOOP --------
 line_140:
 line_150:
 line_160:
 	JP		line_140
-line_190:
 	; -- START
 line_200:
 	JP		line_140
@@ -16,5 +52,21 @@ line_1000:
 	RET
 line_1100:
 	CALL	bios_cls
-	POP	HL
+	POP		HL
 	JP		line_100
+line_2000:
+	LD		HL, 0
+	PUSH	HL
+	LD		HL, 100
+	LD		E, L
+	POP		HL
+	LD		A, L
+	CALL	bios_wrtpsg
+	LD		HL, 1
+	PUSH	HL
+	LD		HL, 2
+	LD		E, L
+	POP		HL
+	LD		A, L
+	CALL	bios_wrtpsg
+	RET
