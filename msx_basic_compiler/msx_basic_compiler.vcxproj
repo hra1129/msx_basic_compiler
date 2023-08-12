@@ -160,6 +160,7 @@
     <ClCompile Include="collections\gosub.cpp" />
     <ClCompile Include="collections\goto.cpp" />
     <ClCompile Include="collections\let.cpp" />
+    <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\return.cpp" />
     <ClCompile Include="collections\screen.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="collections\gosub.h" />
     <ClInclude Include="collections\goto.h" />
     <ClInclude Include="collections\let.h" />
+    <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\return.h" />
     <ClInclude Include="collections\screen.h" />
