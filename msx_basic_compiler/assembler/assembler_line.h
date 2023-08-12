@@ -11,7 +11,7 @@
 #ifndef __ASSEMBLER_LINE_H__
 #define __ASSEMBLER_LINE_H__
 
-enum class CMNEMONIC_TYPE {
+enum class CMNEMONIC_TYPE: int {
 	COMMENT,					//	コメント行または空行
 	LABEL,						//	ラベル行  label:
 	CONSTANT,					//	定数宣言  constant_variable equ 0
@@ -63,9 +63,12 @@ enum class CMNEMONIC_TYPE {
 	IND,
 	HALT,
 	DJNZ,
+	ORG,
+	DEFB,
+	DEFW,
 };
 
-enum class CCONDITION {
+enum class CCONDITION: int {
 	NONE,
 	Z,
 	NZ,
@@ -77,13 +80,13 @@ enum class CCONDITION {
 	M,
 };
 
-enum class COPERAND_TYPE {	//	ex.
-	NONE,					//	なし
-	CONSTANT,				//	1234h
-	MEMORY_CONSTANT,		//	(1234h)
-	REGISTER,				//	HL
-	MEMORY_REGISTER,		//	(HL)
-	LABEL,					//	LABEL1
+enum class COPERAND_TYPE: int {	//	ex.
+	NONE,						//	なし
+	CONSTANT,					//	1234h
+	MEMORY_CONSTANT,			//	(1234h)
+	REGISTER,					//	HL
+	MEMORY_REGISTER,			//	(HL)
+	LABEL,						//	LABEL1
 };
 
 class COPERAND {
@@ -103,12 +106,15 @@ public:
 	COPERAND			operand1;
 	COPERAND			operand2;
 
+	std::string convert_operand( std::string s, COUTPUT_TYPES out_type );
+	std::string convert_length( std::string s, size_t length = 12 );
+	std::string convert_condition( CCONDITION condition );
+	bool save( FILE *p_file, COUTPUT_TYPES output_type );
+
 	CASSEMBLER_LINE() {
 		this->type = CMNEMONIC_TYPE::COMMENT;
 		this->condition = CCONDITION::NONE;
 	}
-
-	bool save( FILE *p_file, COUTPUT_TYPES output_type );
 };
 
 #endif

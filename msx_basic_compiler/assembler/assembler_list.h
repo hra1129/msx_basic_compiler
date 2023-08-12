@@ -7,7 +7,6 @@
 #include <vector>
 #include <cstdio>
 #include "assembler_line.h"
-#include "../basic_types.h"
 
 #ifndef __ASSEMBLER_LIST_H__
 #define __ASSEMBLER_LIST_H__
@@ -16,7 +15,7 @@ class CASSEMBLER_LIST {
 private:
 	std::vector< std::string >			label_list;
 
-	bool save_sub( FILE *p_file, const std::vector< CASSEMBLER_LINE > &list, COUTPUT_TYPES output_type );
+	bool save_sub( FILE *p_file, const std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type );
 
 public:
 	std::vector< CASSEMBLER_LINE >		header;

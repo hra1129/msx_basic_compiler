@@ -1,90 +1,227 @@
-bios_cls = 0x000C3
-bios_chgmod = 0x0005F
-bios_chgmodp = 0x001B5
-bios_extrom = 0x0015F
-bios_imult = 0x03193
-bios_chgclr = 0x00062
-work_forclr = 0x0F3E9
-work_bakclr = 0x0F3EA
-work_bdrclr = 0x0F3EB
-bios_wrtpsg = 0x00093
+        DEFB        0xFE
+        DEFW        start_address
+        DEFW        end_address
+        DEFW        start_address
+        ORG         0x8010
+start_address:
+        LD          [save_stack], SP
+program_start:
+bios_cls                        = 0x000C3
+bios_chgmod                     = 0x0005F
+bios_chgmodp                    = 0x001B5
+bios_extrom                     = 0x0015F
+bios_imult                      = 0x03193
+bios_chgclr                     = 0x00062
+work_forclr                     = 0x0F3E9
+work_bakclr                     = 0x0F3EA
+work_bdrclr                     = 0x0F3EB
+bios_wrtpsg                     = 0x00093
 line_100:
-	CALL	bios_cls
-	LD		HL, 2
-	PUSH	HL
-	LD		HL, 3
-	PUSH	HL
-	LD		HL, 2
-	POP		DE
-	CALL	bios_imult
-	POP		DE
-	ADD		HL, DE
-	PUSH	HL
-	LD		HL, 4
-	POP		DE
-	EX		DE, HL
-	OR		A, A
-	SBC		HL, DE
-	LD		A, L
-	LD		IX, bios_chgmodp
-	CALL	bios_extrom
-	LD		HL, 15
-	LD		A, L
-	LD		[work_forclr], A
-	LD		HL, 0
-	LD		A, L
-	LD		[work_bakclr], A
-	LD		HL, 0
-	LD		A, L
-	LD		[work_bdrclr], A
-	CALL	bios_chgclr
-	LD		HL, 64432
-	PUSH	HL
-	LD		HL, 0
-	LD		A, L
-	POP		HL
-	LD		[HL], A
-	CALL	line_1000
-	CALL	line_2000
-	JP		line_200
-	; --- MAIN LOOP --------
+        CALL        bios_cls
+        LD          HL, 2
+        PUSH        HL
+        LD          HL, 3
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        CALL        bios_imult
+        POP         DE
+        ADD         HL, DE
+        PUSH        HL
+        LD          HL, 4
+        POP         DE
+        EX          DE, HL
+        OR          A, A
+        SBC         HL, DE
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 15
+        LD          A, L
+        LD          [work_forclr], A
+        LD          HL, 0
+        LD          A, L
+        LD          [work_bakclr], A
+        LD          HL, 0
+        LD          A, L
+        LD          [work_bdrclr], A
+        CALL        bios_chgclr
+        LD          HL, 64432
+        PUSH        HL
+        LD          HL, 0
+        LD          A, L
+        POP         HL
+        LD          [HL], A
+        CALL        line_1000
+        CALL        line_2000
+        JP          line_200
+        ;           --- MAIN LOOP --------
 line_140:
 line_150:
 line_160:
-	JP		line_140
-	; -- START
+        JP          line_140
+        ;           -- START
 line_200:
-	JP		line_140
+        JP          line_140
 line_1000:
-	RET
+        RET
 line_1100:
-	CALL	bios_cls
-	POP		HL
-	JP		line_100
+        CALL        bios_cls
+        POP         HL
+        JP          line_100
 line_2000:
-	LD		HL, 0
-	PUSH	HL
-	LD		HL, 100
-	LD		E, L
-	POP		HL
-	LD		A, L
-	CALL	bios_wrtpsg
-	LD		HL, 1
-	PUSH	HL
-	LD		HL, 2
-	LD		E, L
-	POP		HL
-	LD		A, L
-	CALL	bios_wrtpsg
-	RET
-	LD		HL, 8
-	PUSH	HL
-	LD		HL, 10
-	POP		BC
-	OUT		[C], L
-	LD		HL, 9
-	PUSH	HL
-	LD		HL, 128
-	POP		BC
-	OUT		[C], L
-	RET
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 100
+        LD          E, L
+        POP         HL
+        LD          A, L
+        CALL        bios_wrtpsg
+        LD          HL, 1
+        PUSH        HL
+        LD          HL, 2
+        PUSH        HL
+        LD          HL, 3
+        POP         DE
+        XOR         A, A
+        SBC         HL, DE
+        JR          NZ, _pt0
+        DEC         A
+_pt0:
+        LD          H, A
+        LD          L, A
+        PUSH        HL
+        LD          HL, 4
+        PUSH        HL
+        LD          HL, 5
+        POP         DE
+        XOR         A, A
+        SBC         HL, DE
+        JR          Z, _pt1
+        DEC         A
+_pt1:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        PUSH        HL
+        LD          HL, 6
+        PUSH        HL
+        LD          HL, 7
+        POP         DE
+        XOR         A, A
+        SBC         HL, DE
+        JR          Z, _pt2
+        DEC         A
+_pt2:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        PUSH        HL
+        LD          HL, 8
+        PUSH        HL
+        LD          HL, 9
+        POP         DE
+        EX          DE, HL
+        XOR         A, A
+        SBC         HL, DE
+        JR          C, _pt3
+        DEC         A
+_pt3:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        PUSH        HL
+        LD          HL, 10
+        PUSH        HL
+        LD          HL, 11
+        POP         DE
+        XOR         A, A
+        SBC         HL, DE
+        JR          C, _pt4
+        DEC         A
+_pt4:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        PUSH        HL
+        LD          HL, 12
+        PUSH        HL
+        LD          HL, 13
+        POP         DE
+        EX          DE, HL
+        XOR         A, A
+        SBC         HL, DE
+        JR          C, _pt5
+        DEC         A
+_pt5:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        PUSH        HL
+        LD          HL, 14
+        PUSH        HL
+        LD          HL, 15
+        POP         DE
+        XOR         A, A
+        SBC         HL, DE
+        JR          C, _pt6
+        DEC         A
+_pt6:
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        LD          E, L
+        POP         HL
+        LD          A, L
+        CALL        bios_wrtpsg
+        JP          program_termination
+        LD          HL, 8
+        PUSH        HL
+        LD          HL, 10
+        POP         BC
+        OUT         [C], L
+        LD          HL, 9
+        PUSH        HL
+        LD          HL, 128
+        POP         BC
+        OUT         [C], L
+        RET
+program_termination:
+        LD          SP, [save_stack]
+        RET
+end_address:

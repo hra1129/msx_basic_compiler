@@ -18,6 +18,9 @@ public:
 	int line_no;
 	CBASIC_WORD_TYPE type;
 	std::string s_word;
+
+	CBASIC_WORD(): line_no(0), type(CBASIC_WORD_TYPE::UNKNOWN) {
+	}
 };
 
 // --------------------------------------------------------------------

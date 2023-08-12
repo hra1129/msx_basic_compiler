@@ -8,19 +8,20 @@
 #include <cstdio>
 
 // --------------------------------------------------------------------
-bool CASSEMBLER_LIST::save_sub( FILE *p_file, const std::vector< CASSEMBLER_LINE > &list, COUTPUT_TYPES output_type ) {
+bool CASSEMBLER_LIST::save_sub( FILE *p_file, const std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
+	bool b_result = true;
 
-	for( auto p: list ) {
-		p.save( p_file, output_type );
+	for( auto p: *p_list ) {
+		b_result = p.save( p_file, output_type ) && b_result;
 	}
-	return true;
+	return b_result;
 }
 
 // --------------------------------------------------------------------
 void CASSEMBLER_LIST::add_label( const std::string s_name, const std::string s_value ) {
 
 	//	Šù‚É‘¶Ý‚µ‚Ä‚¢‚éƒ‰ƒxƒ‹‚È‚Ì‚©’²‚×‚é
-	for( auto p: this->label_list ) {
+	for( auto &p: this->label_list ) {
 		if( p == s_name ) {
 			//	‘¶Ý‚µ‚Ä‚¢‚éê‡‚Í‰½‚à‚µ‚È‚¢
 			return;
@@ -49,12 +50,12 @@ bool CASSEMBLER_LIST::save( const std::string s_file_name, COUTPUT_TYPES output_
 		return false;
 	}
 
-	result &= this->save_sub( p_file, this->header, output_type );
-	result &= this->save_sub( p_file, this->body, output_type );
-	result &= this->save_sub( p_file, this->subroutines, output_type );
-	result &= this->save_sub( p_file, this->datas, output_type );
-	result &= this->save_sub( p_file, this->variables_area, output_type );
-	result &= this->save_sub( p_file, this->footer, output_type );
+	result &= this->save_sub( p_file, &(this->header), output_type );
+	result &= this->save_sub( p_file, &(this->body), output_type );
+	result &= this->save_sub( p_file, &(this->subroutines), output_type );
+	result &= this->save_sub( p_file, &(this->datas), output_type );
+	result &= this->save_sub( p_file, &(this->variables_area), output_type );
+	result &= this->save_sub( p_file, &(this->footer), output_type );
 	fclose( p_file );
 
 	return result;

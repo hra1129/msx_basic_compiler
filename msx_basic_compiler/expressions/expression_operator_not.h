@@ -3,11 +3,12 @@
 // ====================================================================
 //	2023/July/29th	t.hara
 // --------------------------------------------------------------------
-#pragma once
-
 #include <string>
 #include <vector>
 #include "expression.h"
+
+#ifndef __EXPRESSION_OPERATOR_NOT_H__
+#define __CEXPRESSION_OPERATOR_NOT_H__
 
 // --------------------------------------------------------------------
 //	NOT(”Û’è)
@@ -33,3 +34,5 @@ public:
 		}
 	}
 };
+
+#endif
