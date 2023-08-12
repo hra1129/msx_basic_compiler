@@ -1,13 +1,14 @@
 // --------------------------------------------------------------------
-//	Expression operator +
+//	Expression operator IMP
 // ====================================================================
 //	2023/July/29th	t.hara
 // --------------------------------------------------------------------
-#pragma once
-
 #include <string>
 #include <vector>
 #include "expression.h"
+
+#ifndef __EXPRESSION_OPERATOR_IMP_H__
+#define __CEXPRESSION_OPERATOR_IMP_H__
 
 // --------------------------------------------------------------------
 //	IMP(•ïŠÜ)
@@ -38,3 +39,5 @@ public:
 		}
 	}
 };
+
+#endif

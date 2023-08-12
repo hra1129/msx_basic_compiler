@@ -18,7 +18,6 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\color.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\cls.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\basic_list.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\assembler_list.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\assembler_line.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\expression_operator_power.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\expression_operator_or.obj
@@ -41,8 +40,6 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\expression_function.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\expression.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\variable_manager.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\msx_basic_compiler.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\expression_term.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\msx_basi.ea90cff4.tlog\cl.command.1.tlog
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\msx_basi.ea90cff4.tlog\cl.read.1.tlog
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\x64\debug\msx_basi.ea90cff4.tlog\cl.write.1.tlog

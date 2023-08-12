@@ -6,120 +6,181 @@
 
 #include "assembler_line.h"
 #include <cstring>
+#include <map>
+
+struct CCOMMAND_TYPE {
+	int		parameter_type = 0;
+	std::string		s_name;
+};
+
+std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
+	{ CMNEMONIC_TYPE::COMMENT,    { 1, ";" } },
+	{ CMNEMONIC_TYPE::LABEL,	  { 1, "LABEL" } },
+	{ CMNEMONIC_TYPE::CONSTANT,	  { 1, "CONSTANT" } },
+	{ CMNEMONIC_TYPE::LD,		  { 2, "LD" } },
+	{ CMNEMONIC_TYPE::EX,		  { 2, "EX" } },
+	{ CMNEMONIC_TYPE::EXX,		  { 0, "EXX" } },
+	{ CMNEMONIC_TYPE::PUSH,		  { 1, "PUSH" } },
+	{ CMNEMONIC_TYPE::POP,		  { 1, "POP" } },
+	{ CMNEMONIC_TYPE::JP,		  { 1, "JP" } },
+	{ CMNEMONIC_TYPE::JR,		  { 1, "JR" } },
+	{ CMNEMONIC_TYPE::CALL,		  { 1, "CALL" } },
+	{ CMNEMONIC_TYPE::RET,		  { 0, "RET" } },
+	{ CMNEMONIC_TYPE::RR,		  { 1, "RR" } },
+	{ CMNEMONIC_TYPE::RL,		  { 1, "RL" } },
+	{ CMNEMONIC_TYPE::RRC,		  { 1, "RRC" } },
+	{ CMNEMONIC_TYPE::RLC,		  { 1, "RLC" } },
+	{ CMNEMONIC_TYPE::SRA,		  { 1, "SRA" } },
+	{ CMNEMONIC_TYPE::SRL,		  { 1, "SRL" } },
+	{ CMNEMONIC_TYPE::SLA,		  { 1, "SLA" } },
+	{ CMNEMONIC_TYPE::BIT,		  { 1, "BIT" } },
+	{ CMNEMONIC_TYPE::RES,		  { 1, "RES" } },
+	{ CMNEMONIC_TYPE::SET,		  { 1, "SET" } },
+	{ CMNEMONIC_TYPE::CPL,		  { 0, "CPL" } },
+	{ CMNEMONIC_TYPE::CP,		  { 3, "CP" } },
+	{ CMNEMONIC_TYPE::AND,		  { 3, "AND" } },
+	{ CMNEMONIC_TYPE::OR,		  { 3, "OR" } },
+	{ CMNEMONIC_TYPE::XOR,		  { 3, "XOR" } },
+	{ CMNEMONIC_TYPE::NEG,		  { 0, "NEG" } },
+	{ CMNEMONIC_TYPE::INC,		  { 1, "INC" } },
+	{ CMNEMONIC_TYPE::DEC,		  { 1, "DEC" } },
+	{ CMNEMONIC_TYPE::ADD,		  { 2, "ADD" } },
+	{ CMNEMONIC_TYPE::SUB,		  { 2, "SUB" } },
+	{ CMNEMONIC_TYPE::SBC,		  { 2, "SBC" } },
+	{ CMNEMONIC_TYPE::CCF,		  { 0, "CCF" } },
+	{ CMNEMONIC_TYPE::SCF,		  { 0, "SCF" } },
+	{ CMNEMONIC_TYPE::LDIR,		  { 0, "LDIR" } },
+	{ CMNEMONIC_TYPE::LDDR,		  { 0, "LDDR" } },
+	{ CMNEMONIC_TYPE::CPI,		  { 0, "CPI" } },
+	{ CMNEMONIC_TYPE::CPD,		  { 0, "CPD" } },
+	{ CMNEMONIC_TYPE::OUT,		  { 2, "OUT" } },
+	{ CMNEMONIC_TYPE::IN,		  { 2, "IN" } },
+	{ CMNEMONIC_TYPE::OTIR,		  { 0, "OTIR" } },
+	{ CMNEMONIC_TYPE::OUTI,		  { 0, "OUTI" } },
+	{ CMNEMONIC_TYPE::OTDR,		  { 0, "OTDR" } },
+	{ CMNEMONIC_TYPE::OUTD,		  { 0, "OUTD" } },
+	{ CMNEMONIC_TYPE::INIR,		  { 0, "INIR" } },
+	{ CMNEMONIC_TYPE::INI,		  { 0, "INI" } },
+	{ CMNEMONIC_TYPE::INDR,		  { 0, "INDR" } },
+	{ CMNEMONIC_TYPE::IND,		  { 0, "IND" } },
+	{ CMNEMONIC_TYPE::HALT,		  { 0, "HALT" } },
+	{ CMNEMONIC_TYPE::DJNZ,		  { 1, "DJNZ" } },
+	{ CMNEMONIC_TYPE::ORG,		  { 1, "ORG" } },
+	{ CMNEMONIC_TYPE::DEFB,		  { 1, "DEFB" } },
+	{ CMNEMONIC_TYPE::DEFW,		  { 1, "DEFW" } },
+};
+
+std::map< CCONDITION, std::string > condition_list = {
+	{ CCONDITION::NONE,			"" },
+	{ CCONDITION::Z,			"Z, " },
+	{ CCONDITION::NZ,			"NZ, " },
+	{ CCONDITION::C,			"C, " },
+	{ CCONDITION::NC,			"NC, " },
+	{ CCONDITION::PE,			"PE, " },
+	{ CCONDITION::PO,			"PO, " },
+	{ CCONDITION::P,			"P, " },
+	{ CCONDITION::M,			"M, " },
+};
+
+// --------------------------------------------------------------------
+std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_type ) {
+
+	if( out_type == COUTPUT_TYPES::ZMA ) {
+		return s;
+	}
+
+	//	括弧の付け替え
+	if( s[0] == '[' ) {
+		s[0] = '(';
+	}
+	if( s[ s.size() - 1 ] == ']' ) {
+		s[ s.size() - 1 ] = ')';
+	}
+
+	//	数字の更新
+	if( s[0] == '0' && s[1] == 'x' ) {
+		int value = 0;
+		char s_value[32];
+		sscanf_s( this->operand2.s_value.c_str(), "%i", &value );
+		sprintf_s( s_value, "0%Xh", value );
+		s = s_value;
+	}
+	return s;
+}
+
+// --------------------------------------------------------------------
+std::string CASSEMBLER_LINE::convert_length( std::string s, size_t length ) {
+
+	if( s.size() < length ) {
+		for( size_t i = s.size(); i < length; i++ ) {
+			s = s + ' ';
+		}
+	}
+	return s;
+}
+
+// --------------------------------------------------------------------
+std::string CASSEMBLER_LINE::convert_condition( CCONDITION condition ) {
+
+	return condition_list[ condition ];
+}
 
 // --------------------------------------------------------------------
 bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 
-	if( this->type == CMNEMONIC_TYPE::AND ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tAND\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tAND\t\t%s\n", this->operand2.s_value.c_str() );
-		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::ADD ) {
-		fprintf( p_file, "\tADD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::CALL ) {
-		fprintf( p_file, "\tCALL\t%s\n", this->operand1.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::COMMENT ) {
-		fprintf( p_file, "\t; %s\n", this->operand1.s_value.c_str() );
+	if( this->type == CMNEMONIC_TYPE::LABEL ) {
+		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::CONSTANT ) {
 		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "%s = %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+			fprintf( p_file, "%s= %s\n", this->convert_length( this->operand1.s_value, 32 ).c_str(), this->operand2.s_value.c_str() );
 		}
 		else {
 			if( this->operand2.type == COPERAND_TYPE::CONSTANT ) {
 				int value = 0;
 				sscanf_s( this->operand2.s_value.c_str(), "%i", &value );
-				fprintf( p_file, "%s equ 0%04Xh\n", this->operand1.s_value.c_str(), value );
+				fprintf( p_file, "%s equ 0%04Xh\n", this->convert_length( this->operand1.s_value, 31 ).c_str(), value );
 			}
 			else {
-				fprintf( p_file, "%s equ %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+				fprintf( p_file, "%s equ %s\n", this->convert_length( this->operand1.s_value, 31 ).c_str(), this->operand2.s_value.c_str() );
 			}
 		}
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::CPL ) {
-		fprintf( p_file, "\tCPL\n" );
+
+	CCOMMAND_TYPE command_type = command_list[ this->type ];
+	switch( command_type.parameter_type ) {
+	case 0:	//	オペランド無し
+		fprintf( p_file, "        %s\n", command_type.s_name.c_str() );
 		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::EX ) {
-		fprintf( p_file, "\tEX\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+	case 1:	//	オペランド1個
+		fprintf( p_file, "        %s%s%s\n", 
+				convert_length( command_type.s_name ).c_str(), 
+				convert_condition( this->condition ).c_str(),
+				convert_operand( this->operand1.s_value, output_type ).c_str() );
 		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::JP ) {
-		fprintf( p_file, "\tJP\t\t%s\n", this->operand1.s_value.c_str() );
+	case 2:	//	オペランド2個
+		fprintf( p_file, "        %s%s, %s\n", 
+				convert_length( command_type.s_name ).c_str(), 
+				convert_operand( this->operand1.s_value, output_type ).c_str(), 
+				convert_operand( this->operand2.s_value, output_type ).c_str() );
 		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::LABEL ) {
-		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::LD ) {
-		fprintf( p_file, "\tLD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::OR ) {
+	case 3:	//	ZMA ではオペランド2個だけど、M80 では1個
 		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tOR\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+			fprintf( p_file, "        %s%s, %s\n", 
+					convert_length( command_type.s_name ).c_str(), 
+					this->operand1.s_value.c_str(), 
+					this->operand2.s_value.c_str() );
 		}
 		else {
-			fprintf( p_file, "\tOR\t\t%s\n", this->operand2.s_value.c_str() );
+			fprintf( p_file, "        %s%s\n", 
+					convert_length( command_type.s_name ).c_str(), 
+					convert_operand( this->operand2.s_value, output_type ).c_str() );
 		}
 		return true;
+	default:
+		break;
 	}
-	if( this->type == CMNEMONIC_TYPE::OUT ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tOUT\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tOUT\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::PUSH ) {
-		fprintf( p_file, "\tPUSH\t%s\n", this->operand1.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::POP ) {
-		fprintf( p_file, "\tPOP\t\t%s\n", this->operand1.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::RET ) {
-		if( this->condition == CCONDITION::NONE ) {
-			fprintf( p_file, "\tRET\n" );
-		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::SBC ) {
-		fprintf( p_file, "\tSBC\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::SUB ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tSUB\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tSUB\t\t%s\n", this->operand2.s_value.c_str() );
-		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::XOR ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tXOR\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tXOR\t\t%s\n", this->operand2.s_value.c_str() );
-		}
-		return true;
-	}
-	return true;
+	return false;
 }

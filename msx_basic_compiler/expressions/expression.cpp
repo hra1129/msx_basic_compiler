@@ -319,7 +319,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 	CEXPRESSION_OPERATOR_LT *p_operator_lt;
 	CEXPRESSION_OPERATOR_LE *p_operator_le;
 	CEXPRESSION_NODE *p_result;
-	std::string s_operator;
+	std::string s_operator, s_operator2;
 
 	//	左項を得る
 	p_left = this->makeup_node_operator_add_sub( p_this );
@@ -329,9 +329,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 	p_result = p_left;
 	while( !p_this->list.is_command_end() ) {
 		s_operator = p_this->list.p_position->s_word;
-		if( s_operator != "=" && s_operator != "<>" && s_operator != "><" && 
-			s_operator != ">=" && s_operator != "=>" && s_operator != ">" &&
-			s_operator != "<=" && s_operator != "=<" && s_operator != "<" ) {
+		if( s_operator != "=" && s_operator != "<" && s_operator != ">" ) {
 			//	所望の演算子ではないので左項をそのまま返す
 			break;
 		}
@@ -339,6 +337,16 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 		if( p_this->list.is_command_end() ) {
 			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
 			break;
+		}
+		s_operator2 = p_this->list.p_position->s_word;
+		if( s_operator2 == "=" || s_operator2 == "<" || s_operator2 == ">" ) {
+			//	<>, ><, >=, =>, <=, =< の場合、2つの単語に分かれてるので統合する
+			s_operator = s_operator + s_operator2;
+			p_this->list.p_position++;
+			if( p_this->list.is_command_end() ) {
+				p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	あるべき右項がない
+				break;
+			}
 		}
 		//	この演算子のインスタンスを生成
 		if( s_operator == "=" ) {
@@ -374,6 +382,9 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_compare( CCOMPILE_INFO *p_th
 		else { 
 			//	if( s_operator == "<=" || s_operator == "=<" )
 			p_operator_le = new CEXPRESSION_OPERATOR_LE;
+			p_operator_le->p_left = p_result;
+			p_operator_le->p_right = this->makeup_node_operator_add_sub( p_this );
+			p_result = p_operator_le;
 		}
 	}
 	return p_result;
