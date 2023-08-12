@@ -478,6 +478,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 	//	スペースは読み飛ばす
 	this->skip_white_space();
 	if( this->p_file_image[0] == '&' ) {
+		this->p_file_image++;
 		this->skip_white_space();
 		if( this->p_file_image[0] == 'B' ) {
 			//	2進数の値だった場合

@@ -26,7 +26,8 @@ line_100:
 	OR		A, A
 	SBC		HL, DE
 	LD		A, L
-	CALL	bios_chgmod
+	LD		IX, bios_chgmodp
+	CALL	bios_extrom
 	LD		HL, 15
 	LD		A, L
 	LD		[work_forclr], A
@@ -37,6 +38,12 @@ line_100:
 	LD		A, L
 	LD		[work_bdrclr], A
 	CALL	bios_chgclr
+	LD		HL, 64432
+	PUSH	HL
+	LD		HL, 0
+	LD		A, L
+	POP		HL
+	LD		[HL], A
 	CALL	line_1000
 	CALL	line_2000
 	JP		line_200
@@ -69,4 +76,15 @@ line_2000:
 	POP		HL
 	LD		A, L
 	CALL	bios_wrtpsg
+	RET
+	LD		HL, 8
+	PUSH	HL
+	LD		HL, 10
+	POP		BC
+	OUT		[C], L
+	LD		HL, 9
+	PUSH	HL
+	LD		HL, 128
+	POP		BC
+	OUT		[C], L
 	RET

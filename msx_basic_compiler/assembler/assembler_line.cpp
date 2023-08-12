@@ -10,12 +10,25 @@
 // --------------------------------------------------------------------
 bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 
-	if( this->type == CMNEMONIC_TYPE::COMMENT ) {
-		fprintf( p_file, "\t; %s\n", this->operand1.s_value.c_str() );
+	if( this->type == CMNEMONIC_TYPE::AND ) {
+		if( output_type == COUTPUT_TYPES::ZMA ) {
+			fprintf( p_file, "\tAND\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		}
+		else {
+			fprintf( p_file, "\tAND\t\t%s\n", this->operand2.s_value.c_str() );
+		}
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::LABEL ) {
-		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
+	if( this->type == CMNEMONIC_TYPE::ADD ) {
+		fprintf( p_file, "\tADD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::CALL ) {
+		fprintf( p_file, "\tCALL\t%s\n", this->operand1.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::COMMENT ) {
+		fprintf( p_file, "\t; %s\n", this->operand1.s_value.c_str() );
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::CONSTANT ) {
@@ -34,17 +47,24 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		}
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::CALL ) {
-		fprintf( p_file, "\tCALL\t%s\n", this->operand1.s_value.c_str() );
+	if( this->type == CMNEMONIC_TYPE::CPL ) {
+		fprintf( p_file, "\tCPL\n" );
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::AND ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tAND\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tAND\t\t%s\n", this->operand2.s_value.c_str() );
-		}
+	if( this->type == CMNEMONIC_TYPE::EX ) {
+		fprintf( p_file, "\tEX\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::JP ) {
+		fprintf( p_file, "\tJP\t\t%s\n", this->operand1.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::LABEL ) {
+		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::LD ) {
+		fprintf( p_file, "\tLD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::OR ) {
@@ -56,46 +76,13 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		}
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::XOR ) {
+	if( this->type == CMNEMONIC_TYPE::OUT ) {
 		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tXOR\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+			fprintf( p_file, "\tOUT\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
 		}
 		else {
-			fprintf( p_file, "\tXOR\t\t%s\n", this->operand2.s_value.c_str() );
+			fprintf( p_file, "\tOUT\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
 		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::ADD ) {
-		fprintf( p_file, "\tADD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::SUB ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "\tSUB\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "\tSUB\t\t%s\n", this->operand2.s_value.c_str() );
-		}
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::SBC ) {
-		fprintf( p_file, "\tSBC\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::CPL ) {
-		fprintf( p_file, "\tCPL\n" );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::LD ) {
-		fprintf( p_file, "\tLD\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::EX ) {
-		fprintf( p_file, "\tEX\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
-		return true;
-	}
-	if( this->type == CMNEMONIC_TYPE::JP ) {
-		fprintf( p_file, "\tJP\t\t%s\n", this->operand1.s_value.c_str() );
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::PUSH ) {
@@ -112,8 +99,26 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		}
 		return true;
 	}
-	if( this->type == CMNEMONIC_TYPE::POP ) {
-		fprintf( p_file, "\tPOP\t\t%s\n", this->operand1.s_value.c_str() );
+	if( this->type == CMNEMONIC_TYPE::SBC ) {
+		fprintf( p_file, "\tSBC\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::SUB ) {
+		if( output_type == COUTPUT_TYPES::ZMA ) {
+			fprintf( p_file, "\tSUB\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		}
+		else {
+			fprintf( p_file, "\tSUB\t\t%s\n", this->operand2.s_value.c_str() );
+		}
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::XOR ) {
+		if( output_type == COUTPUT_TYPES::ZMA ) {
+			fprintf( p_file, "\tXOR\t\t%s, %s\n", this->operand1.s_value.c_str(), this->operand2.s_value.c_str() );
+		}
+		else {
+			fprintf( p_file, "\tXOR\t\t%s\n", this->operand2.s_value.c_str() );
+		}
 		return true;
 	}
 	return true;

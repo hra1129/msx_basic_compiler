@@ -14,6 +14,7 @@
 #include "collections/defstr.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
+#include "collections/out.h"
 #include "collections/poke.h"
 #include "collections/return.h"
 #include "collections/screen.h"
@@ -32,6 +33,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CDEFSTR );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
+	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CRETURN );
 	this->collection.push_back( new CSCREEN );
