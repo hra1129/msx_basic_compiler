@@ -17,6 +17,7 @@
 #include "collections/poke.h"
 #include "collections/return.h"
 #include "collections/screen.h"
+#include "collections/sound.h"
 #include "variable_manager.h"
 
 // --------------------------------------------------------------------
@@ -34,6 +35,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CRETURN );
 	this->collection.push_back( new CSCREEN );
+	this->collection.push_back( new CSOUND );
 }
 
 // --------------------------------------------------------------------

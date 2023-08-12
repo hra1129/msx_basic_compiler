@@ -287,6 +287,7 @@ int CBASIC_LIST::get_integer( void ) {
 CBASIC_WORD CBASIC_LIST::get_word( void ) {
 	int i, number;
 	CBASIC_WORD s_word;
+	char s[32];
 
 	//	スペースは読み飛ばす
 	this->skip_white_space();
@@ -322,18 +323,26 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 	}
 	if( *( this->p_file_image ) == 0x1D ) {
 		//	単精度浮動小数点数だった場合
-		//	★T.B.D.
-		s_word.s_word = "0";
+		this->p_file_image++;
+		s_word.s_word = "";
+		for( i = 0; i < 4; i++ ) {
+			sprintf_s( s, "%02X", this->p_file_image[0] );
+			s_word.s_word = s_word.s_word + s;
+			this->p_file_image++;
+		}
 		s_word.type = CBASIC_WORD_TYPE::SINGLE_REAL;
-		this->p_file_image += 5;
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x1F ){
 		//	倍精度浮動小数点数だった場合
-		//	★T.B.D.
-		s_word.s_word = "0";
+		this->p_file_image++;
+		s_word.s_word = "";
+		for( i = 0; i < 4; i++ ) {
+			sprintf_s( s, "%02X", this->p_file_image[0] );
+			s_word.s_word = s_word.s_word + s;
+			this->p_file_image++;
+		}
 		s_word.type = CBASIC_WORD_TYPE::DOUBLE_REAL;
-		this->p_file_image += 9;
 		return s_word;
 	}
 	if( *( this->p_file_image ) == '"' ) {
@@ -346,17 +355,26 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 		}
 		return s_word;
 	}
-	if( this->p_file_image[0] == '&' && this->p_file_image[1] == 'B' ) {
-		//	2進数だった場合
-		number = 0;
-		this->p_file_image += 2;
-		while( *(this->p_file_image) == '0' || *(this->p_file_image) == '1' ) {
-			number = (number << 1) | ( *(this->p_file_image) - '0' );
+	if( this->p_file_image[0] == '&' ) {
+		this->skip_white_space();
+		if( this->p_file_image[0] == 'B' ) {
+			//	2進数だった場合
+			number = 0;
 			this->p_file_image++;
+			while( *(this->p_file_image) == '0' || *(this->p_file_image) == '1' ) {
+				number = (number << 1) | ( *(this->p_file_image) - '0' );
+				this->p_file_image++;
+			}
+			s_word.s_word = std::to_string( number );
+			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			return s_word;
 		}
-		s_word.s_word = std::to_string( number );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
-		return s_word;
+		else {
+			//	'&' だった場合
+			s_word.s_word = '&';
+			s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+			return s_word;
+		}
 	}
 	//	一致する予約語コードがあるか調べる
 	for( auto p = reserved_words.begin(); p != reserved_words.end(); p++ ) {
@@ -398,10 +416,53 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 }
 
 // --------------------------------------------------------------------
-std::string CBASIC_LIST::get_word_in_charlist( const char *p_charlist ) {
+CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s ) {
+	CBASIC_WORD s_word;
+	bool is_real = false;
+	int decimal;
+
+	s_word.line_no = this->get_line_no();
+	//	浮動小数点数か否か
+	for( auto c: s ) {
+		if( c == '.' || c == 'E' ) {
+			is_real = true;
+			break;
+		}
+	}
+	if( !is_real ) {
+		//	整数の範囲に収まるか？
+		decimal = std::stoi( s );
+		if( s.size() < 5 || (s.size() == 5 && decimal < 32768) ) {
+			//	整数確定
+			s_word.s_word = std::to_string( decimal );
+			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			return s_word;
+		}
+	}
+	//	実数表現だった場合
+	//	★T.B.D.
+	return s_word;
+}
+
+// --------------------------------------------------------------------
+std::string CBASIC_LIST::get_word_in_charlist( const char *p_charlist, bool ignore_space ) {
 	std::string s;
 
+	this->skip_white_space();
 	while( this->p_file_image != this->file_image.end() && strchr( p_charlist, (char)this->p_file_image[0] ) != NULL ) {
+		s = s + (char)this->p_file_image[0];
+		this->p_file_image++;
+		this->skip_white_space();
+	}
+	return s;
+}
+
+// --------------------------------------------------------------------
+std::string CBASIC_LIST::get_char_in_charlist( const char *p_charlist, bool ignore_space ) {
+	std::string s;
+
+	this->skip_white_space();
+	if( this->p_file_image != this->file_image.end() && strchr( p_charlist, (char)this->p_file_image[0] ) != NULL ) {
 		s = s + (char)this->p_file_image[0];
 		this->p_file_image++;
 	}
@@ -416,35 +477,47 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 
 	//	スペースは読み飛ばす
 	this->skip_white_space();
-	if( this->p_file_image[0] == '&' && this->p_file_image[1] == 'B' ) {
-		//	2進数の値だった場合
-		this->p_file_image += 2;
-		s = this->get_word_in_charlist( "01" );
-		s_word.s_word = std::to_string( stoi( s, nullptr, 2 ) );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
-		return s_word;
-	}
-	if( this->p_file_image[0] == '&' && this->p_file_image[1] == 'O' ) {
-		//	8進数の値だった場合
-		this->p_file_image += 2;
-		s = this->get_word_in_charlist( "01234567" );
-		s_word.s_word = std::to_string( stoi( s, nullptr, 8 ) );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
-		return s_word;
-	}
-	if( this->p_file_image[0] == '&' && this->p_file_image[1] == 'H' ) {
-		//	16進数の値だった場合
-		this->p_file_image += 2;
-		s = this->get_word_in_charlist( "0123456789abcdefABCDEF" );
-		s_word.s_word = std::to_string( stoi( s, nullptr, 16 ) );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
-		return s_word;
+	if( this->p_file_image[0] == '&' ) {
+		this->skip_white_space();
+		if( this->p_file_image[0] == 'B' ) {
+			//	2進数の値だった場合
+			this->p_file_image++;
+			s = this->get_word_in_charlist( "01" );
+			s_word.s_word = std::to_string( stoi( s, nullptr, 2 ) );
+			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			return s_word;
+		}
+		if( this->p_file_image[0] == 'O' ) {
+			//	8進数の値だった場合
+			this->p_file_image++;
+			s = this->get_word_in_charlist( "01234567" );
+			s_word.s_word = std::to_string( stoi( s, nullptr, 8 ) );
+			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			return s_word;
+		}
+		if( this->p_file_image[0] == 'H' ) {
+			//	16進数の値だった場合
+			this->p_file_image++;
+			s = this->get_word_in_charlist( "0123456789abcdefABCDEF" );
+			s_word.s_word = std::to_string( stoi( s, nullptr, 16 ) );
+			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			return s_word;
+		}
 	}
 	if( isdigit( this->p_file_image[0] & 255 ) ) {
-		//	10進数の値だった場合
-		s = this->get_word_in_charlist( "0123456789" );
-		s_word.s_word = std::to_string( stoi( s, nullptr, 10 ) );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
+		//	10進数の値だった場合、整数・単精度実数・倍精度実数のどれか
+		s = this->get_word_in_charlist( "0123456789", true );
+		s = s + this->get_char_in_charlist( ".", true );
+		s = s + this->get_word_in_charlist( "0123456789", true );
+		if( this->p_file_image != this->file_image.end() && (toupper(this->p_file_image[0] & 255) == 'E' || toupper(this->p_file_image[0] & 255) == 'D') ) {
+			s = s + "E";
+			this->p_file_image++;
+			if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == '+' || this->p_file_image[0] == '-') ) {
+				s = s + (char)this->p_file_image[0];
+			}
+			s = s + this->get_word_in_charlist( "0123456789", true );
+		}
+		s_word = this->get_decimal( s );
 		return s_word;
 	}
 	//	一致する予約語コードがあるか調べる
