@@ -19,9 +19,13 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	p_info->assembler_list.add_label( "bios_chgmod", "0x0005F" );
-	p_info->assembler_list.add_label( "bios_chgmodp", "0x001B5" );
-	p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
+	if( p_info->options.target_type == CTARGET_TYPES::MSX1 ) {
+		p_info->assembler_list.add_label( "bios_chgmod", "0x0005F" );
+	}
+	else {
+		p_info->assembler_list.add_label( "bios_chgmodp", "0x001B5" );
+		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
+	}
 
 	CEXPRESSION exp;
 	//	‘æ1ˆø” <mode>

@@ -167,6 +167,7 @@
     <ClCompile Include="collections\screen.cpp" />
     <ClCompile Include="collections\sound.cpp" />
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="double_real.cpp" />
     <ClCompile Include="error_list.cpp" />
     <ClCompile Include="expressions\expression.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
@@ -192,6 +193,7 @@
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
+    <ClCompile Include="single_real.cpp" />
     <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +219,8 @@
     <ClInclude Include="collections\sound.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
+    <ClInclude Include="constant_info.h" />
+    <ClInclude Include="double_real.h" />
     <ClInclude Include="error_list.h" />
     <ClInclude Include="expressions\expression.h" />
     <ClInclude Include="expressions\expression_function.h" />
@@ -241,6 +245,7 @@
     <ClInclude Include="expressions\expression_operator_sub.h" />
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_term.h" />
+    <ClInclude Include="single_real.h" />
     <ClInclude Include="variable_info.h" />
     <ClInclude Include="variable_manager.h" />
   </ItemGroup>

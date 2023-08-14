@@ -54,6 +54,8 @@ bool CASSEMBLER_LIST::save( const std::string s_file_name, COUTPUT_TYPES output_
 	result &= this->save_sub( p_file, &(this->body), output_type );
 	result &= this->save_sub( p_file, &(this->subroutines), output_type );
 	result &= this->save_sub( p_file, &(this->datas), output_type );
+	result &= this->save_sub( p_file, &(this->const_single_area), output_type );
+	result &= this->save_sub( p_file, &(this->const_double_area), output_type );
 	result &= this->save_sub( p_file, &(this->variables_area), output_type );
 	result &= this->save_sub( p_file, &(this->footer), output_type );
 	fclose( p_file );

@@ -116,6 +116,20 @@ bool CCOMPILER::exec( void ) {
 	asm_line.operand2.s_value = "";
 	this->info.assembler_list.header.push_back( asm_line );
 
+	asm_line.type = CMNEMONIC_TYPE::LABEL;
+	asm_line.operand1.type = COPERAND_TYPE::LABEL;
+	asm_line.operand1.s_value = "save_stack";
+	asm_line.operand2.type = COPERAND_TYPE::NONE;
+	asm_line.operand2.s_value = "";
+	this->info.assembler_list.variables_area.push_back( asm_line );
+
+	asm_line.type = CMNEMONIC_TYPE::DEFW;
+	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
+	asm_line.operand1.s_value = "0";
+	asm_line.operand2.type = COPERAND_TYPE::NONE;
+	asm_line.operand2.s_value = "";
+	this->info.assembler_list.variables_area.push_back( asm_line );
+
 	this->info.list.reset_position();
 	while( !this->info.list.is_end() ) {
 		if( this->info.list.is_line_end() && !this->info.list.is_end() ) {
@@ -167,5 +181,7 @@ bool CCOMPILER::exec( void ) {
 	asm_line.operand2.type = COPERAND_TYPE::NONE;
 	asm_line.operand2.s_value = "";
 	this->info.assembler_list.footer.push_back( asm_line );
+
+	this->info.constants.dump( this->info.assembler_list, this->info.options );
 	return( this->info.errors.list.size() == 0 );
 }

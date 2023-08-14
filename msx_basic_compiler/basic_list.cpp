@@ -5,6 +5,8 @@
 // --------------------------------------------------------------------
 
 #include "basic_list.h"
+#include "single_real.h"
+#include "double_real.h"
 #include <cstring>
 
 struct CBASIC_RESERVED_WORD {
@@ -440,7 +442,15 @@ CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s ) {
 		}
 	}
 	//	ŽÀ”•\Œ»‚¾‚Á‚½ê‡
-	//	šT.B.D.
+	CDOUBLE_REAL v;
+	v.set( s );
+	s_word.s_word = s;
+	if( v.image[4] == 0 && v.image[5] == 0 && v.image[6] == 0 && v.image[7] == 0 ) {
+		s_word.type = CBASIC_WORD_TYPE::SINGLE_REAL;
+	}
+	else {
+		s_word.type = CBASIC_WORD_TYPE::DOUBLE_REAL;
+	}
 	return s_word;
 }
 
@@ -511,12 +521,17 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 		s = s + this->get_char_in_charlist( ".", true );
 		s = s + this->get_word_in_charlist( "0123456789", true );
 		if( this->p_file_image != this->file_image.end() && (toupper(this->p_file_image[0] & 255) == 'E' || toupper(this->p_file_image[0] & 255) == 'D') ) {
-			s = s + "E";
 			this->p_file_image++;
-			if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == '+' || this->p_file_image[0] == '-') ) {
-				s = s + (char)this->p_file_image[0];
+			if( this->p_file_image != this->file_image.end() && (isdigit(this->p_file_image[0] & 255) || this->p_file_image[0] == '+' || this->p_file_image[0] == '-' || this->p_file_image[0] == '\r' || this->p_file_image[0] == '\n' || this->p_file_image[0] == ' ')) {
+				s = s + "E";
+				if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == '+' || this->p_file_image[0] == '-') ) {
+					s = s + (char)this->p_file_image[0];
+				}
+				s = s + this->get_word_in_charlist( "0123456789", true );
 			}
-			s = s + this->get_word_in_charlist( "0123456789", true );
+			else {
+				this->p_file_image--;
+			}
 		}
 		s_word = this->get_decimal( s );
 		return s_word;

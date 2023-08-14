@@ -22,6 +22,8 @@ public:
 	std::vector< CASSEMBLER_LINE >		body;
 	std::vector< CASSEMBLER_LINE >		subroutines;
 	std::vector< CASSEMBLER_LINE >		datas;
+	std::vector< CASSEMBLER_LINE >		const_single_area;
+	std::vector< CASSEMBLER_LINE >		const_double_area;
 	std::vector< CASSEMBLER_LINE >		variables_area;
 	std::vector< CASSEMBLER_LINE >		footer;
 
