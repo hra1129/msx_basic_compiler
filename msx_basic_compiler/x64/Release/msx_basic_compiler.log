@@ -1,7 +1,7 @@
-﻿  expression.cpp
+﻿  screen.cpp
   コード生成しています。
-  2 of 1241 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  1 of 1353 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
+    2 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

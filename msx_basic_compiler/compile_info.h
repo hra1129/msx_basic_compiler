@@ -8,6 +8,7 @@
 #include "basic_list.h"
 #include "error_list.h"
 #include "variable_info.h"
+#include "constant_info.h"
 #include "assembler/assembler_list.h"
 
 #ifndef __COMPILE_INFO_H__
@@ -33,6 +34,11 @@ public:
 	//	•Ï”‚ğ•Û
 	// ----------------------------------------------------------------
 	CVARIABLE_INFO		variables;
+
+	// ----------------------------------------------------------------
+	//	’è”‚ğ•Û
+	// ----------------------------------------------------------------
+	CCONSTANT_INFO		constants;
 
 	// ----------------------------------------------------------------
 	//	”­Œ©‚µ‚½‘S‚Ä‚ÌƒGƒ‰[‚ğ•Û

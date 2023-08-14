@@ -64,8 +64,8 @@ private:
 	void optimization( void );
 
 	// ----------------------------------------------------------------
-	CEXPRESSION_NODE *makeup_node_brackets( CCOMPILE_INFO *p_this );					//	( ) 括弧
-	CEXPRESSION_NODE *makeup_node_term( CCOMPILE_INFO *p_this );						//	関数, FN関数
+	//	演算子のノード生成処理
+	CEXPRESSION_NODE *makeup_node_term( CCOMPILE_INFO *p_this );						//	関数, FN関数, ( ) 括弧
 	CEXPRESSION_NODE *makeup_node_operator_power( CCOMPILE_INFO *p_this );				//	^ 累乗
 	CEXPRESSION_NODE *makeup_node_operator_minus_plus( CCOMPILE_INFO *p_this );			//	- + 符号
 	CEXPRESSION_NODE *makeup_node_operator_mul_div( CCOMPILE_INFO *p_this );			//	* / 乗算、除算
@@ -79,6 +79,11 @@ private:
 	CEXPRESSION_NODE *makeup_node_operator_xor( CCOMPILE_INFO *p_this );				//	XOR 排他的論理和
 	CEXPRESSION_NODE *makeup_node_operator_imp( CCOMPILE_INFO *p_this );				//	IMP 包含
 	CEXPRESSION_NODE *makeup_node_operator_eqv( CCOMPILE_INFO *p_this );				//	EQV 同値
+
+	// ----------------------------------------------------------------
+	//	コンパイル時の型変換処理
+	void convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
+
 public:
 	// ----------------------------------------------------------------
 	//	コンストラクタ

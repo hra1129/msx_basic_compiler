@@ -32,6 +32,62 @@ void CEXPRESSION::optimization( void ) {
 }
 
 // --------------------------------------------------------------------
+void CEXPRESSION::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current ) {
+	CASSEMBLER_LINE asm_line;
+
+	p_this->assembler_list.add_label( "bios_vmovfm", "0x02f08" );
+	p_this->assembler_list.add_label( "work_valtyp", "0x0f663" );
+	p_this->assembler_list.add_label( "work_dac", "0x0f7f6" );
+	p_this->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
+
+	if( target == CEXPRESSION_TYPE::INTEGER ) {
+		p_this->assembler_list.add_label( "bios_frcint", "0x02f8a" );
+
+		asm_line.type = CMNEMONIC_TYPE::LD;
+		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
+		asm_line.operand1.s_value = "A";
+		asm_line.operand2.type = COPERAND_TYPE::CONSTANT;
+		if( current == CEXPRESSION_TYPE::SINGLE_REAL ) {
+			asm_line.operand2.s_value = "4";
+		}
+		else {
+			asm_line.operand2.s_value = "8";
+		}
+		p_this->assembler_list.body.push_back( asm_line );
+
+		asm_line.type = CMNEMONIC_TYPE::LD;
+		asm_line.operand1.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand1.s_value = "[work_valtyp]";
+		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.operand2.s_value = "A";
+		p_this->assembler_list.body.push_back( asm_line );
+
+		asm_line.type = CMNEMONIC_TYPE::CALL;
+		asm_line.operand1.type = COPERAND_TYPE::LABEL;
+		asm_line.operand1.s_value = "bios_vmovfm";
+		asm_line.operand2.type = COPERAND_TYPE::NONE;
+		asm_line.operand2.s_value = "";
+		p_this->assembler_list.body.push_back( asm_line );
+
+		asm_line.type = CMNEMONIC_TYPE::CALL;
+		asm_line.operand1.type = COPERAND_TYPE::LABEL;
+		asm_line.operand1.s_value = "bios_frcint";
+		asm_line.operand2.type = COPERAND_TYPE::NONE;
+		asm_line.operand2.s_value = "";
+		p_this->assembler_list.body.push_back( asm_line );
+
+		asm_line.type = CMNEMONIC_TYPE::LD;
+		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
+		asm_line.operand1.s_value = "HL";
+		asm_line.operand2.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand2.s_value = "[work_dac_int]";
+		p_this->assembler_list.body.push_back( asm_line );
+	}
+	else {
+	}
+}
+
+// --------------------------------------------------------------------
 CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	CEXPRESSION_NODE *p_result;
 	std::string s_operator;
@@ -591,10 +647,21 @@ bool CEXPRESSION::compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target ) {
 	}
 	this->p_top_node->compile( p_this );
 	if( this->p_top_node->type == target ) {
+		//	Œ^‚ªˆê’v‚µ‚Ä‚¢‚éê‡‚ÍAŒ^•ÏŠ·•s—v
 		return true;
 	}
 	//	Œ^•ÏŠ·
-	if( target != CEXPRESSION_TYPE::STRING && this->p_top_node->type == CEXPRESSION_TYPE::STRING ) {
+	if( target != CEXPRESSION_TYPE::STRING ) {
+		if( this->p_top_node->type == CEXPRESSION_TYPE::STRING ) {
+			//	”’lŒ^‚ğ—v‹‚µ‚Ä‚¢‚é‚Ì‚É•¶š—ñŒ^‚ªw’è‚³‚ê‚Ä‚¢‚éê‡
+			p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+			return false;
+		}
+		//	”’lŒ^‚Ìê‡
+		this->convert_type( p_this, target, this->p_top_node->type );
+	}
+	else {
+		//	•¶š—ñŒ^‚ğ—v‹‚µ‚Ä‚¢‚é‚Ì‚É”’lŒ^‚ªw’è‚³‚ê‚Ä‚¢‚éê‡
 		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
 		return false;
 	}
