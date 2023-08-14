@@ -32,7 +32,7 @@ void CEXPRESSION::optimization( void ) {
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current ) {
+void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current ) {
 	CASSEMBLER_LINE asm_line;
 
 	p_this->assembler_list.add_label( "bios_vmovfm", "0x02f08" );
@@ -658,7 +658,7 @@ bool CEXPRESSION::compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target ) {
 			return false;
 		}
 		//	数値型の場合
-		this->convert_type( p_this, target, this->p_top_node->type );
+		this->p_top_node->convert_type( p_this, target, this->p_top_node->type );
 	}
 	else {
 		//	文字列型を要求しているのに数値型が指定されている場合
