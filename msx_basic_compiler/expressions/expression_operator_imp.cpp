@@ -28,6 +28,7 @@ void CEXPRESSION_OPERATOR_IMP::compile( CCOMPILE_INFO *p_this ) {
 	}
 	if( this->p_left->type != CEXPRESSION_TYPE::INTEGER ) {
 		//	¶‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
 	asm_line.type = CMNEMONIC_TYPE::PUSH;
@@ -46,7 +47,9 @@ void CEXPRESSION_OPERATOR_IMP::compile( CCOMPILE_INFO *p_this ) {
 	}
 	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
 		//	‰E‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
 	}
+
 	//	‚±‚Ì‰‰ŽZŽq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
 	this->type = CEXPRESSION_TYPE::INTEGER;
 

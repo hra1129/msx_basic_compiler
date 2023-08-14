@@ -11,6 +11,8 @@ work_forclr                     equ 0F3E9h
 work_bakclr                     equ 0F3EAh
 work_bdrclr                     equ 0F3EBh
 bios_chgmod                     equ 0005Fh
+work_rg9sv                      equ 0FFE8h
+bios_wrtvdp                     equ 00047h
         LD          HL, 15
         LD          A, L
         LD          (work_forclr), A
@@ -24,6 +26,18 @@ bios_chgmod                     equ 0005Fh
         LD          HL, 1
         LD          A, L
         CALL        bios_chgmod
+        LD          HL, 3
+        LD          A, L
+        AND         3
+        ADD         A, A
+        ADD         A, A
+        LD          L, A
+        LD          A, (work_rg9sv)
+        AND         0F3h
+        OR          L
+        LD          B, A
+        LD          C, 9
+        CALL        bios_wrtvdp
 program_termination:
         LD          SP, (save_stack)
         RET

@@ -44,6 +44,10 @@ public:
 	}
 
 	// ----------------------------------------------------------------
+	//	コンパイル時の型変換処理
+	void convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
+
+	// ----------------------------------------------------------------
 	//	コンパイル処理
 	virtual void compile( CCOMPILE_INFO *p_this ) = 0;
 
@@ -79,10 +83,6 @@ private:
 	CEXPRESSION_NODE *makeup_node_operator_xor( CCOMPILE_INFO *p_this );				//	XOR 排他的論理和
 	CEXPRESSION_NODE *makeup_node_operator_imp( CCOMPILE_INFO *p_this );				//	IMP 包含
 	CEXPRESSION_NODE *makeup_node_operator_eqv( CCOMPILE_INFO *p_this );				//	EQV 同値
-
-	// ----------------------------------------------------------------
-	//	コンパイル時の型変換処理
-	void convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
 
 public:
 	// ----------------------------------------------------------------

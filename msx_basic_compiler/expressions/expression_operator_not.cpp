@@ -26,12 +26,13 @@ void CEXPRESSION_OPERATOR_NOT::compile( CCOMPILE_INFO *p_this ) {
 		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
 		return;
 	}
+	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
+		//	右側の項が整数型でなければ、整数型に変換する
+		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
+	}
+
 	//	この演算子の結果は必ず整数型
 	this->type = CEXPRESSION_TYPE::INTEGER;
-	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
-		//	右項が整数型でなければ、整数型に変換する
-		//	★T.B.D.
-	}
 	CASSEMBLER_LINE asm_line;
 	asm_line.type = CMNEMONIC_TYPE::LD;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
