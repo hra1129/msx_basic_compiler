@@ -1,0 +1,7 @@
+
+*.obj
+*.tlog
+*.pdb
+*.ipdb
+*.iobj
+.vs
