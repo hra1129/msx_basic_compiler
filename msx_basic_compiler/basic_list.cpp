@@ -8,6 +8,7 @@
 #include "single_real.h"
 #include "double_real.h"
 #include <cstring>
+#include <cmath>
 
 struct CBASIC_RESERVED_WORD {
 	std::vector< unsigned char > code;
@@ -426,14 +427,52 @@ CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s ) {
 	s_word.line_no = this->get_line_no();
 	//	浮動小数点数か否か
 	for( auto c: s ) {
-		if( c == '.' || c == 'E' ) {
+		if( c == '.' || c == 'E' || c == '!' || c == '#' ) {
 			is_real = true;
+			break;
+		}
+		if( c == '%' ) {
+			is_real = false;
 			break;
 		}
 	}
 	if( !is_real ) {
 		//	整数の範囲に収まるか？
-		decimal = std::stoi( s );
+		double d = 0.;
+		double a = .1;
+		auto p = s.begin();
+		int sign = 0;
+		int exp = 0;
+		//	仮数部の整数部
+		while( p != s.end() && isdigit( *p & 255 ) ) {
+			d = d * 10. + (*p - '0');
+			p++;
+		}
+		if( p != s.end() && *p == '.' ) {
+			//	仮数部の小数部
+			p++;
+			while( p != s.end() && isdigit( *p & 255 ) ) {
+				d = d + (*p - '0') * a;
+				a = a / 10.;
+				p++;
+			}
+		}
+		if( p != s.end() && *p == 'E' ) {
+			//	指数部
+			p++;
+			if( p != s.end() && *p == '-' ) {
+				sign = -1;
+			}
+			else {
+				sign = 1;
+			}
+			while( p != s.end() && isdigit( *p & 255 ) ) {
+				exp = exp * 10 + (*p - '0');
+				p++;
+			}
+			d = d * pow( 10., sign * exp );
+		}
+		decimal = int( d );
 		if( s.size() < 5 || (s.size() == 5 && decimal < 32768) ) {
 			//	整数確定
 			s_word.s_word = std::to_string( decimal );
@@ -515,7 +554,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 			return s_word;
 		}
 	}
-	if( isdigit( this->p_file_image[0] & 255 ) ) {
+	if( isdigit( this->p_file_image[0] & 255 ) || this->p_file_image[0] == '.' ) {
 		//	10進数の値だった場合、整数・単精度実数・倍精度実数のどれか
 		s = this->get_word_in_charlist( "0123456789", true );
 		s = s + this->get_char_in_charlist( ".", true );
@@ -526,6 +565,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 				s = s + "E";
 				if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == '+' || this->p_file_image[0] == '-') ) {
 					s = s + (char)this->p_file_image[0];
+					this->p_file_image++;
 				}
 				s = s + this->get_word_in_charlist( "0123456789", true );
 			}
@@ -533,6 +573,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 				this->p_file_image--;
 			}
 		}
+		s = s + this->get_char_in_charlist( "!#%", true );
 		s_word = this->get_decimal( s );
 		return s_word;
 	}

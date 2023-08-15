@@ -39,6 +39,7 @@ bool CDOUBLE_REAL::set( std::string s ) {
 			if( !is_zero ) {
 				if( mi < MANTISSA_MAX ) {
 					mantissa[mi] = s[i] - '0';
+					mi++;
 				}
 				if( !has_dot ) {
 					exponent_offset++;
@@ -51,6 +52,7 @@ bool CDOUBLE_REAL::set( std::string s ) {
 				return false;
 			}
 			has_dot = true;
+			is_zero = false;
 		}
 		else {
 			break;
@@ -61,7 +63,7 @@ bool CDOUBLE_REAL::set( std::string s ) {
 	exponent = 0;
 	if( i < s.size() && (toupper( s[i] & 255 ) == 'E' || toupper( s[i] & 255 ) == 'D') ) {
 		i++;
-		exponent_sign = 0;
+		exponent_sign = 1;
 		if( i < s.size() ) {
 			if( s[i] == '+' ) {
 				exponent_sign = 1;

@@ -111,7 +111,7 @@ std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_t
 	if( s[0] == '0' && s[1] == 'x' ) {
 		int value = 0;
 		char s_value[32];
-		sscanf_s( this->operand2.s_value.c_str(), "%i", &value );
+		sscanf_s( s.c_str(), "%i", &value );
 		sprintf_s( s_value, "0%Xh", value );
 		s = s_value;
 	}

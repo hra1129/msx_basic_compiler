@@ -31,12 +31,7 @@ void CEXPRESSION_OPERATOR_EQV::compile( CCOMPILE_INFO *p_this ) {
 		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
-	asm_line.type = CMNEMONIC_TYPE::PUSH;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "HL";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_this->assembler_list.push_hl( CEXPRESSION_TYPE::INTEGER );
 
 	this->p_right->compile( p_this );
 

@@ -11,15 +11,6 @@
 #define __EXPRESSION_H__
 
 // --------------------------------------------------------------------
-enum class CEXPRESSION_TYPE: int {
-	UNKNOWN = 0,
-	INTEGER = 1,
-	SINGLE_REAL = 2,
-	DOUBLE_REAL = 3,
-	STRING = 4,
-};
-
-// --------------------------------------------------------------------
 class CEXPRESSION_NODE {
 public:
 	// --------------------------------------------------------------------
@@ -46,6 +37,10 @@ public:
 	// ----------------------------------------------------------------
 	//	コンパイル時の型変換処理
 	void convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
+
+	// ----------------------------------------------------------------
+	//	演算子のオペランドの型揃え(2項演算子用)
+	void type_adjust_2op( CCOMPILE_INFO *p_this, CEXPRESSION_NODE *p_left, CEXPRESSION_NODE *p_right );
 
 	// ----------------------------------------------------------------
 	//	コンパイル処理
