@@ -83,6 +83,16 @@ std::map< CCONDITION, std::string > condition_list = {
 };
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 ) {
+	this->type = t;
+	this->condition = cond;
+	this->operand1.type = o1t;
+	this->operand1.s_value = s_o1;
+	this->operand2.type = o2t;
+	this->operand2.s_value = s_o2;
+}
+
+// --------------------------------------------------------------------
 std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_type ) {
 
 	if( out_type == COUTPUT_TYPES::ZMA ) {
@@ -147,6 +157,10 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 			}
 		}
 		return true;
+	}
+
+	if( this->type == CMNEMONIC_TYPE::DEFB ) {
+		int i = 0;
 	}
 
 	CCOMMAND_TYPE command_type = command_list[ this->type ];
