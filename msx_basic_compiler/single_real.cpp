@@ -5,7 +5,6 @@
 // --------------------------------------------------------------------
 
 #include "single_real.h"
-#include <cctype>
 
 //	単精度実数の有効桁数 6, 四捨五入のための 1桁
 constexpr int MANTISSA_MAX = 6 + 1;
@@ -40,6 +39,7 @@ bool CSINGLE_REAL::set( std::string s ) {
 			if( !is_zero ) {
 				if( mi < MANTISSA_MAX ) {
 					mantissa[mi] = s[i] - '0';
+					mi++;
 				}
 				if( !has_dot ) {
 					exponent_offset++;
@@ -52,6 +52,7 @@ bool CSINGLE_REAL::set( std::string s ) {
 				return false;
 			}
 			has_dot = true;
+			is_zero = false;
 		}
 		else {
 			break;
@@ -62,7 +63,7 @@ bool CSINGLE_REAL::set( std::string s ) {
 	exponent = 0;
 	if( i < s.size() && (toupper( s[i] & 255 ) == 'E' || toupper( s[i] & 255 ) == 'D') ) {
 		i++;
-		exponent_sign = 0;
+		exponent_sign = 1;
 		if( i < s.size() ) {
 			if( s[i] == '+' ) {
 				exponent_sign = 1;

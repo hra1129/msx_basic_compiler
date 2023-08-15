@@ -8,6 +8,15 @@
 #define __BASIC_TYPES_H__
 
 // --------------------------------------------------------------------
+enum class CEXPRESSION_TYPE: int {
+	UNKNOWN = 0,
+	INTEGER = 1,
+	SINGLE_REAL = 2,
+	DOUBLE_REAL = 3,
+	STRING = 4,
+};
+
+// --------------------------------------------------------------------
 enum class CBASIC_WORD_TYPE {
 	UNKNOWN,					//	0:–¢’m
 	UNKNOWN_NAME,			//	1:‰½‚©‚Ì–¼‘O
