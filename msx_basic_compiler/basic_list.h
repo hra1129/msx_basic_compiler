@@ -1,4 +1,3 @@
-#pragma once
 // --------------------------------------------------------------------
 //	MSX-BASIC code loader
 // ====================================================================
@@ -10,6 +9,9 @@
 #include <cstdio>
 #include "basic_types.h"
 #include "error_list.h"
+
+#ifndef __BASIC_LIST_H__
+#define __BASIC_LIST_H__
 
 // --------------------------------------------------------------------
 //	BASIC‚Ì’PŒê‚ðŽ¦‚·
@@ -86,3 +88,5 @@ public:
 
 	void skip_statement( void );
 };
+
+#endif

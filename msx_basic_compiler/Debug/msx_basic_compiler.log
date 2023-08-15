@@ -1,8 +1,27 @@
-﻿  color.cpp
+﻿  assembler_line.cpp
+  assembler_list.cpp
+  basic_list.cpp
+  cls.cpp
+  color.cpp
+  comment.cpp
+  defdbl.cpp
+  defint.cpp
+  defsng.cpp
+  defstr.cpp
+  end.cpp
+  gosub.cpp
+  goto.cpp
+  let.cpp
   out.cpp
   poke.cpp
+  return.cpp
   screen.cpp
   sound.cpp
+  compiler.cpp
+  コードを生成中...
+  コンパイル中...
+  double_real.cpp
+  error_list.cpp
   expression.cpp
   expression_function.cpp
   expression_operator_add.cpp
@@ -18,15 +37,18 @@
   expression_operator_lt.cpp
   expression_operator_minus.cpp
   expression_operator_mod.cpp
-  コードを生成中...
-  コンパイル中...
   expression_operator_mul.cpp
   expression_operator_neq.cpp
   expression_operator_not.cpp
+  コードを生成中...
+  コンパイル中...
   expression_operator_or.cpp
   expression_operator_power.cpp
   expression_operator_sub.cpp
   expression_operator_xor.cpp
   expression_term.cpp
+  msx_basic_compiler.cpp
+  single_real.cpp
+  variable_manager.cpp
   コードを生成中...
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

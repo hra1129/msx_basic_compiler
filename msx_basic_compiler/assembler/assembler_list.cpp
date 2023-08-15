@@ -8,11 +8,12 @@
 #include <cstdio>
 
 // --------------------------------------------------------------------
-bool CASSEMBLER_LIST::save_sub( FILE *p_file, const std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
+bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
 	bool b_result = true;
+	std::vector< CASSEMBLER_LINE >::iterator p;
 
-	for( auto p: *p_list ) {
-		b_result = p.save( p_file, output_type ) && b_result;
+	for( p = p_list->begin(); p != p_list->end(); p++ ) {
+		b_result = p->save( p_file, output_type ) && b_result;
 	}
 	return b_result;
 }
