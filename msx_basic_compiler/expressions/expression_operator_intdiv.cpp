@@ -31,12 +31,7 @@ void CEXPRESSION_OPERATOR_INTDIV::compile( CCOMPILE_INFO *p_this ) {
 		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
-	asm_line.type = CMNEMONIC_TYPE::PUSH;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "HL";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_this->assembler_list.push_hl( CEXPRESSION_TYPE::INTEGER );
 
 	this->p_right->compile( p_this );
 
@@ -55,17 +50,8 @@ void CEXPRESSION_OPERATOR_INTDIV::compile( CCOMPILE_INFO *p_this ) {
 	p_this->assembler_list.add_label( "bios_idiv", "0x031e6" );
 
 	//	‚±‚Ì‰‰Zq‚ª®”‚Ìê‡
-	asm_line.type = CMNEMONIC_TYPE::POP;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "DE";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::CALL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "bios_idiv";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_idiv", COPERAND_TYPE::NONE, "" );
 	p_this->assembler_list.body.push_back( asm_line );
 }

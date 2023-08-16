@@ -24,21 +24,24 @@ void CEXPRESSION_OPERATOR_DIV::compile( CCOMPILE_INFO *p_this ) {
 	this->p_right->compile( p_this );
 
 	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
-	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
-		//	‚±‚Ì‰‰Zq‚Í•¶š—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
-		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
-		return;
+	this->type_adjust_2op( p_this, this->p_left, this->p_right );
+	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
+		//	®”‚Ìê‡
+		p_this->assembler_list.add_label( "bios_idiv", "0x031e6" );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_idiv", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
 	}
-	else if( this->p_left->type == this->p_right->type ) {
-		//	¶‰E‚Ì€‚ª“¯‚¶Œ^‚È‚çA‚»‚ÌŒ^‚ğŒp³
-		this->type = this->p_left->type;
-	}
-	else if( this->p_left->type > this->p_right->type ) {
-		//	¶‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å¶‚ğÌ—p
-		this->type = this->p_left->type;
+	else if( this->type == CEXPRESSION_TYPE::STRING ) {
 	}
 	else {
-		//	‰E‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å‰E‚ğÌ—p
-		this->type = this->p_right->type;
+		//	À”‚Ìê‡
+		p_this->assembler_list.add_label( "bios_decdiv", "0x0289f" );
+		p_this->assembler_list.add_label( "work_dac", "0x0f7f6" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_decdiv", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "work_dac" );
+		p_this->assembler_list.body.push_back( asm_line );
 	}
 }

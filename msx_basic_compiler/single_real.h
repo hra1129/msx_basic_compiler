@@ -11,7 +11,7 @@
 
 class CSINGLE_REAL {
 public:
-	unsigned char image[ 4 ];
+	unsigned char image[ 4 ] = {};
 
 	bool set( std::string s );
 };

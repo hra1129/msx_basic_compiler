@@ -7,8 +7,8 @@
 #include <vector>
 #include "expression.h"
 
-#ifndef __EXPRESSION_OPERATOR_TERM_H__
-#define __CEXPRESSION_OPERATOR_TERM_H__
+#ifndef __EXPRESSION_TERM_H__
+#define __CEXPRESSION_TERM_H__
 
 // --------------------------------------------------------------------
 //	ä÷êîåƒÇ—èoÇµ

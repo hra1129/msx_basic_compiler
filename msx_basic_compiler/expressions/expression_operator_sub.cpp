@@ -37,6 +37,8 @@ void CEXPRESSION_OPERATOR_SUB::compile( CCOMPILE_INFO *p_this ) {
 		p_this->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
+		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		return;
 	}
 	else {
 		//	À”‚Ìê‡

@@ -48,52 +48,18 @@ void CEXPRESSION_OPERATOR_XOR::compile( CCOMPILE_INFO *p_this ) {
 	//	‚±‚Ì‰‰Zq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
 	this->type = CEXPRESSION_TYPE::INTEGER;
 
-	asm_line.type = CMNEMONIC_TYPE::POP;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "DE";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "A";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "L";
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::XOR;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "A";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "E";
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "E" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "L";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "A";
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "A";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "H";
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "H" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::XOR;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "A";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "D";
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "D" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "H";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "A";
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );
 	p_this->assembler_list.body.push_back( asm_line );
 }
