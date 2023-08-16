@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include "expression_term.h"
-#include "../single_real.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION_TERM::optimization( void ) {
@@ -42,6 +41,15 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_this ) {
 		p_this->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
-		//	šT.B.D.
+		CSTRING value;
+		std::string s_label;
+		value.set( this->s_value );
+
+		//	š•¶Žš—ñ’è”‚Ìƒ‰ƒxƒ‹‚ðì‚é
+
+		p_this->constants.add( value, s_label );
+
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
+		p_this->assembler_list.body.push_back( asm_line );
 	}
 }

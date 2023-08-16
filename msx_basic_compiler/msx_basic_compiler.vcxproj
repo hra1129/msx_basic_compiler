@@ -193,8 +193,10 @@
     <ClCompile Include="expressions\expression_operator_sub.cpp" />
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
+    <ClCompile Include="expressions\expression_time.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
     <ClCompile Include="single_real.cpp" />
+    <ClCompile Include="string_value.cpp" />
     <ClCompile Include="variable_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -247,7 +249,9 @@
     <ClInclude Include="expressions\expression_operator_sub.h" />
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_term.h" />
+    <ClInclude Include="expressions\expression_time.h" />
     <ClInclude Include="single_real.h" />
+    <ClInclude Include="string_value.h" />
     <ClInclude Include="variable_info.h" />
     <ClInclude Include="variable_manager.h" />
   </ItemGroup>
