@@ -8,7 +8,7 @@
 #include "expression.h"
 
 #ifndef __EXPRESSION_CSRLIN_H__
-#define __CEXPRESSION_CSRLIN_H__
+#define __EXPRESSION_CSRLIN_H__
 
 // --------------------------------------------------------------------
 //	ä÷êîåƒÇ—èoÇµ

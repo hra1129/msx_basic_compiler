@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "single_real.h"
 #include "double_real.h"
+#include "string_value.h"
 #include "assembler/assembler_list.h"
 
 #ifndef __CONSTANT_INFO_H__
@@ -27,12 +28,12 @@ enum class CCONSTANT_TYPE {
 class CCONSTANT {
 public:
 	CCONSTANT_TYPE	type;
-	std::string		s_name;
+	std::string		s_label;
 	int				i_value;
 	char			r_value[8] = {};
-	std::string		s_value;
+	CSTRING			s_value;
 
-	CCONSTANT(): type( CCONSTANT_TYPE::DOUBLE_REAL ), s_name(""), i_value(0), s_value("") {
+	CCONSTANT(): type( CCONSTANT_TYPE::DOUBLE_REAL ), s_label(""), i_value(0), s_value() {
 	}
 
 	std::string set_real( const unsigned char *p_image, CCONSTANT_TYPE type ) {
@@ -52,7 +53,13 @@ public:
 			s_label = s_label + s_name;
 		}
 		this->type = type;
+		this->s_label = s_label;
 		return s_label;
+	}
+
+	void set_string( std::string s_label, CSTRING s_image ) {
+		this->s_label = s_label;
+		this->s_value = s_image;
 	}
 };
 
@@ -60,8 +67,11 @@ public:
 class CCONSTANT_INFO {
 public:
 
-	//	使用されている定数のリスト
+	//	定義済みの数値定数のリスト
 	std::map< std::string, CCONSTANT > dictionary;
+
+	//	定義済みの文字列定数のリスト
+	std::map< std::string, CCONSTANT > string_list;
 
 	std::string add( const CSINGLE_REAL &value ) {
 		CCONSTANT r_value;
@@ -83,6 +93,12 @@ public:
 			dictionary[ s_label ] = r_value;
 		}
 		return s_label;
+	}
+
+	void add( const CSTRING &value, std::string s_label ) {
+		CCONSTANT r_value;
+
+		r_value.set_string( s_label, value );
 	}
 
 	void dump( CASSEMBLER_LIST &asm_list, COPTIONS options ) {

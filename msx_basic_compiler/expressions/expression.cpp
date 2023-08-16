@@ -27,6 +27,7 @@
 #include "expression_function.h"
 #include "expression_term.h"
 #include "expression_csrlin.h"
+#include "expression_time.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -209,6 +210,12 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	}
 	else if( s_operator == "CSRLIN" ) {
 		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "TIME" ) {
+		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
 		p_result = p_term;
 		p_this->list.p_position++;
 		return p_result;
