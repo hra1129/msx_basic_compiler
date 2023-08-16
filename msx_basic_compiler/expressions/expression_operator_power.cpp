@@ -20,14 +20,7 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_this ) {
 
 	//	æ‚É€‚ğˆ—
 	this->p_left->compile( p_this );
-
-	asm_line.type = CMNEMONIC_TYPE::PUSH;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "HL";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
-	p_this->assembler_list.body.push_back( asm_line );
-
+	p_this->assembler_list.push_hl( this->p_left->type );
 	this->p_right->compile( p_this );
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
@@ -36,44 +29,27 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_this ) {
 		return;
 	}
 	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ÍA•K‚¸”{¸“x
-	this->type = CEXPRESSION_TYPE::DOUBLE_REAL;
-	if( this->p_left->type == this->p_right->type ) {
-		if( this->p_left->type == CEXPRESSION_TYPE::INTEGER ) {
-			//	®”Œ^‚Ìê‡
-			p_this->assembler_list.add_label( "bios_intexp", "0x0383f" );
+	this->type_adjust_2op( p_this, this->p_left, this->p_right );
 
-			asm_line.type = CMNEMONIC_TYPE::POP;
-			asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-			asm_line.operand1.s_value = "DE";
-			asm_line.operand2.type = COPERAND_TYPE::NONE;
-			asm_line.operand2.s_value = "";
-			p_this->assembler_list.body.push_back( asm_line );
+	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
+		//	®”Œ^‚Ìê‡
+		p_this->assembler_list.add_label( "bios_intexp", "0x0383f" );
 
-			asm_line.type = CMNEMONIC_TYPE::EX;
-			asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-			asm_line.operand1.s_value = "DE";
-			asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-			asm_line.operand2.s_value = "HL";
-			p_this->assembler_list.body.push_back( asm_line );
-
-			asm_line.type = CMNEMONIC_TYPE::CALL;
-			asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-			asm_line.operand1.s_value = "bios_intexp";
-			asm_line.operand2.type = COPERAND_TYPE::NONE;
-			asm_line.operand2.s_value = "";
-			p_this->assembler_list.body.push_back( asm_line );
-		}
-		else if( this->p_left->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
-		}
-		else {
-		}
-	}
-	else if( this->p_left->type > this->p_right->type ) {
-		//	¶‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å¶‚ğÌ—p
-		this->type = this->p_left->type;
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_intexp", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	‰E‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å‰E‚ğÌ—p
-		this->type = this->p_right->type;
+		//	À”‚Ìê‡A”{¸“x‚É¸Ši
+		p_this->assembler_list.add_label( "bios_dblexp", "0x037d7" );
+		p_this->assembler_list.add_label( "work_dac", "0x0f7f6" );
+
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_dblexp", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
+		p_this->assembler_list.body.push_back( asm_line );
 	}
 }

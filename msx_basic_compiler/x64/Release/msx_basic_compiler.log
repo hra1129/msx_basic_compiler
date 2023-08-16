@@ -1,51 +1,7 @@
-﻿  assembler_list.cpp
-  cls.cpp
-  color.cpp
-  comment.cpp
-  defdbl.cpp
-  defint.cpp
-  defsng.cpp
-  defstr.cpp
-  end.cpp
-  gosub.cpp
-  goto.cpp
-  let.cpp
-  out.cpp
-  poke.cpp
-  return.cpp
-  screen.cpp
-  sound.cpp
-  compiler.cpp
-  expression.cpp
-  expression_function.cpp
-  コンパイル中...
-  expression_operator_add.cpp
-  expression_operator_and.cpp
-  expression_operator_div.cpp
-  expression_operator_equ.cpp
-  expression_operator_eqv.cpp
-  expression_operator_ge.cpp
-  expression_operator_gt.cpp
-  expression_operator_imp.cpp
-  expression_operator_intdiv.cpp
-  expression_operator_le.cpp
-  expression_operator_lt.cpp
-  expression_operator_minus.cpp
-  expression_operator_mod.cpp
-  expression_operator_mul.cpp
-  expression_operator_neq.cpp
-  expression_operator_not.cpp
-  expression_operator_or.cpp
-  expression_operator_power.cpp
-  expression_operator_sub.cpp
-  expression_operator_xor.cpp
-  コンパイル中...
-  expression_term.cpp
-  msx_basic_compiler.cpp
-  variable_manager.cpp
+﻿  expression.cpp
   コード生成しています。
-  3 of 1382 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    2 functions were new in current compilation
-    48 functions had inline decision re-evaluated but remain unchanged
+  2 of 1390 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    9 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

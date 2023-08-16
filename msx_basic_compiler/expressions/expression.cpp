@@ -26,6 +26,7 @@
 #include "expression_operator_power.h"
 #include "expression_function.h"
 #include "expression_term.h"
+#include "expression_csrlin.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -146,6 +147,9 @@ void CEXPRESSION_NODE::type_adjust_2op( CCOMPILE_INFO *p_this, CEXPRESSION_NODE 
 void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( target == current ) {
+		return;
+	}
 	p_this->assembler_list.add_label( "work_dac", "0x0f7f6" );
 	p_this->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
 
@@ -200,6 +204,12 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
 			return p_result;
 		}
+		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "CSRLIN" ) {
+		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
+		p_result = p_term;
 		p_this->list.p_position++;
 		return p_result;
 	}

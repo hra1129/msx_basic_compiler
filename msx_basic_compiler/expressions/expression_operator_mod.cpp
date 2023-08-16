@@ -50,17 +50,8 @@ void CEXPRESSION_OPERATOR_MOD::compile( CCOMPILE_INFO *p_this ) {
 	p_this->assembler_list.add_label( "bios_imod", "0x0323a" );
 
 	//	‚±‚Ì‰‰Zq‚ª®”‚Ìê‡
-	asm_line.type = CMNEMONIC_TYPE::POP;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "DE";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 	p_this->assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::CALL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "bios_imod";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_imod", COPERAND_TYPE::NONE, "" );
 	p_this->assembler_list.body.push_back( asm_line );
 }

@@ -11,7 +11,7 @@
 
 class CDOUBLE_REAL {
 public:
-	unsigned char image[ 8 ];
+	unsigned char image[ 8 ] = {};
 
 	bool set( std::string s );
 };
