@@ -27,6 +27,7 @@
 #include "expression_function.h"
 #include "expression_term.h"
 #include "expression_csrlin.h"
+#include "expression_str.h"
 #include "expression_time.h"
 
 // --------------------------------------------------------------------
@@ -211,6 +212,18 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	else if( s_operator == "CSRLIN" ) {
 		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
 		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "STR$" ) {
+		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
+		p_result = p_term;
+		p_this->list.p_position++;
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( p_this->list.is_command_end() || p_this->list.p_position->s_word != ")" ) {
+			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+			return p_result;
+		}
 		p_this->list.p_position++;
 		return p_result;
 	}

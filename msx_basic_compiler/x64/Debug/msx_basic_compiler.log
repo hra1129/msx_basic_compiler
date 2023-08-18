@@ -1,2 +1,22 @@
-﻿  basic_list.cpp
-  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe
+﻿  assembler_list.cpp
+  cls.cpp
+  color.cpp
+  comment.cpp
+  defdbl.cpp
+  defint.cpp
+  defsng.cpp
+  defstr.cpp
+  end.cpp
+  gosub.cpp
+  goto.cpp
+  let.cpp
+  out.cpp
+  poke.cpp
+  print.cpp
+  return.cpp
+  run.cpp
+  screen.cpp
+  sound.cpp
+  expression.cpp
+  コードを生成中...
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\sound.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb

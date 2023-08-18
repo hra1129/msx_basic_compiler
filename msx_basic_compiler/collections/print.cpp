@@ -79,13 +79,39 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			switch( exp.get_type() ) {
 			default:
 			case CEXPRESSION_TYPE::INTEGER:
-				//	šT.B.D.
+				p_info->assembler_list.activate_str();
+				p_info->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
+				p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac_int]", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:
-				//	šT.B.D.
+				p_info->assembler_list.activate_str();
+				p_info->assembler_list.activate_ld_dac_single_real();
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_single_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:
-				//	šT.B.D.
+				p_info->assembler_list.activate_str();
+				p_info->assembler_list.activate_ld_dac_double_real();
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_double_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::STRING:
 				p_info->assembler_list.activate_puts();
@@ -100,6 +126,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			}
+			has_semicolon = false;
 		}
 		else {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
