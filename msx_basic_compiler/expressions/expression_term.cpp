@@ -42,12 +42,8 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_this ) {
 	}
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
 		CSTRING value;
-		std::string s_label;
 		value.set( this->s_value );
-
-		//	š•¶š—ñ’è”‚Ìƒ‰ƒxƒ‹‚ğì‚é
-
-		p_this->constants.add( value, s_label );
+		std::string s_label = p_this->constants.add( value );
 
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
 		p_this->assembler_list.body.push_back( asm_line );

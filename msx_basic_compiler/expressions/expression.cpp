@@ -760,8 +760,8 @@ bool CEXPRESSION::compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target ) {
 		return false;
 	}
 	this->p_top_node->compile( p_this );
-	if( this->p_top_node->type == target ) {
-		//	型が一致している場合は、型変換不要
+	if( target == this->p_top_node->type || target == CEXPRESSION_TYPE::UNKNOWN ) {
+		//	型が一致している場合と、変換無しが指定されている場合は、型変換不要
 		return true;
 	}
 	//	型変換

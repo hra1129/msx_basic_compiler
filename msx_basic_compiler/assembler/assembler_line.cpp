@@ -68,6 +68,7 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::ORG,		  { 1, "ORG" } },
 	{ CMNEMONIC_TYPE::DEFB,		  { 1, "DEFB" } },
 	{ CMNEMONIC_TYPE::DEFW,		  { 1, "DEFW" } },
+	{ CMNEMONIC_TYPE::RST,        { 1, "RST" } },
 };
 
 std::map< CCONDITION, std::string > condition_list = {
@@ -140,6 +141,10 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 
 	if( this->type == CMNEMONIC_TYPE::LABEL ) {
 		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
+		return true;
+	}
+	if( this->type == CMNEMONIC_TYPE::COMMENT ) {
+		fprintf( p_file, "; %s\n", this->operand1.s_value.c_str() );
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::CONSTANT ) {

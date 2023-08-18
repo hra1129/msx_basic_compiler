@@ -1,72 +1,74 @@
-        DEFB        0xFE
+; ------------------------------------------------------------------------
+; Compiled by MSX-BACON from test.asc
+; ------------------------------------------------------------------------
+; 
+bios_chgmod                     = 0x0005F
+; BSAVE header -----------------------------------------------------------
+        DEFB        0xfe
         DEFW        start_address
         DEFW        end_address
         DEFW        start_address
         ORG         0x8010
 start_address:
         LD          [save_stack], SP
+        LD          DE, program_start
+        JP          program_run
 program_start:
-work_dac                        = 0x0f7f6
-work_arg                        = 0x0f847
-bios_xdcomp                     = 0x02f5c
-work_dac_int                    = 0x0f7f8
-work_valtyp                     = 0x0f663
-bios_frcint                     = 0x02f8a
-bios_chgmod                     = 0x0005F
-        LD          HL, const_42100000
-        CALL        push_single_real_hl
-        LD          HL, const_43100000
-        LD          DE, work_dac
-        LD          BC, 4
-        LDIR
-        CALL        pop_single_real_arg
-        LD          [work_dac+4], HL
-        LD          [work_dac+6], HL
-        CALL        bios_xdcomp
-        AND         A, 1
-        DEC         A
-        LD          H, A
-        LD          L, A
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_frcint
-        LD          HL, [work_dac_int]
+        LD          HL, 1
         LD          A, L
         CALL        bios_chgmod
+line_110:
+        LD          HL, str_0
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        JP          line_110
 program_termination:
         LD          SP, [save_stack]
         RET
-push_single_real_hl:
-        POP         BC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
+program_run:
+        LD          HL, heap_start
+        LD          [heap_next], HL
+        LD          HL, [save_stack]
+        LD          SP, HL
         PUSH        DE
-        LD          E, [HL]
+        LD          DE, 256
+        XOR         A, A
+        SBC         HL, DE
+        LD          [heap_end], HL
+        RET
+puts:
+        LD          B, [HL]
+_puts_loop:
         INC         HL
-        LD          D, [HL]
-        PUSH        DE
-        PUSH        BC
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
         RET
-pop_single_real_arg:
-        POP         BC
+free_string:
+        PUSH        HL
+        LD          E, [HL]
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        INC         DE
+        SBC         HL, DE
         POP         HL
-        LD          [work_arg+2], HL
-        POP         HL
-        LD          [work_arg+0], HL
-        LD          HL, 0
-        LD          [work_arg+4], HL
-        LD          [work_arg+6], HL
-        PUSH        BC
         RET
-const_42100000:
-        DEFB        0x42, 0x10, 0x00, 0x00
-const_43100000:
-        DEFB        0x43, 0x10, 0x00, 0x00
+        LD          [heap_next], HL
+        RET
+str_0:
+        DEFB        0x04, 0x4D, 0x4F, 0x4A, 0x49
+str_1:
+        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
+heap_next:
+        DEFW        0
+heap_end:
+        DEFW        0
+heap_start:
 end_address:

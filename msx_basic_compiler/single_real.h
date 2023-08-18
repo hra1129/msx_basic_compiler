@@ -11,6 +11,8 @@
 
 class CSINGLE_REAL {
 public:
+	int reference_count = 0;
+
 	unsigned char image[ 4 ] = {};
 
 	bool set( std::string s );

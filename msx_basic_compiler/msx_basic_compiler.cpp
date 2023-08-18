@@ -24,6 +24,8 @@ static void usage( const char *p_name ) {
 	fprintf( stderr, "    -msx2 .... MSX2\n");
 	fprintf( stderr, "    -msx2p ... MSX2+\n");
 	fprintf( stderr, "    -msxtr ... MSXturboR\n");
+	fprintf( stderr, "  Stack size.\n" );
+	fprintf( stderr, "    -stack n . call stack size.\n" );
 }
 
 // --------------------------------------------------------------------
@@ -54,6 +56,16 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 			else if( s == "-msxtr" ) {
 				this->target_type = CTARGET_TYPES::MSXTR;
 			}
+			else if( s == "-stack" && (i + 1) != argc ) {
+				this->stack_size = atoi( argv[i + 1] );
+				if( this->stack_size < 0 ) {
+					this->stack_size = 0;
+				}
+				else if( this->stack_size > 16384 ) {
+					this->stack_size = 16384;
+				}
+				this->stack_size &= ~1;
+			}
 			else {
 				fprintf( stderr, "ERROR: Unknown option '%s'.\n", s.c_str() );
 				exit(1);
@@ -77,6 +89,30 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 		usage( argv[0] );
 		exit(1);
 	}
+	switch( this->output_type ) {
+	default:
+	case COUTPUT_TYPES::ZMA:
+		printf( "  Output type: ZMA\n" );
+		break;
+	case COUTPUT_TYPES::M80:
+		printf( "  Output type: M80\n" );
+		break;
+	}
+	switch( this->target_type ) {
+	case CTARGET_TYPES::MSX1:
+		printf( "  Output type: MSX1\n" );
+		break;
+	case CTARGET_TYPES::MSX2:
+		printf( "  Output type: MSX2\n" );
+		break;
+	case CTARGET_TYPES::MSX2P:
+		printf( "  Output type: MSX2+\n" );
+		break;
+	case CTARGET_TYPES::MSXTR:
+		printf( "  Output type: MSXturboR\n" );
+		break;
+	}
+	printf( "  Stack size : %d", this->stack_size );
 	return result;
 }
 
@@ -100,7 +136,7 @@ int main( int argc, char *argv[] ) {
 	printf( "\n" );
 	printf( "Target: %s (%s).\n", compiler.info.options.s_input_name.c_str(), compiler.info.list.s_source_type.c_str() );
 
-	compiler.exec();
+	compiler.exec( compiler.info.options.s_input_name );
 	compiler.info.errors.print();
 	if( compiler.info.errors.list.size() ) {
 		printf( "Found %d error(s).\n", (int)compiler.info.errors.list.size() );

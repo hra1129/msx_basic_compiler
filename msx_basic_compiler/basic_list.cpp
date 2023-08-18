@@ -526,6 +526,24 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 
 	//	スペースは読み飛ばす
 	this->skip_white_space();
+	if( this->p_file_image == this->file_image.end() ) {
+		s_word.s_word = "";
+		s_word.type = CBASIC_WORD_TYPE::UNKNOWN;
+		return s_word;
+	}
+	if( this->p_file_image[0] == '"' ) {
+		this->p_file_image++;
+		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != '"' && this->p_file_image[0] != '\r' && this->p_file_image[0] != '\n' ) {
+			s = s + (char)this->p_file_image[0];
+			this->p_file_image++;
+		}
+		if( this->p_file_image != this->file_image.end() && this->p_file_image[0] == '"' ) {
+			this->p_file_image++;
+		}
+		s_word.s_word = s;
+		s_word.type = CBASIC_WORD_TYPE::STRING;
+		return s_word;
+	}
 	if( this->p_file_image[0] == '&' ) {
 		this->p_file_image++;
 		this->skip_white_space();
@@ -697,7 +715,7 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 				}
 			}
 			else {
-				if( s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
+				if( s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
 					is_last_jump = true;
 				}
 			}

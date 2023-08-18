@@ -57,9 +57,21 @@ public:
 		return s_label;
 	}
 
-	void set_string( std::string s_label, CSTRING s_image ) {
-		this->s_label = s_label;
+	void set_string( CSTRING s_image ) {
 		this->s_value = s_image;
+	}
+
+	bool string_compare( CCONSTANT &p ) {
+		if( this->type != CCONSTANT_TYPE::STRING ) {
+			return false;
+		}
+		if( this->s_value.length != p.s_value.length ) {
+			return false;
+		}
+		if( memcmp( this->s_value.image, p.s_value.image, this->s_value.length ) != 0 ) {
+			return false;
+		} 
+		return true;
 	}
 };
 
@@ -72,6 +84,7 @@ public:
 
 	//	’è‹`Ï‚İ‚Ì•¶š—ñ’è”‚ÌƒŠƒXƒg
 	std::map< std::string, CCONSTANT > string_list;
+	unsigned int string_label = 0;
 
 	std::string add( const CSINGLE_REAL &value ) {
 		CCONSTANT r_value;
@@ -95,10 +108,20 @@ public:
 		return s_label;
 	}
 
-	void add( const CSTRING &value, std::string s_label ) {
+	std::string add( const CSTRING &value ) {
 		CCONSTANT r_value;
 
-		r_value.set_string( s_label, value );
+		r_value.set_string( value );
+		for( auto &p: string_list ) {
+			if( r_value.string_compare( p.second ) ) {
+				return r_value.s_label;
+			}
+		}
+		std::string s_label = "str_" + std::to_string( this->string_label );
+		this->string_label++;
+		r_value.s_label = s_label;
+		string_list[ s_label ] = r_value;
+		return s_label;
 	}
 
 	void dump( CASSEMBLER_LIST &asm_list, COPTIONS options ) {
@@ -109,8 +132,6 @@ public:
 
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
 			switch( it->second.type ) {
-			case CCONSTANT_TYPE::INTEGER:
-				break;
 			case CCONSTANT_TYPE::SINGLE_REAL:
 				s = "";
 				for( i = 0; i < 4; i++ ) {
@@ -122,14 +143,9 @@ public:
 					}
 					s = s + s_name;
 				}
-				asm_line.type = CMNEMONIC_TYPE::LABEL;
-				asm_line.operand1.s_value = it->first;
-				asm_line.operand1.type = COPERAND_TYPE::LABEL;
+				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
 				asm_list.const_single_area.push_back( asm_line );
-
-				asm_line.type = CMNEMONIC_TYPE::DEFB;
-				asm_line.operand1.s_value = s;
-				asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
+				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
 				asm_list.const_single_area.push_back( asm_line );
 				break;
 			case CCONSTANT_TYPE::DOUBLE_REAL:
@@ -143,21 +159,37 @@ public:
 					}
 					s = s + s_name;
 				}
-				asm_line.type = CMNEMONIC_TYPE::LABEL;
-				asm_line.operand1.s_value = it->first;
-				asm_line.operand1.type = COPERAND_TYPE::LABEL;
-				asm_list.const_single_area.push_back( asm_line );
-
-				asm_line.type = CMNEMONIC_TYPE::DEFB;
-				asm_line.operand1.s_value = s;
-				asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
+				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
 				asm_list.const_double_area.push_back( asm_line );
-				break;
-			case CCONSTANT_TYPE::STRING:
+				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
+				asm_list.const_double_area.push_back( asm_line );
 				break;
 			default:
 				break;
 			}
+		}
+
+		for( auto it = string_list.begin(); it != string_list.end(); it++ ) {
+			if( options.output_type == COUTPUT_TYPES::ZMA ) {
+				sprintf_s( s_name, "0x%02X", (int)it->second.s_value.length );
+			}
+			else {
+				sprintf_s( s_name, "0%02Xh", (int)it->second.s_value.length );
+			}
+			s = s_name;
+			for( i = 0; i < (int)it->second.s_value.length; i++ ) {
+				if( options.output_type == COUTPUT_TYPES::ZMA ) {
+					sprintf_s( s_name, ", 0x%02X", (int)it->second.s_value.image[i] );
+				}
+				else {
+					sprintf_s( s_name, ", 0%02Xh", (int)it->second.s_value.image[i] );
+				}
+				s = s + s_name;
+			}
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
+			asm_list.const_string_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
+			asm_list.const_string_area.push_back( asm_line );
 		}
 	}
 };

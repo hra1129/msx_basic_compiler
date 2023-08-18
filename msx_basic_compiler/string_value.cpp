@@ -21,3 +21,15 @@ bool CSTRING::set( std::string s ) {
 	}
 	return true;
 }
+
+// --------------------------------------------------------------------
+bool CSTRING::set( int length, const char *p_image ) {
+
+	if( length > 255 ) {
+		//	’·‚·‚¬‚é
+		return false;
+	}
+	this->length = length;
+	memset( this->image, 0, sizeof( this->image ) );
+	memcpy( this->image, p_image, length );
+}
