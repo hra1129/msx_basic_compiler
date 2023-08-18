@@ -11,10 +11,13 @@
 
 class CSTRING {
 public:
+	int reference_count = 0;
+
 	size_t length = 0;
 	char image[ 256 ] = {};
 
 	bool set( std::string s );
+	bool set( int length, const char *p_image );
 };
 
 #endif

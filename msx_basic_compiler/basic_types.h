@@ -49,6 +49,7 @@ class COPTIONS {
 public:
 	std::string s_input_name;
 	std::string s_output_name;
+	int stack_size;
 
 	COUTPUT_TYPES output_type;
 	CTARGET_TYPES target_type;
@@ -56,6 +57,7 @@ public:
 	COPTIONS() {
 		this->output_type = COUTPUT_TYPES::ZMA;
 		this->target_type = CTARGET_TYPES::MSX1;
+		this->stack_size = 256;
 	}
 
 	bool parse_options( char *argv[], int argc );

@@ -35,7 +35,7 @@ public:
 		}
 	}
 
-	bool exec( void );
+	bool exec( std::string s_name );
 };
 
 #endif

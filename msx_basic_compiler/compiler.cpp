@@ -17,7 +17,9 @@
 #include "collections/gosub.h"
 #include "collections/out.h"
 #include "collections/poke.h"
+#include "collections/print.h"
 #include "collections/return.h"
+#include "collections/run.h"
 #include "collections/screen.h"
 #include "collections/sound.h"
 #include "variable_manager.h"
@@ -37,7 +39,9 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CGOSUB );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );
+	this->collection.push_back( new CPRINT );
 	this->collection.push_back( new CRETURN );
+	this->collection.push_back( new CRUN );
 	this->collection.push_back( new CSCREEN );
 	this->collection.push_back( new CSOUND );
 }
@@ -61,7 +65,7 @@ void CCOMPILER::insert_label( void ) {
 }
 
 // --------------------------------------------------------------------
-bool CCOMPILER::exec( void ) {
+bool CCOMPILER::exec( std::string s_name ) {
 	bool do_exec;
 	CVARIABLE_MANAGER vm;
 	CASSEMBLER_LINE asm_line;
@@ -71,63 +75,74 @@ bool CCOMPILER::exec( void ) {
 	this->info.list.reset_position();
 	vm.analyze_defvars( &(this->info) );
 
-	//	初期化処理を書く
-	asm_line.type = CMNEMONIC_TYPE::DEFB;
-	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
-	asm_line.operand1.s_value = "0xFE";
+	//	ヘッダーコメント
+	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "------------------------------------------------------------------------", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::DEFW;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "start_address";
+	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "Compiled by MSX-BACON from " + s_name, COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::DEFW;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "end_address";
+	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "------------------------------------------------------------------------", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::DEFW;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "start_address";
+	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::ORG;
-	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
-	asm_line.operand1.s_value = "0x8010";
-	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LABEL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "start_address";
-	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::MEMORY_CONSTANT;
-	asm_line.operand1.s_value = "[save_stack]";
-	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand2.s_value = "SP";
-	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LABEL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "program_start";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
-	this->info.assembler_list.header.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LABEL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "save_stack";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	//	BSAVEヘッダー
+	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "BSAVE header -----------------------------------------------------------", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0xfe", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "end_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ORG, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x8010", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	初期化処理
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[save_stack]", COPERAND_TYPE::REGISTER, "SP" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "program_start" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_run", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_start", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	RUN用サブルーチン
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_run", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "heap_start" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[heap_next]", COPERAND_TYPE::LABEL, "HL" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "[save_stack]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "SP", COPERAND_TYPE::LABEL, "HL" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, std::to_string( this->info.options.stack_size ) );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::SBC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[heap_end]", COPERAND_TYPE::REGISTER, "HL" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	初期化処理用変数
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "save_stack", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::DEFW;
-	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
-	asm_line.operand1.s_value = "0";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "heap_next", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "heap_end", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
 
 	this->info.list.reset_position();
@@ -154,32 +169,15 @@ bool CCOMPILER::exec( void ) {
 		}
 	}
 
-	asm_line.type = CMNEMONIC_TYPE::LABEL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "program_termination";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_termination", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LD;
-	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-	asm_line.operand1.s_value = "SP";
-	asm_line.operand2.type = COPERAND_TYPE::MEMORY_CONSTANT;
-	asm_line.operand2.s_value = "[save_stack]";
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "SP", COPERAND_TYPE::MEMORY_CONSTANT, "[save_stack]" );
 	this->info.assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::RET;
-	asm_line.operand1.type = COPERAND_TYPE::NONE;
-	asm_line.operand1.s_value = "";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
-
-	asm_line.type = CMNEMONIC_TYPE::LABEL;
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
-	asm_line.operand1.s_value = "end_address";
-	asm_line.operand2.type = COPERAND_TYPE::NONE;
-	asm_line.operand2.s_value = "";
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "heap_start", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.footer.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "end_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.footer.push_back( asm_line );
 
 	this->info.constants.dump( this->info.assembler_list, this->info.options );

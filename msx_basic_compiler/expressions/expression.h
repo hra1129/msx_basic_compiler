@@ -109,6 +109,15 @@ public:
 	//	演算式ツリーからアセンブリコードを生成する
 	//	式が省略されていた場合は、false を返す
 	bool compile( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target = CEXPRESSION_TYPE::INTEGER );
+
+	// ----------------------------------------------------------------
+	//	演算結果の型を返す
+	CEXPRESSION_TYPE get_type( void ) const {
+		if( this->p_top_node == nullptr ) {
+			return CEXPRESSION_TYPE::UNKNOWN;
+		}
+		return this->p_top_node->type;
+	}
 };
 
 #endif

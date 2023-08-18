@@ -163,7 +163,9 @@
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
+    <ClCompile Include="collections\print.cpp" />
     <ClCompile Include="collections\return.cpp" />
+    <ClCompile Include="collections\run.cpp" />
     <ClCompile Include="collections\screen.cpp" />
     <ClCompile Include="collections\sound.cpp" />
     <ClCompile Include="compiler.cpp" />
@@ -217,7 +219,9 @@
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
+    <ClInclude Include="collections\print.h" />
     <ClInclude Include="collections\return.h" />
+    <ClInclude Include="collections\run.h" />
     <ClInclude Include="collections\screen.h" />
     <ClInclude Include="collections\sound.h" />
     <ClInclude Include="compiler.h" />

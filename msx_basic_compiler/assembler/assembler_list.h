@@ -20,11 +20,13 @@ private:
 
 public:
 	std::vector< CASSEMBLER_LINE >		header;
+	std::vector< CASSEMBLER_LINE >		define_labels;
 	std::vector< CASSEMBLER_LINE >		body;
 	std::vector< CASSEMBLER_LINE >		subroutines;
 	std::vector< CASSEMBLER_LINE >		datas;
 	std::vector< CASSEMBLER_LINE >		const_single_area;
 	std::vector< CASSEMBLER_LINE >		const_double_area;
+	std::vector< CASSEMBLER_LINE >		const_string_area;
 	std::vector< CASSEMBLER_LINE >		variables_area;
 	std::vector< CASSEMBLER_LINE >		footer;
 
@@ -44,6 +46,9 @@ public:
 	void activate_ld_dac_double_real( void );
 	void activate_ld_arg_single_real( void );
 	void activate_ld_arg_double_real( void );
+	void activate_puts( void );
+	void activate_spc( void );
+	void activate_free_string( void );
 };
 
 #endif

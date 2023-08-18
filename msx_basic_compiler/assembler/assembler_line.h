@@ -66,6 +66,7 @@ enum class CMNEMONIC_TYPE: int {
 	ORG,
 	DEFB,
 	DEFW,
+	RST,
 };
 
 enum class CCONDITION: int {
