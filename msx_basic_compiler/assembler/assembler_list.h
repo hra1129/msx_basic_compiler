@@ -49,6 +49,7 @@ public:
 	void activate_puts( void );
 	void activate_spc( void );
 	void activate_free_string( void );
+	void activate_str( void );
 };
 
 #endif

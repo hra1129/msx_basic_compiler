@@ -394,6 +394,7 @@ void CASSEMBLER_LIST::activate_ld_dac_double_real( void ) {
 	}
 	this->subrouines_list.push_back( "ld_dac_double_real" );
 	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "work_valtyp", "0x0f663" );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_double_real", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "work_dac" );
@@ -401,6 +402,10 @@ void CASSEMBLER_LIST::activate_ld_dac_double_real( void ) {
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "8" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "8" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[work_valtyp]", COPERAND_TYPE::NONE, "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
@@ -415,6 +420,7 @@ void CASSEMBLER_LIST::activate_ld_arg_single_real( void ) {
 	}
 	this->subrouines_list.push_back( "ld_arg_single_real" );
 	this->add_label( "work_arg", "0x0f847" );
+	this->add_label( "work_valtyp", "0x0f663" );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_single_real", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "work_arg" );
@@ -426,6 +432,10 @@ void CASSEMBLER_LIST::activate_ld_arg_single_real( void ) {
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_arg+4]", COPERAND_TYPE::REGISTER, "BC" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_arg+6]", COPERAND_TYPE::REGISTER, "BC" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "8" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[work_valtyp]", COPERAND_TYPE::NONE, "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
@@ -533,6 +543,47 @@ void CASSEMBLER_LIST::activate_free_string( void ) {
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NZ, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[heap_next]", COPERAND_TYPE::REGISTER, "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_str( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "str" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "str" );
+	this->add_label( "bios_fout", "0x03425" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_fout", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_str_loop", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::LABEL, "_str_loop_exit", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_str_loop", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_str_loop_exit", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[HL]", COPERAND_TYPE::NONE, "B" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
