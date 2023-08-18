@@ -17,7 +17,6 @@ program_start:
         LD          HL, 1
         LD          A, L
         CALL        bios_chgmod
-line_110:
         LD          HL, str_0
         PUSH        HL
         CALL        puts
@@ -25,7 +24,14 @@ line_110:
         CALL        free_string
         LD          HL, str_1
         CALL        puts
-        JP          line_110
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+        JP          program_termination
 program_termination:
         LD          SP, [save_stack]
         RET
@@ -61,8 +67,12 @@ free_string:
         LD          [heap_next], HL
         RET
 str_0:
-        DEFB        0x04, 0x4D, 0x4F, 0x4A, 0x49
+        DEFB        0x0D, 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x2C, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21
 str_1:
+        DEFB        0x02, 0x0D, 0x0A
+str_2:
+        DEFB        0x13, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x4D, 0x53, 0x58, 0x2D, 0x42, 0x41, 0x43, 0x4F, 0x4E, 0x21, 0x21
+str_3:
         DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
