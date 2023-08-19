@@ -168,6 +168,7 @@
     <ClCompile Include="collections\run.cpp" />
     <ClCompile Include="collections\screen.cpp" />
     <ClCompile Include="collections\sound.cpp" />
+    <ClCompile Include="collections\vpoke.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="double_real.cpp" />
     <ClCompile Include="error_list.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="collections\run.h" />
     <ClInclude Include="collections\screen.h" />
     <ClInclude Include="collections\sound.h" />
+    <ClInclude Include="collections\vpoke.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
     <ClInclude Include="constant_info.h" />

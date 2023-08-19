@@ -23,6 +23,7 @@
 #include "collections/run.h"
 #include "collections/screen.h"
 #include "collections/sound.h"
+#include "collections/vpoke.h"
 #include "variable_manager.h"
 
 // --------------------------------------------------------------------
@@ -46,6 +47,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CRUN );
 	this->collection.push_back( new CSCREEN );
 	this->collection.push_back( new CSOUND );
+	this->collection.push_back( new CVPOKE );
 }
 
 // --------------------------------------------------------------------
