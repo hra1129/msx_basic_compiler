@@ -13,9 +13,10 @@ bios_frcint                     equ 02F8Ah
 bios_fcomp                      equ 02F21h
 bios_decsub                     equ 0268Ch
 work_jiffy                      equ 0FC9Eh
-bios_rdvrm                      equ 0010Dh
+bios_rdvrm                      equ 0004Ah
 bios_gtstck                     equ 000D5h
 bios_gttrig                     equ 000D8h
+bios_wrtvrm                     equ 0004Dh
 ; BSAVE header -----------------------------------------------------------
         DEFB        0FEh
         DEFW        start_address
@@ -335,6 +336,12 @@ line_170:
         CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
+        LD          HL, 6144
+        PUSH        HL
+        LD          HL, 33
+        LD          A, L
+        POP         HL
+        CALL        bios_wrtvrm
 program_termination:
         LD          SP, (save_stack)
         RET
