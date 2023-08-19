@@ -17,13 +17,17 @@ public:
 	~CEXPRESSION_STR() {
 		this->release();
 	}
-	CEXPRESSION_NODE *p_operand;
+	CEXPRESSION_NODE *p_operand = nullptr;
 
 	void optimization( void );
 
 	void compile( CCOMPILE_INFO *p_this );
 
 	void release( void ) {
+		if( this->p_operand != nullptr ) {
+			delete this->p_operand;
+			this->p_operand = nullptr;
+		}
 	}
 };
 

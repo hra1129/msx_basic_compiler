@@ -8,6 +8,10 @@ work_dac_int                    equ 0F7F8h
 work_valtyp                     equ 0F663h
 work_dac                        equ 0F7F6h
 bios_imult                      equ 03193h
+work_arg                        equ 0F847h
+bios_frcint                     equ 02F8Ah
+bios_fcomp                      equ 02F21h
+bios_decsub                     equ 0268Ch
 ; BSAVE header -----------------------------------------------------------
         DEFB        0FEh
         DEFW        start_address
@@ -29,14 +33,18 @@ program_start:
         CALL        free_string
         LD          HL, str_1
         CALL        puts
+        JP          line_120
+line_120:
         LD          HL, str_2
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_3
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_4
+        JP          line_130
+line_130:
+        LD          HL, str_3
         PUSH        HL
         CALL        puts
         POP         HL
@@ -47,9 +55,11 @@ program_start:
         LD          (work_valtyp), A
         CALL        str
         CALL        puts
-        LD          HL, str_5
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_6
+        JP          line_140
+line_140:
+        LD          HL, str_4
         PUSH        HL
         CALL        puts
         POP         HL
@@ -58,9 +68,11 @@ program_start:
         CALL        ld_dac_single_real
         CALL        str
         CALL        puts
-        LD          HL, str_7
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_8
+        JP          line_150
+line_150:
+        LD          HL, str_4
         PUSH        HL
         CALL        puts
         POP         HL
@@ -69,9 +81,11 @@ program_start:
         CALL        ld_dac_single_real
         CALL        str
         CALL        puts
-        LD          HL, str_9
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_10
+        JP          line_160
+line_160:
+        LD          HL, str_4
         PUSH        HL
         CALL        puts
         POP         HL
@@ -80,9 +94,11 @@ program_start:
         CALL        ld_dac_single_real
         CALL        str
         CALL        puts
-        LD          HL, str_11
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_12
+        JP          line_170
+line_170:
+        LD          HL, str_4
         PUSH        HL
         CALL        puts
         POP         HL
@@ -91,9 +107,9 @@ program_start:
         CALL        ld_dac_single_real
         CALL        str
         CALL        puts
-        LD          HL, str_13
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_14
+        LD          HL, str_5
         PUSH        HL
         CALL        puts
         POP         HL
@@ -102,9 +118,9 @@ program_start:
         CALL        ld_dac_double_real
         CALL        str
         CALL        puts
-        LD          HL, str_15
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_16
+        LD          HL, str_5
         PUSH        HL
         CALL        puts
         POP         HL
@@ -113,9 +129,9 @@ program_start:
         CALL        ld_dac_double_real
         CALL        str
         CALL        puts
-        LD          HL, str_17
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_18
+        LD          HL, str_5
         PUSH        HL
         CALL        puts
         POP         HL
@@ -124,9 +140,9 @@ program_start:
         CALL        ld_dac_double_real
         CALL        str
         CALL        puts
-        LD          HL, str_19
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_20
+        LD          HL, str_5
         PUSH        HL
         CALL        puts
         POP         HL
@@ -135,33 +151,33 @@ program_start:
         CALL        ld_dac_double_real
         CALL        str
         CALL        puts
-        LD          HL, str_21
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_22
+        LD          HL, str_6
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_23
+        LD          HL, str_7
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_24
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_25
+        LD          HL, str_6
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_26
+        LD          HL, str_8
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_27
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_28
+        LD          HL, str_6
         PUSH        HL
         CALL        puts
         POP         HL
@@ -175,9 +191,9 @@ program_start:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_29
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_30
+        LD          HL, str_6
         PUSH        HL
         CALL        puts
         POP         HL
@@ -205,9 +221,9 @@ program_start:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_31
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_32
+        LD          HL, str_9
         PUSH        HL
         CALL        puts
         POP         HL
@@ -226,26 +242,43 @@ program_start:
         LD          (work_valtyp), A
         CALL        str
         CALL        puts
-        LD          HL, str_33
+        LD          HL, str_10
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_34
+        LD          HL, str_1
         CALL        puts
-        LD          HL, str_35
+        LD          HL, str_11
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
         LD          HL, 10
         CALL        spc
-        LD          HL, str_36
+        LD          HL, str_12
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_37
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, str_13
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, const_45500000
+        CALL        convert_to_integer_from_sngle_real
+        LD          A, (HL)
+        LD          L, A
+        LD          H, 0
+        LD          (work_dac_int), HL
+        LD          A, 2
+        LD          (work_valtyp), A
+        CALL        str
+        CALL        puts
+        LD          HL, str_1
         CALL        puts
 program_termination:
         LD          SP, (save_stack)
@@ -318,6 +351,35 @@ _spc_loop:
         RST         018h
         DJNZ        _spc_loop
         RET
+ld_arg_single_real:
+        LD          DE, work_arg
+        LD          BC, 4
+        LDIR
+        LD          (work_arg+4), BC
+        LD          (work_arg+6), BC
+        LD          A, 8
+        LD          (work_valtyp), A
+        RET
+convert_to_integer:
+        CALL        bios_frcint
+        LD          HL, (work_dac_int)
+        RET
+convert_to_integer_from_sngle_real:
+        CALL        ld_dac_single_real
+        LD          BC, 03245h
+        LD          DE, 08076h
+        CALL        bios_fcomp
+        INC         A
+        JR          Z, convert_to_integer
+        LD          HL, const_45327680
+        CALL        ld_arg_single_real
+        CALL        bios_decsub
+        CALL        bios_frcint
+        LD          HL, (work_dac_int)
+        LD          A, H
+        XOR         080h
+        LD          H, A
+        RET
 const_40120000:
         DEFB        040h, 012h, 000h, 000h
 const_41123456:
@@ -326,6 +388,10 @@ const_42120000:
         DEFB        042h, 012h, 000h, 000h
 const_42230000:
         DEFB        042h, 023h, 000h, 000h
+const_45327680:
+        DEFB        045h, 032h, 076h, 0FFFFFF80h
+const_45500000:
+        DEFB        045h, 050h, 000h, 000h
 const_4012345678901234:
         DEFB        040h, 012h, 034h, 056h, 078h, 0FFFFFF90h, 012h, 034h
 const_4112345678901234:
@@ -339,77 +405,29 @@ str_0:
 str_1:
         DEFB        002h, 00Dh, 00Ah
 str_10:
-        DEFB        00Ah, 053h, 049h, 04Eh, 047h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
+        DEFB        002h, 03Eh, 03Eh
 str_11:
-        DEFB        002h, 00Dh, 00Ah
+        DEFB        001h, 05Bh
 str_12:
-        DEFB        00Ah, 053h, 049h, 04Eh, 047h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
+        DEFB        001h, 05Dh
 str_13:
-        DEFB        002h, 00Dh, 00Ah
-str_14:
-        DEFB        00Ah, 044h, 04Fh, 055h, 042h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
-str_15:
-        DEFB        002h, 00Dh, 00Ah
-str_16:
-        DEFB        00Ah, 044h, 04Fh, 055h, 042h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
-str_17:
-        DEFB        002h, 00Dh, 00Ah
-str_18:
-        DEFB        00Ah, 044h, 04Fh, 055h, 042h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
-str_19:
-        DEFB        002h, 00Dh, 00Ah
+        DEFB        00Ch, 050h, 045h, 045h, 04Bh, 028h, 035h, 030h, 030h, 030h, 030h, 029h, 03Dh
 str_2:
         DEFB        013h, 054h, 068h, 069h, 073h, 020h, 069h, 073h, 020h, 04Dh, 053h, 058h, 02Dh, 042h, 041h, 043h, 04Fh, 04Eh, 021h, 021h
-str_20:
-        DEFB        00Ah, 044h, 04Fh, 055h, 042h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
-str_21:
-        DEFB        002h, 00Dh, 00Ah
-str_22:
-        DEFB        00Ah, 053h, 054h, 052h, 049h, 04Eh, 047h, 020h, 020h, 03Dh, 020h
-str_23:
-        DEFB        00Bh, 04Dh, 06Fh, 06Ah, 069h, 04Dh, 06Fh, 06Ah, 069h, 04Bh, 075h, 06Eh
-str_24:
-        DEFB        002h, 00Dh, 00Ah
-str_25:
-        DEFB        00Ah, 053h, 054h, 052h, 049h, 04Eh, 047h, 020h, 020h, 03Dh, 020h
-str_26:
-        DEFB        00Ch, 04Bh, 061h, 069h, 067h, 079h, 06Fh, 02Dh, 04Eh, 061h, 073h, 068h, 069h
-str_27:
-        DEFB        002h, 00Dh, 00Ah
-str_28:
-        DEFB        00Ah, 053h, 054h, 052h, 049h, 04Eh, 047h, 020h, 020h, 03Dh, 020h
-str_29:
-        DEFB        002h, 00Dh, 00Ah
 str_3:
-        DEFB        002h, 00Dh, 00Ah
-str_30:
-        DEFB        00Ah, 053h, 054h, 052h, 049h, 04Eh, 047h, 020h, 020h, 03Dh, 020h
-str_31:
-        DEFB        002h, 00Dh, 00Ah
-str_32:
-        DEFB        00Ch, 049h, 04Eh, 054h, 045h, 047h, 045h, 052h, 020h, 03Dh, 020h, 03Ch, 03Ch
-str_33:
-        DEFB        002h, 03Eh, 03Eh
-str_34:
-        DEFB        002h, 00Dh, 00Ah
-str_35:
-        DEFB        001h, 05Bh
-str_36:
-        DEFB        001h, 05Dh
-str_37:
-        DEFB        002h, 00Dh, 00Ah
-str_4:
         DEFB        00Ah, 049h, 04Eh, 054h, 045h, 047h, 045h, 052h, 020h, 03Dh, 020h
+str_4:
+        DEFB        00Ah, 053h, 049h, 04Eh, 047h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
 str_5:
-        DEFB        002h, 00Dh, 00Ah
+        DEFB        00Ah, 044h, 04Fh, 055h, 042h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
 str_6:
-        DEFB        00Ah, 053h, 049h, 04Eh, 047h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
+        DEFB        00Ah, 053h, 054h, 052h, 049h, 04Eh, 047h, 020h, 020h, 03Dh, 020h
 str_7:
-        DEFB        002h, 00Dh, 00Ah
+        DEFB        00Bh, 04Dh, 06Fh, 06Ah, 069h, 04Dh, 06Fh, 06Ah, 069h, 04Bh, 075h, 06Eh
 str_8:
-        DEFB        00Ah, 053h, 049h, 04Eh, 047h, 04Ch, 045h, 020h, 020h, 03Dh, 020h
+        DEFB        00Ch, 04Bh, 061h, 069h, 067h, 079h, 06Fh, 02Dh, 04Eh, 061h, 073h, 068h, 069h
 str_9:
-        DEFB        002h, 00Dh, 00Ah
+        DEFB        00Ch, 049h, 04Eh, 054h, 045h, 047h, 045h, 052h, 020h, 03Dh, 020h, 03Ch, 03Ch
 save_stack:
         DEFW        0
 heap_next:

@@ -32,4 +32,5 @@ bool CSTRING::set( int length, const char *p_image ) {
 	this->length = length;
 	memset( this->image, 0, sizeof( this->image ) );
 	memcpy( this->image, p_image, length );
+	return true;
 }

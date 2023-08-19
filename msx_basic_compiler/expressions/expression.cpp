@@ -4,6 +4,7 @@
 //	2023/July/29th	t.hara
 // --------------------------------------------------------------------
 #include "expression.h"
+
 #include "expression_operator_eqv.h"
 #include "expression_operator_imp.h"
 #include "expression_operator_xor.h"
@@ -26,7 +27,9 @@
 #include "expression_operator_power.h"
 #include "expression_function.h"
 #include "expression_term.h"
+
 #include "expression_csrlin.h"
+#include "expression_peek.h"
 #include "expression_str.h"
 #include "expression_time.h"
 
@@ -152,6 +155,27 @@ void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE tar
 	if( target == current ) {
 		return;
 	}
+	if( target == CEXPRESSION_TYPE::EXTENDED_INTEGER ) {
+		if( current == CEXPRESSION_TYPE::INTEGER ) {
+			//	•ÏŠ·‚Ì•K—v‚È‚µ
+			return;
+		}
+		if( current == CEXPRESSION_TYPE::SINGLE_REAL ) {
+			p_this->assembler_list.activate_convert_to_integer_from_sngle_real( &(p_this->constants) );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "convert_to_integer_from_sngle_real", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			return;
+		}
+		if( current == CEXPRESSION_TYPE::DOUBLE_REAL ) {
+			p_this->assembler_list.activate_convert_to_integer_from_double_real( &(p_this->constants) );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "convert_to_integer_from_double_real", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			return;
+		}
+		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		return;
+	}
+
 	p_this->assembler_list.add_label( "work_dac", "0x0f7f6" );
 	p_this->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
 
@@ -191,6 +215,17 @@ void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE tar
 }
 
 // --------------------------------------------------------------------
+bool CEXPRESSION::check_word( CCOMPILE_INFO *p_this, std::string s, CERROR_ID error_id ) {
+
+	if( p_this->list.is_command_end() || p_this->list.p_position->s_word != s ) {
+		p_this->errors.add( error_id, p_this->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+		return false;
+	}
+	p_this->list.p_position++;
+	return true;
+}
+
+// --------------------------------------------------------------------
 CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	CEXPRESSION_NODE *p_result;
 	std::string s_operator;
@@ -219,12 +254,28 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
 		p_result = p_term;
 		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
-		if( p_this->list.is_command_end() || p_this->list.p_position->s_word != ")" ) {
-			p_this->errors.add( MISSING_OPERAND, p_this->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
+		return p_result;
+	}
+	else if( s_operator == "PEEK" ) {
+		CEXPRESSION_PEEK *p_term = new CEXPRESSION_PEEK;
+		p_result = p_term;
 		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( s_operator == "TIME" ) {

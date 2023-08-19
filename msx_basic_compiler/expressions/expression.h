@@ -59,6 +59,10 @@ private:
 	CEXPRESSION_NODE *p_top_node;
 
 	// ----------------------------------------------------------------
+	//	次が指定の単語で無ければ指定のエラーにする
+	bool check_word( CCOMPILE_INFO *p_this, std::string s, CERROR_ID error_id = SYNTAX_ERROR );
+
+	// ----------------------------------------------------------------
 	//	演算式ツリーの中で事前に演算可能なモノは演算してしまう
 	void optimization( void );
 

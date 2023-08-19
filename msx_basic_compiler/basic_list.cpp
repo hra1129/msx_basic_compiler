@@ -419,7 +419,7 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 }
 
 // --------------------------------------------------------------------
-CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s ) {
+CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s, const std::string s_type ) {
 	CBASIC_WORD s_word;
 	bool is_real = false;
 	int decimal;
@@ -431,10 +431,12 @@ CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s ) {
 			is_real = true;
 			break;
 		}
-		if( c == '%' ) {
-			is_real = false;
-			break;
-		}
+	}
+	if( s_type == "%" ) {
+		is_real = false;
+	}
+	if( s_type == "!" || s_type == "#" ) {
+		is_real = true;
 	}
 	if( !is_real ) {
 		//	整数の範囲に収まるか？
@@ -591,8 +593,8 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 				this->p_file_image--;
 			}
 		}
-		s = s + this->get_char_in_charlist( "!#%", true );
-		s_word = this->get_decimal( s );
+		std::string s_type = this->get_char_in_charlist( "!#%", true );
+		s_word = this->get_decimal( s, s_type );
 		return s_word;
 	}
 	//	一致する予約語コードがあるか調べる

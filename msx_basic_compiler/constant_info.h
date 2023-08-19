@@ -58,6 +58,7 @@ public:
 	}
 
 	void set_string( CSTRING s_image ) {
+		this->type = CCONSTANT_TYPE::STRING;
 		this->s_value = s_image;
 	}
 
@@ -114,7 +115,7 @@ public:
 		r_value.set_string( value );
 		for( auto &p: string_list ) {
 			if( r_value.string_compare( p.second ) ) {
-				return r_value.s_label;
+				return p.second.s_label;
 			}
 		}
 		std::string s_label = "str_" + std::to_string( this->string_label );

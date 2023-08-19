@@ -194,6 +194,7 @@
     <ClCompile Include="expressions\expression_operator_power.cpp" />
     <ClCompile Include="expressions\expression_operator_sub.cpp" />
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
+    <ClCompile Include="expressions\expression_peek.cpp" />
     <ClCompile Include="expressions\expression_str.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
     <ClCompile Include="expressions\expression_time.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="expressions\expression_operator_power.h" />
     <ClInclude Include="expressions\expression_operator_sub.h" />
     <ClInclude Include="expressions\expression_operator_xor.h" />
+    <ClInclude Include="expressions\expression_peek.h" />
     <ClInclude Include="expressions\expression_str.h" />
     <ClInclude Include="expressions\expression_term.h" />
     <ClInclude Include="expressions\expression_time.h" />

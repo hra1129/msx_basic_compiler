@@ -20,14 +20,9 @@ bool CPOKE::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
 	//	ëÊ1à¯êî <ÉAÉhÉåÉX>
-	if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
-		if( exp.get_type() == CEXPRESSION_TYPE::INTEGER ) {
-			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-		}
-		else {
-			//	ÅöT.B.D.
-		}
+	if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 	}
 	else {

@@ -26,5 +26,6 @@ bool CGOTO::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.operand1.s_value = "line_" + p_info->list.p_position->s_word;
 	asm_line.operand1.type = COPERAND_TYPE::LABEL;
 	p_info->assembler_list.body.push_back( asm_line );
+	p_info->list.p_position++;
 	return true;
 }
