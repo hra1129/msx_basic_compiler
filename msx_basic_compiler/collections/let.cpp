@@ -29,11 +29,10 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word == "TIME" ) {
 		//	TIMEシステム変数への代入
 		p_info->list.p_position++;
-		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "=" ) {
+		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
-		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -46,11 +45,11 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		}
 		else {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
-			return true;
 		}
+		return true;
 	}
-	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
-		//	変数名では無いので代入では無い
+	else if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+		//	変数名では無いので LET ではない。
 		if( has_let ) {
 			//	LET だけで終わってる場合は Syntax error.
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -59,6 +58,8 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	//	変数を生成する
+
+
 
 
 	return true;

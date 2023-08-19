@@ -32,6 +32,9 @@
 #include "expression_peek.h"
 #include "expression_str.h"
 #include "expression_time.h"
+#include "expression_vpeek.h"
+#include "expression_stick.h"
+#include "expression_strig.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -282,6 +285,48 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
 		p_result = p_term;
 		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "VPEEK" ) {
+		CEXPRESSION_VPEEK *p_term = new CEXPRESSION_VPEEK;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "STICK" ) {
+		CEXPRESSION_STICK *p_term = new CEXPRESSION_STICK;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "STRIG" ) {
+		CEXPRESSION_STRIG *p_term = new CEXPRESSION_STRIG;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::INTEGER ) {

@@ -1,0 +1,92 @@
+FOUT (3425h) を使うと、F7C6h に変換結果が格納される。
+STR$() では、FBUFFER (F7C5h, 43) を使って前後にスペースを付けることにすれば、ブロック転送は避けられる。
+
+Datapack には、「結果のアドレスは FBUFFER の中だが、状況により前後する」と書かれている。
+本当に、毎回 F7C6h と見なして良いのだろうか？
+
+FOUT の中身を追ってみる。
+
+3425h:	XOR		A
+		CALL	375Fh
+
+	375Fh:	LD		(F69Dh), A			; TEMP3(F69DH, 2)
+			PUSH	AF
+			PUSH	BC
+			PUSH	DE
+			CALL	303Ah
+
+		303Ah:	RST		28h					; GETTYPR(0028h: DACの種類判定)
+				RET		NC					; C=0 は倍精度
+				JP		Z, 406Dh			; Z=1 は文字列
+				CALL	M, 2FC8h			; S=1 は整数
+				LD		HL, 0				; 単精度の場合、倍精度に足りない 5byte を 0 クリア
+				LD		(F7FAh), HL
+				LD		(F7FCh), HL
+				LD		A, H
+				LD		(F7FEh), A
+				LD		A, 8				; 倍精度に変換して戻る
+				JR		3055h
+
+		3055h:	JP		2F9Eh
+
+		2F9Eh:	LD		(F663h), A			; VALTYP(F663h)
+				RET
+
+	文字列の場合は、406Dh (TypeMismatch) の発生ルーチンへ。
+	では、整数の場合は？ 2FC8h
+
+		2FC8h:	LD		HL, (F7F8h)
+				LD		A, H
+				OR		A
+				PUSH	AF
+				CALL	M, 3221h			; 負数なら、符号反転。
+
+			3221h:	XOR		A
+					LD		C, A
+					SUB		L
+					LD		L, A
+					LD		A, C
+					SBC		A, H
+					LD		H, A
+					JP		2F99h
+			2F99h:	LD		(F7F8h), HL
+					LD		A, 2
+					LD		(F663h), A
+					RET
+
+				CALL	3053h				; VALTYP に 4(単精度) を書くだけのルーチン
+
+			3053h:	LD		A, 4
+					JP		2F9Eh
+			2F9Eh:	LD		(F663h), A
+					RET
+
+				EX		DE, HL
+				LD		HL, 0				; 一旦 DAC をクリア
+				LD		(F7F6h), HL
+				LD		(F7F8h), HL
+				LD		A, D
+				OR		E
+				JP		Z, 66A7h			; 0 なら 66A7h へ。
+
+			; 0 の場合
+			66A7h:	POP		AF
+					RET						; このまま単精度の変換ルーチンへなだれ込む。
+
+			; 0以外の場合
+			2FE3h:	LD		BC, 500h
+					LD		HL, 0F7F7h
+					PUSH	HL
+					LD		HL, 3030h
+					LD		A, 0FFh
+					PUSH	DE
+					LD		E, (HL)
+					INC		HL
+					LD		D, (HL)			; DE = D8F0h = 55536 = 65536 - 10000
+					INC		HL
+					EX		(SP), HL
+					PUSH	BC
+					LD		B, H
+					LD		C, L
+					ADD		HL, DE
+					INC		A

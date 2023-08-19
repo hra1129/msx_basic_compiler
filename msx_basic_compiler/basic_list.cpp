@@ -419,6 +419,17 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 }
 
 // --------------------------------------------------------------------
+bool CBASIC_LIST::check_word( CERROR_LIST *p_error, std::string s, CERROR_ID error_id ) {
+
+	if( this->is_command_end() || this->p_position->s_word != s ) {
+		p_error->add( error_id, this->get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+		return false;
+	}
+	this->p_position++;
+	return true;
+}
+
+// --------------------------------------------------------------------
 CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s, const std::string s_type ) {
 	CBASIC_WORD s_word;
 	bool is_real = false;
