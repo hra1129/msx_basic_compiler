@@ -59,7 +59,7 @@ line_130:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         JP          line_140
@@ -72,7 +72,7 @@ line_140:
         LD          HL, const_41123456
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         JP          line_150
@@ -85,7 +85,7 @@ line_150:
         LD          HL, const_42120000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         JP          line_160
@@ -98,7 +98,7 @@ line_160:
         LD          HL, const_40120000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         JP          line_170
@@ -111,7 +111,7 @@ line_170:
         LD          HL, const_42230000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -122,7 +122,7 @@ line_170:
         LD          HL, const_4112345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -133,7 +133,7 @@ line_170:
         LD          HL, const_4212345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -144,7 +144,7 @@ line_170:
         LD          HL, const_4012345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -155,7 +155,7 @@ line_170:
         LD          HL, const_4312345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_6
@@ -246,7 +246,7 @@ line_170:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_10
         PUSH        HL
         CALL        puts
@@ -282,7 +282,7 @@ line_170:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, 12345
@@ -301,7 +301,7 @@ line_170:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, str_15
@@ -318,7 +318,7 @@ line_170:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_16
         PUSH        HL
         CALL        puts
@@ -333,7 +333,7 @@ line_170:
         LD          A, 2
         LD          (work_valtyp), A
         CALL        str
-        CALL        puts_num_str
+        CALL        puts
         LD          HL, str_1
         CALL        puts
         LD          HL, 6144
@@ -376,15 +376,9 @@ free_string:
         RET
         LD          (heap_next), HL
         RET
-puts_num_str:
-        LD          A, 32
-        RST         018h
-        CALL        puts
-        LD          A, 32
-        RST         018h
-        RET
 str:
         CALL        bios_fout
+        DEC         HL
         PUSH        HL
         XOR         A
         LD          B, A
@@ -395,7 +389,9 @@ _str_loop:
         INC         B
         JR          _str_loop
 _str_loop_exit:
+        LD          (HL), 32
         POP         HL
+        INC         B
         LD          (HL), B
         RET
 ld_dac_single_real:
