@@ -14,6 +14,7 @@ enum class CEXPRESSION_TYPE: int {
 	SINGLE_REAL = 2,
 	DOUBLE_REAL = 3,
 	STRING = 4,
+	EXTENDED_INTEGER = 5,	//	¦ CEXPRESSION::convert_type() ‚Ì target ‚Æ‚µ‚Ä‚Ì‚ÝŽw’è‰Â”\ -32768`65535 ‚ð 2byte®”‚Æ‚µ‚Äˆµ‚¤
 };
 
 // --------------------------------------------------------------------

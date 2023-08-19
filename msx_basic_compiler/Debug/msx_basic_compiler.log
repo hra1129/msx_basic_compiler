@@ -1,5 +1,5 @@
-﻿  assembler_list.cpp
-  expression.cpp
+﻿  expression.cpp
+  expression_peek.cpp
   expression_str.cpp
   コードを生成中...
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

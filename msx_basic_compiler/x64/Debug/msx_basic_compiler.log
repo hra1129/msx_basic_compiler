@@ -16,7 +16,7 @@
   return.cpp
   run.cpp
   screen.cpp
-  sound.cpp
   expression.cpp
+  expression_function.cpp
   コードを生成中...
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\sound.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\expressions\expression.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb

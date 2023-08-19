@@ -1,9 +1,9 @@
-﻿  assembler_list.cpp
-  expression.cpp
+﻿  expression.cpp
+  expression_peek.cpp
   expression_str.cpp
   コード生成しています。
-  13 of 1430 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
-    7 functions were new in current compilation
-    94 functions had inline decision re-evaluated but remain unchanged
+  9 of 1442 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    12 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

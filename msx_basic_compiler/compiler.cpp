@@ -154,6 +154,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 		do_exec = false;
 		if( this->info.list.p_position->s_word == ":" ) {
 			this->info.list.p_position++;
+			continue;
 		}
 		for( auto p: this->collection ) {
 			do_exec = p->exec( &(this->info) );
