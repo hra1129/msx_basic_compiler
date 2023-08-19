@@ -9,7 +9,7 @@
 #ifndef __CERROR_LIST_H__
 #define __CERROR_LIST_H__
 
-enum CERROR_ID: int {
+enum CERROR_ID {
 	SYNTAX_ERROR,
 	MISSING_OPERAND,
 	ILLEGAL_FUNCTION_CALL,

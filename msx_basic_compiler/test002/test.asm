@@ -12,6 +12,10 @@ work_arg                        = 0x0f847
 bios_frcint                     = 0x02f8a
 bios_fcomp                      = 0x02f21
 bios_decsub                     = 0x0268c
+work_jiffy                      = 0x0fc9e
+bios_rdvrm                      = 0x010d
+bios_gtstck                     = 0x00d5
+bios_gttrig                     = 0x00d8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -54,7 +58,7 @@ line_130:
         LD          A, 2
         LD          [work_valtyp], A
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         JP          line_140
@@ -67,7 +71,7 @@ line_140:
         LD          HL, const_41123456
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         JP          line_150
@@ -80,7 +84,7 @@ line_150:
         LD          HL, const_42120000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         JP          line_160
@@ -93,7 +97,7 @@ line_160:
         LD          HL, const_40120000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         JP          line_170
@@ -106,7 +110,7 @@ line_170:
         LD          HL, const_42230000
         CALL        ld_dac_single_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -117,7 +121,7 @@ line_170:
         LD          HL, const_4112345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -128,7 +132,7 @@ line_170:
         LD          HL, const_4212345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -139,7 +143,7 @@ line_170:
         LD          HL, const_4012345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         LD          HL, str_5
@@ -150,7 +154,7 @@ line_170:
         LD          HL, const_4312345678901234
         CALL        ld_dac_double_real
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
         LD          HL, str_6
@@ -241,7 +245,7 @@ line_170:
         LD          A, 2
         LD          [work_valtyp], A
         CALL        str
-        CALL        puts
+        CALL        puts_num_str
         LD          HL, str_10
         PUSH        HL
         CALL        puts
@@ -277,7 +281,58 @@ line_170:
         LD          A, 2
         LD          [work_valtyp], A
         CALL        str
+        CALL        puts_num_str
+        LD          HL, str_1
         CALL        puts
+        LD          HL, 12345
+        LD          [work_jiffy], HL
+        LD          HL, str_14
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, const_45400000
+        CALL        convert_to_integer_from_sngle_real
+        CALL        bios_rdvrm
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts_num_str
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, str_15
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, 0
+        LD          A, L
+        CALL        bios_gtstck
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts_num_str
+        LD          HL, str_16
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, 0
+        LD          A, L
+        CALL        bios_gttrig
+        LD          L, A
+        LD          H, A
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts_num_str
         LD          HL, str_1
         CALL        puts
 program_termination:
@@ -313,6 +368,13 @@ free_string:
         POP         HL
         RET
         LD          [heap_next], HL
+        RET
+puts_num_str:
+        LD          A, 32
+        RST         0x18
+        CALL        puts
+        LD          A, 32
+        RST         0x18
         RET
 str:
         CALL        bios_fout
@@ -390,6 +452,8 @@ const_42230000:
         DEFB        0x42, 0x23, 0x00, 0x00
 const_45327680:
         DEFB        0x45, 0x32, 0x76, 0xFFFFFF80
+const_45400000:
+        DEFB        0x45, 0x40, 0x00, 0x00
 const_45500000:
         DEFB        0x45, 0x50, 0x00, 0x00
 const_4012345678901234:
@@ -412,6 +476,12 @@ str_12:
         DEFB        0x01, 0x5D
 str_13:
         DEFB        0x0C, 0x50, 0x45, 0x45, 0x4B, 0x28, 0x35, 0x30, 0x30, 0x30, 0x30, 0x29, 0x3D
+str_14:
+        DEFB        0x0D, 0x56, 0x50, 0x45, 0x45, 0x4B, 0x28, 0x34, 0x30, 0x30, 0x30, 0x30, 0x29, 0x3D
+str_15:
+        DEFB        0x09, 0x53, 0x54, 0x49, 0x43, 0x4B, 0x28, 0x30, 0x29, 0x3D
+str_16:
+        DEFB        0x09, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x30, 0x29, 0x3D
 str_2:
         DEFB        0x13, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x4D, 0x53, 0x58, 0x2D, 0x42, 0x41, 0x43, 0x4F, 0x4E, 0x21, 0x21
 str_3:

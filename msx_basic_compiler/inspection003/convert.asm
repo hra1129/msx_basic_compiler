@@ -68,7 +68,7 @@ start_address:
 		ret
 
 DBLVAL1:	;	99999.999999999
-		db		0x00 | 0x45				; ³”, E+5
+		db		0x00 | 0xC5				; •‰”, E+5
 		db		0x99
 		db		0x99
 		db		0x99

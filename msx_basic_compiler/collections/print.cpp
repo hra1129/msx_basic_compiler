@@ -22,6 +22,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
+	p_info->assembler_list.activate_puts();
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
 		p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
@@ -81,6 +82,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			switch( exp.get_type() ) {
 			default:
 			case CEXPRESSION_TYPE::INTEGER:
+				p_info->assembler_list.activate_puts_num_str();
 				p_info->assembler_list.activate_str();
 				p_info->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
 				p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
@@ -92,27 +94,29 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts_num_str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:
+				p_info->assembler_list.activate_puts_num_str();
 				p_info->assembler_list.activate_str();
 				p_info->assembler_list.activate_ld_dac_single_real();
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_single_real", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts_num_str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:
+				p_info->assembler_list.activate_puts_num_str();
 				p_info->assembler_list.activate_str();
 				p_info->assembler_list.activate_ld_dac_double_real();
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_double_real", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts_num_str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::STRING:
@@ -142,7 +146,6 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		static const char image[] = { 13, 10 };
 		value.set( 2, image );
 		std::string s_label = p_info->constants.add( value );
-		p_info->assembler_list.activate_puts();
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );

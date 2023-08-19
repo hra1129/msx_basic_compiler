@@ -87,6 +87,10 @@ public:
 	}
 
 	void skip_statement( void );
+
+	// ----------------------------------------------------------------
+	//	次が指定の単語で無ければ指定のエラーにする
+	bool check_word( CERROR_LIST *p_error, std::string s, CERROR_ID error_id = SYNTAX_ERROR );
 };
 
 #endif
