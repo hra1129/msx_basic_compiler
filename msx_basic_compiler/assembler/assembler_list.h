@@ -46,6 +46,8 @@ public:
 	void activate_ld_dac_double_real( void );
 	void activate_ld_arg_single_real( void );
 	void activate_ld_arg_double_real( void );
+	void activate_ld_de_single_real( void );
+	void activate_ld_de_double_real( void );
 	void activate_puts( void );
 	void activate_puts_num_str( void );
 	void activate_spc( void );

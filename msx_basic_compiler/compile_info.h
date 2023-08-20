@@ -10,6 +10,7 @@
 #include "variable_info.h"
 #include "constant_info.h"
 #include "assembler/assembler_list.h"
+#include "variable_manager.h"
 
 #ifndef __COMPILE_INFO_H__
 #define __COMPILE_INFO_H__
@@ -54,6 +55,11 @@ public:
 	//	コンパイルオプションを保持
 	// ----------------------------------------------------------------
 	COPTIONS			options;
+
+	// ----------------------------------------------------------------
+	//	変数の管理
+	// ----------------------------------------------------------------
+	CVARIABLE_MANAGER	variable_manager;
 
 	// ----------------------------------------------------------------
 	//	ラベルの自動生成

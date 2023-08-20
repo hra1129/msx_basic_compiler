@@ -71,13 +71,12 @@ void CCOMPILER::insert_label( void ) {
 // --------------------------------------------------------------------
 bool CCOMPILER::exec( std::string s_name ) {
 	bool do_exec;
-	CVARIABLE_MANAGER vm;
 	CASSEMBLER_LINE asm_line;
 
 	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
 	//	実装をシンプルにするために、途中で変わることは想定しない。
 	this->info.list.reset_position();
-	vm.analyze_defvars( &(this->info) );
+	this->info.variable_manager.analyze_defvars( &(this->info) );
 
 	//	ヘッダーコメント
 	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "------------------------------------------------------------------------", COPERAND_TYPE::NONE, "" );
@@ -186,5 +185,6 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.footer.push_back( asm_line );
 
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
+	this->info.variables.dump( this->info.assembler_list, this->info.options );
 	return( this->info.errors.list.size() == 0 );
 }

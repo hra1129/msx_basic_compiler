@@ -608,6 +608,42 @@ void CASSEMBLER_LIST::activate_ld_arg_double_real( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_ld_de_single_real( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "ld_de_single_real" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "ld_de_single_real" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "4" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_ld_de_double_real( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "ld_de_double_real" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "ld_de_double_real" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "8" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LIST::activate_puts( void ) {
 	CASSEMBLER_LINE asm_line;
 
