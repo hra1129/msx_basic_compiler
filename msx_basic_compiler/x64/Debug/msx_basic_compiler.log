@@ -1,4 +1,4 @@
-﻿  assembler_list.cpp
-  print.cpp
+﻿  expression.cpp
+  expression_variable.cpp
   コードを生成中...
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\assembler\assembler_list.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe

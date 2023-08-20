@@ -27,6 +27,7 @@
 #include "expression_operator_power.h"
 #include "expression_function.h"
 #include "expression_term.h"
+#include "expression_variable.h"
 
 #include "expression_csrlin.h"
 #include "expression_peek.h"
@@ -327,6 +328,13 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
+		return p_result;
+	}
+	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+		CVARIABLE variable = p_this->variable_manager.get_variable_info( p_this );
+		CEXPRESSION_VARIABLE *p_term = new CEXPRESSION_VARIABLE;
+		p_term->variable = variable;
+		p_result = p_term;
 		return p_result;
 	}
 	else if( p_this->list.p_position->type == CBASIC_WORD_TYPE::INTEGER ) {

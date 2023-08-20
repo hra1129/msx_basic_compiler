@@ -58,9 +58,64 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	//	•Ï”‚ð¶¬‚·‚é
-
-
-
-
+	CVARIABLE variable = p_info->variable_manager.get_variable_info( p_info );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	//	‘ã“üˆ—
+	if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return true;
+	}
+	if( p_info->list.is_command_end() ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return true;
+	}
+	//	‰E•Ó‚Ìˆ—
+	CEXPRESSION_TYPE exp_type;
+	switch( variable.type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:		exp_type = CEXPRESSION_TYPE::INTEGER;		break;
+	case CVARIABLE_TYPE::SINGLE_REAL:	exp_type = CEXPRESSION_TYPE::SINGLE_REAL;	break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:	exp_type = CEXPRESSION_TYPE::DOUBLE_REAL;	break;
+	case CVARIABLE_TYPE::STRING:		exp_type = CEXPRESSION_TYPE::STRING;		break;
+	}
+	if( exp.compile( p_info, exp_type ) ) {
+		switch( variable.type ) {
+		default:
+		case CVARIABLE_TYPE::INTEGER:
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "E" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "D" );
+			p_info->assembler_list.body.push_back( asm_line );
+			break;
+		case CVARIABLE_TYPE::SINGLE_REAL:
+			p_info->assembler_list.activate_ld_de_single_real();
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			break;
+		case CVARIABLE_TYPE::DOUBLE_REAL:
+			p_info->assembler_list.activate_ld_de_double_real();
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			break;
+		case CVARIABLE_TYPE::STRING:
+			break;
+		}
+	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+	}
 	return true;
 }

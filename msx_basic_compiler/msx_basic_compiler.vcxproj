@@ -201,6 +201,7 @@
     <ClCompile Include="expressions\expression_strig.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
     <ClCompile Include="expressions\expression_time.cpp" />
+    <ClCompile Include="expressions\expression_variable.cpp" />
     <ClCompile Include="expressions\expression_vpeek.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
     <ClCompile Include="single_real.cpp" />
@@ -265,6 +266,7 @@
     <ClInclude Include="expressions\expression_strig.h" />
     <ClInclude Include="expressions\expression_term.h" />
     <ClInclude Include="expressions\expression_time.h" />
+    <ClInclude Include="expressions\expression_variable.h" />
     <ClInclude Include="expressions\expression_vpeek.h" />
     <ClInclude Include="single_real.h" />
     <ClInclude Include="string_value.h" />
