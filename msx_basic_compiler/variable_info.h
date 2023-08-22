@@ -93,7 +93,7 @@ public:
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
 			asm_list.variables_area.push_back( asm_line );
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "vars_area_end", COPERAND_TYPE::NONE, "" );
@@ -103,33 +103,30 @@ public:
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "vara_area_start", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
-			if( it->second.dimension == 0 ) {
+			if( it->second.dimension == 0 || it->second.type == CVARIABLE_TYPE::STRING ) {
 				continue;
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
-			//	型コード(1byte: 2=整数, 4=単精度, 8=倍精度, 3=文字列), 次元数 (1byte), 格納アドレス(2byte)
-			switch( it->second.type ) {
-			case CVARIABLE_TYPE::INTEGER:
-				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "2", COPERAND_TYPE::NONE, "" );
-				break;
-			case CVARIABLE_TYPE::SINGLE_REAL:
-				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "4", COPERAND_TYPE::NONE, "" );
-				break;
-			case CVARIABLE_TYPE::DOUBLE_REAL:
-				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "8", COPERAND_TYPE::NONE, "" );
-				break;
-			case CVARIABLE_TYPE::STRING:
-				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "3", COPERAND_TYPE::NONE, "" );
-				break;
-			}
-			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
-			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
 			asm_list.variables_area.push_back( asm_line );
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "vara_area_end", COPERAND_TYPE::NONE, "" );
+		asm_list.variables_area.push_back( asm_line );
+
+		//	配列の文字列
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "varsa_area_start", COPERAND_TYPE::NONE, "" );
+		asm_list.variables_area.push_back( asm_line );
+		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
+			if( it->second.dimension == 0 || it->second.type != CVARIABLE_TYPE::STRING ) {
+				continue;
+			}
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
+			asm_list.variables_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
+			asm_list.variables_area.push_back( asm_line );
+		}
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "varsa_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 	}
 };

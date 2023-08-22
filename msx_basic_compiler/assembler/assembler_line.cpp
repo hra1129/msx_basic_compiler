@@ -83,6 +83,18 @@ std::map< CCONDITION, std::string > condition_list = {
 	{ CCONDITION::M,			"M, " },
 };
 
+std::map< CCONDITION, std::string > condition_list_for_ret = {
+	{ CCONDITION::NONE,			"" },
+	{ CCONDITION::Z,			"Z" },
+	{ CCONDITION::NZ,			"NZ" },
+	{ CCONDITION::C,			"C" },
+	{ CCONDITION::NC,			"NC" },
+	{ CCONDITION::PE,			"PE" },
+	{ CCONDITION::PO,			"PO" },
+	{ CCONDITION::P,			"P" },
+	{ CCONDITION::M,			"M" },
+};
+
 // --------------------------------------------------------------------
 void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 ) {
 	this->type = t;
@@ -171,7 +183,9 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 	CCOMMAND_TYPE command_type = command_list[ this->type ];
 	switch( command_type.parameter_type ) {
 	case 0:	//	オペランド無し
-		fprintf( p_file, "        %s\n", command_type.s_name.c_str() );
+		fprintf( p_file, "        %s%s\n",
+			convert_length( command_type.s_name ).c_str(), 
+			condition_list_for_ret[ this->condition ].c_str() );
 		return true;
 	case 1:	//	オペランド1個
 		fprintf( p_file, "        %s%s%s\n", 

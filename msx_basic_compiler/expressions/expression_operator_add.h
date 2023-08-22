@@ -38,6 +38,8 @@ public:
 			this->p_right = nullptr;
 		}
 	}
+
+	void activate_str_add( CCOMPILE_INFO *p_this );
 };
 
 #endif
