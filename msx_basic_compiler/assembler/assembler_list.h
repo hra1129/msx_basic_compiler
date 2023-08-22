@@ -31,6 +31,7 @@ public:
 	std::vector< CASSEMBLER_LINE >		footer;
 
 	void add_label( const std::string s_name, const std::string s_value );
+	bool add_subroutines( const std::string s_name );
 	void push_hl( CEXPRESSION_TYPE type );
 
 	bool save( const std::string s_file_name, COUTPUT_TYPES output_type );
@@ -49,9 +50,11 @@ public:
 	void activate_ld_de_single_real( void );
 	void activate_ld_de_double_real( void );
 	void activate_puts( void );
-	void activate_puts_num_str( void );
 	void activate_spc( void );
+	void activate_allocate_string( void );
 	void activate_free_string( void );
+	void activate_copy_string( void );
+	void activate_free_heap( void );
 	void activate_str( void );
 	void activate_convert_to_integer( void );
 	void activate_convert_to_integer_from_sngle_real( class CCONSTANT_INFO *p_constants );

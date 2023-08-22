@@ -150,6 +150,7 @@
     <ClCompile Include="assembler\assembler_line.cpp" />
     <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
+    <ClCompile Include="collections\call.cpp" />
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
     <ClCompile Include="collections\comment.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="assembler\assembler_list.h" />
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
+    <ClInclude Include="collections\call.h" />
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />
     <ClInclude Include="collections\comment.h" />

@@ -147,6 +147,14 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "heap_move_size", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "heap_remap_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
 
 	this->info.list.reset_position();
 	while( !this->info.list.is_end() ) {
