@@ -30,6 +30,7 @@
 #include "expression_variable.h"
 
 #include "expression_csrlin.h"
+#include "expression_len.h"
 #include "expression_peek.h"
 #include "expression_str.h"
 #include "expression_time.h"
@@ -254,8 +255,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		p_this->list.p_position++;
 		return p_result;
 	}
-	else if( s_operator == "STR$" ) {
-		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
+	else if( s_operator == "LEN" ) {
+		CEXPRESSION_LEN *p_term = new CEXPRESSION_LEN;
 		p_result = p_term;
 		p_this->list.p_position++;
 		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
@@ -270,26 +271,6 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	}
 	else if( s_operator == "PEEK" ) {
 		CEXPRESSION_PEEK *p_term = new CEXPRESSION_PEEK;
-		p_result = p_term;
-		p_this->list.p_position++;
-		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
-			delete p_term;
-			return nullptr;
-		}
-		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
-		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
-			return p_result;
-		}
-		return p_result;
-	}
-	else if( s_operator == "TIME" ) {
-		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
-		p_result = p_term;
-		p_this->list.p_position++;
-		return p_result;
-	}
-	else if( s_operator == "VPEEK" ) {
-		CEXPRESSION_VPEEK *p_term = new CEXPRESSION_VPEEK;
 		p_result = p_term;
 		p_this->list.p_position++;
 		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
@@ -318,6 +299,40 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	}
 	else if( s_operator == "STRIG" ) {
 		CEXPRESSION_STRIG *p_term = new CEXPRESSION_STRIG;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "STR$" ) {
+		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "TIME" ) {
+		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
+		p_result = p_term;
+		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "VPEEK" ) {
+		CEXPRESSION_VPEEK *p_term = new CEXPRESSION_VPEEK;
 		p_result = p_term;
 		p_this->list.p_position++;
 		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
