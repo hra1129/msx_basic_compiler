@@ -75,6 +75,18 @@ program_start:
         CALL        puts
         POP         HL
         CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        LD          A, [HL]
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts
+        LD          HL, str_4
+        CALL        puts
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -246,6 +258,8 @@ str_2:
         DEFB        0x02, 0x41, 0x3D
 str_3:
         DEFB        0x01, 0x3A
+str_4:
+        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:

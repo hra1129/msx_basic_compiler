@@ -10,6 +10,7 @@
 
 class CCALL: public CCOMPILER_CONTAINER {
 private:
+	void iot_set_device_path( CCOMPILE_INFO *p_this );
 	void iotget( CCOMPILE_INFO *p_this );
 public:
 	bool exec( CCOMPILE_INFO *p_this );
