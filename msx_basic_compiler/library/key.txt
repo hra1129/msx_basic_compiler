@@ -1,0 +1,14 @@
+KEY LIST
+	786Ch ... CP 93h (LIST の中間コード)
+	7870h に入っていくらしい。
+
+KEY ON
+	78B3h ... CP 95h (ON の中間コード)
+	78A6h に入っていくらしい。
+
+KEY OFF
+	78B7h ... CP EBh (OFF の中間コード)
+	78AAh に入っていくらしい。
+
+	78AA: RST 10h (CALL CHRGTR: 1文字取得)
+	→ JP 00CCh (ERAFNK)

@@ -12,6 +12,8 @@ work_buf                        equ 0F55Eh
 work_dac_int                    equ 0F7F8h
 work_valtyp                     equ 0F663h
 bios_fout                       equ 03425h
+bios_erafnk                     equ 000CCh
+bios_lstfnk                     equ 07871h
 ; BSAVE header -----------------------------------------------------------
         DEFB        0FEh
         DEFW        start_address
@@ -78,6 +80,8 @@ program_start:
         LD          HL, (vars_A)
         CALL        copy_string
         LD          A, (HL)
+        PUSH        AF
+        POP         AF
         LD          L, A
         LD          H, 0
         LD          (work_dac_int), HL
@@ -85,8 +89,27 @@ program_start:
         LD          (work_valtyp), A
         CALL        str
         CALL        puts
+        LD          A, 32
+        RST         018h
         LD          HL, str_4
+        INC         HL
+        LD          A, (HL)
+        DEC         HL
+        PUSH        AF
+        POP         AF
+        LD          L, A
+        LD          H, 0
+        LD          (work_dac_int), HL
+        LD          A, 2
+        LD          (work_valtyp), A
+        CALL        str
         CALL        puts
+        LD          A, 32
+        RST         018h
+        LD          HL, str_5
+        CALL        puts
+        CALL        bios_erafnk
+        CALL        bios_lstfnk
 program_termination:
         LD          SP, (save_stack)
         RET         
@@ -237,9 +260,7 @@ _str_loop:
         INC         B
         JR          _str_loop
 _str_loop_exit:
-        LD          (HL), 32
         POP         HL
-        INC         B
         LD          (HL), B
         RET         
 puts:
@@ -250,6 +271,8 @@ _puts_loop:
         RST         018h
         DJNZ        _puts_loop
         RET         
+        CALL        free_string
+        CALL        free_string
 str_0:
         DEFB        005h, 048h, 045h, 04Ch, 04Ch, 04Fh
 str_1:
@@ -259,6 +282,8 @@ str_2:
 str_3:
         DEFB        001h, 03Ah
 str_4:
+        DEFB        001h, 041h
+str_5:
         DEFB        002h, 00Dh, 00Ah
 save_stack:
         DEFW        0

@@ -69,6 +69,8 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::DEFB,		  { 1, "DEFB" } },
 	{ CMNEMONIC_TYPE::DEFW,		  { 1, "DEFW" } },
 	{ CMNEMONIC_TYPE::RST,        { 1, "RST" } },
+	{ CMNEMONIC_TYPE::RLCA,       { 0, "RLCA" } },
+	{ CMNEMONIC_TYPE::RRCA,       { 0, "RRCA" } },
 };
 
 std::map< CCONDITION, std::string > condition_list = {

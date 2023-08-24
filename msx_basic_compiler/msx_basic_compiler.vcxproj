@@ -161,6 +161,7 @@
     <ClCompile Include="collections\end.cpp" />
     <ClCompile Include="collections\gosub.cpp" />
     <ClCompile Include="collections\goto.cpp" />
+    <ClCompile Include="collections\key.cpp" />
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="double_real.cpp" />
     <ClCompile Include="error_list.cpp" />
     <ClCompile Include="expressions\expression.cpp" />
+    <ClCompile Include="expressions\expression_asc.cpp" />
     <ClCompile Include="expressions\expression_csrlin.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
     <ClCompile Include="expressions\expression_len.cpp" />
@@ -226,6 +228,7 @@
     <ClInclude Include="collections\end.h" />
     <ClInclude Include="collections\gosub.h" />
     <ClInclude Include="collections\goto.h" />
+    <ClInclude Include="collections\key.h" />
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
@@ -241,6 +244,7 @@
     <ClInclude Include="double_real.h" />
     <ClInclude Include="error_list.h" />
     <ClInclude Include="expressions\expression.h" />
+    <ClInclude Include="expressions\expression_asc.h" />
     <ClInclude Include="expressions\expression_csrlin.h" />
     <ClInclude Include="expressions\expression_function.h" />
     <ClInclude Include="expressions\expression_len.h" />

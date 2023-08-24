@@ -12,6 +12,8 @@ work_buf                        = 0x0f55e
 work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
 bios_fout                       = 0x03425
+bios_erafnk                     = 0x000CC
+bios_lstfnk                     = 0x07871
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -78,6 +80,8 @@ program_start:
         LD          HL, [vars_A]
         CALL        copy_string
         LD          A, [HL]
+        PUSH        AF
+        POP         AF
         LD          L, A
         LD          H, 0
         LD          [work_dac_int], HL
@@ -85,8 +89,27 @@ program_start:
         LD          [work_valtyp], A
         CALL        str
         CALL        puts
+        LD          A, 32
+        RST         0x18
         LD          HL, str_4
+        INC         HL
+        LD          A, [HL]
+        DEC         HL
+        PUSH        AF
+        POP         AF
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
         CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_5
+        CALL        puts
+        CALL        bios_erafnk
+        CALL        bios_lstfnk
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -237,9 +260,7 @@ _str_loop:
         INC         B
         JR          _str_loop
 _str_loop_exit:
-        LD          [HL], 32
         POP         HL
-        INC         B
         LD          [HL], B
         RET         
 puts:
@@ -250,6 +271,8 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
+        CALL        free_string
+        CALL        free_string
 str_0:
         DEFB        0x05, 0x48, 0x45, 0x4C, 0x4C, 0x4F
 str_1:
@@ -259,6 +282,8 @@ str_2:
 str_3:
         DEFB        0x01, 0x3A
 str_4:
+        DEFB        0x01, 0x41
+str_5:
         DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
