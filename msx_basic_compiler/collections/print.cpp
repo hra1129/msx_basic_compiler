@@ -95,6 +95,10 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:
 				p_info->assembler_list.activate_str();
@@ -105,6 +109,10 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:
 				p_info->assembler_list.activate_str();
@@ -114,6 +122,10 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::STRING:

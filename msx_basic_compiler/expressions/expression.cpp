@@ -29,6 +29,7 @@
 #include "expression_term.h"
 #include "expression_variable.h"
 
+#include "expression_asc.h"
 #include "expression_csrlin.h"
 #include "expression_len.h"
 #include "expression_peek.h"
@@ -247,6 +248,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 			return p_result;
 		}
 		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "ASC" ) {
+		CEXPRESSION_ASC *p_term = new CEXPRESSION_ASC;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( s_operator == "CSRLIN" ) {

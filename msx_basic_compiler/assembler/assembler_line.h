@@ -67,6 +67,8 @@ enum class CMNEMONIC_TYPE: int {
 	DEFB,
 	DEFW,
 	RST,
+	RLCA,
+	RRCA,
 };
 
 enum class CCONDITION: int {

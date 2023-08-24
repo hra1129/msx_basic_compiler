@@ -36,6 +36,8 @@ public:
 	}
 
 	bool exec( std::string s_name );
+
+	void line_compile( void );
 };
 
 #endif

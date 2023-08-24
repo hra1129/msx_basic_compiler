@@ -15,6 +15,7 @@
 #include "collections/end.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
+#include "collections/key.h"
 #include "collections/let.h"
 #include "collections/out.h"
 #include "collections/poke.h"
@@ -39,6 +40,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CEND );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
+	this->collection.push_back( new CKEY );
 	this->collection.push_back( new CLET );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );
@@ -69,9 +71,35 @@ void CCOMPILER::insert_label( void ) {
 }
 
 // --------------------------------------------------------------------
-bool CCOMPILER::exec( std::string s_name ) {
+void CCOMPILER::line_compile( void ) {
 	bool do_exec;
+
+	while( !this->info.list.is_line_end() || this->info.list.p_position->s_word != "ELSE" ) {
+		do_exec = false;
+		if( this->info.list.p_position->s_word == ":" ) {
+			this->info.list.p_position++;
+			continue;
+		}
+		for( auto p: this->collection ) {
+			do_exec = p->exec( &(this->info) );
+			if( do_exec ) {
+				break;
+			}
+		}
+		if( !do_exec ) {
+			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
+			this->info.list.update_current_line_no();
+			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
+			this->info.list.skip_statement();
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+bool CCOMPILER::exec( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
+
+	this->info.p_compiler = this;
 
 	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
 	//	実装をシンプルにするために、途中で変わることは想定しない。
@@ -162,22 +190,10 @@ bool CCOMPILER::exec( std::string s_name ) {
 			//	新しい行なので、ラベルの挿入をチェックする
 			this->insert_label();
 		}
-		do_exec = false;
-		if( this->info.list.p_position->s_word == ":" ) {
-			this->info.list.p_position++;
-			continue;
-		}
-		for( auto p: this->collection ) {
-			do_exec = p->exec( &(this->info) );
-			if( do_exec ) {
-				break;
-			}
-		}
-		if( !do_exec ) {
-			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
-			this->info.list.update_current_line_no();
+		this->line_compile();
+		if( !this->info.list.is_line_end() ) {
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
-			this->info.list.skip_statement();
+			this->info.list.p_position++;
 		}
 	}
 

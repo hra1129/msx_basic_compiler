@@ -6,7 +6,6 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\print.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\poke.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\out.obj
-c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\let.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\goto.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\gosub.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\end.obj
@@ -55,6 +54,16 @@ c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_not.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_neq.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_operator_mul.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\let.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_vpeek.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_strig.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_stick.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\vpoke.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_variable.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\call.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_len.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\expression_asc.obj
+c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\key.obj
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_bacon.exe
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_bacon.ilk
 c:\users\hra\documents\github\hra_product\msx_basic_compiler\msx_basic_compiler\debug\msx_bacon.pdb

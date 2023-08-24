@@ -749,7 +749,6 @@ void CASSEMBLER_LIST::activate_allocate_string( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_errhand", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
-
 }
 
 // --------------------------------------------------------------------
@@ -960,11 +959,7 @@ void CASSEMBLER_LIST::activate_str( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_str_loop_exit", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::NONE, "32" );
-	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[HL]", COPERAND_TYPE::NONE, "B" );
 	this->subroutines.push_back( asm_line );
