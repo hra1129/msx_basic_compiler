@@ -10,7 +10,7 @@
 #include "expression_csrlin.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_CSRLIN::optimization( void ) {
+void CEXPRESSION_CSRLIN::optimization( CCOMPILE_INFO *p_this ) {
 	
 }
 

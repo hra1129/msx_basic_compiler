@@ -10,8 +10,10 @@
 #include "expression_operator_imp.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_IMP::optimization( void ) {
+void CEXPRESSION_OPERATOR_IMP::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_left->optimization( p_this );
+	this->p_right->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

@@ -10,7 +10,7 @@
 #include "expression_variable.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_VARIABLE::optimization( void ) {
+void CEXPRESSION_VARIABLE::optimization( CCOMPILE_INFO *p_this ) {
 	
 }
 

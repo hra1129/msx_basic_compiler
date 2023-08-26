@@ -74,7 +74,7 @@ void CCOMPILER::insert_label( void ) {
 void CCOMPILER::line_compile( void ) {
 	bool do_exec;
 
-	while( !this->info.list.is_line_end() || this->info.list.p_position->s_word != "ELSE" ) {
+	while( !this->info.list.is_line_end() && this->info.list.p_position->s_word != "ELSE" ) {
 		do_exec = false;
 		if( this->info.list.p_position->s_word == ":" ) {
 			this->info.list.p_position++;
@@ -98,6 +98,7 @@ void CCOMPILER::line_compile( void ) {
 // --------------------------------------------------------------------
 bool CCOMPILER::exec( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
+	char s_buffer[32];
 
 	this->info.p_compiler = this;
 
@@ -126,12 +127,17 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::ORG, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x8010", COPERAND_TYPE::NONE, "" );
+	sprintf_s( s_buffer, "0x%04X", this->info.options.start_address );
+	asm_line.set( CMNEMONIC_TYPE::ORG, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_buffer, COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	初期化処理
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[save_stack]", COPERAND_TYPE::REGISTER, "SP" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "check_blib", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NZ, COPERAND_TYPE::LABEL, "bios_syntax_error", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "program_start" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -161,6 +167,65 @@ bool CCOMPILER::exec( std::string s_name ) {
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[heap_end]", COPERAND_TYPE::REGISTER, "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	BLIBチェッカー
+	this->info.assembler_list.add_label( "bios_syntax_error", "0x4055" );
+	this->info.assembler_list.add_label( "bios_calslt", "0x001C" );
+	this->info.assembler_list.add_label( "bios_enaslt", "0x0024" );
+	this->info.assembler_list.add_label( "work_mainrom", "0xFCC1" );
+	this->info.assembler_list.add_label( "work_blibslot", "0xF3D3" );
+	this->info.assembler_list.add_label( "signature", "0x4010" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "check_blib", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "a", COPERAND_TYPE::MEMORY_CONSTANT, "[work_blibslot]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "h", COPERAND_TYPE::CONSTANT, "0x40" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_enaslt", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "bc", COPERAND_TYPE::CONSTANT, "8" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "hl", COPERAND_TYPE::LABEL, "signature" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "de", COPERAND_TYPE::LABEL, "signature_ref" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_check_blib_loop", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "a", COPERAND_TYPE::MEMORY_REGISTER, "[de]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "de", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CPI       , CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR		, CCONDITION::NZ,   COPERAND_TYPE::LABEL, "_check_blib_exit", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP		, CCONDITION::PE,   COPERAND_TYPE::LABEL, "_check_blib_loop", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_check_blib_exit", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "af", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "a", COPERAND_TYPE::MEMORY_CONSTANT, "[work_mainrom]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "h", COPERAND_TYPE::CONSTANT, "0x40" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_enaslt", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EI        , CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "af", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET       , CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "signature_ref", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB		, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "\"BACONLIB\"", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD		, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "iy", COPERAND_TYPE::MEMORY_CONSTANT, "[work_blibslot - 1]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP		, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_calslt", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	初期化処理用変数
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "save_stack", COPERAND_TYPE::NONE, "" );

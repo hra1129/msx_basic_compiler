@@ -10,7 +10,7 @@
 #include "expression_time.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_TIME::optimization( void ) {
+void CEXPRESSION_TIME::optimization( CCOMPILE_INFO *p_this ) {
 	
 }
 

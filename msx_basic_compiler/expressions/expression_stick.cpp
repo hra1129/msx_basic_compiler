@@ -10,8 +10,9 @@
 #include "expression_stick.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_STICK::optimization( void ) {
+void CEXPRESSION_STICK::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

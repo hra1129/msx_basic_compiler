@@ -24,8 +24,15 @@ static void usage( const char *p_name ) {
 	fprintf( stderr, "    -msx2 .... MSX2\n");
 	fprintf( stderr, "    -msx2p ... MSX2+\n");
 	fprintf( stderr, "    -msxtr ... MSXturboR\n");
+	fprintf( stderr, "  Optimization levels.\n" );
+	fprintf( stderr, "    -O0 ...... No optimization is performed.\n");
+	fprintf( stderr, "    -O1 ...... Only pre-calculation of arithmetic nodes.\n");
+	fprintf( stderr, "    -O2 ...... It also reconstructs the generated code.\n");
+	fprintf( stderr, "    -O3 ...... Maximum optimization.\n");
+	fprintf( stderr, "  Start address.\n" );
+	fprintf( stderr, "    -start n . Starting address of program code. (Default: 0x8010)\n" );
 	fprintf( stderr, "  Stack size.\n" );
-	fprintf( stderr, "    -stack n . call stack size.\n" );
+	fprintf( stderr, "    -stack n . Call stack size. (Default: 256)\n" );
 }
 
 // --------------------------------------------------------------------
@@ -55,6 +62,27 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 			}
 			else if( s == "-msxtr" ) {
 				this->target_type = CTARGET_TYPES::MSXTR;
+			}
+			else if( s == "-O0" ) {
+				this->optimize_level = COPTIMIZE_LEVEL::NONE;
+			}
+			else if( s == "-O1" ) {
+				this->optimize_level = COPTIMIZE_LEVEL::NODE_ONLY;
+			}
+			else if( s == "-O2" ) {
+				this->optimize_level = COPTIMIZE_LEVEL::CODE;
+			}
+			else if( s == "-O3" ) {
+				this->optimize_level = COPTIMIZE_LEVEL::DEEP;
+			}
+			else if( s == "-start" && (i + 1) != argc ) {
+				this->start_address = atoi( argv[i + 1] );
+				if( this->start_address < 32768 ) {
+					this->start_address = 32768;
+				}
+				else if( this->start_address > 65535 ) {
+					this->start_address = 65535;
+				}
 			}
 			else if( s == "-stack" && (i + 1) != argc ) {
 				this->stack_size = atoi( argv[i + 1] );
@@ -112,7 +140,22 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 		printf( "  Output type: MSXturboR\n" );
 		break;
 	}
-	printf( "  Stack size : %d", this->stack_size );
+	switch( this->optimize_level ) {
+	case COPTIMIZE_LEVEL::NONE:
+		printf( "  Optimization level: O0 (None)\n" );
+		break;
+	case COPTIMIZE_LEVEL::NODE_ONLY:
+		printf( "  Optimization level: O1 (Node Only)\n" );
+		break;
+	case COPTIMIZE_LEVEL::CODE:
+		printf( "  Optimization level: O2 (Code)\n" );
+		break;
+	case COPTIMIZE_LEVEL::DEEP:
+		printf( "  Optimization level: O3 (Deep)\n" );
+		break;
+	}
+	printf( "  Start address : 0x%04X\n", this->start_address );
+	printf( "  Stack size    : %d\n", this->stack_size );
 	return result;
 }
 

@@ -10,8 +10,9 @@
 #include "expression_str.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_STR::optimization( void ) {
+void CEXPRESSION_STR::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

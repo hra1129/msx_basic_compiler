@@ -10,8 +10,9 @@
 #include "expression_operator_not.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_NOT::optimization( void ) {
+void CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_right->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

@@ -10,8 +10,9 @@
 #include "expression_strig.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_STRIG::optimization( void ) {
+void CEXPRESSION_STRIG::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

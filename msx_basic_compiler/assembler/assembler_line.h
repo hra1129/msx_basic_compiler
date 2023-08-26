@@ -69,6 +69,8 @@ enum class CMNEMONIC_TYPE: int {
 	RST,
 	RLCA,
 	RRCA,
+	DI,
+	EI,
 };
 
 enum class CCONDITION: int {

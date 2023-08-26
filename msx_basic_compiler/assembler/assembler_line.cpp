@@ -71,6 +71,8 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::RST,        { 1, "RST" } },
 	{ CMNEMONIC_TYPE::RLCA,       { 0, "RLCA" } },
 	{ CMNEMONIC_TYPE::RRCA,       { 0, "RRCA" } },
+	{ CMNEMONIC_TYPE::EI,         { 0, "EI" } },
+	{ CMNEMONIC_TYPE::DI,         { 0, "DI" } },
 };
 
 std::map< CCONDITION, std::string > condition_list = {

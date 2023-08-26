@@ -10,8 +10,10 @@
 #include "expression_operator_intdiv.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_INTDIV::optimization( void ) {
+void CEXPRESSION_OPERATOR_INTDIV::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_left->optimization( p_this );
+	this->p_right->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

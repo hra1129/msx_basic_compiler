@@ -10,8 +10,9 @@
 #include "expression_asc.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_ASC::optimization( void ) {
+void CEXPRESSION_ASC::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------
