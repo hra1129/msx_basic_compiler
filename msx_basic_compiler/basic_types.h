@@ -46,19 +46,31 @@ enum class CTARGET_TYPES {
 };
 
 // --------------------------------------------------------------------
+enum class COPTIMIZE_LEVEL: int {
+	NONE = 0,
+	NODE_ONLY = 1,
+	CODE = 2,
+	DEEP = 3,
+};
+
+// --------------------------------------------------------------------
 class COPTIONS {
 public:
 	std::string s_input_name;
 	std::string s_output_name;
+	int start_address;
 	int stack_size;
 
 	COUTPUT_TYPES output_type;
 	CTARGET_TYPES target_type;
+	COPTIMIZE_LEVEL optimize_level;
 
 	COPTIONS() {
 		this->output_type = COUTPUT_TYPES::ZMA;
 		this->target_type = CTARGET_TYPES::MSX1;
+		this->start_address = 0x8010;
 		this->stack_size = 256;
+		this->optimize_level = COPTIMIZE_LEVEL::CODE;
 	}
 
 	bool parse_options( char *argv[], int argc );

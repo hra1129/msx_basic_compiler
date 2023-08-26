@@ -10,7 +10,7 @@
 #include "expression_function.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_FUNCTION::optimization( void ) {
+void CEXPRESSION_FUNCTION::optimization( CCOMPILE_INFO *p_this ) {
 	
 }
 

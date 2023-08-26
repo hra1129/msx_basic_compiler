@@ -34,8 +34,10 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 	else if( p_info->list.p_position->s_word == "LIST" ) {
-		p_info->assembler_list.add_label( "bios_lstfnk", "0x07871" );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_lstfnk", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.add_label( "blib_key_list", "0x04018" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::LABEL, "blib_key_list" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}

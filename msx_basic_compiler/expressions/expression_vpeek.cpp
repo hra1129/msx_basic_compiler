@@ -10,8 +10,9 @@
 #include "expression_vpeek.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_VPEEK::optimization( void ) {
+void CEXPRESSION_VPEEK::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

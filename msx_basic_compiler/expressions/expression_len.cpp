@@ -10,8 +10,9 @@
 #include "expression_len.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_LEN::optimization( void ) {
+void CEXPRESSION_LEN::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_operand->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

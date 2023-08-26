@@ -2,18 +2,19 @@
 ; Compiled by MSX-BACON from test.asc
 ; ------------------------------------------------------------------------
 ; 
-bios_chgmod                     = 0x0005F
-bios_chgclr                     = 0x00062
-work_forclr                     = 0x0F3E9
-work_bakclr                     = 0x0F3EA
-work_bdrclr                     = 0x0F3EB
-bios_errhand                    = 0x0406F
-work_buf                        = 0x0f55e
-work_dac_int                    = 0x0f7f8
+bios_syntax_error               = 0x4055
+bios_calslt                     = 0x001C
+bios_enaslt                     = 0x0024
+work_mainrom                    = 0xFCC1
+work_blibslot                   = 0xF3D3
+signature                       = 0x4010
 work_valtyp                     = 0x0f663
+work_dac                        = 0x0f7f6
+bios_vmovfm                     = 0x02f08
+bios_neg                        = 0x02e8d
+bios_frcsng                     = 0x0303a
+bios_absfn                      = 0x02e82
 bios_fout                       = 0x03425
-bios_erafnk                     = 0x000CC
-bios_lstfnk                     = 0x07871
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -22,94 +23,29 @@ bios_lstfnk                     = 0x07871
         ORG         0x8010
 start_address:
         LD          [save_stack], SP
+        CALL        check_blib
+        JP          NZ, bios_syntax_error
         LD          DE, program_start
         JP          program_run
 program_start:
-        LD          HL, 1
-        LD          A, L
-        CALL        bios_chgmod
-        LD          HL, 15
-        LD          A, L
-        LD          [work_forclr], A
-        LD          HL, 4
-        LD          A, L
-        LD          [work_bakclr], A
-        LD          HL, 7
-        LD          A, L
-        LD          [work_bdrclr], A
-        CALL        bios_chgclr
-        LD          HL, vars_A
-        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_absfn
+        LD          HL, work_dac
+        CALL        ld_dac_single_real
+        CALL        str
+        CALL        puts
+        LD          A, 32
+        RST         0x18
         LD          HL, str_0
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        CALL        str_add
-        CALL        copy_string
-        PUSH        HL
-        LD          HL, 100
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        POP         DE
-        CALL        str_add
-        CALL        copy_string
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, str_2
-        PUSH        HL
         CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, [vars_A]
-        CALL        copy_string
-        LD          A, [HL]
-        PUSH        AF
-        POP         AF
-        LD          L, A
-        LD          H, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_4
-        INC         HL
-        LD          A, [HL]
-        DEC         HL
-        PUSH        AF
-        POP         AF
-        LD          L, A
-        LD          H, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_5
-        CALL        puts
-        CALL        bios_erafnk
-        CALL        bios_lstfnk
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -124,128 +60,39 @@ program_run:
         SBC         HL, DE
         LD          [heap_end], HL
         RET         
-free_string:
-        LD          DE, heap_start
-        RST         0x20
-        RET         C
-        LD          DE, [heap_next]
-        RST         0x20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          free_heap
-free_heap:
-        LD          E, L
-        LD          D, H
-        ADD         HL, BC
-        EX          DE, HL
-        PUSH        HL
-        LD          HL, [heap_next]
-        OR          A, A
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
-        LD          [heap_next], DE
-        LD          A, B
-        OR          A, C
-        JR          Z, _free_heap_loop1
-        LDIR        
-        LD          [heap_next], DE
-_free_heap_loop1:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          HL, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop1_next:
-        POP         HL
-        INC         HL
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          C, _free_heap_loop1
+check_blib:
+        LD          a, [work_blibslot]
+        LD          h, 0x40
+        CALL        bios_enaslt
+        LD          bc, 8
+        LD          hl, signature
+        LD          de, signature_ref
+_check_blib_loop:
+        LD          a, [de]
+        INC         de
+        CPI         
+        JR          NZ, _check_blib_exit
+        JP          PE, _check_blib_loop
+_check_blib_exit:
+        PUSH        af
+        LD          a, [work_mainrom]
+        LD          h, 0x40
+        CALL        bios_enaslt
+        EI          
+        POP         af
         RET         
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          D, 0
-        ADD         HL, DE
+signature_ref:
+        DEFB        "BACONLIB"
+call_blib:
+        LD          iy, [work_blibslot - 1]
+        JP          bios_calslt
+puts:
+        LD          B, [HL]
+_puts_loop:
         INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], A
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-str_add:
-        PUSH        DE
-        PUSH        HL
-        LD          C, [HL]
-        LD          A, [DE]
-        ADD         A, C
-        JR          C, _str_add_error
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        INC         HL
-        LD          DE, work_buf+1
-        LD          B, 0
-        LDIR        
-        POP         HL
-        LD          C, [HL]
-        INC         HL
-        LDIR        
-        LD          [work_buf], A
-        POP         HL
-        CALL        free_string
-        POP         HL
-        CALL        free_string
-        LD          A, [work_buf]
-        CALL        allocate_string
-        PUSH        HL
-        LD          DE, work_buf
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
-_str_add_error:
-        LD          E, 15
-        JP          bios_errhand
-copy_string:
         LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
+        RST         0x18
+        DJNZ        _puts_loop
         RET         
 str:
         CALL        bios_fout
@@ -263,27 +110,16 @@ _str_loop_exit:
         POP         HL
         LD          [HL], B
         RET         
-puts:
-        LD          B, [HL]
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
+ld_dac_single_real:
+        LD          DE, work_dac
+        LD          BC, 4
+        LDIR        
+        LD          [work_dac+4], BC
+        LD          [work_dac+6], BC
         RET         
-        CALL        free_string
-        CALL        free_string
+const_41123400:
+        DEFB        0x41, 0x12, 0x34, 0x00
 str_0:
-        DEFB        0x05, 0x48, 0x45, 0x4C, 0x4C, 0x4F
-str_1:
-        DEFB        0x07, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21
-str_2:
-        DEFB        0x02, 0x41, 0x3D
-str_3:
-        DEFB        0x01, 0x3A
-str_4:
-        DEFB        0x01, 0x41
-str_5:
         DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
@@ -298,8 +134,6 @@ heap_remap_address:
 var_area_start:
 var_area_end:
 vars_area_start:
-vars_A:
-        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:

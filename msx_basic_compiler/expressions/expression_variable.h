@@ -21,7 +21,7 @@ public:
 		this->release();
 	}
 
-	void optimization( void );
+	void optimization( CCOMPILE_INFO *p_this );
 
 	void compile( CCOMPILE_INFO *p_this );
 

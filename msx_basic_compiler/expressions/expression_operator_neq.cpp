@@ -10,8 +10,10 @@
 #include "expression_operator_neq.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_NEQ::optimization( void ) {
+void CEXPRESSION_OPERATOR_NEQ::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_left->optimization( p_this );
+	this->p_right->optimization( p_this );
 }
 
 // --------------------------------------------------------------------

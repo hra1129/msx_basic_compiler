@@ -10,8 +10,10 @@
 #include "expression_operator_lt.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_LT::optimization( void ) {
+void CEXPRESSION_OPERATOR_LT::optimization( CCOMPILE_INFO *p_this ) {
 	
+	this->p_left->optimization( p_this );
+	this->p_right->optimization( p_this );
 }
 
 // --------------------------------------------------------------------
