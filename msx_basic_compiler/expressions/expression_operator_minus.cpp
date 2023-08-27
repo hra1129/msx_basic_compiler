@@ -39,9 +39,9 @@ void CEXPRESSION_OPERATOR_MINUS::compile( CCOMPILE_INFO *p_this ) {
 		p_this->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac + 2]", COPERAND_TYPE::MEMORY_REGISTER, "HL" );
 		p_this->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_neg", COPERAND_TYPE::NONE, "" );
-		p_this->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcsng", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_neg", COPERAND_TYPE::NONE, "" );
 		p_this->assembler_list.body.push_back( asm_line );
 		this->type = CEXPRESSION_TYPE::SINGLE_REAL;
 	}

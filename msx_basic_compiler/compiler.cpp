@@ -15,6 +15,7 @@
 #include "collections/end.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
+#include "collections/if.h"
 #include "collections/key.h"
 #include "collections/let.h"
 #include "collections/out.h"
@@ -40,6 +41,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CEND );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
+	this->collection.push_back( new CIF );
 	this->collection.push_back( new CKEY );
 	this->collection.push_back( new CLET );
 	this->collection.push_back( new COUT );
