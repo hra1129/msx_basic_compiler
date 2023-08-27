@@ -8,23 +8,15 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-work_valtyp                     = 0x0f663
-work_dac                        = 0x0f7f6
-bios_vmovfm                     = 0x02f08
-bios_neg                        = 0x02e8d
-bios_frcsng                     = 0x0303a
-bios_rnd                        = 0x02bdf
-bios_frcdbl                     = 0x0303a
+bios_chgmod                     = 0x0005F
+bios_chgclr                     = 0x00062
+work_forclr                     = 0x0F3E9
+work_bakclr                     = 0x0F3EA
+work_bdrclr                     = 0x0F3EB
+work_jiffy                      = 0x0fc9e
 bios_fout                       = 0x03425
-bios_int                        = 0x030cf
-bios_sgn                        = 0x02e97
 work_dac_int                    = 0x0f7f8
-bios_sin                        = 0x029AC
-bios_cos                        = 0x02993
-bios_tan                        = 0x029FB
-bios_atn                        = 0x02A14
-bios_log                        = 0x02A72
-bios_exp                        = 0x02b4a
+work_valtyp                     = 0x0f663
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -39,82 +31,51 @@ start_address:
         JP          program_run
 program_start:
         LD          HL, 1
-        LD          A, 2
-        LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_frcsng
-        CALL        bios_neg
-        LD          HL, work_dac
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_rnd
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, 1
-        LD          A, 2
-        LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_frcsng
-        CALL        bios_neg
-        LD          HL, work_dac
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_rnd
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_4699999998765400
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_int
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_44123456
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_neg
-        LD          HL, work_dac
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_sgn
-        LD          HL, [work_dac + 2]
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 15
+        LD          A, L
+        LD          [work_forclr], A
         LD          HL, 0
-        LD          A, 2
-        LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_sgn
-        LD          HL, [work_dac + 2]
+        LD          A, L
+        LD          [work_bakclr], A
+        LD          HL, 0
+        LD          A, L
+        LD          [work_bdrclr], A
+        CALL        bios_chgclr
+        LD          HL, vari_X
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, vari_Y
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, vari_Z
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, 0
+        LD          [work_jiffy], HL
+line_120:
+        LD          HL, str_0
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vari_X]
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -122,102 +83,129 @@ program_start:
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_0
+        LD          HL, str_1
         CALL        puts
-        LD          HL, const_44123456
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_sgn
-        LD          HL, [work_dac + 2]
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_4131415926535000
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_sin
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_4131415926535000
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_cos
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
+line_130:
+        LD          HL, vari_Z
+        PUSH        HL
+        LD          HL, [vari_Z]
+        PUSH        HL
         LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, [vari_Z]
+        PUSH        HL
+        LD          HL, 100
+        POP         DE
+        EX          DE, HL
+        XOR         A, A
+        SBC         HL, DE
+        JR          NC, _pt2
+        DEC         A
+_pt2:
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt1
+        JP          line_130
+_pt1:
+        LD          HL, vari_Z
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+_pt0:
+        LD          HL, vari_Y
+        PUSH        HL
+        LD          HL, [vari_Y]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, [vari_Y]
+        PUSH        HL
+        LD          HL, 100
+        POP         DE
+        EX          DE, HL
+        XOR         A, A
+        SBC         HL, DE
+        JR          NC, _pt5
+        DEC         A
+_pt5:
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt4
+        JP          line_130
+_pt4:
+        LD          HL, vari_Y
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+_pt3:
+        LD          HL, vari_X
+        PUSH        HL
+        LD          HL, [vari_X]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, [vari_X]
+        PUSH        HL
+        LD          HL, 10
+        POP         DE
+        EX          DE, HL
+        XOR         A, A
+        SBC         HL, DE
+        JR          NC, _pt8
+        DEC         A
+_pt8:
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt7
+        JP          line_120
+_pt7:
+_pt6:
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [work_jiffy]
+        LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_frcdbl
-        CALL        bios_tan
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
         CALL        str
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_4131415926535000
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_atn
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_4127182818285000
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_log
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
-        CALL        puts
-        LD          HL, const_41100000
-        LD          A, 4
-        LD          [work_valtyp], A
-        CALL        bios_vmovfm
-        CALL        bios_frcdbl
-        CALL        bios_exp
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
-        CALL        str
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_0
+        LD          HL, str_1
         CALL        puts
 program_termination:
         LD          SP, [save_stack]
@@ -267,6 +255,62 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
+free_string:
+        LD          DE, heap_start
+        RST         0x20
+        RET         C
+        LD          DE, [heap_next]
+        RST         0x20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          free_heap
+free_heap:
+        LD          E, L
+        LD          D, H
+        ADD         HL, BC
+        EX          DE, HL
+        PUSH        HL
+        LD          HL, [heap_next]
+        OR          A, A
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          [heap_move_size], BC
+        LD          [heap_remap_address], HL
+        LD          [heap_next], DE
+        LD          A, B
+        OR          A, C
+        JR          Z, _free_heap_loop1
+        LDIR        
+        LD          [heap_next], DE
+_free_heap_loop1:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop1_next
+        LD          HL, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop1_next:
+        POP         HL
+        INC         HL
+        LD          DE, varsa_area_end
+        RST         0x20
+        JR          C, _free_heap_loop1
+        RET         
 str:
         CALL        bios_fout
         DEC         HL
@@ -283,25 +327,12 @@ _str_loop_exit:
         POP         HL
         LD          [HL], B
         RET         
-ld_dac_double_real:
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR        
-        LD          A, 8
-        LD          [work_valtyp], A
-        RET         
-const_41100000:
-        DEFB        0x41, 0x10, 0x00, 0x00
-const_44123456:
-        DEFB        0x44, 0x12, 0x34, 0x56
-const_4127182818285000:
-        DEFB        0x41, 0x27, 0x18, 0x28, 0x18, 0x28, 0x50, 0x00
-const_4131415926535000:
-        DEFB        0x41, 0x31, 0x41, 0x59, 0x26, 0x53, 0x50, 0x00
-const_4699999998765400:
-        DEFB        0x46, 0x99, 0x99, 0x99, 0x98, 0x76, 0x54, 0x00
 str_0:
+        DEFB        0x02, 0x58, 0x3D
+str_1:
         DEFB        0x02, 0x0D, 0x0A
+str_2:
+        DEFB        0x08, 0x43, 0x4F, 0x4D, 0x50, 0x4C, 0x45, 0x54, 0x45
 save_stack:
         DEFW        0
 heap_next:
@@ -313,6 +344,12 @@ heap_move_size:
 heap_remap_address:
         DEFW        0
 var_area_start:
+vari_X:
+        DEFW        0
+vari_Y:
+        DEFW        0
+vari_Z:
+        DEFW        0
 var_area_end:
 vars_area_start:
 vars_area_end:

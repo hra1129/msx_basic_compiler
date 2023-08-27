@@ -59,6 +59,8 @@ public:
 	void activate_convert_to_integer( void );
 	void activate_convert_to_integer_from_sngle_real( class CCONSTANT_INFO *p_constants );
 	void activate_convert_to_integer_from_double_real( class CCONSTANT_INFO *p_constants );
+	void activate_single_real_is_zero( void );
+	void activate_double_real_is_zero( void );
 };
 
 #endif
