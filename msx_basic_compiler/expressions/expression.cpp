@@ -31,14 +31,24 @@
 
 #include "expression_abs.h"
 #include "expression_asc.h"
+#include "expression_atn.h"
+#include "expression_cos.h"
 #include "expression_csrlin.h"
+#include "expression_exp.h"
+#include "expression_int.h"
 #include "expression_len.h"
+#include "expression_log.h"
 #include "expression_peek.h"
+#include "expression_rnd.h"
+#include "expression_sgn.h"
 #include "expression_str.h"
 #include "expression_time.h"
 #include "expression_vpeek.h"
+#include "expression_sgn.h"
+#include "expression_sin.h"
 #include "expression_stick.h"
 #include "expression_strig.h"
+#include "expression_tan.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -279,10 +289,66 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "ATN" ) {
+		CEXPRESSION_ATN *p_term = new CEXPRESSION_ATN;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "COS" ) {
+		CEXPRESSION_COS *p_term = new CEXPRESSION_COS;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "CSRLIN" ) {
 		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
 		p_result = p_term;
 		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "EXP" ) {
+		CEXPRESSION_EXP *p_term = new CEXPRESSION_EXP;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "INT" ) {
+		CEXPRESSION_INT *p_term = new CEXPRESSION_INT;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( s_operator == "LEN" ) {
@@ -299,8 +365,64 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "LOG" ) {
+		CEXPRESSION_LOG *p_term = new CEXPRESSION_LOG;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "PEEK" ) {
 		CEXPRESSION_PEEK *p_term = new CEXPRESSION_PEEK;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "RND" ) {
+		CEXPRESSION_RND *p_term = new CEXPRESSION_RND;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "SGN" ) {
+		CEXPRESSION_SGN *p_term = new CEXPRESSION_SGN;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "SIN" ) {
+		CEXPRESSION_SIN *p_term = new CEXPRESSION_SIN;
 		p_result = p_term;
 		p_this->list.p_position++;
 		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
@@ -343,6 +465,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 	}
 	else if( s_operator == "STR$" ) {
 		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "TAN" ) {
+		CEXPRESSION_TAN *p_term = new CEXPRESSION_TAN;
 		p_result = p_term;
 		p_this->list.p_position++;
 		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
