@@ -13,10 +13,12 @@ bios_chgclr                     = 0x00062
 work_forclr                     = 0x0F3E9
 work_bakclr                     = 0x0F3EA
 work_bdrclr                     = 0x0F3EB
-work_jiffy                      = 0x0fc9e
+blib_iotget_int                 = 0x0401b
 bios_fout                       = 0x03425
 work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
+blib_iotget_str                 = 0x0401e
+bios_errhand                    = 0x0406F
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -36,46 +38,30 @@ program_start:
         LD          HL, 15
         LD          A, L
         LD          [work_forclr], A
-        LD          HL, 0
+        LD          HL, 4
         LD          A, L
         LD          [work_bakclr], A
-        LD          HL, 0
+        LD          HL, 7
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
-        LD          HL, vari_X
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, vari_Y
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, vari_Z
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, 0
-        LD          [work_jiffy], HL
-line_120:
         LD          HL, str_0
         PUSH        HL
+        LD          HL, vari_L
+        EX          [SP], HL
+        LD          ix, blib_iotget_int
+        CALL        call_blib
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_1
+        PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, [vari_X]
+        LD          HL, [vari_L]
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -83,121 +69,25 @@ line_120:
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_1
-        CALL        puts
-line_130:
-        LD          HL, vari_Z
-        PUSH        HL
-        LD          HL, [vari_Z]
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        ADD         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, [vari_Z]
-        PUSH        HL
-        LD          HL, 100
-        POP         DE
-        EX          DE, HL
-        XOR         A, A
-        SBC         HL, DE
-        JR          NC, _pt2
-        DEC         A
-_pt2:
-        LD          H, A
-        LD          L, A
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt1
-        JP          line_130
-_pt1:
-        LD          HL, vari_Z
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-_pt0:
-        LD          HL, vari_Y
-        PUSH        HL
-        LD          HL, [vari_Y]
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        ADD         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, [vari_Y]
-        PUSH        HL
-        LD          HL, 100
-        POP         DE
-        EX          DE, HL
-        XOR         A, A
-        SBC         HL, DE
-        JR          NC, _pt5
-        DEC         A
-_pt5:
-        LD          H, A
-        LD          L, A
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt4
-        JP          line_130
-_pt4:
-        LD          HL, vari_Y
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-_pt3:
-        LD          HL, vari_X
-        PUSH        HL
-        LD          HL, [vari_X]
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        ADD         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, [vari_X]
-        PUSH        HL
-        LD          HL, 10
-        POP         DE
-        EX          DE, HL
-        XOR         A, A
-        SBC         HL, DE
-        JR          NC, _pt8
-        DEC         A
-_pt8:
-        LD          H, A
-        LD          L, A
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt7
-        JP          line_120
-_pt7:
-_pt6:
         LD          HL, str_2
+        CALL        puts
+        LD          HL, str_3
+        PUSH        HL
+        LD          HL, vari_B
+        EX          [SP], HL
+        LD          ix, blib_iotget_int
+        CALL        call_blib
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_1
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, [work_jiffy]
+        LD          HL, [vari_B]
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -205,7 +95,32 @@ _pt6:
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_1
+        LD          HL, str_2
+        CALL        puts
+        LD          HL, str_4
+        PUSH        HL
+        LD          HL, vars_IP
+        EX          [SP], HL
+        LD          ix, blib_iotget_str
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_5
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_IP]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
         CALL        puts
 program_termination:
         LD          SP, [save_stack]
@@ -327,12 +242,48 @@ _str_loop_exit:
         POP         HL
         LD          [HL], B
         RET         
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], A
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 str_0:
-        DEFB        0x02, 0x58, 0x3D
+        DEFB        0x12, 0x68, 0x6F, 0x73, 0x74, 0x2F, 0x62, 0x61, 0x74, 0x74, 0x65, 0x72, 0x79, 0x2F, 0x6C, 0x65, 0x76, 0x65, 0x6C
 str_1:
-        DEFB        0x02, 0x0D, 0x0A
+        DEFB        0x10, 0x42, 0x61, 0x74, 0x74, 0x65, 0x72, 0x79, 0x20, 0x6C, 0x65, 0x76, 0x65, 0x6C, 0x20, 0x20, 0x3A
 str_2:
-        DEFB        0x08, 0x43, 0x4F, 0x4D, 0x50, 0x4C, 0x45, 0x54, 0x45
+        DEFB        0x02, 0x0D, 0x0A
+str_3:
+        DEFB        0x0F, 0x63, 0x6F, 0x6E, 0x66, 0x2F, 0x62, 0x72, 0x69, 0x67, 0x68, 0x74, 0x6E, 0x65, 0x73, 0x73
+str_4:
+        DEFB        0x07, 0x68, 0x6F, 0x73, 0x74, 0x2F, 0x69, 0x70
+str_5:
+        DEFB        0x10, 0x48, 0x6F, 0x73, 0x74, 0x20, 0x49, 0x50, 0x20, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x3A
 save_stack:
         DEFW        0
 heap_next:
@@ -344,14 +295,14 @@ heap_move_size:
 heap_remap_address:
         DEFW        0
 var_area_start:
-vari_X:
+vari_B:
         DEFW        0
-vari_Y:
-        DEFW        0
-vari_Z:
+vari_L:
         DEFW        0
 var_area_end:
 vars_area_start:
+vars_IP:
+        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:

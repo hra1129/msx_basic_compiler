@@ -128,6 +128,11 @@ public:
 		}
 		return this->p_top_node->type;
 	}
+
+	// ----------------------------------------------------------------
+	void convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE target ) {
+		this->p_top_node->convert_type( p_this, target, this->get_type() );
+	}
 };
 
 #endif

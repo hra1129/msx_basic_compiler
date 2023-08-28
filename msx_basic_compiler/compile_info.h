@@ -26,7 +26,7 @@ public:
 	CCOMPILE_INFO(): auto_label_index(0) {
 	}
 
-	class CCOMPILER		*p_compiler;
+	class CCOMPILER		*p_compiler = nullptr;
 
 	// ----------------------------------------------------------------
 	//	BASICのソースコードとその参照位置を保持

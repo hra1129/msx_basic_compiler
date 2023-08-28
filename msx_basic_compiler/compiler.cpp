@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 
 #include "compiler.h"
+#include "collections/call.h"
 #include "collections/cls.h"
 #include "collections/color.h"
 #include "collections/comment.h"
@@ -27,10 +28,12 @@
 #include "collections/sound.h"
 #include "collections/vpoke.h"
 #include "variable_manager.h"
+#include "./expressions/expression.h"
 
 // --------------------------------------------------------------------
 void CCOMPILER::initialize( void ) {
 
+	this->collection.push_back( new CCALL );
 	this->collection.push_back( new CCLS );
 	this->collection.push_back( new CCOMMENT );
 	this->collection.push_back( new CCOLOR );
@@ -94,6 +97,75 @@ void CCOMPILER::line_compile( void ) {
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
 			this->info.list.skip_statement();
 		}
+	}
+}
+
+// --------------------------------------------------------------------
+//	着目位置の変数名に応じて、その変数のアドレスを取得するコードを生成する
+CVARIABLE CCOMPILER::get_variable_address( void ) {
+	CASSEMBLER_LINE asm_line;
+	CVARIABLE variable;
+
+	variable = this->info.variable_manager.get_variable_info( &this->info );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
+	this->info.assembler_list.body.push_back( asm_line );
+	return variable;
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
+	CASSEMBLER_LINE asm_line;
+
+	switch( variable.type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:
+		//	変数のアドレスを POP
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		//	格納する値を DE, 変数のアドレスを HL へ
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+		//	変数へ DE の値を格納
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "E" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "D" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::SINGLE_REAL:
+		this->info.assembler_list.activate_ld_de_single_real();
+		//	変数のアドレスを POP
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:
+		this->info.assembler_list.activate_ld_de_double_real();
+		//	変数のアドレスを POP
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::STRING:
+		//	文字列の演算結果 [HL] を HEAP にコピー
+		this->info.assembler_list.activate_copy_string();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "copy_string", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		//	変数のアドレスを POP
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "E" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::REGISTER, "D" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
 	}
 }
 
