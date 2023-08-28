@@ -38,6 +38,11 @@ public:
 	bool exec( std::string s_name );
 
 	void line_compile( void );
+
+	//	変数のアドレスを取得する処理
+	CVARIABLE get_variable_address( void );
+	//	変数へ値を格納する処理
+	void write_variable_value( CVARIABLE &variable );
 };
 
 #endif
