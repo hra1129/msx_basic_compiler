@@ -42,13 +42,14 @@
 #include "expression_rnd.h"
 #include "expression_sgn.h"
 #include "expression_str.h"
-#include "expression_time.h"
-#include "expression_vpeek.h"
 #include "expression_sgn.h"
 #include "expression_sin.h"
 #include "expression_stick.h"
 #include "expression_strig.h"
 #include "expression_tan.h"
+#include "expression_time.h"
+#include "expression_val.h"
+#include "expression_vpeek.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -94,7 +95,7 @@ void CEXPRESSION_NODE::type_adjust_2op( CCOMPILE_INFO *p_this, CEXPRESSION_NODE 
 			p_this->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 			p_this->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "pop_single_real_arg", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "pop_double_real_arg", COPERAND_TYPE::NONE, "" );
 			p_this->assembler_list.body.push_back( asm_line );
 		}
 	}
@@ -495,6 +496,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_this ) {
 		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
 		p_result = p_term;
 		p_this->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "VAL" ) {
+		CEXPRESSION_VAL *p_term = new CEXPRESSION_VAL;
+		p_result = p_term;
+		p_this->list.p_position++;
+		if( !this->check_word( p_this, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_this );
+		if( !this->check_word( p_this, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( s_operator == "VPEEK" ) {

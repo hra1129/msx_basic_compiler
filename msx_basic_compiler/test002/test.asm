@@ -13,12 +13,13 @@ bios_chgclr                     = 0x00062
 work_forclr                     = 0x0F3E9
 work_bakclr                     = 0x0F3EA
 work_bdrclr                     = 0x0F3EB
-blib_iotget_int                 = 0x0401b
+bios_fin                        = 0x3299
+bios_frcdbl                     = 0x303a
+work_dac                        = 0x0f7f6
+work_arg                        = 0x0f847
+bios_decadd                     = 0x0269a
 bios_fout                       = 0x03425
-work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
-blib_iotget_str                 = 0x0401e
-bios_errhand                    = 0x0406F
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -45,81 +46,61 @@ program_start:
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
+; VALの引数
         LD          HL, str_0
+; VALの本体開始
         PUSH        HL
-        LD          HL, vari_L
-        EX          [SP], HL
-        LD          ix, blib_iotget_int
-        CALL        call_blib
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
         INC         HL
-        LD          [HL], D
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
+        LD          A, [HL]
+        CALL        bios_fin
+        CALL        bios_frcdbl
         POP         HL
         CALL        free_string
-        LD          HL, [vari_L]
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
+        LD          HL, work_dac
+; VALの本体終了
+        CALL        push_double_real_hl
+; VALの引数
+        LD          HL, str_1
+; VALの本体開始
+        PUSH        HL
+        INC         HL
+        LD          A, [HL]
+        CALL        bios_fin
+        CALL        bios_frcdbl
+        POP         HL
+        CALL        free_string
+        LD          HL, work_dac
+; VALの本体終了
+        LD          DE, work_dac
+        LD          BC, 8
+        LDIR        
+        CALL        pop_double_real_arg
+        CALL        bios_decadd
+        LD          HL, work_dac
+        CALL        ld_dac_double_real
         CALL        str
         CALL        puts
         LD          A, 32
         RST         0x18
         LD          HL, str_2
         CALL        puts
+; VALの引数
         LD          HL, str_3
+; VALの本体開始
         PUSH        HL
-        LD          HL, vari_B
-        EX          [SP], HL
-        LD          ix, blib_iotget_int
-        CALL        call_blib
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
         INC         HL
-        LD          [HL], D
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
+        LD          A, [HL]
+        CALL        bios_fin
+        CALL        bios_frcdbl
         POP         HL
         CALL        free_string
-        LD          HL, [vari_B]
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
+        LD          HL, work_dac
+; VALの本体終了
+        CALL        ld_dac_double_real
         CALL        str
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_2
-        CALL        puts
-        LD          HL, str_4
-        PUSH        HL
-        LD          HL, vars_IP
-        EX          [SP], HL
-        LD          ix, blib_iotget_str
-        CALL        call_blib
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, str_5
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, [vars_IP]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_2
         CALL        puts
 program_termination:
@@ -226,6 +207,41 @@ _free_heap_loop1_next:
         RST         0x20
         JR          C, _free_heap_loop1
         RET         
+push_double_real_hl:
+        POP         BC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        DE
+        PUSH        BC
+        RET         
+pop_double_real_arg:
+        POP         BC
+        POP         HL
+        LD          [work_arg+6], HL
+        POP         HL
+        LD          [work_arg+4], HL
+        POP         HL
+        LD          [work_arg+2], HL
+        POP         HL
+        LD          [work_arg+0], HL
+        PUSH        BC
+        RET         
 str:
         CALL        bios_fout
         DEC         HL
@@ -242,48 +258,21 @@ _str_loop_exit:
         POP         HL
         LD          [HL], B
         RET         
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], A
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
+ld_dac_double_real:
+        LD          DE, work_dac
+        LD          BC, 8
         LDIR        
-        POP         HL
+        LD          A, 8
+        LD          [work_valtyp], A
         RET         
 str_0:
-        DEFB        0x12, 0x68, 0x6F, 0x73, 0x74, 0x2F, 0x62, 0x61, 0x74, 0x74, 0x65, 0x72, 0x79, 0x2F, 0x6C, 0x65, 0x76, 0x65, 0x6C
+        DEFB        0x03, 0x31, 0x32, 0x33
 str_1:
-        DEFB        0x10, 0x42, 0x61, 0x74, 0x74, 0x65, 0x72, 0x79, 0x20, 0x6C, 0x65, 0x76, 0x65, 0x6C, 0x20, 0x20, 0x3A
+        DEFB        0x06, 0x32, 0x33, 0x34, 0x2E, 0x35, 0x36
 str_2:
         DEFB        0x02, 0x0D, 0x0A
 str_3:
-        DEFB        0x0F, 0x63, 0x6F, 0x6E, 0x66, 0x2F, 0x62, 0x72, 0x69, 0x67, 0x68, 0x74, 0x6E, 0x65, 0x73, 0x73
-str_4:
-        DEFB        0x07, 0x68, 0x6F, 0x73, 0x74, 0x2F, 0x69, 0x70
-str_5:
-        DEFB        0x10, 0x48, 0x6F, 0x73, 0x74, 0x20, 0x49, 0x50, 0x20, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x3A
+        DEFB        0x08, 0x31, 0x32, 0x33, 0x2E, 0x35, 0x36, 0x45, 0x32
 save_stack:
         DEFW        0
 heap_next:
@@ -295,14 +284,8 @@ heap_move_size:
 heap_remap_address:
         DEFW        0
 var_area_start:
-vari_B:
-        DEFW        0
-vari_L:
-        DEFW        0
 var_area_end:
 vars_area_start:
-vars_IP:
-        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:
