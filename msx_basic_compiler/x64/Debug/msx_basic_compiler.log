@@ -1,22 +1,2 @@
-﻿  assembler_list.cpp
-  call.cpp
-  cls.cpp
-  color.cpp
-  comment.cpp
-  defdbl.cpp
-  defint.cpp
-  defsng.cpp
-  defstr.cpp
-  end.cpp
-  gosub.cpp
-  goto.cpp
-  if.cpp
-  key.cpp
-  let.cpp
-  out.cpp
-  poke.cpp
-  print.cpp
-  return.cpp
-  compiler.cpp
-  コードを生成中...
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\poke.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
+﻿  expression_val.cpp
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe
