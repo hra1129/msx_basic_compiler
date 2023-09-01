@@ -136,6 +136,37 @@ std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_t
 }
 
 // --------------------------------------------------------------------
+std::string CASSEMBLER_LINE::convert_operand_hl( std::string s, COUTPUT_TYPES out_type ) {
+
+	if( out_type == COUTPUT_TYPES::ZMA ) {
+		return s;
+	}
+
+	//	HL → (HL)
+	if( s == "hl" || s == "HL" ) {
+		s = "(" + s + ")";
+	}
+
+	//	括弧の付け替え
+	if( s[0] == '[' ) {
+		s[0] = '(';
+	}
+	if( s[ s.size() - 1 ] == ']' ) {
+		s[ s.size() - 1 ] = ')';
+	}
+
+	//	数字の更新
+	if( s[0] == '0' && s[1] == 'x' ) {
+		int value = 0;
+		char s_value[32];
+		sscanf_s( s.c_str(), "%i", &value );
+		sprintf_s( s_value, "0%Xh", value );
+		s = s_value;
+	}
+	return s;
+}
+
+// --------------------------------------------------------------------
 std::string CASSEMBLER_LINE::convert_length( std::string s, size_t length ) {
 
 	if( s.size() < length ) {
@@ -215,6 +246,12 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 					convert_length( command_type.s_name ).c_str(), 
 					convert_operand( this->operand2.s_value, output_type ).c_str() );
 		}
+		return true;
+	case 4:	//	オペランド1個、オペランドが HL の場合は、(HL) に置き換える
+		fprintf( p_file, "        %s%s%s\n", 
+			convert_length( command_type.s_name ).c_str(), 
+			convert_condition( this->condition ).c_str(),
+			convert_operand_hl( this->operand1.s_value, output_type ).c_str() );
 		return true;
 	default:
 		break;

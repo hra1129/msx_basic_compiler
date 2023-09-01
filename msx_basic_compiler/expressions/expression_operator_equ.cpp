@@ -19,6 +19,7 @@ void CEXPRESSION_OPERATOR_EQU::optimization( CCOMPILE_INFO *p_this ) {
 // --------------------------------------------------------------------
 void CEXPRESSION_OPERATOR_EQU::compile( CCOMPILE_INFO *p_this ) {
 	CASSEMBLER_LINE asm_line;
+	std::string s_label;
 
 	//	æ‚É€‚ðˆ—
 	this->p_left->compile( p_this );
@@ -30,6 +31,24 @@ void CEXPRESSION_OPERATOR_EQU::compile( CCOMPILE_INFO *p_this ) {
 
 	if( this->type == CEXPRESSION_TYPE::STRING ) {
 		//	•¶Žš—ñ‚Ìê‡
+		s_label = p_this->get_auto_label();
+		p_this->assembler_list.add_label( "blib_strcmp", "0x04027" );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::NONE, "blib_strcmp" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "0" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		p_this->assembler_list.body.push_back( asm_line );
 		return;
 	}
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
@@ -54,4 +73,5 @@ void CEXPRESSION_OPERATOR_EQU::compile( CCOMPILE_INFO *p_this ) {
 	p_this->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, "A" );
 	p_this->assembler_list.body.push_back( asm_line );
+	this->type = CEXPRESSION_TYPE::INTEGER;
 }

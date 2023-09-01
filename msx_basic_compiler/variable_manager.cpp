@@ -200,7 +200,7 @@ int CVARIABLE_MANAGER::evaluate_dimensions( void ) {
 }
 
 // --------------------------------------------------------------------
-CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info ) {
+CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, bool with_array ) {
 	std::string s_name;
 	std::string s_label;
 	CVARIABLE_TYPE var_type;
@@ -242,12 +242,14 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info ) {
 	else {
 		var_type = p_info->variables.def_types[ s_name[0] - 'A' ];
 	}
-	//	配列変数か？
-	if( !p_info->list.is_command_end() ) {
-		if( p_info->list.p_position->s_word == "(" || p_info->list.p_position->s_word == "[" ) {
-			//	配列変数の場合
-			is_array = true;
-			p_info->list.p_position++;
+	if( with_array ) {
+		//	配列変数か？
+		if( !p_info->list.is_command_end() ) {
+			if( p_info->list.p_position->s_word == "(" || p_info->list.p_position->s_word == "[" ) {
+				//	配列変数の場合
+				is_array = true;
+				p_info->list.p_position++;
+			}
 		}
 	}
 	//	変数ラベルを生成
@@ -271,6 +273,34 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info ) {
 		//	配列の要素数を調べる
 		//	★T.B.D.
 	}
+	if( p_info->variables.dictionary.count( s_label ) == 0 ) {
+		p_info->variables.dictionary[ s_label ] = variable;
+	}
+	else {
+		variable = p_info->variables.dictionary[ s_label ];
+	}
+	return variable;
+}
+
+// --------------------------------------------------------------------
+CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type ) {
+	CVARIABLE variable;
+	std::string s_label;
+
+	//	変数ラベルを生成
+	switch( var_type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:		s_label = "svari";	break;
+	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "svarf";	break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "svard";	break;
+	case CVARIABLE_TYPE::STRING:		s_label = "svars";	break;
+	}
+	s_label = s_label + "_" + s_name;
+	//	変数を登録する
+	variable.s_name = s_name;
+	variable.s_label = s_label;
+	variable.type = var_type;
+	variable.dimension = 0;
 	if( p_info->variables.dictionary.count( s_label ) == 0 ) {
 		p_info->variables.dictionary[ s_label ] = variable;
 	}

@@ -55,7 +55,8 @@ blib_entries::
 			jp		sub_iotput_int
 	blib_iotput_str:
 			jp		sub_iotput_str
-
+	blib_strcmp:
+			jp		sub_strcmp
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -335,4 +336,51 @@ sub_iotput_str::
 			; 送信開始
 			pop		hl
 			jp		_send_string
+			endscope
+
+; =============================================================================
+;	STRCMP
+;	input:
+;		HL ... 文字列1 (BASIC形式)
+;		DE ... 文字列2 (BASIC形式)
+;	output:
+;		HL < DE ... C = 1, Z = 0
+;		HL = DE ... C = 0, Z = 1
+;		HL > DE ... C = 0, Z = 0
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		文字列 HL - DE を求める
+; =============================================================================
+			scope	sub_strcmp
+sub_strcmp::
+			ld		b, [hl]				; B = [HL] の長さ
+			ld		a, [de]				; C = [DE] の長さ
+			ld		c, a
+			inc		hl
+			inc		de
+			ex		de, hl
+
+			inc		b
+			inc		c
+			dec		c
+			jr		z, _loop_end
+			jr		_loop_start
+	_loop:
+			ld		a, [de]
+			cp		a, [hl]
+			ret		c
+			ret		nz
+			inc		hl
+			inc		de
+			dec		c
+			jr		z, _loop_end
+	_loop_start:
+			djnz	_loop
+			; C がまだ残っているので HL < DE と判断。
+			scf
+			ret
+	_loop_end:
+			dec		b
+			ret
 			endscope

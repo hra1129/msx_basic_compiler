@@ -13,12 +13,8 @@ bios_chgclr                     = 0x00062
 work_forclr                     = 0x0F3E9
 work_bakclr                     = 0x0F3EA
 work_bdrclr                     = 0x0F3EB
-bios_fin                        = 0x3299
-bios_frcdbl                     = 0x303a
-work_dac                        = 0x0f7f6
-work_arg                        = 0x0f847
-bios_decadd                     = 0x0269a
 bios_fout                       = 0x03425
+work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -32,6 +28,8 @@ start_address:
         JP          NZ, bios_syntax_error
         LD          DE, program_start
         JP          program_run
+jp_hl:
+        JP          HL
 program_start:
         LD          HL, 1
         LD          A, L
@@ -46,62 +44,333 @@ program_start:
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
-; VALの引数
+        LD          HL, vari_I
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
+        PUSH        HL
+        LD          HL, 10
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt1
+        LD          [svari_I_LABEL], HL
+        JR          _pt0
+_pt1:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt2
+        RST         0x20
+        JR          C, _pt3
+        JR          Z, _pt3
+        RET         NC
+_pt2:
+        RST         0x20
+        RET         C
+_pt3:
+        POP         HL
+_pt0:
+        LD          HL, [vari_I]
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
         LD          HL, str_0
-; VALの本体開始
+        CALL        puts
+        LD          HL, vari_I
         PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
         INC         HL
-        LD          A, [HL]
-        CALL        bios_fin
-        CALL        bios_frcdbl
-        POP         HL
-        CALL        free_string
-        LD          HL, work_dac
-; VALの本体終了
-        CALL        push_double_real_hl
-; VALの引数
-        LD          HL, str_1
-; VALの本体開始
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
         PUSH        HL
+        LD          HL, 10
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
         INC         HL
-        LD          A, [HL]
-        CALL        bios_fin
-        CALL        bios_frcdbl
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt5
+        LD          [svari_I_LABEL], HL
+        JR          _pt4
+_pt5:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt6
+        RST         0x20
+        JR          C, _pt7
+        JR          Z, _pt7
+        RET         NC
+_pt6:
+        RST         0x20
+        RET         C
+_pt7:
         POP         HL
-        CALL        free_string
-        LD          HL, work_dac
-; VALの本体終了
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR        
-        CALL        pop_double_real_arg
-        CALL        bios_decadd
-        LD          HL, work_dac
-        CALL        ld_dac_double_real
+_pt4:
+        LD          HL, [vari_I]
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
         CALL        str
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_2
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
+        LD          HL, str_0
         CALL        puts
-; VALの引数
-        LD          HL, str_3
-; VALの本体開始
+        LD          HL, vari_I
         PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
         INC         HL
-        LD          A, [HL]
-        CALL        bios_fin
-        CALL        bios_frcdbl
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt9
+        LD          [svari_I_LABEL], HL
+        JR          _pt8
+_pt9:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt10
+        RST         0x20
+        JR          C, _pt11
+        JR          Z, _pt11
+        RET         NC
+_pt10:
+        RST         0x20
+        RET         C
+_pt11:
         POP         HL
-        CALL        free_string
-        LD          HL, work_dac
-; VALの本体終了
-        CALL        ld_dac_double_real
+_pt8:
+        LD          HL, vari_J
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_J_FOR_END
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_J_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt13
+        LD          [svari_J_LABEL], HL
+        JR          _pt12
+_pt13:
+        LD          HL, [vari_J]
+        LD          DE, [svari_J_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_J], HL
+        LD          A, D
+        LD          DE, [svari_J_FOR_END]
+        RLCA        
+        JR          C, _pt14
+        RST         0x20
+        JR          C, _pt15
+        JR          Z, _pt15
+        RET         NC
+_pt14:
+        RST         0x20
+        RET         C
+_pt15:
+        POP         HL
+_pt12:
+        LD          HL, [vari_J]
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
         CALL        str
         CALL        puts
         LD          A, 32
         RST         0x18
-        LD          HL, str_2
+        LD          HL, [svari_J_LABEL]
+        CALL        jp_hl
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
+        LD          HL, str_0
+        CALL        puts
+        LD          HL, vari_I
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt17
+        LD          [svari_I_LABEL], HL
+        JR          _pt16
+_pt17:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt18
+        RST         0x20
+        JR          C, _pt19
+        JR          Z, _pt19
+        RET         NC
+_pt18:
+        RST         0x20
+        RET         C
+_pt19:
+        POP         HL
+_pt16:
+        LD          HL, vari_J
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_J_FOR_END
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_J_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt21
+        LD          [svari_J_LABEL], HL
+        JR          _pt20
+_pt21:
+        LD          HL, [vari_J]
+        LD          DE, [svari_J_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_J], HL
+        LD          A, D
+        LD          DE, [svari_J_FOR_END]
+        RLCA        
+        JR          C, _pt22
+        RST         0x20
+        JR          C, _pt23
+        JR          Z, _pt23
+        RET         NC
+_pt22:
+        RST         0x20
+        RET         C
+_pt23:
+        POP         HL
+_pt20:
+        LD          HL, [vari_J]
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, [svari_J_LABEL]
+        CALL        jp_hl
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
+        LD          HL, str_0
         CALL        puts
 program_termination:
         LD          SP, [save_stack]
@@ -151,97 +420,6 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
-free_string:
-        LD          DE, heap_start
-        RST         0x20
-        RET         C
-        LD          DE, [heap_next]
-        RST         0x20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          free_heap
-free_heap:
-        LD          E, L
-        LD          D, H
-        ADD         HL, BC
-        EX          DE, HL
-        PUSH        HL
-        LD          HL, [heap_next]
-        OR          A, A
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
-        LD          [heap_next], DE
-        LD          A, B
-        OR          A, C
-        JR          Z, _free_heap_loop1
-        LDIR        
-        LD          [heap_next], DE
-_free_heap_loop1:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          HL, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop1_next:
-        POP         HL
-        INC         HL
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          C, _free_heap_loop1
-        RET         
-push_double_real_hl:
-        POP         BC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        DE
-        PUSH        BC
-        RET         
-pop_double_real_arg:
-        POP         BC
-        POP         HL
-        LD          [work_arg+6], HL
-        POP         HL
-        LD          [work_arg+4], HL
-        POP         HL
-        LD          [work_arg+2], HL
-        POP         HL
-        LD          [work_arg+0], HL
-        PUSH        BC
-        RET         
 str:
         CALL        bios_fout
         DEC         HL
@@ -258,21 +436,8 @@ _str_loop_exit:
         POP         HL
         LD          [HL], B
         RET         
-ld_dac_double_real:
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR        
-        LD          A, 8
-        LD          [work_valtyp], A
-        RET         
 str_0:
-        DEFB        0x03, 0x31, 0x32, 0x33
-str_1:
-        DEFB        0x06, 0x32, 0x33, 0x34, 0x2E, 0x35, 0x36
-str_2:
         DEFB        0x02, 0x0D, 0x0A
-str_3:
-        DEFB        0x08, 0x31, 0x32, 0x33, 0x2E, 0x35, 0x36, 0x45, 0x32
 save_stack:
         DEFW        0
 heap_next:
@@ -284,6 +449,22 @@ heap_move_size:
 heap_remap_address:
         DEFW        0
 var_area_start:
+svari_I_FOR_END:
+        DEFW        0
+svari_I_FOR_STEP:
+        DEFW        0
+svari_I_LABEL:
+        DEFW        0
+svari_J_FOR_END:
+        DEFW        0
+svari_J_FOR_STEP:
+        DEFW        0
+svari_J_LABEL:
+        DEFW        0
+vari_I:
+        DEFW        0
+vari_J:
+        DEFW        0
 var_area_end:
 vars_area_start:
 vars_area_end:
