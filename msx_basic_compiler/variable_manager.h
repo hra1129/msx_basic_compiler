@@ -31,7 +31,10 @@ public:
 	bool analyze_defvars( class CCOMPILE_INFO *p_info );
 
 	//	Œ»İ‚ÌQÆˆÊ’u‚Ì•Ï”‚Ìî•ñ‚ğ•Ô‚·
-	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info );
+	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
+
+	//	“Áê•Ï”‚ğ’è‹`‚·‚é
+	CVARIABLE put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type );
 };
 
 #endif

@@ -14,11 +14,13 @@
 #include "collections/defsng.h"
 #include "collections/defstr.h"
 #include "collections/end.h"
+#include "collections/for.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
 #include "collections/if.h"
 #include "collections/key.h"
 #include "collections/let.h"
+#include "collections/next.h"
 #include "collections/out.h"
 #include "collections/poke.h"
 #include "collections/print.h"
@@ -42,11 +44,13 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CDEFSNG );
 	this->collection.push_back( new CDEFSTR );
 	this->collection.push_back( new CEND );
+	this->collection.push_back( new CFOR );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
 	this->collection.push_back( new CIF );
 	this->collection.push_back( new CKEY );
 	this->collection.push_back( new CLET );
+	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPRINT );
@@ -102,11 +106,23 @@ void CCOMPILER::line_compile( void ) {
 
 // --------------------------------------------------------------------
 //	着目位置の変数名に応じて、その変数のアドレスを取得するコードを生成する
-CVARIABLE CCOMPILER::get_variable_address( void ) {
+CVARIABLE CCOMPILER::get_variable_address() {
 	CASSEMBLER_LINE asm_line;
 	CVARIABLE variable;
 
 	variable = this->info.variable_manager.get_variable_info( &this->info );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
+	this->info.assembler_list.body.push_back( asm_line );
+	return variable;
+}
+
+// --------------------------------------------------------------------
+//	着目位置の変数名に応じて、その変数のアドレスを取得するコードを生成する (配列は除外)
+CVARIABLE CCOMPILER::get_variable_address_wo_array( void ) {
+	CASSEMBLER_LINE asm_line;
+	CVARIABLE variable;
+
+	variable = this->info.variable_manager.get_variable_info( &this->info, false );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
 	this->info.assembler_list.body.push_back( asm_line );
 	return variable;
@@ -217,6 +233,12 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_run", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_start", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	RUN用サブルーチン

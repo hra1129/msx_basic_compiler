@@ -23,13 +23,14 @@ void CEXPRESSION_OPERATOR_GE::compile( CCOMPILE_INFO *p_this ) {
 
 	//	æ‚É€‚ðˆ—
 	this->p_left->compile( p_this );
-
 	p_this->assembler_list.push_hl( this->p_left->type );
-
 	this->p_right->compile( p_this );
 
 	//	‚±‚Ì‰‰ŽZŽq‚Ì‰‰ŽZŒ‹‰Ê‚Í•K‚¸®”
-	this->type = CEXPRESSION_TYPE::INTEGER;
+	this->type_adjust_2op( p_this, this->p_left, this->p_right );
+
+
+	//	‚±‚Ì‰‰ŽZŽq‚Ì‰‰ŽZŒ‹‰Ê‚Í•K‚¸®”
 	if( this->p_left->type != this->p_right->type && (this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING) ) {
 		//	¶‰E‚Ì€‚ªˆÙ‚È‚éŒ^‚ÅA•Ð•û‚ª•¶Žš—ñŒ^‚È‚çƒGƒ‰[
 		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
@@ -111,4 +112,5 @@ void CEXPRESSION_OPERATOR_GE::compile( CCOMPILE_INFO *p_this ) {
 		asm_line.operand2.s_value = "A";
 		p_this->assembler_list.body.push_back( asm_line );
 	}
+	this->type = CEXPRESSION_TYPE::INTEGER;
 }

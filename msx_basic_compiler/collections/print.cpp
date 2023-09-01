@@ -20,9 +20,6 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word != "PRINT" && p_info->list.p_position->s_word != "LPRINT" ) {
 		return false;
 	}
-	p_info->list.p_position++;
-
-	p_info->assembler_list.activate_puts();
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
 		p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
@@ -31,6 +28,8 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		is_printer = true;
 	}
+	p_info->list.p_position++;
+	p_info->assembler_list.activate_puts();
 
 	has_semicolon = false;
 	while( !p_info->list.is_command_end() ) {
