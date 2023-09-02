@@ -49,7 +49,7 @@ bool CNEXT::exec( CCOMPILE_INFO *p_info ) {
 			if( p_info->for_variable_array.size() > 0 ) {
 				p_info->for_variable_array.pop_back();
 			}
-			p_info->variable_manager.put_special_variable( p_info, variable_loop.s_name + "_LABEL", CVARIABLE_TYPE::INTEGER );
+			p_info->variable_manager.put_special_variable( p_info, variable_loop.s_name + "_LABEL", CVARIABLE_TYPE::INTEGER, variable_loop.type );
 		}
 		//	1•Ï”•¶‚Ìƒ‹[ƒvˆ—
 		variable_loopl = p_info->variables.dictionary[ "s" + variable_loop.s_label + "_LABEL" ];

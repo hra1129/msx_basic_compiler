@@ -283,12 +283,15 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, boo
 }
 
 // --------------------------------------------------------------------
-CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type ) {
+CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type, CVARIABLE_TYPE var_name_type ) {
 	CVARIABLE variable;
 	std::string s_label;
 
+	if( var_name_type == CVARIABLE_TYPE::UNKNOWN ) {
+		var_name_type = var_type;
+	}
 	//	ïœêîÉâÉxÉãÇê∂ê¨
-	switch( var_type ) {
+	switch( var_name_type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:		s_label = "svari";	break;
 	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "svarf";	break;

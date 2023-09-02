@@ -228,6 +228,70 @@ void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_this, CEXPRESSION_TYPE tar
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac_int]" );
 		p_this->assembler_list.body.push_back( asm_line );
 	}
+	else if( target == CEXPRESSION_TYPE::SINGLE_REAL ) {
+		p_this->assembler_list.add_label( "work_valtyp", "0x0f663" );
+		p_this->assembler_list.add_label( "bios_frcsng", "0x02fb2" );
+		if( current == CEXPRESSION_TYPE::INTEGER ) {
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac_int]", COPERAND_TYPE::REGISTER, "HL" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "2" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcsng", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+		}
+		else if( current == CEXPRESSION_TYPE::DOUBLE_REAL ) {
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::REGISTER, "8" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "8" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcsng", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+		}
+	}
+	else if( target == CEXPRESSION_TYPE::DOUBLE_REAL ) {
+		p_this->assembler_list.add_label( "work_valtyp", "0x0f663" );
+		p_this->assembler_list.add_label( "bios_frcdbl", "0x0303a" );
+		if( current == CEXPRESSION_TYPE::INTEGER ) {
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac_int]", COPERAND_TYPE::REGISTER, "HL" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "2" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+		}
+		else if( current == CEXPRESSION_TYPE::SINGLE_REAL ) {
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::REGISTER, "4" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "4" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
+			p_this->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "work_dac" );
+			p_this->assembler_list.body.push_back( asm_line );
+		}
+	}
 	else {
 	}
 }
