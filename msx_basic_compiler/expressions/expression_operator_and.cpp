@@ -10,41 +10,41 @@
 #include "expression_operator_and.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_AND::optimization( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_AND::optimization( CCOMPILE_INFO *p_info ) {
 	
-	this->p_left->optimization( p_this );
-	this->p_right->optimization( p_this );
+	this->p_left->optimization( p_info );
+	this->p_right->optimization( p_info );
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_AND::compile( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_AND::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	æ‚É€‚ğˆ—
-	this->p_left->compile( p_this );
+	this->p_left->compile( p_info );
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING ) {
 		//	‚±‚Ì‰‰Zq‚Í•¶š—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
-		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_left->type != CEXPRESSION_TYPE::INTEGER ) {
 		//	¶‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
-		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
+		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
-	p_this->assembler_list.push_hl( CEXPRESSION_TYPE::INTEGER );
+	p_info->assembler_list.push_hl( CEXPRESSION_TYPE::INTEGER );
 
-	this->p_right->compile( p_this );
+	this->p_right->compile( p_info );
 
 	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
 		//	‚±‚Ì‰‰Zq‚Í•¶š—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
-		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
 		//	‰E‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
-		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
+		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
 	}
 
 	//	‚±‚Ì‰‰Zq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
@@ -55,47 +55,47 @@ void CEXPRESSION_OPERATOR_AND::compile( CCOMPILE_INFO *p_this ) {
 	asm_line.operand1.s_value = "DE";
 	asm_line.operand2.type = COPERAND_TYPE::NONE;
 	asm_line.operand2.s_value = "";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::LD;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "A";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "L";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::AND;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "A";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "E";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::LD;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "L";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "A";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::LD;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "A";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "H";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::AND;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "A";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "D";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	asm_line.type = CMNEMONIC_TYPE::LD;
 	asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand1.s_value = "H";
 	asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 	asm_line.operand2.s_value = "A";
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 }

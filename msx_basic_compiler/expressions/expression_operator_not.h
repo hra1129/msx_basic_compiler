@@ -23,9 +23,9 @@ public:
 		this->release();
 	}
 
-	void optimization( CCOMPILE_INFO *p_this );
+	void optimization( CCOMPILE_INFO *p_info );
 
-	void compile( CCOMPILE_INFO *p_this );
+	void compile( CCOMPILE_INFO *p_info );
 
 	void release( void ) {
 		if( this->p_right != nullptr ) {

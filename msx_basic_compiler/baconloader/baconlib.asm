@@ -4,10 +4,13 @@
 ;	Copyright (C)2023 HRA!
 ; =============================================================================
 
+chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
 blibslot	:= 0xF3D3
+putpnt		:= 0xF3F8
+getpnt		:= 0xF3FA
 buf			:= 0xF55E
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 exptbl		:= 0xFCC1
@@ -57,6 +60,8 @@ blib_entries::
 			jp		sub_iotput_str
 	blib_strcmp:
 			jp		sub_strcmp
+	blib_inkey:
+			jp		sub_inkey
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -382,5 +387,37 @@ sub_strcmp::
 			ret
 	_loop_end:
 			dec		b
+			ret
+			endscope
+
+; =============================================================================
+;	INKEY
+;	input:
+;		none
+;	output:
+;		HL .... 入力された文字 (BASIC形式)
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		何も入力されていなければ "" が返る
+; =============================================================================
+			scope	sub_inkey
+sub_inkey::
+			di
+			ld		hl, [getpnt]
+			ld		a, [putpnt]
+			sub		a, l
+			jr		z, no_key
+		found_key:
+			call	chget
+			ld		hl, buf+1
+			ld		[hl], a
+			dec		hl
+			ld		[hl], 1
+			ret
+		no_key:
+			ld		hl, buf
+			ld		[hl], a
+			ei
 			ret
 			endscope

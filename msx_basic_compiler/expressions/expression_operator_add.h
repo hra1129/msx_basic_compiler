@@ -24,9 +24,9 @@ public:
 		this->release();
 	}
 
-	void optimization( CCOMPILE_INFO *p_this );
+	void optimization( CCOMPILE_INFO *p_info );
 
-	void compile( CCOMPILE_INFO *p_this );
+	void compile( CCOMPILE_INFO *p_info );
 
 	void release( void ) {
 		if( this->p_left != nullptr ) {
@@ -39,7 +39,7 @@ public:
 		}
 	}
 
-	void activate_str_add( CCOMPILE_INFO *p_this );
+	void activate_str_add( CCOMPILE_INFO *p_info );
 };
 
 #endif

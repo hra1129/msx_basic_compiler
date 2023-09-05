@@ -185,6 +185,7 @@
     <ClCompile Include="expressions\expression_csrlin.cpp" />
     <ClCompile Include="expressions\expression_exp.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
+    <ClCompile Include="expressions\expression_inkey.cpp" />
     <ClCompile Include="expressions\expression_int.cpp" />
     <ClCompile Include="expressions\expression_len.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="expressions\expression_csrlin.h" />
     <ClInclude Include="expressions\expression_exp.h" />
     <ClInclude Include="expressions\expression_function.h" />
+    <ClInclude Include="expressions\expression_inkey.h" />
     <ClInclude Include="expressions\expression_int.h" />
     <ClInclude Include="expressions\expression_len.h" />
     <ClInclude Include="expressions\expression_log.h" />

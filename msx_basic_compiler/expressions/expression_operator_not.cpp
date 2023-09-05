@@ -10,42 +10,42 @@
 #include "expression_operator_not.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info ) {
 	
-	this->p_right->optimization( p_this );
+	this->p_right->optimization( p_info );
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_NOT::compile( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_NOT::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	æ‚É€‚ğˆ—
-	this->p_right->compile( p_this );
+	this->p_right->compile( p_info );
 
 	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
 	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
 		//	‚±‚Ì‰‰Zq‚Í•¶š—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
-		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
 		//	‰E‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
-		this->convert_type( p_this, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
+		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
 	}
 
 	//	‚±‚Ì‰‰Zq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
 	this->type = CEXPRESSION_TYPE::INTEGER;
 
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "L" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CPL, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "H" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CPL, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );
-	p_this->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.body.push_back( asm_line );
 }

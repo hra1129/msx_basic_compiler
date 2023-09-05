@@ -211,7 +211,7 @@ bool CBASIC_LIST::is_command_end( void ) {
 	if( this->is_line_end() ) {
 		return true;
 	}
-	return( this->p_position->type != CBASIC_WORD_TYPE::STRING && (this->p_position->s_word == ":" || this->p_position->s_word == "'" || this->p_position->s_word == "REM") );
+	return( this->p_position->type != CBASIC_WORD_TYPE::STRING && (this->p_position->s_word == ":" || this->p_position->s_word == "'" || this->p_position->s_word == "ELSE" || this->p_position->s_word == "REM") );
 }
 
 // --------------------------------------------------------------------

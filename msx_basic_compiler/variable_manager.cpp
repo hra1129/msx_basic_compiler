@@ -165,8 +165,8 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 		variable.dimension = 1;			//	1次元配列
 		dimensions = 1;
 		//	要素番号をスタックに積む
-		//	★	p_this->body.push_back( "\t\tld\t\thl, 10" );
-		//	★	p_this->body.push_back( "\t\tpush\thl" );
+		//	★	p_info->body.push_back( "\t\tld\t\thl, 10" );
+		//	★	p_info->body.push_back( "\t\tpush\thl" );
 	}
 
 	variable.s_name = s_name;

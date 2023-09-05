@@ -1,22 +1,2 @@
-﻿  call.cpp
-  cls.cpp
-  color.cpp
-  comment.cpp
-  defdbl.cpp
-  defint.cpp
-  defsng.cpp
-  defstr.cpp
-  end.cpp
-  for.cpp
-  gosub.cpp
-  goto.cpp
-  if.cpp
-  key.cpp
-  let.cpp
-  next.cpp
-  out.cpp
-  print.cpp
-  expression_function.cpp
-  expression_operator_and.cpp
-  コードを生成中...
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\expressions\expression_function.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
+﻿  expression_atn.cpp
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe
