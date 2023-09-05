@@ -10,7 +10,7 @@
 
 class CGOTO: public CCOMPILER_CONTAINER {
 public:
-	bool exec( CCOMPILE_INFO *p_this );
+	bool exec( CCOMPILE_INFO *p_info );
 };
 
 #endif

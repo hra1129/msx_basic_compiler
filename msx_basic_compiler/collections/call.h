@@ -11,11 +11,11 @@
 class CCALL: public CCOMPILER_CONTAINER {
 private:
 	//	ÉRÉ}ÉìÉhèàóù
-	void iotinit( CCOMPILE_INFO *p_this );
-	void iotget( CCOMPILE_INFO *p_this );
-	void iotput( CCOMPILE_INFO *p_this );
+	void iotinit( CCOMPILE_INFO *p_info );
+	void iotget( CCOMPILE_INFO *p_info );
+	void iotput( CCOMPILE_INFO *p_info );
 public:
-	bool exec( CCOMPILE_INFO *p_this );
+	bool exec( CCOMPILE_INFO *p_info );
 };
 
 #endif

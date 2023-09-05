@@ -10,11 +10,11 @@
 #include "expression_function.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_FUNCTION::optimization( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_FUNCTION::optimization( CCOMPILE_INFO *p_info ) {
 	
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION_FUNCTION::compile( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_FUNCTION::compile( CCOMPILE_INFO *p_info ) {
 	
 }

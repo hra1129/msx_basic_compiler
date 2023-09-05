@@ -10,27 +10,28 @@
 #include "expression_operator_mul.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_MUL::optimization( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_MUL::optimization( CCOMPILE_INFO *p_info ) {
 	
-	this->p_left->optimization( p_this );
-	this->p_right->optimization( p_this );
+	this->p_left->optimization( p_info );
+	this->p_right->optimization( p_info );
 }
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_this ) {
+void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
+	bool already_dac_active = false;
 
 	//	æ‚É€‚ğˆ—
-	this->p_left->compile( p_this );
+	this->p_left->compile( p_info );
 
-	p_this->assembler_list.push_hl( this->p_left->type );
+	p_info->assembler_list.push_hl( this->p_left->type );
 
-	this->p_right->compile( p_this );
+	this->p_right->compile( p_info );
 
 	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
 		//	‚±‚Ì‰‰Zq‚Í•¶š—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
-		p_this->errors.add( TYPE_MISMATCH, p_this->list.get_line_no() );
+		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	else if( this->p_left->type == this->p_right->type ) {
@@ -40,27 +41,90 @@ void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_this ) {
 	else if( this->p_left->type > this->p_right->type ) {
 		//	¶‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å¶‚ğÌ—p
 		this->type = this->p_left->type;
+		//	ƒXƒ^ƒbƒN‚É¶€AHL‚É‰E€B‰E€‚ğ¶€‚ÌŒ^‚ÉŠiã‚°‚·‚é‚Ì‚Å convert_type ‚ğŒÄ‚Ô‚¾‚¯‚Å‚¢‚¢
+		this->convert_type( p_info, this->type, this->p_right->type );
 	}
 	else {
 		//	‰E‚Ì•û‚ªŒ^‚ª‘å‚«‚¢‚Ì‚Å‰E‚ğÌ—p
 		this->type = this->p_right->type;
+		//	ƒXƒ^ƒbƒN‚É¶€AHL‚É‰E€BHL‚ğ•ÛŒì‚µ‚Â‚ÂAƒXƒ^ƒbƒNã‚Ì¶€‚ğ•ÏŠ·‚·‚é
+		if( this->p_left->type == CEXPRESSION_TYPE::INTEGER ) {
+			//	¶€‚ª®”Œ^‚Ìê‡
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			this->convert_type( p_info, this->type, CEXPRESSION_TYPE::INTEGER );
+			if( this->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
+				p_info->assembler_list.activate_ld_arg_single_real();
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_single_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				p_info->assembler_list.activate_ld_arg_double_real();
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_double_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else {
+			//	¶€‚ª’P¸“xÀ”Œ^‚Ìê‡
+
+
+
+
+
+
+
+
+
+
+		}
+		already_dac_active = true;
 	}
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
-		p_this->assembler_list.add_label( "bios_imult", "0x03193" );
-
+		p_info->assembler_list.add_label( "bios_imult", "0x03193" );
 		//	‚±‚Ì‰‰Zq‚ª®”‚Ìê‡
-		asm_line.type = CMNEMONIC_TYPE::POP;
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand1.s_value = "DE";
-		asm_line.operand2.type = COPERAND_TYPE::NONE;
-		asm_line.operand2.s_value = "";
-		p_this->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::CALL;
-		asm_line.operand1.type = COPERAND_TYPE::LABEL;
-		asm_line.operand1.s_value = "bios_imult";
-		asm_line.operand2.type = COPERAND_TYPE::NONE;
-		asm_line.operand2.s_value = "";
-		p_this->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_imult", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else if( this->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
+		p_info->assembler_list.add_label( "bios_decmul", "0x027e6" );
+		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
+		p_info->assembler_list.activate_ld_arg_single_real();
+		p_info->assembler_list.activate_pop_single_real_dac();
+		//	‚±‚Ì‰‰Zq‚ª’P¸“xÀ”‚Ìê‡
+		if( !already_dac_active ) {
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_single_real", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_dac", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_decmul", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "work_dac" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else if( this->type == CEXPRESSION_TYPE::DOUBLE_REAL ) {
+		p_info->assembler_list.add_label( "bios_decmul", "0x027e6" );
+		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
+		p_info->assembler_list.activate_ld_arg_double_real();
+		p_info->assembler_list.activate_pop_double_real_dac();
+		//	‚±‚Ì‰‰Zq‚ª”{¸“xÀ”‚Ìê‡
+		if( !already_dac_active ) {
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_double_real", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_double_real_dac", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_decmul", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "work_dac" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 }

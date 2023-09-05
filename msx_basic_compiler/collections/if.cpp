@@ -77,6 +77,8 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 		else {
 			//	ステートメントの場合
 			p_info->p_compiler->line_compile();
+			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_end_label, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
 	else {
@@ -86,7 +88,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	//	ELSE
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_false_label, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	if( p_info->list.is_command_end() ) {
+	if( p_info->list.is_line_end() ) {
 		//	ELSE は無い
 	}
 	if( p_info->list.p_position->s_word == "ELSE" ) {
