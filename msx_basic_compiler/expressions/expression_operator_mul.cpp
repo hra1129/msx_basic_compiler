@@ -20,6 +20,7 @@ void CEXPRESSION_OPERATOR_MUL::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	bool already_dac_active = false;
+	bool already_arg_active = false;
 
 	//	先に項を処理
 	this->p_left->compile( p_info );
@@ -69,21 +70,20 @@ void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_info ) {
 			}
 			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
+			already_arg_active = true;
 		}
 		else {
-			//	左項が単精度実数型の場合
-
-
-
-
-
-
-
-
-
-
+			//	左項が単精度実数型の場合、先に右項(倍精度)を DAC へコピー
+			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
+			p_info->assembler_list.activate_ld_arg_double_real();
+			p_info->assembler_list.activate_pop_single_real_dac();
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_double_real", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_dac", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			already_dac_active = true;
+			already_arg_active = true;
 		}
-		already_dac_active = true;
 	}
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
 		p_info->assembler_list.add_label( "bios_imult", "0x03193" );
@@ -99,12 +99,14 @@ void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.activate_ld_arg_single_real();
 		p_info->assembler_list.activate_pop_single_real_dac();
 		//	この演算子が単精度実数の場合
-		if( !already_dac_active ) {
+		if( !already_arg_active ) {
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_single_real", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_dac", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
+		if( !already_dac_active ) {
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_dac", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_decmul", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "work_dac" );
@@ -116,12 +118,14 @@ void CEXPRESSION_OPERATOR_MUL::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.activate_ld_arg_double_real();
 		p_info->assembler_list.activate_pop_double_real_dac();
 		//	この演算子が倍精度実数の場合
-		if( !already_dac_active ) {
+		if( !already_arg_active ) {
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_arg_double_real", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_double_real_dac", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
+		if( !already_dac_active ) {
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_double_real_dac", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_decmul", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "work_dac" );
