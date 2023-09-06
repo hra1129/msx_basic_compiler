@@ -20,6 +20,7 @@
 #include "collections/if.h"
 #include "collections/key.h"
 #include "collections/let.h"
+#include "collections/locate.h"
 #include "collections/next.h"
 #include "collections/out.h"
 #include "collections/poke.h"
@@ -50,6 +51,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CIF );
 	this->collection.push_back( new CKEY );
 	this->collection.push_back( new CLET );
+	this->collection.push_back( new CLOCATE );
 	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );

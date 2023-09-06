@@ -165,6 +165,7 @@
     <ClCompile Include="collections\if.cpp" />
     <ClCompile Include="collections\key.cpp" />
     <ClCompile Include="collections\let.cpp" />
+    <ClCompile Include="collections\locate.cpp" />
     <ClCompile Include="collections\next.cpp" />
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
@@ -248,6 +249,7 @@
     <ClInclude Include="collections\if.h" />
     <ClInclude Include="collections\key.h" />
     <ClInclude Include="collections\let.h" />
+    <ClInclude Include="collections\locate.h" />
     <ClInclude Include="collections\next.h" />
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
