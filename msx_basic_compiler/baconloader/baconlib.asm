@@ -62,6 +62,12 @@ blib_entries::
 			jp		sub_strcmp
 	blib_inkey:
 			jp		sub_inkey
+	blib_right:
+			jp		sub_right
+	blib_left:
+			jp		sub_left
+	blib_mid:
+			jp		sub_mid
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -210,7 +216,7 @@ _send_string::
 			endscope
 
 ; =============================================================================
-;	IOTGET (INTEGER)
+;	CALL IOTGET( DEVPATH$, INT_VAR )
 ;	input:
 ;		HL ... デバイスパス文字列 (BASIC形式)
 ;	output:
@@ -241,7 +247,7 @@ sub_iotget_int::
 			endscope
 
 ; =============================================================================
-;	IOTGET (STRING)
+;	CALL IOTGET( DEVPATH$, STR_VAR$ )
 ;	input:
 ;		HL ... デバイスパス文字列 (BASIC形式)
 ;	output:
@@ -278,7 +284,7 @@ sub_iotget_str::
 			endscope
 
 ; =============================================================================
-;	IOTPUT (INTEGER)
+;	CALL IOTPUT( DEVPATH$, INT )
 ;	input:
 ;		HL ... デバイスパス文字列 (BASIC形式)
 ;		DE ... 送信する数値
@@ -315,7 +321,7 @@ sub_iotput_int::
 			endscope
 
 ; =============================================================================
-;	IOTPUT (STRING)
+;	CALL IOTPUT( DEVPATH$, STR$ )
 ;	input:
 ;		HL ... デバイスパス文字列 (BASIC形式)
 ;		DE ... 送信する文字列 (BASIC形式)
@@ -391,7 +397,7 @@ sub_strcmp::
 			endscope
 
 ; =============================================================================
-;	INKEY
+;	INKEY$
 ;	input:
 ;		none
 ;	output:
@@ -420,4 +426,103 @@ sub_inkey::
 			ld		[hl], a
 			ei
 			ret
+			endscope
+
+; =============================================================================
+;	RIGHT$( STR$, N )
+;	input:
+;		HL .... STR$ (BASIC形式)
+;		C ..... 文字数 N
+;	output:
+;		HL .... 切り取られた文字列 (BASIC形式)
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		何も入力されていなければ "" が返る
+; =============================================================================
+			scope	sub_right
+sub_right::
+			ex		de, hl
+			ld		hl, buf
+			ld		[hl], c
+			inc		c
+			dec		c
+			ret		z				; もし、N=0 なら長さ 0 の文字列を返す
+
+			ld		a, [de]			; 文字列の長さ
+			inc		de
+			cp		a, c			; もし、STR$の長さよりも N の方が大きければ、まるまる返す
+			jr		nc, skip
+			ld		c, a
+		skip:
+			ex		de, hl
+			sub		a, c			; A = 文字列長 - N  ※かならず0以上。負にはならない。
+			ld		e, a
+			ld		d, 0
+			ld		b, d
+			add		hl, de
+			ex		de, hl			; DE = STR$ の 切り取り開始位置
+
+			ld		hl, buf
+			ld		[hl], a
+			inc		hl
+			ex		de, hl
+			ldir
+
+			ld		hl, buf
+			ret
+			endscope
+
+; =============================================================================
+;	LEFT$( STR$, N )
+;	input:
+;		HL .... STR$ (BASIC形式)
+;		C ..... 文字数 N
+;	output:
+;		HL .... 切り取られた文字列 (BASIC形式)
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		何も入力されていなければ "" が返る
+; =============================================================================
+			scope	sub_left
+sub_left::
+			ex		de, hl
+			ld		hl, buf
+			ld		[hl], c
+			inc		c
+			dec		c
+			ret		z				; もし、N=0 なら長さ 0 の文字列を返す
+
+			ld		a, [de]			; 文字列の長さ
+			inc		de
+			cp		a, c			; もし、STR$の長さよりも N の方が大きければ、まるまる返す
+			jr		nc, skip
+			ld		c, a
+		skip:
+			ld		b, 0
+
+			ld		hl, buf
+			ld		[hl], a
+			inc		hl
+			ex		de, hl
+			ldir
+			ret
+			endscope
+
+; =============================================================================
+;	MID$( STR$, N, M )
+;	input:
+;		HL .... STR$ (BASIC形式)
+;		B ..... 位置 N
+;		C ..... 文字数 M
+;	output:
+;		HL .... 切り取られた文字列 (BASIC形式)
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		何も入力されていなければ "" が返る
+; =============================================================================
+			scope	sub_mid
+sub_mid::
 			endscope
