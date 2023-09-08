@@ -37,9 +37,12 @@
 #include "expression_exp.h"
 #include "expression_inkey.h"
 #include "expression_int.h"
+#include "expression_left.h"
 #include "expression_len.h"
 #include "expression_log.h"
+#include "expression_mid.h"
 #include "expression_peek.h"
+#include "expression_right.h"
 #include "expression_rnd.h"
 #include "expression_sgn.h"
 #include "expression_str.h"
@@ -301,7 +304,9 @@ void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE tar
 bool CEXPRESSION::check_word( CCOMPILE_INFO *p_info, std::string s, CERROR_ID error_id ) {
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != s ) {
-		p_info->errors.add( error_id, p_info->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+		if( error_id != CERROR_ID::NO_ERROR ) {
+			p_info->errors.add( error_id, p_info->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+		}
 		return false;
 	}
 	p_info->list.p_position++;
@@ -423,6 +428,24 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "LEFT$" ) {
+		CEXPRESSION_LEFT *p_term = new CEXPRESSION_LEFT;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "LEN" ) {
 		CEXPRESSION_LEN *p_term = new CEXPRESSION_LEN;
 		p_result = p_term;
@@ -451,6 +474,33 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "MID$" ) {
+		CEXPRESSION_MID *p_term = new CEXPRESSION_MID;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		p_term->p_operand3 = nullptr;
+		if( this->check_word( p_info, ")", NO_ERROR ) ) {
+			//	‘æ3ˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
+			return p_result;
+		}
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		p_term->p_operand3 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "PEEK" ) {
 		CEXPRESSION_PEEK *p_term = new CEXPRESSION_PEEK;
 		p_result = p_term;
@@ -460,6 +510,24 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "RIGHT$" ) {
+		CEXPRESSION_RIGHT *p_term = new CEXPRESSION_RIGHT;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
