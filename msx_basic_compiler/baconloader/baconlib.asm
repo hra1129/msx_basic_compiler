@@ -454,19 +454,16 @@ sub_right::
 			cp		a, c			; もし、STR$の長さよりも N の方が大きければ、まるまる返す
 			jr		nc, skip
 			ld		c, a
-		skip:
-			ex		de, hl
+			ld		[hl], c			; 長さを更新
+	skip:
+
+			ex		de, hl			; HL = ターゲット文字列, DE = BUF
 			sub		a, c			; A = 文字列長 - N  ※かならず0以上。負にはならない。
-			ld		e, a
+			ld		e, a			; DE = 文字列長 - N
 			ld		d, 0
 			ld		b, d
 			add		hl, de
-			ex		de, hl			; DE = STR$ の 切り取り開始位置
-
-			ld		hl, buf
-			ld		[hl], a
-			inc		hl
-			ex		de, hl
+			ld		de, buf + 1
 			ldir
 
 			ld		hl, buf
@@ -499,7 +496,7 @@ sub_left::
 			cp		a, c			; もし、STR$の長さよりも N の方が大きければ、まるまる返す
 			jr		nc, skip
 			ld		c, a
-		skip:
+	skip:
 			ld		b, 0
 
 			ld		hl, buf
@@ -514,8 +511,8 @@ sub_left::
 ;	MID$( STR$, N, M )
 ;	input:
 ;		HL .... STR$ (BASIC形式)
-;		B ..... 位置 N
-;		C ..... 文字数 M
+;		B ..... 位置 N (先頭の文字は 1)
+;		C ..... 文字数 M (切り出し長)
 ;	output:
 ;		HL .... 切り取られた文字列 (BASIC形式)
 ;	break:
@@ -525,4 +522,38 @@ sub_left::
 ; =============================================================================
 			scope	sub_mid
 sub_mid::
+			ld		a, [hl]
+			cp		a, b
+			jr		c, ret_blank			; 位置が右からはみ出してる場合は空文字列を返す
+			or		a, a
+			jr		z, ret_blank			; そもそも空文字列が指定されてる場合は空文字列を返す
+			inc		c
+			dec		c
+			jr		z, ret_blank			; そもそも 切り出し長 0 が指定されてる場合は空文字列を返す
+
+			; 切り出し先頭位置へ移動
+			ld		e, b
+			ld		d, 0
+			add		hl, de					; HL = HL + (B - 1) + 1    : 文字列長を示す 1byte のフィールドがあるので +1
+
+			; 残りの文字数と、文字数 M を比較する
+			dec		b
+			sub		a, b
+			jr		z, ret_blank			; 残りの文字数が 0 なら空文字列を返す
+			cp		a, c
+			jr		nc, skip				; 残りの文字数の方が少なかった場合は、そのまま。多かった場合は、切り出し長を残りの文字数に置換
+			ld		c, a
+	skip:
+			ex		de, hl
+			ld		b, 0
+			ld		hl, buf
+			ld		[hl], c
+			inc		hl
+			ldir
+			ret
+
+	ret_blank:
+			ld		hl, buf
+			ld		[hl], 0
+			ret
 			endscope

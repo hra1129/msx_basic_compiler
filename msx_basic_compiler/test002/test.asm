@@ -9,10 +9,8 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 bios_chgmod                     = 0x0005F
-bios_posit                      = 0x000C6
-work_csry                       = 0x0F3DC
-work_csrx                       = 0x0F3DD
-work_csrsw                      = 0x0FCA9
+bios_errhand                    = 0x0406F
+blib_right                      = 0x0402d
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -31,87 +29,139 @@ program_start:
         LD          HL, 1
         LD          A, L
         CALL        bios_chgmod
-        LD          HL, 1
-        LD          H, L
-        INC         H
+        LD          HL, vars_A
         PUSH        HL
-        LD          HL, 1
-        LD          A, L
-        INC         A
-        POP         HL
-        LD          L, A
-        CALL        bios_posit
-        LD          HL, 1
-        LD          A, 0x1B
-        RST         0x18
-        LD          A, 0x78
-        INC         L
-        DEC         L
-        JR          Z, _pt0
-        INC         A
-_pt0:
-        RST         0x18
-        LD          A, 0x35
-        RST         0x18
         LD          HL, str_0
-        PUSH        HL
-        CALL        puts
-        POP         HL
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
         CALL        free_string
-        LD          HL, str_1
-        CALL        puts
-        LD          HL, 2
-        LD          H, L
-        INC         H
+        LD          HL, [vars_A]
+        CALL        copy_string
         PUSH        HL
-        LD          HL, 2
-        LD          A, L
-        INC         A
-        POP         HL
-        LD          L, A
-        CALL        bios_posit
-        LD          HL, 1
-        LD          A, 0x1B
-        RST         0x18
-        LD          A, 0x78
-        INC         L
-        DEC         L
-        JR          Z, _pt1
-        INC         A
-_pt1:
-        RST         0x18
-        LD          A, 0x35
-        RST         0x18
-        LD          HL, str_2
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_1
-        CALL        puts
-        LD          HL, 3
-        LD          H, L
-        INC         H
-        PUSH        HL
-        LD          HL, 3
-        LD          A, L
-        INC         A
-        POP         HL
-        LD          L, A
-        CALL        bios_posit
         LD          HL, 0
-        LD          A, 0x1B
-        RST         0x18
-        LD          A, 0x78
-        INC         L
-        DEC         L
-        JR          Z, _pt2
-        INC         A
-_pt2:
-        RST         0x18
-        LD          A, 0x35
-        RST         0x18
-        LD          HL, str_3
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 1
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 2
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 10
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 11
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 12
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
         PUSH        HL
         CALL        puts
         POP         HL
@@ -158,14 +208,6 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-puts:
-        LD          B, [HL]
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
 free_string:
         LD          DE, heap_start
         RST         0x20
@@ -222,14 +264,52 @@ _free_heap_loop1_next:
         RST         0x20
         JR          C, _free_heap_loop1
         RET         
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
+        RET         
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 str_0:
-        DEFB        0x0C, 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x21, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44
+        DEFB        0x0A, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30
 str_1:
         DEFB        0x02, 0x0D, 0x0A
-str_2:
-        DEFB        0x09, 0x4D, 0x4F, 0x47, 0x45, 0x20, 0x4D, 0x4F, 0x47, 0x45
-str_3:
-        DEFB        0x0B, 0x48, 0x55, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D
 save_stack:
         DEFW        0
 heap_next:
@@ -243,6 +323,8 @@ heap_remap_address:
 var_area_start:
 var_area_end:
 vars_area_start:
+vars_A:
+        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:

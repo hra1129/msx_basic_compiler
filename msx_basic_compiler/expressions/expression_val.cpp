@@ -19,9 +19,6 @@ void CEXPRESSION_VAL::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_VAL::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "VALの引数", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.body.push_back( asm_line );
-
 	//	先に引数を処理
 	this->p_operand->compile( p_info );
 
@@ -29,9 +26,6 @@ void CEXPRESSION_VAL::compile( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
-
-	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "VALの本体開始", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.body.push_back( asm_line );
 
 	p_info->assembler_list.add_label( "bios_fin", "0x3299" );
 	p_info->assembler_list.add_label( "bios_frcdbl", "0x303a" );
@@ -54,9 +48,5 @@ void CEXPRESSION_VAL::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "work_dac" );
 	p_info->assembler_list.body.push_back( asm_line );
-
-	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "VALの本体終了", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.body.push_back( asm_line );
-
 	this->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 }

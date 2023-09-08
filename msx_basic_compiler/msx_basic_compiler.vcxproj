@@ -188,8 +188,10 @@
     <ClCompile Include="expressions\expression_function.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
     <ClCompile Include="expressions\expression_int.cpp" />
+    <ClCompile Include="expressions\expression_left.cpp" />
     <ClCompile Include="expressions\expression_len.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
+    <ClCompile Include="expressions\expression_mid.cpp" />
     <ClCompile Include="expressions\expression_operator_add.cpp" />
     <ClCompile Include="expressions\expression_operator_and.cpp" />
     <ClCompile Include="expressions\expression_operator_div.cpp" />
@@ -211,6 +213,7 @@
     <ClCompile Include="expressions\expression_operator_sub.cpp" />
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_peek.cpp" />
+    <ClCompile Include="expressions\expression_right.cpp" />
     <ClCompile Include="expressions\expression_rnd.cpp" />
     <ClCompile Include="expressions\expression_sgn.cpp" />
     <ClCompile Include="expressions\expression_sin.cpp" />
@@ -274,8 +277,10 @@
     <ClInclude Include="expressions\expression_function.h" />
     <ClInclude Include="expressions\expression_inkey.h" />
     <ClInclude Include="expressions\expression_int.h" />
+    <ClInclude Include="expressions\expression_left.h" />
     <ClInclude Include="expressions\expression_len.h" />
     <ClInclude Include="expressions\expression_log.h" />
+    <ClInclude Include="expressions\expression_mid.h" />
     <ClInclude Include="expressions\expression_operator_add.h" />
     <ClInclude Include="expressions\expression_operator_and.h" />
     <ClInclude Include="expressions\expression_operator_div.h" />
@@ -297,6 +302,7 @@
     <ClInclude Include="expressions\expression_operator_sub.h" />
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_peek.h" />
+    <ClInclude Include="expressions\expression_right.h" />
     <ClInclude Include="expressions\expression_rnd.h" />
     <ClInclude Include="expressions\expression_sgn.h" />
     <ClInclude Include="expressions\expression_sin.h" />
