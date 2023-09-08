@@ -11,6 +11,8 @@ signature                       = 0x4010
 bios_chgmod                     = 0x0005F
 bios_errhand                    = 0x0406F
 blib_right                      = 0x0402d
+blib_left                       = 0x04030
+blib_mid                        = 0x04033
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -155,6 +157,270 @@ program_start:
         POP         HL
         PUSH        HL
         LD          IX, blib_right
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 0
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 1
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 2
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 10
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 11
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 12
+        LD          C, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_left
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 1
+        LD          B, L
+        LD          C, 255
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 2
+        LD          B, L
+        LD          C, 255
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 3
+        LD          B, L
+        LD          C, 255
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 3
+        PUSH        HL
+        LD          HL, 4
+        LD          C, L
+        POP         HL
+        LD          B, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 4
+        PUSH        HL
+        LD          HL, 3
+        LD          C, L
+        POP         HL
+        LD          B, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        free_string
+        POP         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_1
+        CALL        puts
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, 11
+        LD          B, L
+        LD          C, 255
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
         CALL        call_blib
         CALL        copy_string
         POP         DE
