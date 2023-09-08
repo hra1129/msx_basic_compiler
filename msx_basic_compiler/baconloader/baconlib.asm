@@ -484,9 +484,9 @@ sub_right::
 ; =============================================================================
 			scope	sub_left
 sub_left::
-			ex		de, hl
-			ld		hl, buf
-			ld		[hl], c
+			ex		de, hl			; DE = STR$
+			ld		hl, buf			; HL = BUF
+			ld		[hl], c			; 切り取る長さを設定
 			inc		c
 			dec		c
 			ret		z				; もし、N=0 なら長さ 0 の文字列を返す
@@ -497,13 +497,15 @@ sub_left::
 			jr		nc, skip
 			ld		c, a
 	skip:
+			ld		[hl], c
+			ld		a, c
+			or		a, a
+			ret		z
 			ld		b, 0
-
-			ld		hl, buf
-			ld		[hl], a
 			inc		hl
 			ex		de, hl
 			ldir
+			ld		hl, buf
 			ret
 			endscope
 
@@ -544,12 +546,15 @@ sub_mid::
 			jr		nc, skip				; 残りの文字数の方が少なかった場合は、そのまま。多かった場合は、切り出し長を残りの文字数に置換
 			ld		c, a
 	skip:
-			ex		de, hl
+			ld		a, c
+			ld		de, buf
+			ld		[de], a
+			or		a, a
+			ret		z
 			ld		b, 0
-			ld		hl, buf
-			ld		[hl], c
-			inc		hl
+			inc		de
 			ldir
+			ld		hl, buf
 			ret
 
 	ret_blank:
