@@ -1,4 +1,4 @@
-﻿  error.cpp
-  compiler.cpp
+﻿  expression.cpp
+  expression_chr.cpp
   コードを生成中...
-  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
+LINK : fatal error LNK1104: ファイル 'C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe' を開くことができません。
