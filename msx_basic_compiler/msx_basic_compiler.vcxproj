@@ -183,6 +183,7 @@
     <ClCompile Include="expressions\expression_abs.cpp" />
     <ClCompile Include="expressions\expression_asc.cpp" />
     <ClCompile Include="expressions\expression_atn.cpp" />
+    <ClCompile Include="expressions\expression_chr.cpp" />
     <ClCompile Include="expressions\expression_cos.cpp" />
     <ClCompile Include="expressions\expression_csrlin.cpp" />
     <ClCompile Include="expressions\expression_exp.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="expressions\expression_abs.h" />
     <ClInclude Include="expressions\expression_asc.h" />
     <ClInclude Include="expressions\expression_atn.h" />
+    <ClInclude Include="expressions\expression_chr.h" />
     <ClInclude Include="expressions\expression_cos.h" />
     <ClInclude Include="expressions\expression_csrlin.h" />
     <ClInclude Include="expressions\expression_exp.h" />

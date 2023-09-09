@@ -1,8 +1,8 @@
-﻿  error.cpp
-  compiler.cpp
+﻿  expression.cpp
+  expression_chr.cpp
   コード生成しています。
-  5 of 1765 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
-    2 functions were new in current compilation
-    130 functions had inline decision re-evaluated but remain unchanged
+  8 of 1772 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+    7 functions were new in current compilation
+    41 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe
