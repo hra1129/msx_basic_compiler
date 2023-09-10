@@ -18,9 +18,7 @@ bool CCLS::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "bios_cls", "0x000C3" );
 	CASSEMBLER_LINE asm_line;
-	asm_line.type = CMNEMONIC_TYPE::CALL;
-	asm_line.operand1.s_value = "bios_cls";
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_cls", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

@@ -150,6 +150,7 @@
     <ClCompile Include="assembler\assembler_line.cpp" />
     <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
+    <ClCompile Include="collections\beep.cpp" />
     <ClCompile Include="collections\call.cpp" />
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
@@ -183,11 +184,13 @@
     <ClCompile Include="expressions\expression_abs.cpp" />
     <ClCompile Include="expressions\expression_asc.cpp" />
     <ClCompile Include="expressions\expression_atn.cpp" />
+    <ClCompile Include="expressions\expression_bin.cpp" />
     <ClCompile Include="expressions\expression_chr.cpp" />
     <ClCompile Include="expressions\expression_cos.cpp" />
     <ClCompile Include="expressions\expression_csrlin.cpp" />
     <ClCompile Include="expressions\expression_exp.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
+    <ClCompile Include="expressions\expression_hex.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
     <ClCompile Include="expressions\expression_inp.cpp" />
     <ClCompile Include="expressions\expression_int.cpp" />
@@ -195,6 +198,7 @@
     <ClCompile Include="expressions\expression_len.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
     <ClCompile Include="expressions\expression_mid.cpp" />
+    <ClCompile Include="expressions\expression_oct.cpp" />
     <ClCompile Include="expressions\expression_operator_add.cpp" />
     <ClCompile Include="expressions\expression_operator_and.cpp" />
     <ClCompile Include="expressions\expression_operator_div.cpp" />
@@ -240,6 +244,7 @@
     <ClInclude Include="assembler\assembler_list.h" />
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
+    <ClInclude Include="collections\beep.h" />
     <ClInclude Include="collections\call.h" />
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />
@@ -275,11 +280,13 @@
     <ClInclude Include="expressions\expression_abs.h" />
     <ClInclude Include="expressions\expression_asc.h" />
     <ClInclude Include="expressions\expression_atn.h" />
+    <ClInclude Include="expressions\expression_bin.h" />
     <ClInclude Include="expressions\expression_chr.h" />
     <ClInclude Include="expressions\expression_cos.h" />
     <ClInclude Include="expressions\expression_csrlin.h" />
     <ClInclude Include="expressions\expression_exp.h" />
     <ClInclude Include="expressions\expression_function.h" />
+    <ClInclude Include="expressions\expression_hex.h" />
     <ClInclude Include="expressions\expression_inkey.h" />
     <ClInclude Include="expressions\expression_inp.h" />
     <ClInclude Include="expressions\expression_int.h" />
@@ -287,6 +294,7 @@
     <ClInclude Include="expressions\expression_len.h" />
     <ClInclude Include="expressions\expression_log.h" />
     <ClInclude Include="expressions\expression_mid.h" />
+    <ClInclude Include="expressions\expression_oct.h" />
     <ClInclude Include="expressions\expression_operator_add.h" />
     <ClInclude Include="expressions\expression_operator_and.h" />
     <ClInclude Include="expressions\expression_operator_div.h" />
