@@ -32,30 +32,17 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 		}
 
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
 
 		if( p_info->options.target_type == CTARGET_TYPES::MSX1 ) {
-			asm_line.type = CMNEMONIC_TYPE::CALL;
-			asm_line.operand1.s_value = "bios_chgmod";
-			asm_line.operand1.type = COPERAND_TYPE::LABEL;
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_chgmod", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			asm_line.type = CMNEMONIC_TYPE::LD;
-			asm_line.operand1.s_value = "IX";
-			asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-			asm_line.operand2.s_value = "bios_chgmodp";
-			asm_line.operand2.type = COPERAND_TYPE::LABEL;
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_chgmodp" );
 			p_info->assembler_list.body.push_back( asm_line );
-
-			asm_line.type = CMNEMONIC_TYPE::CALL;
-			asm_line.operand1.s_value = "bios_extrom";
-			asm_line.operand1.type = COPERAND_TYPE::LABEL;
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		exp.release();
@@ -78,67 +65,23 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.add_label( "work_rg1sv", "0x0f3e0" );
 		p_info->assembler_list.add_label( "bios_wrtvdp", "0x00047" );
 
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::AND;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "3";
-		asm_line.operand2.type = COPERAND_TYPE::CONSTANT;
+		asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "3" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "L";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "A";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "[work_rg1sv]";
-		asm_line.operand2.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_rg1sv]" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::AND;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "0xFC";
-		asm_line.operand2.type = COPERAND_TYPE::CONSTANT;
+		asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0xFC" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::OR;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "B";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "A";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "C";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "1";
-		asm_line.operand2.type = COPERAND_TYPE::CONSTANT;
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::CONSTANT, "1" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::CALL;
-		asm_line.operand1.s_value = "bios_wrtvdp";
-		asm_line.operand1.type = COPERAND_TYPE::LABEL;
-		asm_line.operand2.s_value = "";
-		asm_line.operand2.type = COPERAND_TYPE::NONE;
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_wrtvdp", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;
