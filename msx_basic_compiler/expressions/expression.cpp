@@ -32,10 +32,12 @@
 #include "expression_abs.h"
 #include "expression_asc.h"
 #include "expression_atn.h"
+#include "expression_bin.h"
 #include "expression_chr.h"
 #include "expression_cos.h"
 #include "expression_csrlin.h"
 #include "expression_exp.h"
+#include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
 #include "expression_int.h"
@@ -43,6 +45,7 @@
 #include "expression_len.h"
 #include "expression_log.h"
 #include "expression_mid.h"
+#include "expression_oct.h"
 #include "expression_peek.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
@@ -376,6 +379,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "BIN$" ) {
+		CEXPRESSION_BIN *p_term = new CEXPRESSION_BIN;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "CHR$" ) {
 		CEXPRESSION_CHR *p_term = new CEXPRESSION_CHR;
 		p_result = p_term;
@@ -412,6 +429,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "EXP" ) {
 		CEXPRESSION_EXP *p_term = new CEXPRESSION_EXP;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "HEX$" ) {
+		CEXPRESSION_HEX *p_term = new CEXPRESSION_HEX;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
@@ -526,6 +557,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return p_result;
 		}
 		p_term->p_operand3 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "OCT$" ) {
+		CEXPRESSION_OCT *p_term = new CEXPRESSION_OCT;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
