@@ -33,10 +33,14 @@
 #include "expression_asc.h"
 #include "expression_atn.h"
 #include "expression_bin.h"
+#include "expression_cdbl.h"
 #include "expression_chr.h"
+#include "expression_cint.h"
 #include "expression_cos.h"
+#include "expression_csng.h"
 #include "expression_csrlin.h"
 #include "expression_exp.h"
+#include "expression_fix.h"
 #include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
@@ -393,8 +397,36 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "CDBL" ) {
+		CEXPRESSION_CDBL *p_term = new CEXPRESSION_CDBL;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "CHR$" ) {
 		CEXPRESSION_CHR *p_term = new CEXPRESSION_CHR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "CINT" ) {
+		CEXPRESSION_CINT *p_term = new CEXPRESSION_CINT;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
@@ -421,6 +453,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "CSNG" ) {
+		CEXPRESSION_CSNG *p_term = new CEXPRESSION_CSNG;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "CSRLIN" ) {
 		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
 		p_result = p_term;
@@ -429,6 +475,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "EXP" ) {
 		CEXPRESSION_EXP *p_term = new CEXPRESSION_EXP;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "FIX" ) {
+		CEXPRESSION_FIX *p_term = new CEXPRESSION_FIX;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
