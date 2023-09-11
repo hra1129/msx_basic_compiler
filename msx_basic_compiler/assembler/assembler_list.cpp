@@ -21,6 +21,34 @@ bool CASSEMBLER_LIST::add_subroutines( const std::string s_name ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::add_data( int line_no, const std::string s_value, CCONSTANT_INFO *p_constants ) {
+	CASSEMBLER_LINE asm_line;
+	bool has_label = false;
+	std::string s_label;
+
+	//	既にデータラベルを配置した行番号か？
+	for( auto i: this->data_lines ) {
+		if( i == line_no ) {
+			has_label = true;
+			break;
+		}
+	}
+	if( !has_label ) {
+		this->data_lines.push_back( line_no );
+		s_label = "data_" + std::to_string( line_no );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		this->datas.push_back( asm_line );
+	}
+	
+	CSTRING value;
+	value.set( s_value );
+	s_label = p_constants->add( value );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+	this->datas.push_back( asm_line );
+}
+
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LIST::push_hl( CEXPRESSION_TYPE type ) {
 	CASSEMBLER_LINE asm_line;
 

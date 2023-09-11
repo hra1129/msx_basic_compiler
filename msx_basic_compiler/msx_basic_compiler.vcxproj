@@ -155,6 +155,7 @@
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
     <ClCompile Include="collections\comment.cpp" />
+    <ClCompile Include="collections\data.cpp" />
     <ClCompile Include="collections\defdbl.cpp" />
     <ClCompile Include="collections\defint.cpp" />
     <ClCompile Include="collections\defsng.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\print.cpp" />
+    <ClCompile Include="collections\restore.cpp" />
     <ClCompile Include="collections\return.cpp" />
     <ClCompile Include="collections\run.cpp" />
     <ClCompile Include="collections\screen.cpp" />
@@ -253,6 +255,7 @@
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />
     <ClInclude Include="collections\comment.h" />
+    <ClInclude Include="collections\data.h" />
     <ClInclude Include="collections\defdbl.h" />
     <ClInclude Include="collections\defint.h" />
     <ClInclude Include="collections\defsng.h" />
@@ -270,6 +273,7 @@
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\print.h" />
+    <ClInclude Include="collections\restore.h" />
     <ClInclude Include="collections\return.h" />
     <ClInclude Include="collections\run.h" />
     <ClInclude Include="collections\screen.h" />

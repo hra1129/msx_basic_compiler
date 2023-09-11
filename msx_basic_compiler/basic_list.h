@@ -48,6 +48,7 @@ private:
 	CBASIC_WORD get_comment( void );
 	CBASIC_WORD get_word( void );
 	CBASIC_WORD get_ascii_word( void );
+	CBASIC_WORD get_data_word( void );
 
 	bool load_binary( FILE *p_file, CERROR_LIST &errors );
 	bool load_ascii( FILE *p_file, CERROR_LIST &errors );
@@ -56,6 +57,7 @@ public:
 	std::string s_source_type;
 	std::vector< CBASIC_WORD >::const_iterator p_position;
 	std::vector< int > jump_target_line_no;
+	std::vector< int > data_line_no;
 
 	CBASIC_LIST(): line_no(0), current_line_no(0) {
 	}

@@ -10,6 +10,7 @@
 #include "collections/cls.h"
 #include "collections/color.h"
 #include "collections/comment.h"
+#include "collections/data.h"
 #include "collections/defdbl.h"
 #include "collections/defint.h"
 #include "collections/defsng.h"
@@ -27,6 +28,7 @@
 #include "collections/out.h"
 #include "collections/poke.h"
 #include "collections/print.h"
+#include "collections/restore.h"
 #include "collections/return.h"
 #include "collections/run.h"
 #include "collections/screen.h"
@@ -43,6 +45,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CCLS );
 	this->collection.push_back( new CCOMMENT );
 	this->collection.push_back( new CCOLOR );
+	this->collection.push_back( new CDATA );
 	this->collection.push_back( new CDEFDBL );
 	this->collection.push_back( new CDEFINT );
 	this->collection.push_back( new CDEFSNG );
@@ -60,6 +63,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPRINT );
+	this->collection.push_back( new CRESTORE );
 	this->collection.push_back( new CRETURN );
 	this->collection.push_back( new CRUN );
 	this->collection.push_back( new CSCREEN );
@@ -382,6 +386,16 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.footer.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "end_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.footer.push_back( asm_line );
+
+	//	データ参照用のラベル
+	if( this->info.list.data_line_no.size() != 0 ) {
+		std::string s_label;
+		s_label = "data_" + std::to_string( this->info.list.data_line_no[0] );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "data_ptr", COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
 
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
 	this->info.variables.dump( this->info.assembler_list, this->info.options );

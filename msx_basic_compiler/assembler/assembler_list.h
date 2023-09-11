@@ -30,8 +30,11 @@ public:
 	std::vector< CASSEMBLER_LINE >		variables_area;
 	std::vector< CASSEMBLER_LINE >		footer;
 
+	std::vector<int> data_lines;
+
 	void add_label( const std::string s_name, const std::string s_value );
 	bool add_subroutines( const std::string s_name );
+	void add_data( int line_no, const std::string s_value, class CCONSTANT_INFO *p_constants );
 	void push_hl( CEXPRESSION_TYPE type );
 
 	bool save( const std::string s_file_name, COUTPUT_TYPES output_type );

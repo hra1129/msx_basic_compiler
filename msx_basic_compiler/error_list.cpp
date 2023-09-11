@@ -15,6 +15,7 @@ static std::map< int, std::string > error_name = {
 	{ ILLEGAL_FUNCTION_CALL, "Illegal function call." },
 	{ REDIMENSIONED_ARRAY, "Redimensioned array." },
 	{ TYPE_MISMATCH, "Type mismatch." },
+	{ UNDIFINED_LINE_NUMBER, "Undifined line number." },
 };
 
 // --------------------------------------------------------------------

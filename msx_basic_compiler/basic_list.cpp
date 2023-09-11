@@ -532,12 +532,59 @@ std::string CBASIC_LIST::get_char_in_charlist( const char *p_charlist, bool igno
 }
 
 // --------------------------------------------------------------------
+CBASIC_WORD CBASIC_LIST::get_data_word( void ) {
+	CBASIC_WORD s_word;
+	std::string s;
+
+	this->skip_white_space();
+	s_word.line_no = this->line_no;
+
+	//	データのライン番号を登録する
+	bool has_line_no = false;
+	for( auto i: this->data_line_no ) {
+		if( i == this->line_no ) {
+			has_line_no = true;
+			break;
+		}
+	}
+	if( !has_line_no ) {
+		this->data_line_no.push_back( this->line_no );
+	}
+
+	if( this->p_file_image == this->file_image.end() ) {
+		s_word.s_word = "";
+		s_word.type = CBASIC_WORD_TYPE::UNKNOWN;
+		return s_word;
+	}
+	if( this->p_file_image[0] == '"' ) {
+		//	" で始まる場合
+		this->p_file_image++;
+		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != '"' && this->p_file_image[0] != '\r' && this->p_file_image[0] != '\n' && this->p_file_image[0] != '\0' ) {
+			s = s + (char)this->p_file_image[0];
+			this->p_file_image++;
+		}
+		if( this->p_file_image != this->file_image.end() && this->p_file_image[0] == '"' ) {
+			this->p_file_image++;
+		}
+	}
+	else {
+		//	" が無い場合
+		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != ':' && this->p_file_image[0] != ',' && this->p_file_image[0] != '\r' && this->p_file_image[0] != '\n' && this->p_file_image[0] != '\0' ) {
+			s = s + (char)this->p_file_image[0];
+			this->p_file_image++;
+		}
+	}
+	s_word.s_word = s;
+	s_word.type = CBASIC_WORD_TYPE::STRING;
+	return s_word;
+}
+
+// --------------------------------------------------------------------
 CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 	CBASIC_WORD s_word;
 	std::string s;
 	int i;
 
-	//	スペースは読み飛ばす
 	this->skip_white_space();
 	if( this->p_file_image == this->file_image.end() ) {
 		s_word.s_word = "";
@@ -666,6 +713,7 @@ CBASIC_WORD CBASIC_LIST::get_comment( void ) {
 bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
 	int next_address;
 	CBASIC_WORD s_word;
+	bool is_data = false;
 
 	//	skip 0xFF
 	this->p_file_image++;
@@ -684,7 +732,22 @@ bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
 			s_word = this->get_word();
 			s_word.line_no = line_no;
 			this->words.push_back( s_word );
-			if( s_word.s_word == "'" || s_word.s_word == "REM" ) {
+			if( !is_data && s_word.s_word == "DATA" && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
+				is_data = true;
+			}
+			else if( is_data ) {
+				this->skip_white_space();
+				s_word = this->get_data_word();
+				this->words.push_back( s_word );
+				if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == ',') ) {
+					this->p_file_image++;
+					is_data = true;
+				}
+				else {
+					is_data = false;
+				}
+			}
+			else if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "'" || s_word.s_word == "REM") ) {
 				this->skip_white_space();
 				s_word = this->get_comment();
 				s_word.line_no = line_no;
@@ -706,30 +769,51 @@ bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
 bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 	CBASIC_WORD s_word;
 	bool is_last_jump = false;
+	bool is_data = false;
 
 	while( this->p_file_image != this->file_image.end() ) {
 		//	行番号を得る
 		line_no = this->get_integer();
 		//	行内の解釈
 		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != '\n' ) {
-			//	単語を1つ取得して、行番号を付与してリストに追加
-			s_word = this->get_ascii_word();
-			s_word.line_no = line_no;
-			if( is_last_jump ) {
-				if( s_word.type == CBASIC_WORD_TYPE::INTEGER ) {
-					s_word.type = CBASIC_WORD_TYPE::LINE_NO;
-					this->jump_target_line_no.push_back( std::stoi( s_word.s_word ) );
+			if( is_data ) {
+				//	データを取得
+				s_word = this->get_data_word();
+				if( this->p_file_image != this->file_image.end() ) {
+					if( this->p_file_image[0] == ',' ) {
+						this->p_file_image++;
+					}
+					else {
+						is_data = false;
+					}
 				}
-				else if( s_word.s_word == "ELSE" ) {
-					is_last_jump = true;
-				}
-				else if( s_word.s_word != "," && (s_word.s_word == ":" || s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD) ) {
-					is_last_jump = false;
+				else {
+					is_data = false;
 				}
 			}
 			else {
-				if( s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
-					is_last_jump = true;
+				//	単語を1つ取得して、行番号を付与してリストに追加
+				s_word = this->get_ascii_word();
+				s_word.line_no = line_no;
+				if( is_last_jump ) {
+					if( s_word.type == CBASIC_WORD_TYPE::INTEGER ) {
+						s_word.type = CBASIC_WORD_TYPE::LINE_NO;
+						this->jump_target_line_no.push_back( std::stoi( s_word.s_word ) );
+					}
+					else if( s_word.s_word == "ELSE" ) {
+						is_last_jump = true;
+					}
+					else if( s_word.s_word != "," && (s_word.s_word == ":" || s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD) ) {
+						is_last_jump = false;
+					}
+				}
+				else {
+					if( s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
+						is_last_jump = true;
+					}
+					else if( s_word.s_word == "DATA" ) {
+						is_data = true;
+					}
 				}
 			}
 			this->words.push_back( s_word );
