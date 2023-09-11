@@ -1,9 +1,102 @@
-﻿  expression.cpp
+﻿  assembler_list.cpp
+  basic_list.cpp
+  beep.cpp
+  call.cpp
+  cls.cpp
+  color.cpp
+  comment.cpp
+  data.cpp
+  defdbl.cpp
+  defint.cpp
+  defsng.cpp
+  defstr.cpp
+  end.cpp
+  error.cpp
+  for.cpp
+  gosub.cpp
+  goto.cpp
+  if.cpp
+  key.cpp
+  let.cpp
+  コンパイル中...
+  locate.cpp
+  next.cpp
+  out.cpp
+  poke.cpp
+  print.cpp
+  restore.cpp
+  return.cpp
+  run.cpp
+  screen.cpp
+  sound.cpp
+  vpoke.cpp
+  compiler.cpp
+  error_list.cpp
+  expression.cpp
+  expression_abs.cpp
+  expression_asc.cpp
+  expression_atn.cpp
+  expression_bin.cpp
+  expression_cdbl.cpp
+  expression_chr.cpp
+  コンパイル中...
+  expression_cint.cpp
+  expression_cos.cpp
+  expression_csng.cpp
+  expression_csrlin.cpp
+  expression_exp.cpp
   expression_fix.cpp
+  expression_function.cpp
+  expression_hex.cpp
+  expression_inkey.cpp
+  expression_inp.cpp
   expression_int.cpp
+  expression_left.cpp
+  expression_len.cpp
+  expression_log.cpp
+  expression_mid.cpp
+  expression_oct.cpp
+  expression_operator_add.cpp
+  expression_operator_and.cpp
+  expression_operator_div.cpp
+  expression_operator_eqv.cpp
+  コンパイル中...
+  expression_operator_ge.cpp
+  expression_operator_gt.cpp
+  expression_operator_imp.cpp
+  expression_operator_intdiv.cpp
+  expression_operator_le.cpp
+  expression_operator_lt.cpp
+  expression_operator_minus.cpp
+  expression_operator_mod.cpp
+  expression_operator_mul.cpp
+  expression_operator_neq.cpp
+  expression_operator_not.cpp
+  expression_operator_or.cpp
+  expression_operator_power.cpp
+  expression_operator_sub.cpp
+  expression_operator_xor.cpp
+  expression_peek.cpp
+  expression_right.cpp
+  expression_rnd.cpp
+  expression_sgn.cpp
+  expression_sin.cpp
+  コンパイル中...
+  expression_sqr.cpp
+  expression_stick.cpp
+  expression_str.cpp
+  expression_strig.cpp
+  expression_tan.cpp
+  expression_term.cpp
+  expression_time.cpp
+  expression_val.cpp
+  expression_variable.cpp
+  expression_vpeek.cpp
+  msx_basic_compiler.cpp
+  variable_manager.cpp
   コード生成しています。
-  9 of 1823 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+  228 of 1830 functions (12.5%) were compiled, the rest were copied from previous compilation.
     7 functions were new in current compilation
-    227 functions had inline decision re-evaluated but remain unchanged
+    65 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe
