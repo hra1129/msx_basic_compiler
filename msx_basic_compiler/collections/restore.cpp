@@ -11,7 +11,7 @@
 bool CRESTORE::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
-	int target_line_no, last_line_no;
+	int target_line_no;
 	std::string s_label;
 	bool target_is_found;
 
@@ -40,19 +40,13 @@ bool CRESTORE::exec( CCOMPILE_INFO *p_info ) {
 	//	行番号が指定されている場合
 	target_line_no = std::stoi( p_info->list.p_position->s_word );
 	target_is_found = false;
-	last_line_no = -1;
+	p_info->list.p_position++;
 	for( auto i: p_info->list.data_line_no ) {
-		if( target_line_no > i ) {
-			target_line_no = last_line_no;
-			target_is_found = true;
-			break;
-		}
-		if( target_line_no == i ) {
+		if( target_line_no <= i ) {
 			target_line_no = i;
 			target_is_found = true;
 			break;
 		}
-		last_line_no = i;
 	}
 	if( !target_is_found ) {
 		//	行番号の指定が最後のデータの行より大きい値

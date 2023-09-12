@@ -39,6 +39,8 @@ line_100:
         LD          HL, work_dac
         POP         DE
         CALL        ld_de_double_real
+        LD          HL, data_110
+        LD          [data_ptr], HL
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -83,6 +85,34 @@ ld_de_double_real:
         LD          BC, 8
         LDIR        
         RET         
+data_110:
+        DEFW        str_0
+        DEFW        str_1
+        DEFW        str_2
+        DEFW        str_3
+        DEFW        str_4
+        DEFW        str_0
+data_120:
+        DEFW        str_5
+        DEFW        str_6
+data_140:
+        DEFW        str_7
+str_0:
+        DEFB        0x03, 0x31, 0x32, 0x33
+str_1:
+        DEFB        0x05, 0x26, 0x48, 0x46, 0x30, 0x30
+str_2:
+        DEFB        0x03, 0x41, 0x42, 0x43
+str_3:
+        DEFB        0x03, 0x44, 0x45, 0x46
+str_4:
+        DEFB        0x02, 0x2D, 0x31
+str_5:
+        DEFB        0x02, 0x31, 0x30
+str_6:
+        DEFB        0x02, 0x32, 0x30
+str_7:
+        DEFB        0x08, 0x52, 0x45, 0x4D, 0x20, 0x54, 0x45, 0x53, 0x54
 save_stack:
         DEFW        0
 heap_next:
