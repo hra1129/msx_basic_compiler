@@ -42,7 +42,7 @@ public:
 
 	// ----------------------------------------------------------------
 	//	コンパイル時の型変換処理
-	void convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
+	static void convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
 
 	// ----------------------------------------------------------------
 	//	演算子のオペランドの型揃え(2項演算子用)
@@ -132,6 +132,11 @@ public:
 	// ----------------------------------------------------------------
 	void convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target ) {
 		this->p_top_node->convert_type( p_info, target, this->get_type() );
+	}
+
+	// ----------------------------------------------------------------
+	void convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current ) {
+		this->p_top_node->convert_type( p_info, target, current );
 	}
 };
 
