@@ -173,6 +173,7 @@
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\print.cpp" />
+    <ClCompile Include="collections\read.cpp" />
     <ClCompile Include="collections\restore.cpp" />
     <ClCompile Include="collections\return.cpp" />
     <ClCompile Include="collections\run.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\print.h" />
+    <ClInclude Include="collections\read.h" />
     <ClInclude Include="collections\restore.h" />
     <ClInclude Include="collections\return.h" />
     <ClInclude Include="collections\run.h" />
