@@ -17,6 +17,7 @@ bios_vmovfm                     = 0x02f08
 bios_vmovam                     = 0x02eef
 bios_xdcomp                     = 0x02f5c
 bios_errhand                    = 0x0406F
+bios_fin                        = 0x3299
 work_csrx                       = 0x0f3dd
 work_linlen                     = 0x0f3b0
 bios_fout                       = 0x03425
@@ -195,7 +196,12 @@ _pt4:
         INC         HL
         LD          [data_ptr], HL
         EX          DE, HL
+        INC         HL
+        LD          A, [HL]
+        CALL        bios_fin
+        CALL        bios_frcdbl
         POP         DE
+        LD          HL, work_dac
         CALL        ld_de_double_real
         LD          HL, vard_A
         CALL        ld_dac_double_real
@@ -287,7 +293,12 @@ _pt9:
         INC         HL
         LD          [data_ptr], HL
         EX          DE, HL
+        INC         HL
+        LD          A, [HL]
+        CALL        bios_fin
+        CALL        bios_frcdbl
         POP         DE
+        LD          HL, work_dac
         CALL        ld_de_double_real
         LD          HL, vard_A
         CALL        ld_dac_double_real
