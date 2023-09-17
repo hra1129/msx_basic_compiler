@@ -206,6 +206,7 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, boo
 	CVARIABLE_TYPE var_type;
 	CVARIABLE variable;
 	bool is_array = false;
+	int dimension = 0;
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		return variable;

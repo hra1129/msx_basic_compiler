@@ -57,3 +57,53 @@ vara_area, varsa_area の中に「実体へのポインタ」を格納する変数を作成する。
 		文字列配列の場合、中身の解放も必要。
 	・配列の要素のアドレス取得
 		変数への代入、VARPTR()
+
+
+文字列配列変数の解放
+	HL →	[サイズ:2byte]
+			[次元数:1byte]
+			[要素数:2byte]
+				:
+			[実体 Nbyte]
+
+	実体のアドレス = HL + 2 + 1 + (次元数 << 1)
+
+	実体の中に、この配列変数より若い番地の文字列が格納されている場合、それを解放すると
+	文字列配列のアドレスがズレる → メモリは削除によって若い番地にしか移動しないことと、
+	変数へは必ずコピーが格納されることを考慮すると、配列変数の実体に、配列変数より若い
+	番地が格納されることはあり得ない。従って、解法の途中で配列変数のアドレスがズレること
+	は考慮しなくて良い。
+
+		push	hl					; 最後に解放する「文字列配列」のアドレスを保存
+		ld		e, [hl]				; DE にサイズ
+		inc		hl
+		ld		d, [hl]
+		inc		hl
+		ld		c, [hl]				; C に次元数
+		inc		hl
+		ld		b, 0
+		add		hl, bc
+		add		hl, bc				; ここで実体の先頭アドレス、かつ Cy = 0
+		ex		de, hl				; HL にサイズ、DE に実体アドレス
+		rr		h
+		rr		l					; サイズフィールド分の 1 はこの右シフトで切れる、Cy = 1 になる
+		or		a, a				; Cy = 0
+		sbc		hl, bc				; 次元数を引いて HL = 要素数 にする
+		ex		de, hl				; HL に実体アドレス、DE に要素数
+	loop:
+		push	de
+		ld		e, [hl]
+		inc		hl
+		ld		d, [hl]
+		inc		hl
+		push	hl
+		ex		de, hl
+		call	free_string
+		pop		hl
+		pop		de
+		dec		de
+		ld		a, e
+		or		a, d
+		jr		nz, loop
+		pop		hl
+		jp		free_heap

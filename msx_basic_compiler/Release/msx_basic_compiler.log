@@ -1,7 +1,8 @@
-﻿  read.cpp
+﻿  expression_stick.cpp
+  expression_strig.cpp
   コード生成しています。
-  6 of 1832 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  2 of 1839 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    49 functions had inline decision re-evaluated but remain unchanged
+    46 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

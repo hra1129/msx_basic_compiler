@@ -4,6 +4,8 @@
 ;	Copyright (C)2023 HRA!
 ; =============================================================================
 
+vdpport0	:= 0x98
+wrtvdp		:= 0x0047
 chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
@@ -14,6 +16,10 @@ getpnt		:= 0xF3FA
 buf			:= 0xF55E
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 exptbl		:= 0xFCC1
+rg0sav		:= 0xF3DF
+statfl		:= 0xF3E7
+rg8sav		:= 0xFFE7
+rg15sav		:= 0xFFEE
 
 ; BASIC error codes
 error_syntax					:= 2
@@ -68,6 +74,10 @@ blib_entries::
 			jp		sub_left
 	blib_mid:
 			jp		sub_mid
+	blib_wrvdp:
+			jp		sub_wrvdp
+	blib_rdvdp:
+			jp		sub_rdvdp
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -560,5 +570,91 @@ sub_mid::
 	ret_blank:
 			ld		hl, buf
 			ld		[hl], 0
+			ret
+			endscope
+
+; =============================================================================
+;	VDP( n ) = m
+;	input:
+;		A ..... VDP()レジスタ番号 n
+;		B ..... 書き込むデータ
+;	output:
+;		none
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		n は、BASIC の VDP(n) の n である。V9938/9958 の R#x, S#y の x や y じゃない
+;		ので注意すること。
+;		n が、存在しない番号の場合、何もせずに戻る。
+; =============================================================================
+			scope	sub_wrvdp
+sub_wrvdp::
+			cp		a, 8
+			ret		z				; n = 8 の場合は何もしない
+			ccf
+			sbc		a, 0
+			ld		c, a
+			jp		wrtvdp
+			endscope
+
+; =============================================================================
+;	m = VDP( n )
+;	input:
+;		A ..... VDP()レジスタ番号 n
+;	output:
+;		HL .... 読み出したデータ
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		n は、BASIC の VDP(n) の n である。V9938/9958 の R#x, S#y の x や y じゃない
+;		ので注意すること。
+;		n が、存在しない番号の場合、A に不定を返す。
+; =============================================================================
+			scope	sub_rdvdp
+sub_rdvdp::
+			or		a, a
+			jp		m, _status_read
+			cp		a, 8
+			jr		z, _vdp8
+			jr		c, _vdp0_7
+	_vdp9_48:
+			ld		hl, rg8sav - 9
+			add		a, l
+			ld		l, a
+			ld		a, [hl]
+			ld		l, a
+			ld		h, 0
+			ret
+	_vdp0_7:
+			ld		hl, rg0sav
+			add		a, l
+			ld		l, a
+			ld		a, [hl]
+			ld		l, a
+			ld		h, 0
+			ret
+	_vdp8:
+			ld		a, [statfl]
+			ld		l, a
+			ld		h, 0
+			ret
+	_status_read:
+			ld		c, vdpport0 + 1
+			neg
+			di
+			; R#15 = A
+			out		[c], a
+			ld		a, 15 | 0x80
+			out		[c], a
+			; B = S#n
+			in		b, [c]
+			; R#15 = rg15sav
+			ld		a, [rg15sav]
+			out		[c], a
+			ld		a, 15 | 0x80
+			out		[c], a
+			ei
+			ld		l, b
+			ld		h, 0
 			ret
 			endscope

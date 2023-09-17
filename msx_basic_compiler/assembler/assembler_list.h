@@ -56,6 +56,8 @@ public:
 	void activate_spc( void );
 	void activate_allocate_string( void );
 	void activate_free_string( void );
+	void activate_free_array( void );
+	void activate_free_sarray( void );
 	void activate_copy_string( void );
 	void activate_free_heap( void );
 	void activate_str( void );

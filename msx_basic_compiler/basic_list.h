@@ -26,6 +26,14 @@ public:
 };
 
 // --------------------------------------------------------------------
+//	ソースコードの位置を示す型
+class CBASIC_LIST_POSITION {
+public:
+	std::vector< CBASIC_WORD >::const_iterator p_position;
+	int current_line_no;
+};
+
+// --------------------------------------------------------------------
 //	BASICの単語配列
 class CBASIC_LIST {
 private:
@@ -65,6 +73,18 @@ public:
 	void reset_position( void ) {
 		this->p_position = words.begin();
 		this->current_line_no = -1;
+	}
+
+	void set_position( const CBASIC_LIST_POSITION &pos ) {
+		this->p_position = pos.p_position;
+		this->current_line_no = pos.current_line_no;
+	}
+
+	CBASIC_LIST_POSITION get_position( void ) const {
+		CBASIC_LIST_POSITION pos;
+		pos.p_position = this->p_position;
+		pos.current_line_no = this->current_line_no;
+		return pos;
 	}
 
 	bool is_end( void );
