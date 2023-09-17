@@ -62,6 +62,7 @@
 #include "expression_tan.h"
 #include "expression_time.h"
 #include "expression_val.h"
+#include "expression_vdp.h"
 #include "expression_vpeek.h"
 
 // --------------------------------------------------------------------
@@ -786,6 +787,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "VDP" ) {
+		CEXPRESSION_VDP *p_term = new CEXPRESSION_VDP;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "VPEEK" ) {
 		CEXPRESSION_VPEEK *p_term = new CEXPRESSION_VPEEK;
 		p_result = p_term;
@@ -801,6 +816,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		return p_result;
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+		//	変数の場合
 		CVARIABLE variable = p_info->variable_manager.get_variable_info( p_info );
 		CEXPRESSION_VARIABLE *p_term = new CEXPRESSION_VARIABLE;
 		p_term->variable = variable;
@@ -808,6 +824,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		return p_result;
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::INTEGER ) {
+		//	整数定数の場合
 		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
 		p_term->type = CEXPRESSION_TYPE::INTEGER;
 		p_term->s_value = s_operator;
@@ -816,6 +833,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		return p_result;
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SINGLE_REAL ) {
+		//	単精度実数定数の場合
 		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
 		p_term->type = CEXPRESSION_TYPE::SINGLE_REAL;
 		p_term->s_value = s_operator;
@@ -824,6 +842,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		return p_result;
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::DOUBLE_REAL ) {
+		//	倍精度実数定数の場合
 		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
 		p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 		p_term->s_value = s_operator;
@@ -832,6 +851,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		return p_result;
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::STRING ) {
+		//	文字列定数の場合
 		CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM;
 		p_term->type = CEXPRESSION_TYPE::STRING;
 		p_term->s_value = s_operator;
@@ -1335,6 +1355,11 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_eqv( CCOMPILE_INFO *p_info )
 
 // --------------------------------------------------------------------
 void CEXPRESSION::makeup_node( CCOMPILE_INFO *p_info ) {
+
+	if( this->p_top_node != nullptr ) {
+		//	既にノード生成済みなら何もしない
+		return;
+	}
 
 	this->p_top_node = this->makeup_node_operator_eqv( p_info );
 

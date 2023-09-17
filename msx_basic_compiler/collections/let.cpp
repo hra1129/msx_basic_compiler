@@ -48,6 +48,52 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		}
 		return true;
 	}
+	if( p_info->list.p_position->s_word == "VDP" ) {
+		//	VDPシステム変数への代入
+		p_info->list.p_position++;
+		if( !p_info->list.check_word( &(p_info->errors), "(" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+		}
+		if( !p_info->list.check_word( &(p_info->errors), ")" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "L" );	//	式の評価結果を B へ
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );		//	レジスタ番号を A へ
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+		}
+		p_info->assembler_list.add_label( "blib_wrvdp", "0x04036" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::NONE, "blib_wrvdp" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		return true;
+	}
 	else if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		//	変数名では無いので LET ではない。
 		if( has_let ) {
