@@ -30,7 +30,7 @@ public:
 class CBASIC_LIST_POSITION {
 public:
 	std::vector< CBASIC_WORD >::const_iterator p_position;
-	int current_line_no;
+	int current_line_no = -1;
 };
 
 // --------------------------------------------------------------------

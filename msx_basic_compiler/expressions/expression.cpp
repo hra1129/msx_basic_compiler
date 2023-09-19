@@ -41,6 +41,7 @@
 #include "expression_csrlin.h"
 #include "expression_exp.h"
 #include "expression_fix.h"
+#include "expression_fre.h"
 #include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
@@ -311,11 +312,11 @@ void CEXPRESSION_NODE::convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE tar
 }
 
 // --------------------------------------------------------------------
-bool CEXPRESSION::check_word( CCOMPILE_INFO *p_info, std::string s, CERROR_ID error_id ) {
+bool CEXPRESSION::check_word( CCOMPILE_INFO *p_info, std::string s, int error_id ) {
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != s ) {
 		if( error_id != CERROR_ID::NO_ERROR ) {
-			p_info->errors.add( error_id, p_info->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
+			p_info->errors.add( CERROR_ID( error_id ), p_info->list.get_line_no() );	//	‚ ‚é‚×‚«•Â‚¶Š‡ŒÊ
 		}
 		return false;
 	}
@@ -490,6 +491,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "FIX" ) {
 		CEXPRESSION_FIX *p_term = new CEXPRESSION_FIX;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "FRE" ) {
+		CEXPRESSION_FRE *p_term = new CEXPRESSION_FRE;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
