@@ -66,7 +66,7 @@ private:
 
 	// ----------------------------------------------------------------
 	//	次が指定の単語で無ければ指定のエラーにする
-	bool check_word( CCOMPILE_INFO *p_info, std::string s, CERROR_ID error_id = SYNTAX_ERROR );
+	bool check_word( CCOMPILE_INFO *p_info, std::string s, int error_id = CERROR_ID::SYNTAX_ERROR );
 
 	// ----------------------------------------------------------------
 	//	演算式ツリーの中で事前に演算可能なモノは演算してしまう
