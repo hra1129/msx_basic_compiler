@@ -30,6 +30,9 @@ public:
 	//	コードを解釈して変数リストを作成する
 	bool analyze_defvars( class CCOMPILE_INFO *p_info );
 
+	//	現在の参照位置の変数を生成して情報を返す
+	CVARIABLE create_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
+
 	//	現在の参照位置の変数の情報を返す
 	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
 
