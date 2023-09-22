@@ -162,6 +162,7 @@
     <ClCompile Include="collections\defstr.cpp" />
     <ClCompile Include="collections\dim.cpp" />
     <ClCompile Include="collections\end.cpp" />
+    <ClCompile Include="collections\erase.cpp" />
     <ClCompile Include="collections\error.cpp" />
     <ClCompile Include="collections\for.cpp" />
     <ClCompile Include="collections\gosub.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="collections\defstr.h" />
     <ClInclude Include="collections\dim.h" />
     <ClInclude Include="collections\end.h" />
+    <ClInclude Include="collections\erase.h" />
     <ClInclude Include="collections\error.h" />
     <ClInclude Include="collections\for.h" />
     <ClInclude Include="collections\gosub.h" />

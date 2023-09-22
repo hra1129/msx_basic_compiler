@@ -200,6 +200,71 @@ int CVARIABLE_MANAGER::evaluate_dimensions( void ) {
 	return 0;
 }
 
+//	Œ»Ý‚ÌŽQÆˆÊ’u‚Ì”z—ñ•Ï”‚Ìî•ñ‚ð•Ô‚·
+CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
+	std::string s_name;
+	std::string s_label;
+	CVARIABLE_TYPE var_type;
+	CVARIABLE variable;
+
+	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+		return variable;
+	}
+	//	•Ï”–¼‚ðŽæ“¾
+	s_name = p_info->list.p_position->s_word;
+	p_info->list.p_position++;
+	if( s_name.size() > 2 ) {
+		//	•Ï”–¼Å‘å 2•¶Žš§ŒÀ
+		s_name.resize( 2 );
+	}
+	//	Œ^Ž¯•ÊŽq
+	if( !p_info->list.is_command_end() ) {
+		if( p_info->list.p_position->s_word == "%" ) {
+			var_type = CVARIABLE_TYPE::INTEGER;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "!" ) {
+			var_type = CVARIABLE_TYPE::SINGLE_REAL;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "#" ) {
+			var_type = CVARIABLE_TYPE::DOUBLE_REAL;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "$" ) {
+			var_type = CVARIABLE_TYPE::STRING;
+			p_info->list.p_position++;
+		}
+		else {
+			var_type = p_info->variables.def_types[ s_name[0] - 'A' ];
+		}
+	}
+	else {
+		var_type = p_info->variables.def_types[ s_name[0] - 'A' ];
+	}
+	//	•Ï”ƒ‰ƒxƒ‹‚ð¶¬
+	switch( var_type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:		s_label = "varia";	break;
+	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "varfa";	break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "varda";	break;
+	case CVARIABLE_TYPE::STRING:		s_label = "varsa";	break;
+	}
+	s_label = s_label + "_" + s_name;
+	//	•Ï”‚ð“o˜^‚·‚é
+	variable.s_name = s_name;
+	variable.s_label = s_label;
+	variable.type = var_type;
+	variable.dimension = 0;
+	if( p_info->variables.dictionary.count( s_label ) == 0 ) {
+		p_info->variables.dictionary[ s_label ] = variable;
+	}
+	else {
+		variable = p_info->variables.dictionary[ s_label ];
+	}
+	return variable;
+}
+
 // --------------------------------------------------------------------
 CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, bool with_array ) {
 	std::string s_name;

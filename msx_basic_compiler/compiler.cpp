@@ -17,6 +17,7 @@
 #include "collections/defstr.h"
 #include "collections/dim.h"
 #include "collections/end.h"
+#include "collections/erase.h"
 #include "collections/error.h"
 #include "collections/for.h"
 #include "collections/goto.h"
@@ -54,6 +55,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CDEFSTR );
 	this->collection.push_back( new CDIM );
 	this->collection.push_back( new CEND );
+	this->collection.push_back( new CERASE );
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );
 	this->collection.push_back( new CGOTO );
