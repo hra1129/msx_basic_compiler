@@ -15,6 +15,7 @@
 #include "collections/defint.h"
 #include "collections/defsng.h"
 #include "collections/defstr.h"
+#include "collections/dim.h"
 #include "collections/end.h"
 #include "collections/error.h"
 #include "collections/for.h"
@@ -51,6 +52,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CDEFINT );
 	this->collection.push_back( new CDEFSNG );
 	this->collection.push_back( new CDEFSTR );
+	this->collection.push_back( new CDIM );
 	this->collection.push_back( new CEND );
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );

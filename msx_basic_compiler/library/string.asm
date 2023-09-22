@@ -56,6 +56,7 @@ _free_heap_loop1:
 	JR			C, _free_heap_loop1_next	; 対象外なら飛ぶ
 	; 対象のアドレスなので処理する
 	LD			HL, [heap_move_size]
+	EX			DE, HL
 	SBC			HL, DE
 	POP			DE
 	EX			DE, HL
