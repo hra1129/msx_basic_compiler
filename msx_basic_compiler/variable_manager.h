@@ -36,6 +36,9 @@ public:
 	//	現在の参照位置の変数の情報を返す
 	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
 
+	//	現在の参照位置の配列変数の情報を返す
+	CVARIABLE get_array_info( class CCOMPILE_INFO *p_info );
+
 	//	特殊変数を定義する
 	CVARIABLE put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type, CVARIABLE_TYPE var_name_type = CVARIABLE_TYPE::UNKNOWN );
 };

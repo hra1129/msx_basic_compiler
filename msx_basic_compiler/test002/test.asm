@@ -56,6 +56,10 @@ program_start:
         INC         HL
         LD          [HL], B
         LD          HL, [varia_A]
+        CALL        free_array
+        LD          HL, 0
+        LD          [varia_A], HL
+        LD          HL, [varia_A]
         LD          A, L
         OR          A, H
         JP          NZ, bios_errhand_redim
@@ -84,6 +88,14 @@ program_start:
         LD          [HL], C
         INC         HL
         LD          [HL], B
+        LD          HL, [varia_A]
+        CALL        free_array
+        LD          HL, 0
+        LD          [varia_A], HL
+        LD          HL, [varia_A]
+        CALL        free_array
+        LD          HL, 0
+        LD          [varia_A], HL
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -145,6 +157,121 @@ allocate_heap:
 _allocate_heap_error:
         LD          E, 7
         JP          bios_errhand
+free_array:
+        LD          DE, heap_start
+        RST         0x20
+        RET         C
+        LD          DE, [heap_next]
+        RST         0x20
+        RET         NC
+        LD          C, [HL]
+        INC         HL
+        LD          B, [HL]
+        DEC         HL
+        INC         BC
+        INC         BC
+        JP          free_heap
+free_heap:
+        PUSH        HL
+        ADD         HL, BC
+        EX          DE, HL
+        LD          HL, [heap_next]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          [heap_move_size], BC
+        LD          [heap_remap_address], HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _free_heap_loop0
+        LDIR        
+_free_heap_loop0:
+        LD          [heap_next], DE
+        LD          HL, vars_area_start
+_free_heap_loop1:
+        LD          DE, varsa_area_end
+        RST         0x20
+        JR          NC, _free_heap_loop1_end
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop1_next
+        LD          HL, [heap_move_size]
+        EX          DE, HL
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop1_next:
+        POP         HL
+        INC         HL
+        JR          _free_heap_loop1
+_free_heap_loop1_end:
+        LD          HL, varsa_area_start
+_free_heap_loop2:
+        LD          DE, varsa_area_end
+        RST         0x20
+        RET         NC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
+        EX          DE, HL
+        SBC         HL, BC
+        SBC         HL, BC
+        RRC         H
+        RRC         L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_free_heap_sarray_elements:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop2_next
+        LD          HL, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop2_next:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _free_heap_sarray_elements
+        POP         HL
+        JR          _free_heap_loop2
 save_stack:
         DEFW        0
 heap_next:
