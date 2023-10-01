@@ -104,7 +104,7 @@ bool CVARIABLE_MANAGER::analyze_defvars( CCOMPILE_INFO *p_info ) {
 
 // --------------------------------------------------------------------
 //	{変数名}[%|!|#|$][(...)]
-CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) {
+CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 	CVARIABLE variable;
 	std::string s_name;
 	int line_no;
@@ -157,17 +157,8 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 	//	配列か？
 	if( p_info->list.p_position->s_word == "(" ) {
 		s_name = s_name + "(";
-		variable.dimension = -1;		//	配列なのは確かだが、要素数はまだ分からない。
-		dimensions = this->evaluate_dimensions();		//	要素番号をスタックに積む
-	}
-	else if( is_dim ) {
-		//	DIM A のように、DIM宣言の中で要素数指定が省略されている場合 (10) が指定されたモノとする
-		s_name = s_name + "(";
-		variable.dimension = 1;			//	1次元配列
-		dimensions = 1;
-		//	要素番号をスタックに積む
-		//	★	p_info->body.push_back( "\t\tld\t\thl, 10" );
-		//	★	p_info->body.push_back( "\t\tpush\thl" );
+		variable.dimension = this->evaluate_dimensions( p_info );		//	要素番号をスタックに積む
+		dimensions = variable.dimension;
 	}
 
 	variable.s_name = s_name;
@@ -183,21 +174,35 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info, bool is_dim ) 
 		//	初めて登場する変数の場合、辞書に登録して認知
 		p_info->variables.dictionary[ s_name ] = variable;
 	}
-
-	if( is_dim ) {
-		//	配列宣言DIM だった場合、HLに配列ポインタのアドレスを入れて redim を呼ぶ
-
-
-	}
 	return variable;
 }
 
 // --------------------------------------------------------------------
 //	配列の要素に指定されている式を評価してスタックに積む
-int CVARIABLE_MANAGER::evaluate_dimensions( void ) {
+int CVARIABLE_MANAGER::evaluate_dimensions( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION exp;
+	int dimension = 0;
 
-	//	★
-	return 0;
+	std::vector< CBASIC_WORD >::const_iterator p_position = p_info->list.p_position;
+	for( ;; ) {
+		exp.makeup_node( p_info );
+		if( p_info->list.is_command_end() ) {
+			break;
+		}
+		if( p_info->list.p_position->s_word == ")" || p_info->list.p_position->s_word == "]" ) {
+			p_info->list.p_position++;
+			break;
+		}
+		if( p_info->list.p_position->s_word != "," ) {
+			break;
+		}
+		p_info->list.p_position++;
+		dimension++;
+		exp.release();
+	}
+	p_info->list.p_position = p_position;
+
+	return dimension;
 }
 
 //	現在の参照位置の配列変数の情報を返す
@@ -266,13 +271,14 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, bool with_array ) {
+CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std::vector< CEXPRESSION* > &exp_list, bool with_array ) {
 	std::string s_name;
 	std::string s_label;
 	CVARIABLE_TYPE var_type;
 	CVARIABLE variable;
 	bool is_array = false;
 	int dimension = 0;
+	CEXPRESSION *p_exp;
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		return variable;
@@ -322,10 +328,10 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, boo
 	//	変数ラベルを生成
 	switch( var_type ) {
 	default:
-	case CVARIABLE_TYPE::INTEGER:		s_label = "vari";	break;
-	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "varf";	break;
-	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "vard";	break;
-	case CVARIABLE_TYPE::STRING:		s_label = "vars";	break;
+	case CVARIABLE_TYPE::INTEGER:		s_label = "vari"; break;
+	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "varf"; break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "vard"; break;
+	case CVARIABLE_TYPE::STRING:		s_label = "vars"; break;
 	}
 	if( is_array ) {
 		s_label = s_label + "a";
@@ -338,15 +344,130 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, boo
 	variable.dimension = 0;
 	if( is_array ) {
 		//	配列の要素数を調べる
-		//	★T.B.D.
+		std::vector< CBASIC_WORD >::const_iterator p_position = p_info->list.p_position;
+		for(;;) {
+			//	式を評価
+			p_exp = new CEXPRESSION();
+			p_exp->makeup_node( p_info );
+			exp_list.push_back( p_exp );
+			p_exp = nullptr;
+			//	次元数更新
+			dimension++;
+			//	エラーチェックと終了判定
+			if( p_info->list.is_command_end() ) {
+				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+				break;
+			}
+			if( p_info->list.p_position->s_word == ")" || p_info->list.p_position->s_word == "]" ) {
+				//	以降、式が無ければ抜ける
+				p_info->list.p_position++;
+				break;
+			}
+			if( p_info->list.p_position->s_word != "," ) {
+				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+				break;
+			}
+			p_info->list.p_position++;
+		}
 	}
 	if( p_info->variables.dictionary.count( s_label ) == 0 ) {
+		variable.dimension = dimension;
 		p_info->variables.dictionary[ s_label ] = variable;
 	}
 	else {
 		variable = p_info->variables.dictionary[ s_label ];
+		if( variable.dimension != dimension ) {
+			p_info->errors.add( SUBSCRIPT_OUT_OF_RANGE, p_info->list.get_line_no() );
+		}
 	}
 	return variable;
+}
+
+// --------------------------------------------------------------------
+void CVARIABLE_MANAGER::compile_array_elements( class CCOMPILE_INFO *p_info, std::vector< class CEXPRESSION* > &exp_list, CVARIABLE &variable ) {
+	CASSEMBLER_LINE asm_line;
+	int i, area_size; 
+	int element_size = 2;
+
+	//	あとで「自動確保」の際のメモリサイズを計算するために必要になる「要素のサイズ」を計算
+	switch( variable.type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:		element_size = 2; break;
+	case CVARIABLE_TYPE::SINGLE_REAL:	element_size = 4; break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:	element_size = 8; break;
+	case CVARIABLE_TYPE::STRING:		element_size = 2; break;
+	}
+	//	自動確保配列だった場合の必要なメモリ数を計算する
+	area_size = element_size * 11;
+	for( i = 1; i < variable.dimension; i++ ) {
+		area_size *= 11;
+	}
+	//	配列実体アドレスが NULL なら、配列変数の自動確保を実施
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, variable.s_label );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::CONSTANT, std::to_string( variable.dimension ) );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, std::to_string( 2 + 1 + variable.dimension * 2 + area_size ) );
+	p_info->assembler_list.body.push_back( asm_line );
+	if( variable.type == CVARIABLE_TYPE::STRING ) {
+		p_info->assembler_list.activate_check_sarray( &(p_info->constants) );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "check_sarray", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		p_info->assembler_list.activate_check_array();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "check_array", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	//	配列変数の要素の先頭アドレスを求め、かつ要素数をスタックに積む
+	p_info->assembler_list.activate_calc_array_top();
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "calc_array_top", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.add_label( "bios_umult", "0x0314a" );
+	for( i = variable.dimension - 1; i >= 0; i-- ) {
+		//	要素 i を計算する
+		exp_list[i]->compile( p_info, CEXPRESSION_TYPE::INTEGER );
+		if( i < variable.dimension - 1 ) {
+			// 最後の演算結果を取り出す ( Z * y_max )
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			//	要素 i の演算結果と加算する
+			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		if( i == 0 ) {
+			//	要素１つ分のサイズに合わせて、2倍・4倍・8倍する
+			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			if( element_size >= 4 ) {
+				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			if( element_size == 8 ) {
+				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			// 配列要素の先頭アドレスをスタックから取り出して加算
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else {
+			//	要素 i - 1 の最大数をスタックから取り出す
+			asm_line.set( CMNEMONIC_TYPE::LD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "L" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "H" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::POP,  CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,    "bios_umult", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		exp_list[i]->release();
+	}
 }
 
 // --------------------------------------------------------------------

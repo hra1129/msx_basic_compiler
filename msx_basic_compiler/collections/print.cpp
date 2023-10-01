@@ -236,6 +236,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				break;
 			}
 			has_semicolon = false;
+			exp.release();
 		}
 		else {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );

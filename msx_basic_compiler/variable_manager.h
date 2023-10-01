@@ -22,10 +22,10 @@ private:
 	void update( class CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type );
 
 	//	配列の要素 ( a, b, c ... ) を評価して、要素数を返す
-	int evaluate_dimensions( void );
+	int evaluate_dimensions( class CCOMPILE_INFO *p_info );
 public:
 	//	変数追加処理
-	CVARIABLE add_variable( class CCOMPILE_INFO *p_info, bool is_dim = false );
+	CVARIABLE add_variable( class CCOMPILE_INFO *p_info );
 
 	//	コードを解釈して変数リストを作成する
 	bool analyze_defvars( class CCOMPILE_INFO *p_info );
@@ -34,7 +34,10 @@ public:
 	CVARIABLE create_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
 
 	//	現在の参照位置の変数の情報を返す
-	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
+	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, std::vector< class CEXPRESSION* > &exp_list, bool with_array = true );
+
+	//	配列要素の式の配列 exp_list をコンパイルするコードを生成する。HL に変数のアドレスが入っている前提である。
+	void compile_array_elements( class CCOMPILE_INFO *p_info, std::vector< class CEXPRESSION* > &exp_list, CVARIABLE &variable );
 
 	//	現在の参照位置の配列変数の情報を返す
 	CVARIABLE get_array_info( class CCOMPILE_INFO *p_info );

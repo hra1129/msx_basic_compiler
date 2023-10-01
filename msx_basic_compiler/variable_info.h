@@ -51,10 +51,17 @@ public:
 		}
 	}
 
+	int var_area_size = 0;
+	int vars_area_count = 0;
+	int vara_area_count = 0;
+
 	void dump( CASSEMBLER_LIST &asm_list, COPTIONS options ) {
 		std::string s;
 		CASSEMBLER_LINE asm_line;
 
+		var_area_size = 0;
+		vars_area_count = 0;
+		vara_area_count = 0;
 		//	配列でない整数・単精度・倍精度変数
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "var_area_start", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
@@ -68,14 +75,17 @@ public:
 			case CVARIABLE_TYPE::INTEGER:
 				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 				asm_list.variables_area.push_back( asm_line );
+				var_area_size += 2;
 				break;
 			case CVARIABLE_TYPE::SINGLE_REAL:
 				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0", COPERAND_TYPE::NONE, "" );
 				asm_list.variables_area.push_back( asm_line );
+				var_area_size += 4;
 				break;
 			case CVARIABLE_TYPE::DOUBLE_REAL:
 				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
 				asm_list.variables_area.push_back( asm_line );
+				var_area_size += 8;
 				break;
 			default:
 				break;
@@ -95,6 +105,7 @@ public:
 			asm_list.variables_area.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
 			asm_list.variables_area.push_back( asm_line );
+			vars_area_count++;
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "vars_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
@@ -110,6 +121,7 @@ public:
 			asm_list.variables_area.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
 			asm_list.variables_area.push_back( asm_line );
+			vara_area_count++;
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "vara_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
@@ -125,6 +137,7 @@ public:
 			asm_list.variables_area.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	アドレス
 			asm_list.variables_area.push_back( asm_line );
+			vara_area_count++;
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "varsa_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );

@@ -133,3 +133,115 @@ _free_heap_loop2_next:
 	JR			NZ, _free_heap_sarray_elements
 	POP			HL
 	JR			_free_heap_loop2
+
+===============================================================================
+DIM宣言無し数値配列の確保
+	D .... 次元数
+	HL ... 配列変数のアドレス
+	BC ... 確保するサイズ ( 2 + 1 + 2*B + (11^B)*要素サイズ
+	
+	HL は維持される。
+===============================================================================
+check_array:
+	; アドレスが 0 かどうか調べる
+	ld			a, [hl]
+	inc			hl
+	or			a, [hl]
+	dec			hl
+	ret			nz						; 既に確保されている(0でない)ので何もせずに戻る
+
+	push		de						; 次元数保存
+	push		hl						; 配列のアドレス保存
+	push		bc						; サイズ保存
+	call		allocate_heap			; サイズBC のメモリを確保して、HLにアドレスを得る
+	pop			bc						; サイズ復帰
+	pop			de						; 配列のアドレス復帰
+	pop			af						; 次元数復帰
+	ex			de, hl
+	push		hl						; 配列のアドレス保存
+	ld			[hl], e
+	inc			hl
+	ld			[hl], d
+	ex			de, hl
+
+	dec			bc						; [サイズ]フィールドの分は、[サイズ]フィールドに格納する値には含まないので 2減らす
+	dec			bc
+	ld			[hl], c					; [サイズ]フィールドへの書き込み
+	inc			hl
+	ld			[hl], b
+	inc			hl
+	ld			[hl], a					; [次元]フィールドへの書き込み
+	ld			b, a
+	ld			de, 11
+_loop:									; 次元数繰り返し 11 を書き込む（要素数フィールド)
+	ld			[hl], e
+	inc			hl
+	ld			[hl], d
+	inc			hl
+	djnz		_loop
+	pop			hl						; 配列のアドレス復帰
+	ret
+
+===============================================================================
+DIM宣言無し文字列配列の確保
+	D .... 次元数
+	HL ... 配列変数のアドレス
+	BC ... 確保するサイズ ( 2 + 1 + 2*B + (11^B)*要素サイズ
+	
+	HL は維持される。
+===============================================================================
+check_sarray:
+	; アドレスが 0 かどうか調べる
+	ld			a, [hl]
+	inc			hl
+	or			a, [hl]
+	dec			hl
+	ret			nz						; 既に確保されている(0でない)ので何もせずに戻る
+
+	push		de						; 次元数保存
+	push		hl						; 配列のアドレス保存
+	push		bc						; サイズ保存
+	call		allocate_heap			; サイズBC のメモリを確保して、HLにアドレスを得る
+	pop			bc						; サイズ復帰
+	pop			de						; 配列のアドレス復帰
+	pop			af						; 次元数復帰
+	ex			de, hl
+	push		hl						; 配列のアドレス保存
+	ld			[hl], e
+	inc			hl
+	ld			[hl], d
+	ex			de, hl
+
+	dec			bc						; [サイズ]フィールドの分は、[サイズ]フィールドに格納する値には含まないので 2減らす
+	dec			bc
+	ld			[hl], c					; [サイズ]フィールドへの書き込み
+	inc			hl
+	ld			[hl], b
+	inc			hl
+	ld			[hl], a					; [次元]フィールドへの書き込み
+	or			a, a
+	rr			b						; [次元]フィールド分の 1 によって奇数になっているが、ここで消滅する
+	rr			c
+	ld			de, 11
+_loop:									; 次元数繰り返し 11 を書き込む（要素数フィールド)
+	ld			[hl], e
+	inc			hl
+	ld			[hl], d
+	inc			hl
+	dec			bc						; 要素数を引く
+	dec			a
+	jr			nz, _loop
+	; 空文字列を詰める
+	ld			de, str_0				; 空文字ラベル
+	ld			[hl], e
+	inc			hl
+	ld			[hl], d
+	inc			hl
+	ld			e, l
+	ld			d, h
+	dec			hl
+	dec			hl
+	dec			bc
+	ldir
+	pop			hl						; 配列のアドレス復帰
+	ret

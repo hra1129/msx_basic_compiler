@@ -67,6 +67,9 @@ public:
 	void activate_convert_to_integer_from_double_real( class CCONSTANT_INFO *p_constants );
 	void activate_single_real_is_zero( void );
 	void activate_double_real_is_zero( void );
+	void activate_check_array( void );
+	void activate_check_sarray( class CCONSTANT_INFO *p_constants );
+	void activate_calc_array_top( void );
 };
 
 #endif
