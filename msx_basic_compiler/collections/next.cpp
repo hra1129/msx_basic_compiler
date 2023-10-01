@@ -45,7 +45,8 @@ bool CNEXT::exec( CCOMPILE_INFO *p_info ) {
 		}
 		else {
 			//	•Ï”‚ð¶¬‚·‚é
-			variable_loop = p_info->variable_manager.get_variable_info( p_info );
+			std::vector< CEXPRESSION* > exp_list_dummy;
+			variable_loop = p_info->variable_manager.get_variable_info( p_info, exp_list_dummy );
 			if( p_info->for_variable_array.size() > 0 ) {
 				p_info->for_variable_array.pop_back();
 			}

@@ -832,8 +832,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		//	•Ï”‚Ìê‡
-		CVARIABLE variable = p_info->variable_manager.get_variable_info( p_info );
 		CEXPRESSION_VARIABLE *p_term = new CEXPRESSION_VARIABLE;
+		CVARIABLE variable = p_info->variable_manager.get_variable_info( p_info, p_term->exp_list );
 		p_term->variable = variable;
 		p_result = p_term;
 		return p_result;

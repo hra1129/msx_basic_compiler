@@ -79,6 +79,8 @@ public:
 // --------------------------------------------------------------------
 class CCONSTANT_INFO {
 public:
+	//	空文字列のラベル
+	std::string s_blank_string;
 
 	//	定義済みの数値定数のリスト
 	std::map< std::string, CCONSTANT > dictionary;

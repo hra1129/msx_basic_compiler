@@ -16,6 +16,7 @@ class CEXPRESSION_VARIABLE: public CEXPRESSION_NODE {
 public:
 	std::string s_value;
 	CVARIABLE variable;
+	std::vector< CEXPRESSION* > exp_list;
 
 	~CEXPRESSION_VARIABLE() {
 		this->release();

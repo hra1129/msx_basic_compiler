@@ -825,6 +825,8 @@ void CASSEMBLER_LIST::activate_allocate_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::REGISTER, "H" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "0" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
@@ -1371,6 +1373,279 @@ void CASSEMBLER_LIST::activate_double_real_is_zero( void ) {
 	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "[HL]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_check_array( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "check_array" ) ) {
+		return;
+	}
+	this->activate_allocate_heap();
+	this->subrouines_list.push_back( "check_array" );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "check_array",      COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,   CCONDITION::NZ,   COPERAND_TYPE::NONE,             "",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL,  CCONDITION::NONE, COPERAND_TYPE::LABEL,            "allocate_heap",    COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "AF",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",               COPERAND_TYPE::REGISTER,  "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER,  "[HL]",             COPERAND_TYPE::REGISTER,  "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER,  "[HL]",             COPERAND_TYPE::REGISTER,  "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",               COPERAND_TYPE::REGISTER,  "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",               COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",              COPERAND_TYPE::REGISTER, "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",              COPERAND_TYPE::REGISTER, "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",              COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "B",                 COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "DE",                COPERAND_TYPE::CONSTANT, "11" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,           "_check_array_loop", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",              COPERAND_TYPE::REGISTER, "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",              COPERAND_TYPE::REGISTER, "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DJNZ,  CCONDITION::NONE, COPERAND_TYPE::LABEL,           "_check_array_loop", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,   CCONDITION::NONE, COPERAND_TYPE::NONE,            "",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_check_sarray( CCONSTANT_INFO *p_constants ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "check_sarray" ) ) {
+		return;
+	}
+	this->activate_allocate_heap();
+	this->subrouines_list.push_back( "check_sarray" );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "check_sarray",       COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                  COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                  COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,   CCONDITION::NZ,   COPERAND_TYPE::NONE,             "",                   COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL,  CCONDITION::NONE, COPERAND_TYPE::LABEL,            "allocate_heap",      COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "AF",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::REGISTER,  "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER,  "[HL]",               COPERAND_TYPE::REGISTER,  "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER,  "[HL]",               COPERAND_TYPE::REGISTER,  "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::REGISTER,  "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",                 COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,	       "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "A",                   COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RR,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "B",                   COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RR,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "C",                   COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "DE",                  COPERAND_TYPE::CONSTANT, "11" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "_check_sarray_loop", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "BC",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "A",                   COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR,    CCONDITION::NZ, COPERAND_TYPE::LABEL,            "_check_sarray_loop",  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "DE",                  COPERAND_TYPE::LABEL, p_constants->s_blank_string );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]",                COPERAND_TYPE::REGISTER, "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "E",                   COPERAND_TYPE::REGISTER, "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "D",                   COPERAND_TYPE::REGISTER, "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "BC",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR,  CCONDITION::NONE, COPERAND_TYPE::NONE,            "",                    COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,        "HL",                  COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,   CCONDITION::NONE, COPERAND_TYPE::NONE,            "",                    COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_calc_array_top( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "calc_array_top" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "calc_array_top" );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "calc_array_top",     COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	//	変数の指し示す先を読む
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "E",                  COPERAND_TYPE::REGISTER,        "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "D",                  COPERAND_TYPE::REGISTER,        "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::REGISTER,        "HL" );
+	this->subroutines.push_back( asm_line );
+	//	サイズフィールドを読み飛ばす
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	//	次元数フィールドを取得
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "E",                  COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "D",                  COPERAND_TYPE::CONSTANT,        "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::REGISTER,        "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::REGISTER,        "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                  COPERAND_TYPE::REGISTER,        "E" );
+	this->subroutines.push_back( asm_line );
+	//	戻りアドレスをスタックから DE へ待避
+	asm_line.set( CMNEMONIC_TYPE::POP,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	//	最初の要素のアドレスをスタックへ積む
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	//	要素数フィールドを読み取ってスタックに積む
+	asm_line.set( CMNEMONIC_TYPE::JR,    CCONDITION::NONE, COPERAND_TYPE::LABEL,            "_calc_array_top_l2", COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "_calc_array_top_l1", COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "B",                  COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "HL",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,    CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "C",                  COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "BC",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL,            "_calc_array_top_l2", COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC,   CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "A",                  COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR,    CCONDITION::NZ,   COPERAND_TYPE::LABEL,            "_calc_array_top_l1", COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,  CCONDITION::NONE, COPERAND_TYPE::REGISTER,         "DE",                 COPERAND_TYPE::NONE,            "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,   CCONDITION::NONE, COPERAND_TYPE::NONE,             "",                   COPERAND_TYPE::NONE,            "" );
 	this->subroutines.push_back( asm_line );
 }
 

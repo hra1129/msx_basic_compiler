@@ -16,6 +16,7 @@ static std::map< int, std::string > error_name = {
 	{ REDIMENSIONED_ARRAY, "Redimensioned array." },
 	{ TYPE_MISMATCH, "Type mismatch." },
 	{ UNDIFINED_LINE_NUMBER, "Undifined line number." },
+	{ SUBSCRIPT_OUT_OF_RANGE, "Subscript out of range." },
 };
 
 // --------------------------------------------------------------------
