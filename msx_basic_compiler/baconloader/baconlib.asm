@@ -5,21 +5,32 @@
 ; =============================================================================
 
 vdpport0	:= 0x98
+calslt		:= 0x001C
+romver		:= 0x002D
 wrtvdp		:= 0x0047
 chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
+extrom		:= 0x015F
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
+linl40		:= 0xF3AE
+linl32		:= 0xF3AF
+linlen		:= 0xF3B0
+clmlst		:= 0xF3B2
 blibslot	:= 0xF3D3
 putpnt		:= 0xF3F8
 getpnt		:= 0xF3FA
 buf			:= 0xF55E
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
+oldscr		:= 0xFCB0
 exptbl		:= 0xFCC1
 rg0sav		:= 0xF3DF
 statfl		:= 0xF3E7
 rg8sav		:= 0xFFE7
 rg15sav		:= 0xFFEE
+
+; SUB-ROM entry
+chgmdp		:= 0x01B5
 
 ; BASIC error codes
 error_syntax					:= 2
@@ -78,6 +89,8 @@ blib_entries::
 			jp		sub_wrvdp
 	blib_rdvdp:
 			jp		sub_rdvdp
+	blib_width:
+			jp		sub_width
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -657,4 +670,108 @@ sub_rdvdp::
 			ld		l, b
 			ld		h, 0
 			ret
+			endscope
+
+; =============================================================================
+;	WIDTH n
+;	input:
+;		L ..... 設定する幅 n
+;	output:
+;		none
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;
+; =============================================================================
+			scope	sub_width
+sub_width::
+			; 幅に変更があるか調べる
+			ld		a, [linlen]
+			cp		a, l
+			ret		z					; 変更が無ければ何もしない
+			; MSX1か？
+			ld		a, [romver]
+			or		a, a
+			jr		nz, _skip0
+			; 幅40まで
+			ld		a, l
+			or		a, a
+			jp		z, err_illegal_function_call
+			cp		a, 41
+			jp		nc, err_illegal_function_call
+		_skip0:
+			; 画面モードを調べる
+			ld		a, [oldscr]
+			or		a, a
+			ld		a, l
+			jr		z, _skip1
+			; SCREEN0 でなければ 幅32まで
+			cp		a, 33
+			jp		nc, err_illegal_function_call
+		_skip1:
+			; SCREEN0 なら 幅80まで
+			cp		a, 81
+			jp		nc, err_illegal_function_call
+		_skip2:
+			; 画面クリア
+			ld		a, 0x0C
+			rst		0x18
+			; 幅更新
+			ld		a, l
+			ld		[linlen], a
+			call	update_clmlst
+			; 画面モードチェック
+			ld		a, [oldscr]
+			dec		a
+			ld		a, l
+			jr		nz, _skip3
+			; SCREEN1 の場合
+			ld		[linl32], a
+			; 画面クリア
+			ld		a, 0x0C
+			rst		0x18
+			ret
+		_skip3:
+			; SCREEN0 の場合
+			ld		a, [linl40]
+			ld		h, 41
+			cp		a, h
+			ld		a, l
+			ld		[linl40], a
+			; 画面クリア
+			ld		a, 0x0C
+			rst		0x18
+			ld		a, l
+			jr		c, _skip4
+			cp		a, h
+			ret		nc
+			ld		h, a
+		_skip4:
+			cp		a, h
+			ret		c
+			; CHGMDP で SCREEN0 のモードセット
+			xor		a, a
+			ld		ix, chgmdp
+			jp		extrom
+
+			; clmlst 更新
+		update_clmlst:
+			sub		a, 14
+			jr		nc, update_clmlst
+			add		a, 0x1C
+			neg
+			add		a, l
+			ld		[clmlst], a
+			ret
+			endscope
+
+; =============================================================================
+			scope	error_handler
+err_syntax:
+			ld		e, 2
+err_illegal_function_call	:= $+1
+			ld		bc, 0x051E
+			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT
+			ld		ix, 0x406F				; ERRHNDR
+			jp		calslt
 			endscope
