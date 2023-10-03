@@ -203,6 +203,105 @@ void CCALL::iotput( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
+void CCALL::iotfind( CCOMPILE_INFO *p_info ) {
+	CASSEMBLER_LINE asm_line;
+	CEXPRESSION exp;
+
+	p_info->list.p_position++;
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	p_info->list.p_position++;
+	//	第1引数: デバイスパス
+	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+		exp.release();
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	p_info->list.p_position++;
+	//	第2引数: 値を受け取る変数名
+	CVARIABLE variable = p_info->p_compiler->get_variable_address();
+	//	IOTFINDコマンド
+	if( variable.type == CVARIABLE_TYPE::STRING ) {
+		p_info->assembler_list.add_label( "blib_iotget_str", "0x0401e" );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[SP]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::LABEL, "blib_iotget_str" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+
+	}
+	else if( variable.type == CVARIABLE_TYPE::INTEGER ) {
+		p_info->assembler_list.add_label( "blib_iotget_int", "0x0401b" );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[SP]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::LABEL, "blib_iotget_int" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else if( variable.type == CVARIABLE_TYPE::SINGLE_REAL ) {
+		p_info->assembler_list.add_label( "blib_iotget_int", "0x0401b" );
+		p_info->assembler_list.add_label( "bios_frcsng", "0x02fb2" );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[SP]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_iotget_int" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::MEMORY_REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac + 2]", COPERAND_TYPE::MEMORY_REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcsng", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else if( variable.type == CVARIABLE_TYPE::DOUBLE_REAL ) {
+		p_info->assembler_list.add_label( "blib_iotget_int", "0x0401b" );
+		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303a" );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[SP]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_iotget_int" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_valtyp]", COPERAND_TYPE::MEMORY_REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac + 2]", COPERAND_TYPE::MEMORY_REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	//	代入処理
+	p_info->p_compiler->write_variable_value( variable );
+
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")" ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+	}
+	else {
+		p_info->list.p_position++;
+	}
+}
+
+// --------------------------------------------------------------------
 //  CALL 拡張命令
 bool CCALL::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();

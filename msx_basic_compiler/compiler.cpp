@@ -37,6 +37,7 @@
 #include "collections/screen.h"
 #include "collections/sound.h"
 #include "collections/vpoke.h"
+#include "collections/width.h"
 #include "variable_manager.h"
 #include "./expressions/expression.h"
 
@@ -75,6 +76,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CSCREEN );
 	this->collection.push_back( new CSOUND );
 	this->collection.push_back( new CVPOKE );
+	this->collection.push_back( new CWIDTH );
 }
 
 // --------------------------------------------------------------------

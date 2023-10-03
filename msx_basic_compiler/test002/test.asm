@@ -8,8 +8,11 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
+bios_chgmod                     = 0x0005F
+blib_width                      = 0x0403c
 bios_errhand                    = 0x0406F
-bios_umult                      = 0x0314a
+blib_inkey                      = 0x0402a
+blib_strcmp                     = 0x04027
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -25,125 +28,132 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, 0
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        PUSH        HL
+        LD          HL, 1
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 20
+        LD          ix, blib_width
+        CALL        call_blib
         LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, 1
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
         PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
         LD          HL, str_2
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, 2
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
+        CALL        puts
+line_110:
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
         PUSH        HL
-        LD          HL, str_3
+        LD          HL, str_0
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
         CALL        free_string
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
         LD          HL, 0
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        CALL        copy_string
+        JR          NZ, _pt2
+        DEC         HL
+_pt2:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt1
+        JP          line_110
+_pt1:
+_pt0:
+        LD          HL, 0
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 30
+        LD          ix, blib_width
+        CALL        call_blib
+        LD          HL, str_3
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, 1
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
+        LD          HL, str_2
+        CALL        puts
+line_130:
+        LD          IX, blib_inkey
+        CALL        call_blib
         CALL        copy_string
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, 2
-        ADD         HL, HL
+        LD          HL, str_0
         POP         DE
-        ADD         HL, DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
         EX          DE, HL
-        CALL        copy_string
         PUSH        HL
-        CALL        puts
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
         POP         HL
+        PUSH        AF
         CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt5
+        DEC         HL
+_pt5:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt4
+        JP          line_130
+_pt4:
+_pt3:
+        LD          HL, 60
+        LD          ix, blib_width
+        CALL        call_blib
         LD          HL, str_4
+        PUSH        HL
         CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_150:
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt8
+        DEC         HL
+_pt8:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt7
+        JP          line_150
+_pt7:
+_pt6:
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -173,106 +183,16 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-allocate_heap:
-        LD          HL, [heap_next]
-        PUSH        HL
-        ADD         HL, BC
-        JR          C, _allocate_heap_error
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_heap_error
-        LD          [heap_next], HL
-        POP         HL
-        PUSH        HL
-        DEC         BC
-        LD          E, L
-        LD          D, H
-        INC         DE
-        LD          [HL], 0
-        LDIR        
-        POP         HL
-        RET         
-_allocate_heap_error:
-        LD          E, 7
-        JP          bios_errhand
-check_sarray:
-        LD          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        DEC         HL
-        RET         NZ
-        PUSH        DE
-        PUSH        HL
-        PUSH        BC
-        CALL        allocate_heap
-        POP         BC
-        POP         DE
-        POP         AF
-        EX          DE, HL
-        PUSH        HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        EX          DE, HL
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          [HL], A
-        INC         HL
-        OR          A, A
-        RR          B
-        RR          C
-        LD          DE, 11
-_check_sarray_loop:
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        DEC         BC
-        DEC         A
-        JR          NZ, _check_sarray_loop
-        LD          DE, str_0
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        LD          E, L
-        LD          D, H
-        DEC         HL
-        DEC         HL
-        DEC         BC
-        LDIR        
-        POP         HL
-        RET         
-calc_array_top:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        INC         HL
-        INC         HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, 0
-        ADD         HL, DE
-        ADD         HL, DE
-        LD          A, E
-        POP         DE
-        PUSH        HL
-        JR          _calc_array_top_l2
-_calc_array_top_l1:
-        DEC         HL
+puts:
         LD          B, [HL]
-        DEC         HL
-        LD          C, [HL]
-        PUSH        BC
-_calc_array_top_l2:
-        DEC         A
-        JR          NZ, _calc_array_top_l1
-        PUSH        DE
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
         RET         
 free_string:
         LD          DE, heap_start
@@ -386,17 +306,6 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
 allocate_string:
         LD          HL, [heap_next]
         PUSH        HL
@@ -438,22 +347,17 @@ program_run:
         XOR         A, A
         SBC         HL, DE
         LD          [heap_end], HL
-        LD          HL, var_area_start
-        LD          DE, var_area_start + 1
-        LD          BC, varsa_area_end - var_area_start - 1
-        LD          [HL], 0
-        LDIR        
         RET         
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x05, 0x4D, 0x4F, 0x4A, 0x49, 0x30
+        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30
 str_2:
-        DEFB        0x05, 0x6D, 0x6F, 0x6A, 0x69, 0x31
-str_3:
-        DEFB        0x04, 0xD3, 0xBC, 0xDE, 0x32
-str_4:
         DEFB        0x02, 0x0D, 0x0A
+str_3:
+        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30
+str_4:
+        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30
 save_stack:
         DEFW        0
 heap_next:
@@ -471,8 +375,6 @@ vars_area_end:
 vara_area_start:
 vara_area_end:
 varsa_area_start:
-varsa_A:
-        DEFW        0
 varsa_area_end:
 heap_start:
 end_address:
