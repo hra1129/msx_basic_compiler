@@ -34,6 +34,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0x8E },				"RETURN" },
 	{ { 0xFF, 0x82 },		"RIGHT$" },
 	{ { 0xC5 },				"SCREEN" },
+	{ { 0xC5 },				"SCROLL" },
 	{ { 0xFF, 0x99 },		"SPACE$" },
 	{ { 0xC7 },				"SPRITE" },
 	{ { 0xE7 },				"VARPTR" },
