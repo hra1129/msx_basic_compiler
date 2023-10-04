@@ -25,9 +25,33 @@ fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 oldscr		:= 0xFCB0
 exptbl		:= 0xFCC1
 rg0sav		:= 0xF3DF
+rg1sav		:= 0xF3E0
+rg2sav		:= 0xF3E1
+rg3sav		:= 0xF3E2
+rg4sav		:= 0xF3E3
+rg5sav		:= 0xF3E4
+rg6sav		:= 0xF3E5
+rg7sav		:= 0xF3E6
 statfl		:= 0xF3E7
 rg8sav		:= 0xFFE7
+rg9sav		:= 0xFFE8
+rg10sav		:= 0xFFE9
+rg11sav		:= 0xFFEA
+rg12sav		:= 0xFFEB
+rg13sav		:= 0xFFEC
+rg14sav		:= 0xFFED
 rg15sav		:= 0xFFEE
+rg16sav		:= 0xFFEF
+rg17sav		:= 0xFFF0
+rg18sav		:= 0xFFF1
+rg19sav		:= 0xFFF2
+rg20sav		:= 0xFFF3
+rg21sav		:= 0xFFF4
+rg22sav		:= 0xFFF5
+rg23sav		:= 0xFFF6
+rg25sav		:= 0xFFFA
+rg26sav		:= 0xFFFB
+rg27sav		:= 0xFFFC
 
 ; SUB-ROM entry
 chgmdp		:= 0x01B5
@@ -91,6 +115,8 @@ blib_entries::
 			jp		sub_rdvdp
 	blib_width:
 			jp		sub_width
+	blib_setscroll:
+			jp		sub_setscroll
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -627,11 +653,21 @@ sub_wrvdp::
 sub_rdvdp::
 			or		a, a
 			jp		m, _status_read
+			cp		a, 25
+			jr		nc, _vdp26_28
 			cp		a, 8
 			jr		z, _vdp8
 			jr		c, _vdp0_7
-	_vdp9_48:
+	_vdp9_23:
 			ld		hl, rg8sav - 9
+			add		a, l
+			ld		l, a
+			ld		a, [hl]
+			ld		l, a
+			ld		h, 0
+			ret
+	_vdp26_28:
+			ld		hl, rg25sav - 26
 			add		a, l
 			ld		l, a
 			ld		a, [hl]
@@ -763,6 +799,128 @@ sub_width::
 			add		a, l
 			ld		[clmlst], a
 			ret
+			endscope
+
+; =============================================================================
+;	SET SCROLL X, Y, MaskMode, PageMode
+;	input:
+;		HL ...	X位置 (0～511)
+;		E ....	Y位置 (0～255)
+;		D ....	MaskMode
+;		B ....	PageMode
+;		A ....	bit0: X位置 有効1, 無効0
+;				bit1: Y位置 有効1, 無効0
+;				bit2: MaskMode 有効1, 無効0
+;				bit3: PageMode 有効1, 無効0
+;	output:
+;		none
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;
+; =============================================================================
+			scope	sub_setscroll
+sub_setscroll::
+			ld		c, a
+			; 垂直スクロール位置 R#23
+			and		a, 0x02
+			ld		[buf+0], a
+			ld		a, e
+			ld		[buf+1], a
+			; 水平スクロール位置 R#26, R#27
+			ld		a, c
+			and		a, 0x01
+			ld		[buf+2], a
+			ld		[buf+3], hl
+			; マスクモード
+			ld		a, c
+			and		a, 0x04
+			ld		[buf+5], a
+			ld		a, d
+			ld		[buf+6], a
+			; ページモード
+			ld		a, c
+			and		a, 0x08
+			ld		[buf+7], a
+			ld		a, b
+			ld		[buf+8], a
+			; 垂直スクロール位置 R#23
+			ld		a, [buf+0]
+			or		a, a
+			jr		z, _skip_r23
+			ld		a, [buf+1]
+			ld		c, 23
+			ld		b, a
+			call	wrtvdp
+		_skip_r23:
+			; 水平スクロール位置 R#26, R#27
+			ld		a, [buf+2]
+			or		a, a
+			jr		z, _skip_r26
+			ld		hl, [buf+3]
+			ld		a, l
+			and		a, 7
+			xor		a, 7
+			ld		b, a
+			ld		c, 27
+			call	wrtvdp
+			ld		a, l
+			and		a, 0xF8
+			ld		l, a
+			rr		h
+			rr		l
+			rr		h
+			rr		l
+			rr		h
+			rr		l
+			ld		b, l
+			ld		c, 26
+			call	wrtvdp
+		_skip_r26:
+			; マスクモード、ページモード R#25
+			ld		a, [buf+5]
+			ld		c, a
+			ld		a, [buf+7]
+			or		a, c
+			ret		z						; マスクもページも指定無しなら何もしない
+			; R#25 の現在の値を保持
+			ld		a, [rg25sav]
+			ld		b, a
+			and		a, 0xFC
+			ld		c, a					; C = XXXX_XX00
+			ld		a, b
+			and		a, 0x03
+			ld		b, a					; B = 0000_00XX
+			; マスクモードの更新
+			ld		a, [buf+5]
+			or		a, a
+			jr		z, _skip_r25_mask		; マスクの指定が省略ならスルー
+			ld		a, b
+			and		a, 0b1111_1101
+			ld		b, a
+			ld		a, [buf+6]
+			or		a, a
+			jr		z, _skip_r25_mask
+			inc		b
+			inc		b
+		_skip_r25_mask:
+			; ページモード
+			ld		a, [buf+7]
+			or		a, a
+			jr		z, _skip_r25_page		; ページの指定が省略ならスルー
+			ld		a, b
+			and		a, 0b1111_1110
+			ld		b, a
+			ld		a, [buf+8]
+			or		a, a
+			jr		z, _skip_r25_page
+			inc		b
+		_skip_r25_page:
+			ld		a, c
+			or		a, b
+			ld		b, a
+			ld		c, 25
+			jp		wrtvdp
 			endscope
 
 ; =============================================================================

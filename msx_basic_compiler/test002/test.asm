@@ -9,10 +9,7 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 bios_chgmod                     = 0x0005F
-blib_width                      = 0x0403c
-bios_errhand                    = 0x0406F
-blib_inkey                      = 0x0402a
-blib_strcmp                     = 0x04027
+blib_setscroll                  = 0x0403f
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -31,9 +28,6 @@ program_start:
         LD          HL, 1
         LD          A, L
         CALL        bios_chgmod
-        LD          HL, 20
-        LD          ix, blib_width
-        CALL        call_blib
         LD          HL, str_1
         PUSH        HL
         CALL        puts
@@ -41,119 +35,114 @@ program_start:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-line_110:
-        LD          IX, blib_inkey
-        CALL        call_blib
-        CALL        copy_string
+line_120:
+        LD          HL, vari_X
         PUSH        HL
-        LD          HL, str_0
+        LD          HL, 0
         POP         DE
         EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_X_FOR_END
         PUSH        HL
-        PUSH        DE
-        LD          IX, blib_strcmp
-        CALL        call_blib
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _pt2
-        DEC         HL
-_pt2:
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt1
-        JP          line_110
+        LD          HL, 255
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_X_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt1
+        LD          [svari_X_LABEL], HL
+        JR          _pt0
 _pt1:
-_pt0:
-        LD          HL, 0
-        LD          A, L
-        CALL        bios_chgmod
-        LD          HL, 30
-        LD          ix, blib_width
-        CALL        call_blib
-        LD          HL, str_3
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_130:
-        LD          IX, blib_inkey
-        CALL        call_blib
-        CALL        copy_string
-        PUSH        HL
-        LD          HL, str_0
-        POP         DE
-        EX          DE, HL
-        PUSH        HL
-        PUSH        DE
-        LD          IX, blib_strcmp
-        CALL        call_blib
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _pt5
-        DEC         HL
-_pt5:
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt4
-        JP          line_130
-_pt4:
+        LD          HL, [vari_X]
+        LD          DE, [svari_X_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_X], HL
+        LD          A, D
+        LD          DE, [svari_X_FOR_END]
+        RLCA        
+        JR          C, _pt2
+        RST         0x20
+        JR          C, _pt3
+        JR          Z, _pt3
+        RET         NC
+_pt2:
+        RST         0x20
+        RET         C
 _pt3:
-        LD          HL, 60
-        LD          ix, blib_width
-        CALL        call_blib
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
         POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_150:
-        LD          IX, blib_inkey
-        CALL        call_blib
-        CALL        copy_string
+_pt0:
+        LD          HL, [vari_X]
         PUSH        HL
-        LD          HL, str_0
+        LD          HL, [vari_X]
+        PUSH        HL
+        POP         HL
+        LD          E, L
+        POP         HL
+        LD          A, 3
+        LD          IX, blib_setscroll
+        CALL        call_blib
+        LD          HL, vari_Y
+        PUSH        HL
+        LD          HL, 0
         POP         DE
         EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_Y_FOR_END
         PUSH        HL
-        PUSH        DE
-        LD          IX, blib_strcmp
-        CALL        call_blib
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _pt8
-        DEC         HL
-_pt8:
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt7
-        JP          line_150
-_pt7:
+        LD          HL, 1000
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_Y_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt5
+        LD          [svari_Y_LABEL], HL
+        JR          _pt4
+_pt5:
+        LD          HL, [vari_Y]
+        LD          DE, [svari_Y_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_Y], HL
+        LD          A, D
+        LD          DE, [svari_Y_FOR_END]
+        RLCA        
+        JR          C, _pt6
+        RST         0x20
+        JR          C, _pt7
+        JR          Z, _pt7
+        RET         NC
 _pt6:
+        RST         0x20
+        RET         C
+_pt7:
+        POP         HL
+_pt4:
+        LD          HL, [svari_Y_LABEL]
+        CALL        jp_hl
+        LD          HL, [svari_X_LABEL]
+        CALL        jp_hl
+        JP          line_120
 program_termination:
         LD          SP, [save_stack]
         RET         
@@ -306,37 +295,6 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -347,17 +305,18 @@ program_run:
         XOR         A, A
         SBC         HL, DE
         LD          [heap_end], HL
+        LD          HL, var_area_start
+        LD          DE, var_area_start + 1
+        LD          BC, varsa_area_end - var_area_start - 1
+        LD          [HL], 0
+        LDIR        
         RET         
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x32, 0x30
+        DEFB        0x05, 0x48, 0x45, 0x4C, 0x4C, 0x4F
 str_2:
         DEFB        0x02, 0x0D, 0x0A
-str_3:
-        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x33, 0x30
-str_4:
-        DEFB        0x35, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30, 0x20, 0x57, 0x49, 0x44, 0x54, 0x48, 0x20, 0x36, 0x30
 save_stack:
         DEFW        0
 heap_next:
@@ -369,6 +328,22 @@ heap_move_size:
 heap_remap_address:
         DEFW        0
 var_area_start:
+svari_X_FOR_END:
+        DEFW        0
+svari_X_FOR_STEP:
+        DEFW        0
+svari_X_LABEL:
+        DEFW        0
+svari_Y_FOR_END:
+        DEFW        0
+svari_Y_FOR_STEP:
+        DEFW        0
+svari_Y_LABEL:
+        DEFW        0
+vari_X:
+        DEFW        0
+vari_Y:
+        DEFW        0
 var_area_end:
 vars_area_start:
 vars_area_end:
