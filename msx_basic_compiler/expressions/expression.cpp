@@ -62,6 +62,7 @@
 #include "expression_strig.h"
 #include "expression_tan.h"
 #include "expression_time.h"
+#include "expression_usr.h"
 #include "expression_val.h"
 #include "expression_vdp.h"
 #include "expression_vpeek.h"
@@ -786,6 +787,51 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		CEXPRESSION_TIME *p_term = new CEXPRESSION_TIME;
 		p_result = p_term;
 		p_info->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "USR" ) {
+		CEXPRESSION_USR *p_term = new CEXPRESSION_USR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		if( p_info->list.p_position->s_word.size() != 1 && !isdigit( p_info->list.p_position->s_word[0] & 255 ) ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		p_term->n = p_info->list.p_position->s_word[0] - '0';
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word.size() != 1 ) {
+			p_term->type = CEXPRESSION_TYPE::INTEGER;
+		}
+		else if( p_info->list.p_position->s_word == "%" ) {
+			p_term->type = CEXPRESSION_TYPE::INTEGER;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "!" ) {
+			p_term->type = CEXPRESSION_TYPE::SINGLE_REAL;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "#" ) {
+			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			p_info->list.p_position++;
+		}
+		else if( p_info->list.p_position->s_word == "$" ) {
+			p_term->type = CEXPRESSION_TYPE::STRING;
+			p_info->list.p_position++;
+		}
 		return p_result;
 	}
 	else if( s_operator == "VAL" ) {

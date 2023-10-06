@@ -11,11 +11,12 @@
 #include <cmath>
 
 struct CBASIC_RESERVED_WORD {
-	std::vector< unsigned char > code;
+	std::vector< int > code;
 	std::string s_name;
 };
 
 static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
+	{ { -1 },				"INTERVAL" },
 	{ { 0x8C },				"RESTORE" },
 	{ { 0xE3 },				"STRING$" },
 	{ { 0xBC },				"CIRCLE" },
@@ -34,7 +35,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0x8E },				"RETURN" },
 	{ { 0xFF, 0x82 },		"RIGHT$" },
 	{ { 0xC5 },				"SCREEN" },
-	{ { 0xC5 },				"SCROLL" },
+	{ { -1 },				"SCROLL" },
 	{ { 0xFF, 0x99 },		"SPACE$" },
 	{ { 0xC7 },				"SPRITE" },
 	{ { 0xE7 },				"VARPTR" },
@@ -102,6 +103,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0x83 },				"NEXT" },
 	{ { 0xFF, 0x9A },		"OCT$" },
 	{ { 0xB0 },				"OPEN" },
+	{ { -1 },				"PAGE" },
 	{ { 0xFF, 0x97 },		"PEEK" },
 	{ { 0xC1 },				"PLAY" },
 	{ { 0x98 },				"POKE" },
