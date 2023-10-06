@@ -160,6 +160,7 @@
     <ClCompile Include="collections\defint.cpp" />
     <ClCompile Include="collections\defsng.cpp" />
     <ClCompile Include="collections\defstr.cpp" />
+    <ClCompile Include="collections\defusr.cpp" />
     <ClCompile Include="collections\dim.cpp" />
     <ClCompile Include="collections\end.cpp" />
     <ClCompile Include="collections\erase.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\locate.cpp" />
     <ClCompile Include="collections\next.cpp" />
+    <ClCompile Include="collections\on_interval.cpp" />
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\print.cpp" />
@@ -243,6 +245,7 @@
     <ClCompile Include="expressions\expression_tan.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
     <ClCompile Include="expressions\expression_time.cpp" />
+    <ClCompile Include="expressions\expression_usr.cpp" />
     <ClCompile Include="expressions\expression_val.cpp" />
     <ClCompile Include="expressions\expression_variable.cpp" />
     <ClCompile Include="expressions\expression_vdp.cpp" />
@@ -267,6 +270,7 @@
     <ClInclude Include="collections\defint.h" />
     <ClInclude Include="collections\defsng.h" />
     <ClInclude Include="collections\defstr.h" />
+    <ClInclude Include="collections\defusr.h" />
     <ClInclude Include="collections\dim.h" />
     <ClInclude Include="collections\end.h" />
     <ClInclude Include="collections\erase.h" />
@@ -279,6 +283,7 @@
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\locate.h" />
     <ClInclude Include="collections\next.h" />
+    <ClInclude Include="collections\on_interval.h" />
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\print.h" />
@@ -352,6 +357,7 @@
     <ClInclude Include="expressions\expression_tan.h" />
     <ClInclude Include="expressions\expression_term.h" />
     <ClInclude Include="expressions\expression_time.h" />
+    <ClInclude Include="expressions\expression_usr.h" />
     <ClInclude Include="expressions\expression_val.h" />
     <ClInclude Include="expressions\expression_variable.h" />
     <ClInclude Include="expressions\expression_vdp.h" />

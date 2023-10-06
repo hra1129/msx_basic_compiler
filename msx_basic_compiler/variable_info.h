@@ -14,6 +14,7 @@
 
 // --------------------------------------------------------------------
 enum class CVARIABLE_TYPE {
+	UNSIGNED_BYTE,
 	INTEGER,
 	SINGLE_REAL,
 	DOUBLE_REAL,
@@ -72,6 +73,11 @@ public:
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
 			switch( it->second.type ) {
+			case CVARIABLE_TYPE::UNSIGNED_BYTE:
+				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+				asm_list.variables_area.push_back( asm_line );
+				var_area_size += 1;
+				break;
 			case CVARIABLE_TYPE::INTEGER:
 				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 				asm_list.variables_area.push_back( asm_line );

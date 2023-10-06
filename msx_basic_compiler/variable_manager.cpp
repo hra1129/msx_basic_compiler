@@ -729,6 +729,7 @@ CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, 
 	//	•Ï”ƒ‰ƒxƒ‹‚ğ¶¬
 	switch( var_name_type ) {
 	default:
+	case CVARIABLE_TYPE::UNSIGNED_BYTE:	s_label = "svarb";	break;
 	case CVARIABLE_TYPE::INTEGER:		s_label = "svari";	break;
 	case CVARIABLE_TYPE::SINGLE_REAL:	s_label = "svarf";	break;
 	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "svard";	break;

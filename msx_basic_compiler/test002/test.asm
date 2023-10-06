@@ -2,14 +2,13 @@
 ; Compiled by MSX-BACON from test.asc
 ; ------------------------------------------------------------------------
 ; 
+work_h_timi                     = 0x0fd9f
 bios_syntax_error               = 0x4055
 bios_calslt                     = 0x001C
 bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_chgmod                     = 0x0005F
-blib_setscroll                  = 0x0403f
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -20,130 +19,55 @@ start_address:
         LD          [save_stack], SP
         CALL        check_blib
         JP          NZ, bios_syntax_error
+        LD          HL, work_h_timi
+        LD          DE, h_timi_backup
+        LD          BC, 5
+        LDIR        
+        DI          
+        LD          HL, h_timi_handler
+        LD          [work_h_timi + 1], HL
+        LD          A, 0xC3
+        LD          [work_h_timi], A
+        EI          
         LD          DE, program_start
         JP          program_run
 jp_hl:
         JP          HL
 program_start:
-        LD          HL, 1
-        LD          A, L
-        CALL        bios_chgmod
+line_100:
+        CALL        interrupt_prcess
+        DI          
+        LD          HL, 30
+        LD          [svari_on_interval_value], HL
+        LD          [svari_on_interval_counter], HL
+        LD          HL, line_120
+        LD          [svari_on_interval_line], HL
+        EI          
+        CALL        interrupt_prcess
+        LD          A, 1
+        LD          [svarb_on_interval_mode], A
+        CALL        interrupt_prcess
+        CALL        interrupt_prcess
+line_110:
         LD          HL, str_1
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_2
-        CALL        puts
+        CALL        interrupt_prcess
+        JP          line_110
+        CALL        interrupt_prcess
 line_120:
-        LD          HL, vari_X
+        LD          HL, str_3
         PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_X_FOR_END
-        PUSH        HL
-        LD          HL, 255
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_X_FOR_STEP
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, _pt1
-        LD          [svari_X_LABEL], HL
-        JR          _pt0
-_pt1:
-        LD          HL, [vari_X]
-        LD          DE, [svari_X_FOR_STEP]
-        ADD         HL, DE
-        LD          [vari_X], HL
-        LD          A, D
-        LD          DE, [svari_X_FOR_END]
-        RLCA        
-        JR          C, _pt2
-        RST         0x20
-        JR          C, _pt3
-        JR          Z, _pt3
-        RET         NC
-_pt2:
-        RST         0x20
-        RET         C
-_pt3:
+        CALL        puts
         POP         HL
-_pt0:
-        LD          HL, [vari_X]
-        PUSH        HL
-        LD          HL, [vari_X]
-        PUSH        HL
-        POP         HL
-        LD          E, L
-        POP         HL
-        LD          A, 3
-        LD          IX, blib_setscroll
-        CALL        call_blib
-        LD          HL, vari_Y
-        PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_Y_FOR_END
-        PUSH        HL
-        LD          HL, 1000
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_Y_FOR_STEP
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, _pt5
-        LD          [svari_Y_LABEL], HL
-        JR          _pt4
-_pt5:
-        LD          HL, [vari_Y]
-        LD          DE, [svari_Y_FOR_STEP]
-        ADD         HL, DE
-        LD          [vari_Y], HL
-        LD          A, D
-        LD          DE, [svari_Y_FOR_END]
-        RLCA        
-        JR          C, _pt6
-        RST         0x20
-        JR          C, _pt7
-        JR          Z, _pt7
-        RET         NC
-_pt6:
-        RST         0x20
-        RET         C
-_pt7:
-        POP         HL
-_pt4:
-        LD          HL, [svari_Y_LABEL]
-        CALL        jp_hl
-        LD          HL, [svari_X_LABEL]
-        CALL        jp_hl
-        JP          line_120
+        CALL        free_string
+        CALL        interrupt_prcess
+        RET         
+        CALL        interrupt_prcess
 program_termination:
+        CALL        restore_h_timi
         LD          SP, [save_stack]
         RET         
 check_blib:
@@ -305,18 +229,58 @@ program_run:
         XOR         A, A
         SBC         HL, DE
         LD          [heap_end], HL
-        LD          HL, var_area_start
-        LD          DE, var_area_start + 1
-        LD          BC, varsa_area_end - var_area_start - 1
-        LD          [HL], 0
+        RET         
+interrupt_prcess:
+        LD          HL, [svari_on_interval_line]
+        LD          A, L
+        OR          A, H
+        JR          Z, _skip_on_interval
+        LD          A, [svarb_on_interval_exec]
+        DEC         A
+        JR          NZ, _skip_on_interval
+        LD          [svarb_on_interval_exec], A
+        CALL        jp_hl
+_skip_on_interval:
+        RET         
+h_timi_handler:
+        PUSH        AF
+        LD          A, [svarb_on_interval_mode]
+        OR          A, A
+        JR          Z, _end_of_interval
+        LD          HL, [svari_on_interval_counter]
+        LD          A, L
+        OR          A, H
+        JR          Z, _happned_interval
+        DEC         HL
+        LD          [svari_on_interval_counter], HL
+        JR          _end_of_interval
+_happned_interval:
+        LD          A, [svarb_on_interval_mode]
+        DEC         A
+        JR          NZ, _end_of_interval
+        INC         A
+        LD          [svarb_on_interval_exec], A
+        LD          HL, [svari_on_interval_value]
+        LD          [svari_on_interval_counter], HL
+_end_of_interval:
+        POP         AF
+        JP          h_timi_backup
+restore_h_timi:
+        DI          
+        LD          HL, h_timi_backup
+        LD          DE, work_h_timi
+        LD          BC, 5
         LDIR        
+        EI          
         RET         
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x05, 0x48, 0x45, 0x4C, 0x4C, 0x4F
+        DEFB        0x01, 0x2A
 str_2:
         DEFB        0x02, 0x0D, 0x0A
+str_3:
+        DEFB        0x0C, 0x3C, 0x3C, 0x49, 0x4E, 0x54, 0x45, 0x52, 0x56, 0x41, 0x4C, 0x3E, 0x3E
 save_stack:
         DEFW        0
 heap_next:
@@ -327,22 +291,38 @@ heap_move_size:
         DEFW        0
 heap_remap_address:
         DEFW        0
+h_timi_backup:
+        DEFB        0, 0, 0, 0, 0
 var_area_start:
-svari_X_FOR_END:
+svarb_on_interval_exec:
+        DEFB        0
+svarb_on_interval_mode:
+        DEFB        0
+svarb_on_strig0_mode:
+        DEFB        0
+svarb_on_strig1_mode:
+        DEFB        0
+svarb_on_strig2_mode:
+        DEFB        0
+svarb_on_strig3_mode:
+        DEFB        0
+svarb_on_strig4_mode:
+        DEFB        0
+svari_on_interval_counter:
         DEFW        0
-svari_X_FOR_STEP:
+svari_on_interval_line:
         DEFW        0
-svari_X_LABEL:
+svari_on_interval_value:
         DEFW        0
-svari_Y_FOR_END:
+svari_on_strig0_line:
         DEFW        0
-svari_Y_FOR_STEP:
+svari_on_strig1_line:
         DEFW        0
-svari_Y_LABEL:
+svari_on_strig2_line:
         DEFW        0
-vari_X:
+svari_on_strig3_line:
         DEFW        0
-vari_Y:
+svari_on_strig4_line:
         DEFW        0
 var_area_end:
 vars_area_start:
