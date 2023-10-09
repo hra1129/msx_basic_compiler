@@ -1,0 +1,59 @@
+svarf_on_strig0_mode
+	4byte
+		+00: 0=OFF/STOP, 1=ON
+		+01: 0=定常状態, FFh=押された (GTTRIG の応答)
+		+02: 一つ前の GTTRIG応答
+		+03: Reserved
+
+svari_on_strig0_line
+	2byte
+		飛び先の番地
+
+; ===============================================================================
+; 割り込みフラグ処理ルーチン ( ON STRIG )
+
+		LD		HL, svarf_on_strig0_mode
+		LD		DE, svari_on_strig0_line
+		LD		B, 0x05
+_on_strig_loop1:
+		; svarf_on_strig0_mode[+00] を確認する
+		LD		A, [HL]
+		INC		HL
+		DEC		A
+		JR		NZ, _skip_strig1				; OFF/STOP なら処理をスキップする
+
+		; svarf_on_strig0_mode[+01] を確認する
+		OR		A, [HL]
+		JR		NZ, _skip_strig1				; 0xFF なら処理をスキップする
+
+		; svarf_on_strig0_mode[+02] を確認する
+		INC		HL
+		OR		A, [HL]
+		DEC		HL
+		JR		Z, _skip_strig1					; 0x00 なら処理をスキップする
+		LD		[HL], A							; [+01] を 0xFF にする
+
+		; svari_on_strig0_line を CALL する
+		PUSH	HL								; svarf_on_strig0_mode + 01 を保存
+		EX		DE, HL
+		LD		E, [HL]
+		INC		HL
+		LD		D, [HL]
+		DEC		HL
+		PUSH	HL								; svari_on_strig0_line 保存
+		EX		DE, HL
+		CALL	jp_hl
+		POP		DE
+		POP		HL
+
+		; 次へ
+_skip_strig1:
+		INC		DE
+		INC		DE
+		INC		HL
+		INC		HL
+		INC		HL
+		DJNZ	_on_strig_loop1
+
+; ===============================================================================
+; 
