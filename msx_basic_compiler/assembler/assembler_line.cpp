@@ -22,7 +22,7 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::EXX,		  { 0, "EXX" } },
 	{ CMNEMONIC_TYPE::PUSH,		  { 1, "PUSH" } },
 	{ CMNEMONIC_TYPE::POP,		  { 1, "POP" } },
-	{ CMNEMONIC_TYPE::JP,		  { 1, "JP" } },
+	{ CMNEMONIC_TYPE::JP,		  { 4, "JP" } },
 	{ CMNEMONIC_TYPE::JR,		  { 1, "JR" } },
 	{ CMNEMONIC_TYPE::CALL,		  { 1, "CALL" } },
 	{ CMNEMONIC_TYPE::RET,		  { 0, "RET" } },

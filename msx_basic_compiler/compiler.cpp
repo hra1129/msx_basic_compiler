@@ -28,6 +28,7 @@
 #include "collections/let.h"
 #include "collections/locate.h"
 #include "collections/next.h"
+#include "collections/on_goto.h"			//	on gosub ‚à‚±‚Ì’†
 #include "collections/on_interval.h"
 #include "collections/on_strig.h"
 #include "collections/out.h"
@@ -71,6 +72,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CLET );
 	this->collection.push_back( new CLOCATE );
 	this->collection.push_back( new CNEXT );
+	this->collection.push_back( new CONGOTO );
 	this->collection.push_back( new CONINTERVAL );
 	this->collection.push_back( new CONSTRIG );
 	this->collection.push_back( new COUT );
@@ -608,7 +610,9 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_prcess_end", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	
 	//	H.TIMIˆ—ƒ‹[ƒ`ƒ“
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_handler", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );

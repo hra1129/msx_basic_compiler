@@ -173,6 +173,7 @@
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\locate.cpp" />
     <ClCompile Include="collections\next.cpp" />
+    <ClCompile Include="collections\on_goto.cpp" />
     <ClCompile Include="collections\on_interval.cpp" />
     <ClCompile Include="collections\on_strig.cpp" />
     <ClCompile Include="collections\out.cpp" />
@@ -284,6 +285,7 @@
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\locate.h" />
     <ClInclude Include="collections\next.h" />
+    <ClInclude Include="collections\on_goto.h" />
     <ClInclude Include="collections\on_interval.h" />
     <ClInclude Include="collections\on_strig.h" />
     <ClInclude Include="collections\out.h" />

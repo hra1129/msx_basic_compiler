@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------------
-; Compiled by MSX-BACON from test.asc
+; Compiled by MSX-BACON from test.bas
 ; ------------------------------------------------------------------------
 ; 
 work_h_timi                     = 0x0fd9f
@@ -9,6 +9,7 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
+bios_icomp                      = 0x02f4d
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -38,21 +39,7 @@ program_start:
 line_100:
         CALL        interrupt_prcess
         CALL        interrupt_prcess
-        DI          
-        LD          HL, line_1000
-        LD          [svari_on_strig0_line], HL
-        LD          HL, line_1010
-        LD          [svari_on_strig1_line], HL
-        LD          HL, line_1020
-        LD          [svari_on_strig2_line], HL
-        LD          HL, line_1030
-        LD          [svari_on_strig3_line], HL
-        LD          HL, line_1040
-        LD          [svari_on_strig4_line], HL
-        EI          
-line_110:
-        CALL        interrupt_prcess
-        LD          HL, vari_I
+        LD          HL, vari_A
         PUSH        HL
         LD          HL, 0
         POP         DE
@@ -60,58 +47,32 @@ line_110:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, svari_I_FOR_END
-        PUSH        HL
-        LD          HL, 4
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_I_FOR_STEP
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, _pt1
-        LD          [svari_I_LABEL], HL
-        JR          _pt0
-_pt1:
-        LD          HL, [vari_I]
-        LD          DE, [svari_I_FOR_STEP]
-        ADD         HL, DE
-        LD          [vari_I], HL
-        LD          A, D
-        LD          DE, [svari_I_FOR_END]
-        RLCA        
-        JR          C, _pt2
-        RST         0x20
-        JR          C, _pt3
-        JR          Z, _pt3
-        RET         NC
-_pt2:
-        RST         0x20
-        RET         C
-_pt3:
-        POP         HL
-_pt0:
+line_110:
         CALL        interrupt_prcess
-        LD          HL, [vari_I]
+        LD          HL, [vari_A]
         LD          A, L
-        AND         A, 7
-        ADD         A, A
-        ADD         A, A
-        LD          L, A
-        LD          H, 0
-        LD          DE, svarf_on_strig0_mode
+        OR          A, H
+        JP          Z, _pt0
+        LD          DE, 5
+        RST         0x20
+        JP          NC, _pt0
+        ADD         HL, HL
+        LD          DE, _pt1 - 2
         ADD         HL, DE
-        LD          [HL], 1
-        CALL        interrupt_prcess
-        LD          HL, [svari_I_LABEL]
-        CALL        jp_hl
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        LD          DE, _pt0
+        PUSH        DE
+        JP          HL
+_pt1:
+        DEFW        line_130
+        DEFW        line_140
+        DEFW        line_150
+        DEFW        line_160
+        DEFW        line_170
+_pt0:
 line_120:
         CALL        interrupt_prcess
         LD          HL, str_1
@@ -119,59 +80,40 @@ line_120:
         CALL        puts
         POP         HL
         CALL        free_string
+        LD          HL, str_2
+        CALL        puts
         CALL        interrupt_prcess
-        LD          HL, vari_I
+        LD          HL, vari_A
         PUSH        HL
-        LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_I_FOR_END
-        PUSH        HL
-        LD          HL, 1000
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_I_FOR_STEP
+        LD          HL, [vari_A]
         PUSH        HL
         LD          HL, 1
         POP         DE
+        ADD         HL, DE
+        POP         DE
         EX          DE, HL
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, _pt5
-        LD          [svari_I_LABEL], HL
-        JR          _pt4
-_pt5:
-        LD          HL, [vari_I]
-        LD          DE, [svari_I_FOR_STEP]
-        ADD         HL, DE
-        LD          [vari_I], HL
-        LD          A, D
-        LD          DE, [svari_I_FOR_END]
-        RLCA        
-        JR          C, _pt6
-        RST         0x20
-        JR          C, _pt7
-        JR          Z, _pt7
-        RET         NC
-_pt6:
-        RST         0x20
-        RET         C
-_pt7:
-        POP         HL
-_pt4:
         CALL        interrupt_prcess
-        LD          HL, [svari_I_LABEL]
-        CALL        jp_hl
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        CALL        bios_icomp
+        AND         A, 1
+        DEC         A
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt3
+        JP          line_110
+_pt3:
         CALL        interrupt_prcess
-        JP          line_120
-line_1000:
+        JP          program_termination
+_pt2:
+line_130:
         CALL        interrupt_prcess
         LD          HL, str_3
         PUSH        HL
@@ -181,8 +123,21 @@ line_1000:
         LD          HL, str_2
         CALL        puts
         CALL        interrupt_prcess
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_prcess
         RET         
-line_1010:
+line_140:
         CALL        interrupt_prcess
         LD          HL, str_4
         PUSH        HL
@@ -192,8 +147,21 @@ line_1010:
         LD          HL, str_2
         CALL        puts
         CALL        interrupt_prcess
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_prcess
         RET         
-line_1020:
+line_150:
         CALL        interrupt_prcess
         LD          HL, str_5
         PUSH        HL
@@ -203,8 +171,21 @@ line_1020:
         LD          HL, str_2
         CALL        puts
         CALL        interrupt_prcess
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_prcess
         RET         
-line_1030:
+line_160:
         CALL        interrupt_prcess
         LD          HL, str_6
         PUSH        HL
@@ -214,8 +195,21 @@ line_1030:
         LD          HL, str_2
         CALL        puts
         CALL        interrupt_prcess
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_prcess
         RET         
-line_1040:
+line_170:
         CALL        interrupt_prcess
         LD          HL, str_7
         PUSH        HL
@@ -224,6 +218,19 @@ line_1040:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
+        CALL        interrupt_prcess
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, [vari_A]
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
         CALL        interrupt_prcess
         RET         
 program_termination:
@@ -441,6 +448,7 @@ _skip_strig1:
         INC         HL
         DJNZ        _on_strig_loop1
         RET         
+interrupt_prcess_end:
 h_timi_handler:
         PUSH        AF
         LD          A, [svarb_on_interval_mode]
@@ -499,19 +507,19 @@ restore_h_timi:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x01, 0x41
+        DEFB        0x07, 0x54, 0x48, 0x52, 0x4F, 0x55, 0x47, 0x48
 str_2:
         DEFB        0x02, 0x0D, 0x0A
 str_3:
-        DEFB        0x08, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x30, 0x29
+        DEFB        0x03, 0x31, 0x33, 0x30
 str_4:
-        DEFB        0x08, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x31, 0x29
+        DEFB        0x03, 0x31, 0x34, 0x30
 str_5:
-        DEFB        0x08, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x32, 0x29
+        DEFB        0x03, 0x31, 0x35, 0x30
 str_6:
-        DEFB        0x08, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x33, 0x29
+        DEFB        0x03, 0x31, 0x36, 0x30
 str_7:
-        DEFB        0x08, 0x53, 0x54, 0x52, 0x49, 0x47, 0x28, 0x34, 0x29
+        DEFB        0x03, 0x31, 0x37, 0x30
 save_stack:
         DEFW        0
 heap_next:
@@ -545,12 +553,6 @@ svarf_on_strig6_mode_dummy:
         DEFW        0, 0
 svarf_on_strig7_mode_dummy:
         DEFW        0, 0
-svari_I_FOR_END:
-        DEFW        0
-svari_I_FOR_STEP:
-        DEFW        0
-svari_I_LABEL:
-        DEFW        0
 svari_on_interval_counter:
         DEFW        0
 svari_on_interval_line:
@@ -567,7 +569,7 @@ svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
         DEFW        0
-vari_I:
+vari_A:
         DEFW        0
 var_area_end:
 vars_area_start:
