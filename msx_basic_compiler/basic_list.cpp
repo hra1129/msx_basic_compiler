@@ -353,10 +353,14 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 	}
 	if( *( this->p_file_image ) == '"' ) {
 		//	•¶Žš—ñ‚¾‚Á‚½ê‡
-		s_word.s_word = "\"";
+		s_word.s_word = "";
 		s_word.type = CBASIC_WORD_TYPE::STRING;
+		this->p_file_image++;
 		while( *(this->p_file_image) != '\"' && *(this->p_file_image) != 0 ){
 			s_word.s_word = s_word.s_word + (char)*(this->p_file_image);
+			this->p_file_image++;
+		}
+		if( *(this->p_file_image) == '\"' ) {
 			this->p_file_image++;
 		}
 		return s_word;
