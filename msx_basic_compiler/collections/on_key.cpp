@@ -9,7 +9,7 @@
 
 // --------------------------------------------------------------------
 //	KEY {ON|OFF|STOP}
-void CONKEY::strig( CCOMPILE_INFO *p_info ) {
+void CONKEY::key( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
 	CEXPRESSION exp;
@@ -82,15 +82,15 @@ void CONKEY::strig( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-//  ON KEY GOSUB <飛び先0>, <飛び先1>, <飛び先2>, <飛び先3>, <飛び先4>
+//  ON KEY GOSUB <飛び先0>, <飛び先1>, ... , <飛び先3>, <飛び先9>
 bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
 	int i;
 
-	if( p_info->list.p_position->s_word == "STRIG" ) {
+	if( p_info->list.p_position->s_word == "KEY" ) {
 		//	STRIG(n) {ON|OFF|STOP}
-		this->strig( p_info );		
+		this->key( p_info );
 		return true;
 	}
 	if( p_info->list.p_position->s_word != "ON" ) {
@@ -120,7 +120,7 @@ bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	asm_line.set( CMNEMONIC_TYPE::DI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	for( i = 0; i < 5; i++ ) {
+	for( i = 0; i < 10; i++ ) {
 		//	行番号の記述がない場合はエラー
 		if( p_info->list.is_command_end() ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -129,7 +129,7 @@ bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_strig" + std::to_string(i) + "_line]", COPERAND_TYPE::REGISTER, "HL" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_key" + std::to_string(i) + "_line]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}

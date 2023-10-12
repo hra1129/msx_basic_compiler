@@ -11,7 +11,10 @@
 bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
+	std::vector< CBASIC_WORD >::const_iterator p_position;
 
+	//	KEY(n) {ON|OFF|STOP} は ON KEY のところで処理するので、ここの対象外の命令だったら戻せるように覚えておく
+	p_position = p_info->list.p_position;
 	if( p_info->list.p_position->s_word != "KEY" ) {
 		return false;
 	}
@@ -21,6 +24,11 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 
+	if( p_info->list.p_position->s_word == "(" ) {
+		//	KEY(n) はここの対象外。
+		p_info->list.p_position = p_position;
+		return false;
+	}
 	if( p_info->list.p_position->s_word == "ON" ) {
 		p_info->assembler_list.add_label( "bios_dspfnk", "0x000CF" );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_dspfnk", COPERAND_TYPE::NONE, "" );

@@ -175,6 +175,7 @@
     <ClCompile Include="collections\next.cpp" />
     <ClCompile Include="collections\on_goto.cpp" />
     <ClCompile Include="collections\on_interval.cpp" />
+    <ClCompile Include="collections\on_key.cpp" />
     <ClCompile Include="collections\on_strig.cpp" />
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\poke.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="collections\next.h" />
     <ClInclude Include="collections\on_goto.h" />
     <ClInclude Include="collections\on_interval.h" />
+    <ClInclude Include="collections\on_key.h" />
     <ClInclude Include="collections\on_strig.h" />
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\poke.h" />
