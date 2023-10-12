@@ -316,11 +316,11 @@ bool CCALL::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "IOTINIT" ) {
-		this->iotget( p_info );
+		this->iotinit( p_info );
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "IOTGET" ) {
-		this->iotinit( p_info );
+		this->iotget( p_info );
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "IOTPUT" ) {

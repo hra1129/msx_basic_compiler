@@ -10,7 +10,7 @@
 
 class CONKEY: public CCOMPILER_CONTAINER {
 private:
-	void strig( CCOMPILE_INFO *p_info );
+	void key( CCOMPILE_INFO *p_info );
 
 public:
 	bool exec( CCOMPILE_INFO *p_info );

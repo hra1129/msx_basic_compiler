@@ -30,6 +30,7 @@
 #include "collections/next.h"
 #include "collections/on_goto.h"			//	on gosub ‚à‚±‚Ì’†
 #include "collections/on_interval.h"
+#include "collections/on_key.h"
 #include "collections/on_strig.h"
 #include "collections/out.h"
 #include "collections/poke.h"
