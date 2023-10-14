@@ -25,7 +25,7 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 	if( exp.compile( p_info ) ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "7" );
+		asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "15" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -35,7 +35,7 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::CONSTANT, "0" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "svarf_on_strig0_mode" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "svarf_on_key01_mode" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -72,7 +72,7 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 	else if( p_info->list.p_position->s_word == "ON" ) {
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "1" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "255" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}
@@ -89,14 +89,14 @@ bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 	int i;
 
 	if( p_info->list.p_position->s_word == "KEY" ) {
-		//	STRIG(n) {ON|OFF|STOP}
+		//	KEY(n) {ON|OFF|STOP}
 		this->key( p_info );
 		return true;
 	}
 	if( p_info->list.p_position->s_word != "ON" ) {
 		return false;
 	}
-	//	ON STRIG GOSUB line
+	//	ON KEY GOSUB line
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -129,7 +129,7 @@ bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_key" + std::to_string(i) + "_line]", COPERAND_TYPE::REGISTER, "HL" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, ((i<9)?"[svari_on_key0":"[svari_on_key") + std::to_string(i+1) + "_line]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}

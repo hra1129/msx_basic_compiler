@@ -248,8 +248,74 @@ _skip_strig2:
         DJNZ        _on_strig_loop2
 _end_of_strig:
         DI          
+        IN          A, [0xAA]
+        AND         A, 0xF0
+        OR          A, 6
+        LD          B, A
+        OUT         [0xAA], A
+        IN          A, [0xA9]
+        OR          A, 0x1E
+        RRCA        
+        LD          C, A
+        LD          A, B
+        INC         A
+        OUT         [0xAA], A
+        IN          A, [0xA9]
+        OR          A, 0xFC
+        AND         A, C
+        LD          C, A
+        LD          HL, svarf_on_key01_mode
+        LD          B, 0x90
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key02_mode
+        LD          B, 0xA0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key03_mode
+        LD          B, 0xC0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key04_mode
+        LD          B, 0x81
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key05_mode
+        LD          B, 0x82
+        CALL        _on_key_sub
+        LD          A, C
+        XOR         A, 0x80
+        LD          C, A
+        LD          HL, svarf_on_key06_mode
+        LD          B, 0x90
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key07_mode
+        LD          B, 0xA0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key08_mode
+        LD          B, 0xC0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key09_mode
+        LD          B, 0x81
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key10_mode
+        LD          B, 0x82
+        CALL        _on_key_sub
         POP         AF
         JP          h_timi_backup
+_on_key_sub:
+        LD          A, C
+        AND         A, B
+        AND         A, [HL]
+        INC         HL
+        INC         HL
+        LD          D, [HL]
+        LD          [HL], 0
+        RET         NZ
+        DEC         A
+        LD          [HL], A
+        AND         A, D
+        RET         NZ
+        DEC         HL
+        DEC         A
+        LD          [HL], A
+        RET         
 restore_h_timi:
         DI          
         LD          HL, h_timi_backup
@@ -281,6 +347,38 @@ svarb_on_interval_exec:
         DEFB        0
 svarb_on_interval_mode:
         DEFB        0
+svarf_on_key01_mode:
+        DEFW        0, 0
+svarf_on_key02_mode:
+        DEFW        0, 0
+svarf_on_key03_mode:
+        DEFW        0, 0
+svarf_on_key04_mode:
+        DEFW        0, 0
+svarf_on_key05_mode:
+        DEFW        0, 0
+svarf_on_key06_mode:
+        DEFW        0, 0
+svarf_on_key07_mode:
+        DEFW        0, 0
+svarf_on_key08_mode:
+        DEFW        0, 0
+svarf_on_key09_mode:
+        DEFW        0, 0
+svarf_on_key10_mode:
+        DEFW        0, 0
+svarf_on_key11_mode_dummy:
+        DEFW        0, 0
+svarf_on_key12_mode_dummy:
+        DEFW        0, 0
+svarf_on_key13_mode_dummy:
+        DEFW        0, 0
+svarf_on_key14_mode_dummy:
+        DEFW        0, 0
+svarf_on_key15_mode_dummy:
+        DEFW        0, 0
+svarf_on_key16_mode_dummy:
+        DEFW        0, 0
 svarf_on_strig0_mode:
         DEFW        0, 0
 svarf_on_strig1_mode:
@@ -302,6 +400,26 @@ svari_on_interval_counter:
 svari_on_interval_line:
         DEFW        0
 svari_on_interval_value:
+        DEFW        0
+svari_on_key01_line:
+        DEFW        0
+svari_on_key02_line:
+        DEFW        0
+svari_on_key03_line:
+        DEFW        0
+svari_on_key04_line:
+        DEFW        0
+svari_on_key05_line:
+        DEFW        0
+svari_on_key06_line:
+        DEFW        0
+svari_on_key07_line:
+        DEFW        0
+svari_on_key08_line:
+        DEFW        0
+svari_on_key09_line:
+        DEFW        0
+svari_on_key10_line:
         DEFW        0
 svari_on_strig0_line:
         DEFW        0
