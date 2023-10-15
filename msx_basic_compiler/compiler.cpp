@@ -248,6 +248,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.constants.s_blank_string = this->info.constants.add( value );
 
 	this->info.assembler_list.add_label( "work_h_timi", "0x0fd9f" );
+	this->info.assembler_list.add_label( "work_h_erro", "0x0ffb1" );
 
 	//	ヘッダーコメント
 	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "------------------------------------------------------------------------", COPERAND_TYPE::NONE, "" );
@@ -299,6 +300,23 @@ bool CCOMPILER::exec( std::string s_name ) {
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0xC3" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_h_timi]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	初期化処理 (H.ERROフック)
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "work_h_erro" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "h_erro_backup" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "5" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "h_erro_handler" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_h_erro + 1]", COPERAND_TYPE::REGISTER, "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0xC3" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_h_erro]", COPERAND_TYPE::REGISTER, "A" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -411,6 +429,9 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 	//	プログラムの終了処理
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_termination", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	プログラムの終了処理 (H.TIMI復元)
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_erro", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_timi", COPERAND_TYPE::NONE, "" );
@@ -932,6 +953,40 @@ bool CCOMPILER::exec( std::string s_name ) {
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
+	//	H.ERRO復元処理ルーチン
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_erro", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "h_erro_backup" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "work_h_erro" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "5" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	H.ERRO処理ルーチン
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_erro_handler", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );				// Eにエラーコードが入っているので保存
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_timi", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_erro", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "work_h_erro", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
 	//	割り込みフラグ
 	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
 	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
@@ -982,6 +1037,14 @@ bool CCOMPILER::exec( std::string s_name ) {
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_backup", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+
+	//	H.ERRO待避エリア
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_erro_backup", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
+
+
 	this->info.assembler_list.variables_area.push_back( asm_line );
 
 	//	変数ダンプ
