@@ -125,6 +125,23 @@ line_130:
         INC         HL
         LD          [HL], D
         CALL        interrupt_process
+        LD          HL, varia_A
+        LD          D, 1
+        LD          BC, 27
+        CALL        check_array
+        CALL        calc_array_top
+        LD          HL, 6
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        PUSH        HL
+        LD          HL, 34
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_process
         LD          HL, vari_P
         PUSH        HL
         LD          HL, varia_A
@@ -164,6 +181,34 @@ line_140:
         CALL        puts
         POP         HL
 _pt1:
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, [vari_P]
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        ADD         HL, DE
+        LD          A, [HL]
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt2
+        PUSH        HL
+        LD          HL, str_1
+        CALL        puts
+        POP         HL
+_pt2:
         CALL        puts
         LD          A, 32
         RST         0x18
