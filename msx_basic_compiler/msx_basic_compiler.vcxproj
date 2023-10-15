@@ -251,6 +251,7 @@
     <ClCompile Include="expressions\expression_usr.cpp" />
     <ClCompile Include="expressions\expression_val.cpp" />
     <ClCompile Include="expressions\expression_variable.cpp" />
+    <ClCompile Include="expressions\expression_varptr.cpp" />
     <ClCompile Include="expressions\expression_vdp.cpp" />
     <ClCompile Include="expressions\expression_vpeek.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
@@ -366,6 +367,7 @@
     <ClInclude Include="expressions\expression_usr.h" />
     <ClInclude Include="expressions\expression_val.h" />
     <ClInclude Include="expressions\expression_variable.h" />
+    <ClInclude Include="expressions\expression_varptr.h" />
     <ClInclude Include="expressions\expression_vdp.h" />
     <ClInclude Include="expressions\expression_vpeek.h" />
     <ClInclude Include="single_real.h" />

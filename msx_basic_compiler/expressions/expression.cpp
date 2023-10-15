@@ -64,6 +64,7 @@
 #include "expression_time.h"
 #include "expression_usr.h"
 #include "expression_val.h"
+#include "expression_varptr.h"
 #include "expression_vdp.h"
 #include "expression_vpeek.h"
 
@@ -843,6 +844,39 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "VARPTR" ) {
+		CEXPRESSION_VARPTR *p_term = new CEXPRESSION_VARPTR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_position = p_info->list.p_position;
+		if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "#" ) {
+			//	VARPTR( #1 ) ‚Ì‚æ‚¤‚ÈŽg‚¢•û‚Ìê‡
+			p_info->list.p_position++;
+			if( p_info->list.is_command_end() ) {
+				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+				return p_result;
+			}
+			int n = std::stoi( p_info->list.p_position->s_word );
+			if( n < 0 || n > 15 ) {
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+				return p_result;
+			}
+			p_term->file_number = n;
+			p_info->list.p_position++;
+		}
+		else {
+			//	VARPTR( A ) ‚Ì‚æ‚¤‚ÈŽg‚¢•û‚Ìê‡
+			p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		}
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}

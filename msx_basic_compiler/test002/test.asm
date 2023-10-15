@@ -10,13 +10,13 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-work_dac                        = 0x0f7f6
+bios_fout                       = 0x03425
 work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
-bios_frcint                     = 0x02f8a
-bios_fout                       = 0x03425
 work_csrx                       = 0x0f3dd
 work_linlen                     = 0x0f3b0
+bios_errhand                    = 0x0406F
+bios_umult                      = 0x0314a
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -37,6 +37,12 @@ start_address:
         LD          [work_h_timi + 1], HL
         LD          A, 0xC3
         LD          [work_h_timi], A
+        LD          HL, _code_ret
+        LD          [svari_on_key01_line], HL
+        LD          HL, svari_on_key01_line
+        LD          DE, svari_on_key01_line + 2
+        LD          BC, 20 - 2
+        LDIR        
         LD          HL, work_h_erro
         LD          DE, h_erro_backup
         LD          BC, 5
@@ -57,16 +63,16 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_A
         PUSH        HL
-        LD          HL, const_45327680
-        LD          DE, work_dac
-        LD          BC, 4
-        LDIR        
-        LD          [work_dac+4], BC
-        LD          [work_dac+6], BC
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_frcint
-        LD          HL, [work_dac_int]
+        LD          HL, 123
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_process
+        LD          HL, vari_P
+        PUSH        HL
+        LD          HL, vari_A
         POP         DE
         EX          DE, HL
         LD          [HL], E
@@ -74,7 +80,10 @@ line_110:
         LD          [HL], D
 line_120:
         CALL        interrupt_process
-        LD          HL, [vari_A]
+        LD          HL, [vari_P]
+        LD          A, [HL]
+        LD          L, A
+        LD          H, 0
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -92,6 +101,69 @@ line_120:
         CALL        puts
         POP         HL
 _pt0:
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_1
+        CALL        puts
+line_130:
+        CALL        interrupt_process
+        LD          HL, varia_A
+        LD          D, 1
+        LD          BC, 27
+        CALL        check_array
+        CALL        calc_array_top
+        LD          HL, 5
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        PUSH        HL
+        LD          HL, 192
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        CALL        interrupt_process
+        LD          HL, vari_P
+        PUSH        HL
+        LD          HL, varia_A
+        LD          D, 1
+        LD          BC, 27
+        CALL        check_array
+        CALL        calc_array_top
+        LD          HL, 5
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+line_140:
+        CALL        interrupt_process
+        LD          HL, [vari_P]
+        LD          A, [HL]
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt1
+        PUSH        HL
+        LD          HL, str_1
+        CALL        puts
+        POP         HL
+_pt1:
         CALL        puts
         LD          A, 32
         RST         0x18
@@ -155,6 +227,92 @@ _str_loop:
 _str_loop_exit:
         POP         HL
         LD          [HL], B
+        RET         
+allocate_heap:
+        LD          HL, [heap_next]
+        PUSH        HL
+        ADD         HL, BC
+        JR          C, _allocate_heap_error
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_heap_error
+        LD          [heap_next], HL
+        POP         HL
+        PUSH        HL
+        DEC         BC
+        LD          E, L
+        LD          D, H
+        INC         DE
+        LD          [HL], 0
+        LDIR        
+        POP         HL
+        RET         
+_allocate_heap_error:
+        LD          E, 7
+        JP          bios_errhand
+check_array:
+        LD          A, [HL]
+        INC         HL
+        OR          A, [HL]
+        DEC         HL
+        RET         NZ
+        PUSH        DE
+        PUSH        HL
+        PUSH        BC
+        CALL        allocate_heap
+        POP         BC
+        POP         DE
+        POP         AF
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        EX          DE, HL
+        DEC         BC
+        DEC         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        LD          [HL], A
+        INC         HL
+        LD          B, A
+        LD          DE, 11
+_check_array_loop:
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        DJNZ        _check_array_loop
+        POP         HL
+        RET         
+calc_array_top:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        INC         HL
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, 0
+        ADD         HL, DE
+        ADD         HL, DE
+        LD          A, E
+        POP         DE
+        PUSH        HL
+        JR          _calc_array_top_l2
+_calc_array_top_l1:
+        DEC         HL
+        LD          B, [HL]
+        DEC         HL
+        LD          C, [HL]
+        PUSH        BC
+_calc_array_top_l2:
+        DEC         A
+        JR          NZ, _calc_array_top_l1
+        PUSH        DE
         RET         
 program_run:
         LD          HL, heap_start
@@ -377,6 +535,7 @@ restore_h_erro:
         LD          BC, 5
         LDIR        
         EI          
+_code_ret:
         RET         
 h_erro_handler:
         PUSH        DE
@@ -384,8 +543,6 @@ h_erro_handler:
         CALL        restore_h_erro
         POP         DE
         JP          work_h_erro
-const_45327680:
-        DEFB        0x45, 0x32, 0x76, 0x80
 str_0:
         DEFB        0x00
 str_1:
@@ -495,10 +652,14 @@ svari_on_strig4_line:
         DEFW        0
 vari_A:
         DEFW        0
+vari_P:
+        DEFW        0
 var_area_end:
 vars_area_start:
 vars_area_end:
 vara_area_start:
+varia_A:
+        DEFW        0
 vara_area_end:
 varsa_area_start:
 varsa_area_end:
