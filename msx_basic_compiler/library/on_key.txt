@@ -79,6 +79,26 @@ _skip_key1:
 		AND		A, C				; [SHIFT][F3][F2][F1][-][-][F5][F4]
 		LD		C, A
 
+		LD		HL, svarf_on_key06_mode
+		LD		B, 0x90
+		CALL	_on_key_sub
+		LD		HL, svarf_on_key07_mode
+		LD		B, 0xA0
+		CALL	_on_key_sub
+		LD		HL, svarf_on_key08_mode
+		LD		B, 0xC0
+		CALL	_on_key_sub
+		LD		HL, svarf_on_key09_mode
+		LD		B, 0x81
+		CALL	_on_key_sub
+		LD		HL, svarf_on_key10_mode
+		LD		B, 0x82
+		CALL	_on_key_sub
+
+		LD		A, C
+		XOR		A, 0x80
+		LD		C, A
+
 		LD		HL, svarf_on_key01_mode
 		LD		B, 0x90
 		CALL	_on_key_sub
@@ -95,35 +115,17 @@ _skip_key1:
 		LD		B, 0x82
 		CALL	_on_key_sub
 
-		LD		A, C
-		XOR		A, 0x80
-		LD		C, A
-
-		LD		HL, svarf_on_key06_mode
-		LD		B, 0x90
-		CALL	_on_key_sub
-		LD		HL, svarf_on_key07_mode
-		LD		B, 0xA0
-		CALL	_on_key_sub
-		LD		HL, svarf_on_key08_mode
-		LD		B, 0xC0
-		CALL	_on_key_sub
-		LD		HL, svarf_on_key09_mode
-		LD		B, 0x81
-		CALL	_on_key_sub
-		LD		HL, svarf_on_key10_mode
-		LD		B, 0x82
-		CALL	_on_key_sub
 		ここで終わり
 
 _on_key_sub:						; C = キーマトリクス値, B = マスク値, HL = テーブルのアドレス, Cは維持
-		LD		A, C
-		AND		A, B
-		AND		A, [HL]				; 押されてる状態なら 0 になる、押されてない状態なら 非0(=Bとは限らない) になる
+		LD		A, [HL]				; 0=OFF/STOP, FFh=ON
+		AND		A, B				; OFF/STOP なら、0 になる。ON ならマスク値になる。
 		INC		HL					; フラグ不変
 		INC		HL					; フラグ不変
 		LD		D, [HL]				; フラグ不変 前回の状態(00h or FFh)を保護
 		LD		[HL], 0				; フラグ不変 前回の状態を「押されてない状態」にする
+		RET		Z					; OFF/STOP なら戻る
+		AND		A, C				; 押されていれば、0 になる。押されていなければ 非0 になる
 		RET		NZ					; 押されてない状態なら、ここで戻る
 		DEC		A
 		LD		[HL], A				; 前回の状態を「押されている状態(FFh)」にする

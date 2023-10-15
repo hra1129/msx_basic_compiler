@@ -36,8 +36,8 @@ jp_hl:
         JP          HL
 program_start:
 line_100:
-        CALL        interrupt_prcess
-        CALL        interrupt_prcess
+        CALL        interrupt_process
+        CALL        interrupt_process
         DI          
         LD          HL, line_130
         LD          [svari_on_key01_line], HL
@@ -61,7 +61,7 @@ line_100:
         LD          [svari_on_key10_line], HL
         EI          
 line_110:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, vari_I
         PUSH        HL
         LD          HL, 1
@@ -108,7 +108,7 @@ _pt2:
 _pt3:
         POP         HL
 _pt0:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, [vari_I]
         LD          A, L
         AND         A, 15
@@ -116,14 +116,14 @@ _pt0:
         ADD         A, A
         LD          L, A
         LD          H, 0
-        LD          DE, svarf_on_key01_mode
+        LD          DE, svarf_on_key01_mode - 4
         ADD         HL, DE
-        LD          [HL], 255
-        CALL        interrupt_prcess
+        LD          [HL], 0xFF
+        CALL        interrupt_process
         LD          HL, [svari_I_LABEL]
         CALL        jp_hl
 line_120:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_1
         PUSH        HL
         CALL        puts
@@ -131,7 +131,7 @@ line_120:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, vari_I
         PUSH        HL
         LD          HL, 0
@@ -178,13 +178,13 @@ _pt6:
 _pt7:
         POP         HL
 _pt4:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, [svari_I_LABEL]
         CALL        jp_hl
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         JP          line_120
 line_130:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_3
         PUSH        HL
         CALL        puts
@@ -192,10 +192,10 @@ line_130:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_140:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_4
         PUSH        HL
         CALL        puts
@@ -203,10 +203,10 @@ line_140:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_150:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_5
         PUSH        HL
         CALL        puts
@@ -214,10 +214,10 @@ line_150:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_160:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_6
         PUSH        HL
         CALL        puts
@@ -225,10 +225,10 @@ line_160:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_170:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_7
         PUSH        HL
         CALL        puts
@@ -236,10 +236,10 @@ line_170:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_180:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_8
         PUSH        HL
         CALL        puts
@@ -247,10 +247,10 @@ line_180:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_190:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_9
         PUSH        HL
         CALL        puts
@@ -258,10 +258,10 @@ line_190:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_200:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_10
         PUSH        HL
         CALL        puts
@@ -269,10 +269,10 @@ line_200:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_210:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_11
         PUSH        HL
         CALL        puts
@@ -280,10 +280,10 @@ line_210:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         RET         
 line_220:
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         LD          HL, str_12
         PUSH        HL
         CALL        puts
@@ -291,7 +291,7 @@ line_220:
         CALL        free_string
         LD          HL, str_2
         CALL        puts
-        CALL        interrupt_prcess
+        CALL        interrupt_process
         JP          program_termination
 program_termination:
         CALL        restore_h_timi
@@ -457,7 +457,7 @@ program_run:
         SBC         HL, DE
         LD          [heap_end], HL
         RET         
-interrupt_prcess:
+interrupt_process:
         LD          HL, [svari_on_interval_line]
         LD          A, L
         OR          A, H
@@ -507,8 +507,37 @@ _skip_strig1:
         INC         HL
         INC         HL
         DJNZ        _on_strig_loop1
+        LD          HL, svarf_on_key01_mode
+        LD          DE, svari_on_key01_line
+        LD          B, 0x0A
+_on_key_loop1:
+        LD          A, [HL]
+        INC         HL
+        AND         A, [HL]
+        JR          Z, _skip_key1
+        LD          [HL], 0
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        DEC         HL
+        EX          DE, HL
+        PUSH        DE
+        PUSH        BC
+        CALL        jp_hl
+        POP         BC
+        POP         DE
+        POP         HL
+_skip_key1:
+        INC         DE
+        INC         DE
+        INC         HL
+        INC         HL
+        INC         HL
+        DJNZ        _on_key_loop1
         RET         
-interrupt_prcess_end:
+interrupt_process_end:
 h_timi_handler:
         PUSH        AF
         LD          A, [svarb_on_interval_mode]
@@ -570,24 +599,6 @@ _end_of_strig:
         OR          A, 0xFC
         AND         A, C
         LD          C, A
-        LD          HL, svarf_on_key01_mode
-        LD          B, 0x90
-        CALL        _on_key_sub
-        LD          HL, svarf_on_key02_mode
-        LD          B, 0xA0
-        CALL        _on_key_sub
-        LD          HL, svarf_on_key03_mode
-        LD          B, 0xC0
-        CALL        _on_key_sub
-        LD          HL, svarf_on_key04_mode
-        LD          B, 0x81
-        CALL        _on_key_sub
-        LD          HL, svarf_on_key05_mode
-        LD          B, 0x82
-        CALL        _on_key_sub
-        LD          A, C
-        XOR         A, 0x80
-        LD          C, A
         LD          HL, svarf_on_key06_mode
         LD          B, 0x90
         CALL        _on_key_sub
@@ -603,16 +614,35 @@ _end_of_strig:
         LD          HL, svarf_on_key10_mode
         LD          B, 0x82
         CALL        _on_key_sub
+        LD          A, C
+        XOR         A, 0x80
+        LD          C, A
+        LD          HL, svarf_on_key01_mode
+        LD          B, 0x90
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key02_mode
+        LD          B, 0xA0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key03_mode
+        LD          B, 0xC0
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key04_mode
+        LD          B, 0x81
+        CALL        _on_key_sub
+        LD          HL, svarf_on_key05_mode
+        LD          B, 0x82
+        CALL        _on_key_sub
         POP         AF
         JP          h_timi_backup
 _on_key_sub:
-        LD          A, C
+        LD          A, [HL]
         AND         A, B
-        AND         A, [HL]
         INC         HL
         INC         HL
         LD          D, [HL]
         LD          [HL], 0
+        RET         Z
+        AND         A, C
         RET         NZ
         DEC         A
         LD          [HL], A
