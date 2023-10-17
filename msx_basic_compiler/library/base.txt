@@ -1,0 +1,29 @@
+MSX-BASIC で BASE() を読んだ場合、どんな処理がなされるのか？
+BIOSのワークエリアを見てみると、TXTNAM(F3B3H, 2) からの並びが BASE(0)～BASE(19) と一致しているので、
+試しに F3B3H のリードアクセスブレイクを貼って、A=BASE(0) を実行してみる。
+
+A1GT-BIOS で、SUB-ROM の 2321h でアクセスしているのが分かる。
+
+			JR		2325h			; 多分これは別のルーチンだろう
+			LD		HL,F3B3h		; ここが読み出し処理のエントリーだと思われる。
+			LD		D,0
+			ADD		HL,DE			; DE=0 (おそらくBASEの引数)
+			ADD		HL,DE
+	2321:	LD		A,(HL)			; HL=F3B3h
+			INC		HL
+			LD		H,(HL)
+			LD		L,A
+			CALL	27F4h
+			POP		HL
+			RET
+
+	27F4:	LD		IX,3236h
+			JR		280Ah
+
+	280A:	JR		282Eh
+
+	282E:	CALL	0262h
+			EI
+			RET
+
+	

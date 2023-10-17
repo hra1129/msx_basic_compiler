@@ -1,0 +1,58 @@
+464Eh に中間コード 81h以上の場合のジャンプテーブルジャンプ処理がある。
+
+SPRITE$(n)
+	7A48h に処理ルーチン
+
+	7A48:	CP		'$'				; SPRITE$ の $
+			JP		NZ, 0x77AB		; スルー
+			LD		A, (FCAFh)		; SCRMOD
+			AND		A
+			JP		Z, 475Ah		; SCREEN0 ならエラー?
+			CALL	7AA0h
+
+		7AA0:	RST		08h
+				DB		'$'			; 0008h が使う。
+				LD		A, FFh
+				CALL	7C08h
+
+			7C08:	PUSH	AF
+					RST		08h
+					DB		'('
+					CALL	521Ch
+
+				521C:	CALL	4C64h
+
+					4C64:	DEC		HL
+							LD		D, 00h
+							PUSH	DE
+							LD		C, 01h
+							CALL	625Eh
+							CALL	FF66h
+							CALL	4DC7h
+							LD		(F6BCh), HL		; TEMP2
+							LD		HL, (F6BCh)
+							POP		BC
+							LD		A, (HL)
+							LD		(F69Dh), HL
+							CP		EEh
+							RET		C
+
+						CALL	5212h
+						JP		NZ, 475Ah
+						DEC		HL
+						RST		10h
+						LD		A, E
+						RET
+
+			7C0E:	POP		AF
+					CP		E
+					JR		C, 7C73h
+					RST		08h
+					DB		')'
+					LD		A, E
+					RET
+
+		7AA7:	PUSH	HL
+				LD		A, E
+				CALL	0084h
+				

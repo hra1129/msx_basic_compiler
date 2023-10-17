@@ -8,22 +8,39 @@ vdpport0	:= 0x98
 calslt		:= 0x001C
 romver		:= 0x002D
 wrtvdp		:= 0x0047
+setwrt		:= 0x0053
+calpat		:= 0x0084
 chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
+nstwrt		:= 0x0171
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
 linl40		:= 0xF3AE
 linl32		:= 0xF3AF
 linlen		:= 0xF3B0
 clmlst		:= 0xF3B2
+txtnam		:= 0xf3b3
+txtcol		:= 0xf3b5
+txtcgp		:= 0xf3b7
+txtatr		:= 0xf3b9
+txtpat		:= 0xf3bb
+t32nam		:= 0xf3bd
+t32col		:= 0xf3bf
+t32cgp		:= 0xf3c1
+t32atr		:= 0xf3c3
+t32pat		:= 0xf3c5
+grpnam		:= 0xf3c7
+grpcol		:= 0xf3c9
+grpcgp		:= 0xf3cb
+grpatr		:= 0xf3cd
+grppat		:= 0xf3cf
+mltnam		:= 0xf3d1
+mltcol		:= 0xf3d3
+mltcgp		:= 0xf3d5
+mltatr		:= 0xf3d7
+mltpat		:= 0xf3d9
 blibslot	:= 0xF3D3
-putpnt		:= 0xF3F8
-getpnt		:= 0xF3FA
-buf			:= 0xF55E
-fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
-oldscr		:= 0xFCB0
-exptbl		:= 0xFCC1
 rg0sav		:= 0xF3DF
 rg1sav		:= 0xF3E0
 rg2sav		:= 0xF3E1
@@ -33,6 +50,13 @@ rg5sav		:= 0xF3E4
 rg6sav		:= 0xF3E5
 rg7sav		:= 0xF3E6
 statfl		:= 0xF3E7
+putpnt		:= 0xF3F8
+getpnt		:= 0xF3FA
+buf			:= 0xF55E
+fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
+scrmod		:= 0xFCAF
+oldscr		:= 0xFCB0
+exptbl		:= 0xFCC1
 rg8sav		:= 0xFFE7
 rg9sav		:= 0xFFE8
 rg10sav		:= 0xFFE9
@@ -117,6 +141,8 @@ blib_entries::
 			jp		sub_width
 	blib_setscroll:
 			jp		sub_setscroll
+	blib_setsprite:
+			jp		sub_setsprite
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -924,8 +950,77 @@ sub_setscroll::
 			endscope
 
 ; =============================================================================
+;	SPRITE$(E)=HL
+;	input:
+;		E ..... スプライト番号
+;		HL .... セットする文字列 (BASIC形式)
+;	output:
+;		HL .... スプライトジェネレーターテーブルのアドレス
+;	break:
+;		all
+;	comment:
+;		set page で描画ページに指定されている方（つまり書き込み対象の方）の
+;		アドレスを返す。
+;		文字列が短い場合、足りない分は 00h が詰められる。
+; =============================================================================
+			scope	sub_setsprite
+sub_setsprite::
+			ld		a, [scrmod]
+			dec		a
+			cp		a, 12
+			jp		nc, err_syntax
+			ld		a, e
+			push	hl
+			call	calpat
+
+			; VRAMアドレスを設定
+			ld		a, [romver]
+			or		a, a
+			jr		z, _skip0
+			call	nstwrt
+			jr		_skip1
+		_skip0:
+			call	setwrt
+		_skip1:
+
+			; 1スプライトのサイズは、8x8 なら 8byte, 16x16 なら 32byte
+			ld		a, [rg1sav]			; 0bXXXX_XXSX : Sprite Size S:0=8x8, 1=16x16
+			rlca
+			rlca
+			rlca
+			rlca
+			and		a, 32
+			jr		nz, _skip2
+			ld		a, 8
+		_skip2:
+			ld		b, a
+
+			; 文字列を流し込む
+			pop		hl
+			ld		c, [hl]				; 文字列長
+			inc		c
+			dec		c
+			jr		z, _skip3
+		_loop1:
+			inc		hl
+			ld		a, [hl]
+			out		[vdpport0], a
+			dec		b
+			ret		z
+			dec		c
+			jr		nz, _loop1
+		_skip3:
+			xor		a, a
+		_loop2:
+			out		[vdpport0], a
+			dec		b
+			jr		nz, _loop2
+			ret
+			endscope
+
+; =============================================================================
 			scope	error_handler
-err_syntax:
+err_syntax::
 			ld		e, 2
 err_illegal_function_call	:= $+1
 			ld		bc, 0x051E
