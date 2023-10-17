@@ -26,6 +26,51 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		has_let = true;
 	}
 	
+	if( p_info->list.p_position->s_word == "SPRITE" ) {
+		//	SPRITE$(n)‚Ö‚Ì‘ã“ü
+		p_info->list.p_position++;
+		if( !p_info->list.check_word( &(p_info->errors), "$" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), "(" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			//	Š‡ŒÊ‚Ì’†‚ÌŽ®
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), ")" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+			p_info->assembler_list.add_label( "blib_setsprite", "0x04042" );
+			//	‘ã“ü‚·‚é•¶Žš—ñ
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::LABEL, "blib_setsprite" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+		}
+		return true;
+	}
 	if( p_info->list.p_position->s_word == "TIME" ) {
 		//	TIMEƒVƒXƒeƒ€•Ï”‚Ö‚Ì‘ã“ü
 		p_info->list.p_position++;

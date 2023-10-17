@@ -10,13 +10,14 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_fout                       = 0x03425
-work_dac_int                    = 0x0f7f8
-work_valtyp                     = 0x0f663
-work_csrx                       = 0x0f3dd
-work_linlen                     = 0x0f3b0
-bios_errhand                    = 0x0406F
-bios_umult                      = 0x0314a
+bios_chgmod                     = 0x0005F
+work_rg1sv                      = 0x0f3e0
+bios_wrtvdp                     = 0x00047
+bios_chgclr                     = 0x00062
+work_forclr                     = 0x0F3E9
+work_bakclr                     = 0x0F3EA
+work_bdrclr                     = 0x0F3EB
+blib_setsprite                  = 0x04042
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -59,161 +60,55 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
+        CALL        interrupt_process
+        LD          HL, 1
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 3
+        LD          A, L
+        AND         A, 3
+        LD          L, A
+        LD          A, [work_rg1sv]
+        AND         A, 0xFC
+        OR          A, L
+        LD          B, A
+        LD          C, 1
+        CALL        bios_wrtvdp
+        CALL        interrupt_process
+        LD          HL, 15
+        LD          A, L
+        LD          [work_forclr], A
+        LD          HL, 4
+        LD          A, L
+        LD          [work_bakclr], A
+        LD          HL, 7
+        LD          A, L
+        LD          [work_bdrclr], A
+        CALL        bios_chgclr
 line_110:
         CALL        interrupt_process
-        LD          HL, vari_A
+        LD          HL, 0
         PUSH        HL
-        LD          HL, 123
+        LD          HL, str_1
         POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        CALL        interrupt_process
-        LD          HL, vari_P
-        PUSH        HL
-        LD          HL, vari_A
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
+        LD          ix, blib_setsprite
+        CALL        call_blib
 line_120:
         CALL        interrupt_process
-        LD          HL, [vari_P]
-        LD          A, [HL]
-        LD          L, A
-        LD          H, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt0
+        LD          HL, 1
         PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt0:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
+        LD          HL, str_2
+        POP         DE
+        LD          ix, blib_setsprite
+        CALL        call_blib
 line_130:
         CALL        interrupt_process
-        LD          HL, varia_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_array
-        CALL        calc_array_top
-        LD          HL, 5
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        PUSH        HL
-        LD          HL, 192
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        CALL        interrupt_process
-        LD          HL, varia_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_array
-        CALL        calc_array_top
-        LD          HL, 6
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        PUSH        HL
-        LD          HL, 34
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        CALL        interrupt_process
-        LD          HL, vari_P
-        PUSH        HL
-        LD          HL, varia_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_array
-        CALL        calc_array_top
-        LD          HL, 5
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-line_140:
-        CALL        interrupt_process
-        LD          HL, [vari_P]
-        LD          A, [HL]
-        LD          L, A
-        LD          H, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt1
-        PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt1:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, [vari_P]
-        PUSH        HL
         LD          HL, 2
-        POP         DE
-        ADD         HL, DE
-        LD          A, [HL]
-        LD          L, A
-        LD          H, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt2
         PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt2:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
+        LD          HL, str_3
+        POP         DE
+        LD          ix, blib_setsprite
+        CALL        call_blib
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -245,120 +140,6 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
-str:
-        CALL        bios_fout
-fout_adjust:
-        DEC         HL
-        PUSH        HL
-        XOR         A, A
-        LD          B, A
-_str_loop:
-        INC         HL
-        CP          A, [HL]
-        JR          Z, _str_loop_exit
-        INC         B
-        JR          _str_loop
-_str_loop_exit:
-        POP         HL
-        LD          [HL], B
-        RET         
-allocate_heap:
-        LD          HL, [heap_next]
-        PUSH        HL
-        ADD         HL, BC
-        JR          C, _allocate_heap_error
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_heap_error
-        LD          [heap_next], HL
-        POP         HL
-        PUSH        HL
-        DEC         BC
-        LD          E, L
-        LD          D, H
-        INC         DE
-        LD          [HL], 0
-        LDIR        
-        POP         HL
-        RET         
-_allocate_heap_error:
-        LD          E, 7
-        JP          bios_errhand
-check_array:
-        LD          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        DEC         HL
-        RET         NZ
-        PUSH        DE
-        PUSH        HL
-        PUSH        BC
-        CALL        allocate_heap
-        POP         BC
-        POP         DE
-        POP         AF
-        EX          DE, HL
-        PUSH        HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        EX          DE, HL
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          [HL], A
-        INC         HL
-        LD          B, A
-        LD          DE, 11
-_check_array_loop:
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        DJNZ        _check_array_loop
-        POP         HL
-        RET         
-calc_array_top:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        INC         HL
-        INC         HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, 0
-        ADD         HL, DE
-        ADD         HL, DE
-        LD          A, E
-        POP         DE
-        PUSH        HL
-        JR          _calc_array_top_l2
-_calc_array_top_l1:
-        DEC         HL
-        LD          B, [HL]
-        DEC         HL
-        LD          C, [HL]
-        PUSH        BC
-_calc_array_top_l2:
-        DEC         A
-        JR          NZ, _calc_array_top_l1
-        PUSH        DE
-        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -591,7 +372,11 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x02, 0x0D, 0x0A
+        DEFB        0x20, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31
+str_2:
+        DEFB        0x14, 0x41, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39
+str_3:
+        DEFB        0x28, 0x42, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39
 save_stack:
         DEFW        0
 heap_next:
@@ -695,16 +480,10 @@ svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
         DEFW        0
-vari_A:
-        DEFW        0
-vari_P:
-        DEFW        0
 var_area_end:
 vars_area_start:
 vars_area_end:
 vara_area_start:
-varia_A:
-        DEFW        0
 vara_area_end:
 varsa_area_start:
 varsa_area_end:
