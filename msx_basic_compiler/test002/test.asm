@@ -91,12 +91,12 @@ line_30:
         PUSH        HL
         LD          IX, blib_mid
         CALL        call_blib
-        CALL        copy_string
         POP         DE
         PUSH        HL
         EX          DE, HL
         CALL        free_string
         POP         HL
+        CALL        copy_string
         POP         DE
         EX          DE, HL
         LD          C, [HL]
