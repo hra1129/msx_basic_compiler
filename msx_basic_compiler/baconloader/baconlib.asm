@@ -5,11 +5,15 @@
 ; =============================================================================
 
 vdpport0	:= 0x98
+vdpport1	:= 0x99
+vdpport2	:= 0x9A
+vdpport3	:= 0x9B
 calslt		:= 0x001C
 romver		:= 0x002D
 wrtvdp		:= 0x0047
 setwrt		:= 0x0053
 calpat		:= 0x0084
+calatr		:= 0x0087
 chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
@@ -143,6 +147,8 @@ blib_entries::
 			jp		sub_setscroll
 	blib_setsprite:
 			jp		sub_setsprite
+	blib_putsprite:
+			jp		sub_putsprite
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1015,6 +1021,99 @@ sub_setsprite::
 			out		[vdpport0], a
 			dec		b
 			jr		nz, _loop2
+			ret
+			endscope
+
+; =============================================================================
+;	PUT SPRITE A,(B,C),D,E
+;	input:
+;		A ..... スプライト番号
+;		B ..... X座標
+;		C ..... Y座標
+;		D ..... 色
+;		E ..... パターン番号
+;		L ..... パラメータ有効フラグ (0:無効, 1:有効)
+;		        bit0: 座標
+;		        bit1: パターン番号
+;		        bit2: 色
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		スプライトモード2であれば、CCビットが立っているスプライトを一緒に動かす
+; =============================================================================
+			scope	sub_putsprite
+sub_putsprite::
+			ld		h, a
+			ld		a, [scrmod]
+			dec		a
+			cp		a, 12
+			jp		nc, err_syntax
+			cp		a, 3
+			jr		nc, _sprite_mode2
+	_sprite_mode1:
+			; スプライトアトリビュートを求める
+			ld		a, h
+			push	de					; パターンと色保存
+			push	hl					; フラグ保存
+			call	calatr
+			pop		de					; フラグ復帰
+			ld		a, e
+			; 座標指定
+			rrca
+			di
+			jr		nc, _skip_pos1
+			ld		e, a
+			ld		a, l
+			out		[vdpport1], a
+			ld		a, h
+			or		a, 0x40
+			out		[vdpport1], a
+			ld		a, c
+			out		[vdpport0], a		; Y座標
+			ld		a, b
+			out		[vdpport0], a		; X座標
+			ld		a, e
+	_skip_pos1:
+			inc		hl
+			inc		hl
+			; パターン
+			pop		bc
+			rrca
+			jr		nc, _skip_pat1
+
+			ld		e, a
+			ld		a, l
+			out		[vdpport1], a
+			ld		a, h
+			or		a, 0x40
+			out		[vdpport1], a
+			ld		a, [rg1sav]			; 0bXXXX_XXSX : Sprite Size S:0=8x8, 1=16x16
+			and		a, 0b0000_0010
+			ld		a, c
+			jr		z, _skip_pat1_0
+			add		a, a				; 16x16 の場合は、4倍する
+			add		a, a
+	_skip_pat1_0:
+			out		[vdpport0], a		; パターン
+			ld		a, e
+	_skip_pat1:
+			inc		hl
+			; 色
+			rrca
+			jr		nc, _skip_col1
+			ld		a, l
+			out		[vdpport1], a
+			ld		a, h
+			or		a, 0x40
+			out		[vdpport1], a
+			ld		a, b
+			out		[vdpport0], a		; 色
+	_skip_col1:
+			ei
+			ret
+	_sprite_mode2:
 			ret
 			endscope
 

@@ -111,7 +111,7 @@ void CEXPRESSION_OPERATOR_GE::compile( CCOMPILE_INFO *p_info ) {
 		asm_line.operand2.s_value = "A";
 		p_info->assembler_list.body.push_back( asm_line );
 
-		asm_line.type = CMNEMONIC_TYPE::SBC;					//	HL(¶€) >= DE(‰E€) ‚ª¬—§‚·‚éê‡‚Í Cy=0, ‚µ‚È‚¢ê‡‚Í Cy=1
+		asm_line.type = CMNEMONIC_TYPE::SBC;					//	HL(¶€) >= DE(‰E€) ‚ª¬—§‚·‚éê‡‚Í S=0 (P), ‚µ‚È‚¢ê‡‚Í S=1 (M)
 		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 		asm_line.operand1.s_value = "HL";
 		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
@@ -119,8 +119,8 @@ void CEXPRESSION_OPERATOR_GE::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 
 		std::string s_label = p_info->get_auto_label();
-		asm_line.type = CMNEMONIC_TYPE::JR;
-		asm_line.condition = CCONDITION::C;
+		asm_line.type = CMNEMONIC_TYPE::JP;
+		asm_line.condition = CCONDITION::M;
 		asm_line.operand1.type = COPERAND_TYPE::LABEL;
 		asm_line.operand1.s_value = s_label;
 		asm_line.operand2.type = COPERAND_TYPE::NONE;
