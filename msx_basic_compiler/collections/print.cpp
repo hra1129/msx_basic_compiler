@@ -24,14 +24,22 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word != "PRINT" && p_info->list.p_position->s_word != "LPRINT" ) {
 		return false;
 	}
+
+	p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
-		p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
+		//	LPRINT �̏ꍇ
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_prtflg]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		is_printer = true;
 	}
+	else {
+		//	PRINT �̏ꍇ
+		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_prtflg]", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.body.push_back( asm_line );
+
 	p_info->list.p_position++;
 	p_info->assembler_list.activate_puts();
 

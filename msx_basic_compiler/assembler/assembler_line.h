@@ -43,6 +43,7 @@ enum class CMNEMONIC_TYPE: int {
 	INC,
 	DEC,
 	ADD,
+	ADC,
 	SUB,
 	SBC,
 	CCF,

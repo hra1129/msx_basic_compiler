@@ -45,6 +45,7 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::INC,		  { 1, "INC" } },
 	{ CMNEMONIC_TYPE::DEC,		  { 1, "DEC" } },
 	{ CMNEMONIC_TYPE::ADD,		  { 2, "ADD" } },
+	{ CMNEMONIC_TYPE::ADC,		  { 2, "ADC" } },
 	{ CMNEMONIC_TYPE::SUB,		  { 2, "SUB" } },
 	{ CMNEMONIC_TYPE::SBC,		  { 2, "SBC" } },
 	{ CMNEMONIC_TYPE::CCF,		  { 0, "CCF" } },
