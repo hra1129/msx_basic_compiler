@@ -43,7 +43,13 @@ bool CRETURN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 
 		//	割り込みから戻る RETURN だった場合は、割り込み処理ルーチン呼び出しのスタックも廃棄する
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );	//	割り込み呼び出し前のスタック 1段
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );	//	割り込み呼び出し前のスタック 2段
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );	//	割り込み呼び出し前のスタック 3段
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );	//	interrupt_process からの戻りアドレス
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );

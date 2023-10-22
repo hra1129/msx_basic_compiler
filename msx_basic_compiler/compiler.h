@@ -24,6 +24,12 @@ private:
 	void exec_data( void );
 	void exec_subroutines( void );
 
+	void exec_sub_run( void );
+	void exec_sub_interrupt_process( void );
+	void exec_sub_h_timi( void );
+	void exec_sub_restore_h_timi( void );
+	void exec_sub_on_error( void );
+
 	// ----------------------------------------------------------------
 	//	現在の行が飛び先として指定されている場合、ラベルを生成する
 	void insert_label( void );

@@ -482,7 +482,7 @@ void CCOMPILER::exec_data( void ) {
 }
 
 // --------------------------------------------------------------------
-void CCOMPILER::exec_subroutines( void ) {
+void CCOMPILER::exec_sub_run( void ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	RUN用サブルーチン
@@ -506,6 +506,7 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[heap_end]", COPERAND_TYPE::REGISTER, "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
 	//	RUN用サブルーチンの中で変数領域をクリアする
 	int variable_area_bytes = this->info.variables.var_area_size + this->info.variables.vars_area_count + this->info.variables.vara_area_count;
 	if( variable_area_bytes == 0 ) {
@@ -548,6 +549,11 @@ void CCOMPILER::exec_subroutines( void ) {
 	}
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_sub_interrupt_process( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	割り込みフラグ処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_process", COPERAND_TYPE::NONE, "" );
@@ -569,7 +575,19 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_interval_exec]", COPERAND_TYPE::REGISTER, "A" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::Z, COPERAND_TYPE::LABEL, "_skip_on_interval", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -618,7 +636,7 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	-- svari_on_strig0_line を CALL する
 	asm_line.set( CMNEMONIC_TYPE::PUSH,	CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				// svarf_on_strig0_mode + 01 を保存
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	this->info.assembler_list.subroutines.push_back( asm_line );																//	飛び先へ飛ぶ前に「STACK 1段」
 	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
@@ -630,12 +648,12 @@ void CCOMPILER::exec_subroutines( void ) {
 	asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				// svari_on_strig0_line 保存
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	this->info.assembler_list.subroutines.push_back( asm_line );																//	飛び先へ飛ぶ前に「STACK 2段」
 	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 3段」
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL,	CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL,	CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );				//	割り込みの飛び先
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -677,7 +695,7 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::MEMORY_REGISTER,	"[HL]",				COPERAND_TYPE::CONSTANT,		"0" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"HL",				COPERAND_TYPE::NONE,			"" );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"HL",				COPERAND_TYPE::NONE, "" );	//	飛び先へ飛ぶ前に「STACK 1段」
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::EX,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"DE",				COPERAND_TYPE::REGISTER,		"HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -691,9 +709,9 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::EX,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"DE",				COPERAND_TYPE::REGISTER,		"HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"DE",				COPERAND_TYPE::NONE,			"" );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"DE",				COPERAND_TYPE::NONE, "" );	//	飛び先へ飛ぶ前に「STACK 2段」
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"BC",				COPERAND_TYPE::NONE,			"" );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,		"BC",				COPERAND_TYPE::NONE, "" );	//	飛び先へ飛ぶ前に「STACK 3段」
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL,		CCONDITION::NONE,	COPERAND_TYPE::LABEL,			"jp_hl",			COPERAND_TYPE::NONE,			"" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -722,6 +740,11 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_process_end", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_sub_h_timi( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	H.TIMI処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_handler", COPERAND_TYPE::NONE, "" );
@@ -961,6 +984,11 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET,	CCONDITION::NONE,	COPERAND_TYPE::NONE,			"",				COPERAND_TYPE::NONE,			"" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_sub_restore_h_timi( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	H.TIMI復元処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_timi", COPERAND_TYPE::NONE, "" );
@@ -979,6 +1007,17 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	H.TIMI待避エリア
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_backup", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_sub_on_error( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	H.ERRO復元処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "restore_h_erro", COPERAND_TYPE::NONE, "" );
@@ -1015,6 +1054,23 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "work_h_erro", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	H.ERRO待避エリア
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_erro_backup", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_subroutines( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	this->exec_sub_run();
+	this->exec_sub_interrupt_process();
+	this->exec_sub_h_timi();
+	this->exec_sub_restore_h_timi();
+	this->exec_sub_on_error();
 }
 
 // --------------------------------------------------------------------
@@ -1088,20 +1144,6 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key08_line", CVARIABLE_TYPE::INTEGER );
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key09_line", CVARIABLE_TYPE::INTEGER );
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key10_line", CVARIABLE_TYPE::INTEGER );
-
-	//	H.TIMI待避エリア
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_backup", COPERAND_TYPE::NONE, "" );
-	this->info.assembler_list.variables_area.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
-	this->info.assembler_list.variables_area.push_back( asm_line );
-
-	//	H.ERRO待避エリア
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_erro_backup", COPERAND_TYPE::NONE, "" );
-	this->info.assembler_list.variables_area.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0, 0, 0, 0, 0", COPERAND_TYPE::NONE, "" );
-
-
-	this->info.assembler_list.variables_area.push_back( asm_line );
 
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
