@@ -16,7 +16,7 @@
   for.cpp
   gosub.cpp
   goto.cpp
-  let.cpp
-  next.cpp
+  if.cpp
+  locate.cpp
   コードを生成中...
-C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\let.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\if.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
