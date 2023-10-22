@@ -24,6 +24,10 @@ bool CLOCATE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "work_csry", "0x0F3DC" );
 	p_info->assembler_list.add_label( "work_csrx", "0x0F3DD" );
 	p_info->assembler_list.add_label( "work_csrsw", "0x0FCA9" );
+	p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
+
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.body.push_back( asm_line );
 
 	CEXPRESSION exp;
 	//	‘æ1ˆø” <X>
