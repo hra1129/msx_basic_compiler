@@ -232,25 +232,9 @@ void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
 }
 
 // --------------------------------------------------------------------
-bool CCOMPILER::exec( std::string s_name ) {
+void CCOMPILER::exec_header( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
-	CVARIABLE variable;
 	char s_buffer[32];
-
-	this->info.p_compiler = this;
-
-	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
-	//	実装をシンプルにするために、途中で変わることは想定しない。
-	this->info.list.reset_position();
-	this->info.variable_manager.analyze_defvars( &(this->info) );
-
-	//	空文字列を文字列プールに追加
-	CSTRING value;
-	value.set( "" );
-	this->info.constants.s_blank_string = this->info.constants.add( value );
-
-	this->info.assembler_list.add_label( "work_h_timi", "0x0fd9f" );
-	this->info.assembler_list.add_label( "work_h_erro", "0x0ffb1" );
 
 	//	ヘッダーコメント
 	asm_line.set( CMNEMONIC_TYPE::COMMENT, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "------------------------------------------------------------------------", COPERAND_TYPE::NONE, "" );
@@ -275,6 +259,12 @@ bool CCOMPILER::exec( std::string s_name ) {
 	sprintf_s( s_buffer, "0x%04X", this->info.options.start_address );
 	asm_line.set( CMNEMONIC_TYPE::ORG, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_buffer, COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_initializer( std::string s_name ) {
+	CASSEMBLER_LINE asm_line;
+
 	//	初期化処理 (BACONLIB存在確認)
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -348,6 +338,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_start", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
+
 	//	BLIBチェッカー
 	this->info.assembler_list.add_label( "bios_syntax_error", "0x4055" );
 	this->info.assembler_list.add_label( "bios_calslt", "0x001C" );
@@ -428,6 +419,11 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_compile_body( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	this->info.list.reset_position();
 	while( !this->info.list.is_end() ) {
@@ -441,6 +437,11 @@ bool CCOMPILER::exec( std::string s_name ) {
 			this->info.list.p_position++;
 		}
 	}
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_terminator( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	プログラムの終了処理
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_termination", COPERAND_TYPE::NONE, "" );
@@ -460,16 +461,29 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.footer.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "end_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.footer.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_data( void ) {
 
 	//	データ参照用のラベル
-	if( this->info.list.data_line_no.size() != 0 ) {
-		std::string s_label;
-		s_label = "data_" + std::to_string( this->info.list.data_line_no[0] );
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "data_ptr", COPERAND_TYPE::NONE, "" );
-		this->info.assembler_list.variables_area.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
-		this->info.assembler_list.variables_area.push_back( asm_line );
+	if( this->info.list.data_line_no.size() == 0 ) {
+		return;
 	}
+
+	CASSEMBLER_LINE asm_line;
+	std::string s_label;
+
+	s_label = "data_" + std::to_string( this->info.list.data_line_no[0] );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "data_ptr", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::exec_subroutines( void ) {
+	CASSEMBLER_LINE asm_line;
 
 	//	RUN用サブルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "program_run", COPERAND_TYPE::NONE, "" );
@@ -528,8 +542,6 @@ bool CCOMPILER::exec( std::string s_name ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "vars_area_start + 2" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::LABEL, "vars_area_end - vars_area_start - 2" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "0" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -710,7 +722,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_process_end", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	
+
 	//	H.TIMI処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "h_timi_handler", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1003,6 +1015,33 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "work_h_erro", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+bool CCOMPILER::exec( std::string s_name ) {
+	CASSEMBLER_LINE asm_line;
+	CVARIABLE variable;
+
+	this->info.p_compiler = this;
+
+	//	DEFINT, DEFSNG, DEFDBL, DEFSTR を処理する。
+	//	実装をシンプルにするために、途中で変わることは想定しない。
+	this->info.list.reset_position();
+	this->info.variable_manager.analyze_defvars( &(this->info) );
+
+	//	空文字列を文字列プールに追加
+	CSTRING value;
+	value.set( "" );
+	this->info.constants.s_blank_string = this->info.constants.add( value );
+
+	this->info.assembler_list.add_label( "work_h_timi", "0x0fd9f" );
+	this->info.assembler_list.add_label( "work_h_erro", "0x0ffb1" );
+
+	this->exec_header( s_name );
+	this->exec_initializer( s_name );
+	this->exec_compile_body();
+	this->exec_terminator();
+	this->exec_data();
 
 	//	割り込みフラグ
 	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
@@ -1067,6 +1106,8 @@ bool CCOMPILER::exec( std::string s_name ) {
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
 	this->info.variables.dump( this->info.assembler_list, this->info.options );
+
+	this->exec_subroutines();
 
 	return( this->info.errors.list.size() == 0 );
 }
