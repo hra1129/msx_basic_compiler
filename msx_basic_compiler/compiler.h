@@ -17,6 +17,13 @@ private:
 
 	void initialize( void );
 
+	void exec_header( std::string s_name );
+	void exec_initializer( std::string s_name );
+	void exec_compile_body( void );
+	void exec_terminator( void );
+	void exec_data( void );
+	void exec_subroutines( void );
+
 	// ----------------------------------------------------------------
 	//	現在の行が飛び先として指定されている場合、ラベルを生成する
 	void insert_label( void );

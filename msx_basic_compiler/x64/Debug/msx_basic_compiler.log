@@ -1,2 +1,22 @@
-﻿  expression_operator_add.cpp
-  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe
+﻿  beep.cpp
+  call.cpp
+  cls.cpp
+  color.cpp
+  comment.cpp
+  data.cpp
+  defdbl.cpp
+  defint.cpp
+  defsng.cpp
+  defstr.cpp
+  defusr.cpp
+  dim.cpp
+  end.cpp
+  erase.cpp
+  error.cpp
+  for.cpp
+  gosub.cpp
+  goto.cpp
+  let.cpp
+  next.cpp
+  コードを生成中...
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\collections\let.cpp : fatal error C1090: PDB API の呼び出しに失敗しました。エラー コード '3': C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\vc142.pdb
