@@ -1,7 +1,7 @@
-﻿  assembler_list.cpp
+﻿  expression_operator_add.cpp
   コード生成しています。
   1 of 1951 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    61 functions had inline decision re-evaluated but remain unchanged
+    115 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe
