@@ -41,6 +41,7 @@
 #include "collections/return.h"
 #include "collections/run.h"
 #include "collections/screen.h"
+#include "collections/setpage.h"
 #include "collections/setscroll.h"
 #include "collections/sound.h"
 #include "collections/vpoke.h"
@@ -87,6 +88,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CRETURN );
 	this->collection.push_back( new CRUN );
 	this->collection.push_back( new CSCREEN );
+	this->collection.push_back( new CSETPAGE );
 	this->collection.push_back( new CSETSCROLL );
 	this->collection.push_back( new CSOUND );
 	this->collection.push_back( new CVPOKE );
