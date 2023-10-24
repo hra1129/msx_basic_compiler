@@ -1,4 +1,5 @@
-﻿  return.cpp
+﻿  beep.cpp
+  setpage.cpp
   compiler.cpp
   コードを生成中...
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

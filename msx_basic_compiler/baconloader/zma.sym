@@ -1,3 +1,4 @@
+ACPAGE equ 0faf6h
 BLIBSLOT equ 0f3d3h
 BLIB_ENTRIES equ 04018h
 BLIB_INKEY equ 0402ah
@@ -24,6 +25,7 @@ CALSLT equ 01ch
 CHGET equ 09fh
 CHGMDP equ 01b5h
 CLMLST equ 0f3b2h
+DFPAGE equ 0faf5h
 ENASLT equ 024h
 END_ADDRESS equ 09448h
 ERRHAND equ 0406fh
