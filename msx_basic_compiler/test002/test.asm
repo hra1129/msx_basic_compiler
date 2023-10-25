@@ -10,10 +10,15 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-work_romver                     = 0x002D
-bios_beep                       = 0x00C0
-bsub_beep                       = 0x017D
-bios_extrom                     = 0x0015F
+bios_chgmod                     = 0x0005F
+work_rg1sv                      = 0x0f3e0
+bios_wrtvdp                     = 0x00047
+work_cliksw                     = 0x0f3db
+blib_setsprite                  = 0x04042
+blib_putsprite                  = 0x04045
+bios_errhand                    = 0x0406F
+blib_inkey                      = 0x0402a
+blib_strcmp                     = 0x04027
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -56,15 +61,269 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-        LD          A, work_romver
-        OR          A, A
-        JR          NZ, _pt0
-        CALL        bios_beep
-        JR          _pt1
-_pt0:
-        LD          IX, bsub_beep
-        CALL        bios_extrom
+        CALL        interrupt_process
+        LD          HL, 5
+        LD          A, L
+        CALL        bios_chgmod
+        LD          HL, 3
+        LD          A, L
+        AND         A, 3
+        LD          L, A
+        LD          A, [work_rg1sv]
+        AND         A, 0xFC
+        OR          A, L
+        LD          B, A
+        LD          C, 1
+        CALL        bios_wrtvdp
+        LD          HL, 0
+        LD          A, L
+        LD          [work_cliksw], A
+line_110:
+        CALL        interrupt_process
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        LD          ix, blib_setsprite
+        CALL        call_blib
+line_120:
+        CALL        interrupt_process
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 13
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_130:
+        CALL        interrupt_process
+        LD          HL, 1
+        PUSH        HL
+        LD          HL, 32
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 12
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_140:
+        CALL        interrupt_process
+        LD          HL, 2
+        PUSH        HL
+        LD          HL, 64
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 11
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_150:
+        CALL        interrupt_process
+        LD          HL, 3
+        PUSH        HL
+        LD          HL, 96
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 10
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_160:
+        CALL        interrupt_process
+        LD          HL, 4
+        PUSH        HL
+        LD          HL, 128
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 9
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_170:
+        CALL        interrupt_process
+        LD          HL, 5
+        PUSH        HL
+        LD          HL, 160
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 8
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_180:
+        CALL        interrupt_process
+        LD          HL, 6
+        PUSH        HL
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 7
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_190:
+        CALL        interrupt_process
+        LD          HL, 7
+        PUSH        HL
+        LD          HL, 224
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        LD          HL, 6
+        PUSH        HL
+        LD          HL, 0
+        PUSH        HL
+        POP         DE
+        POP         HL
+        LD          D, L
+        POP         HL
+        POP         BC
+        LD          B, C
+        LD          C, L
+        POP         HL
+        LD          A, L
+        LD          L, 7
+        LD          ix, blib_putsprite
+        CALL        call_blib
+line_200:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt2
+        DEC         HL
+_pt2:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt1
+        JP          line_200
 _pt1:
+_pt0:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -96,6 +355,148 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+free_string:
+        LD          DE, heap_start
+        RST         0x20
+        RET         C
+        LD          DE, [heap_next]
+        RST         0x20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          free_heap
+free_heap:
+        PUSH        HL
+        ADD         HL, BC
+        LD          [heap_move_size], BC
+        LD          [heap_remap_address], HL
+        EX          DE, HL
+        LD          HL, [heap_next]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _free_heap_loop0
+        LDIR        
+_free_heap_loop0:
+        LD          [heap_next], DE
+        LD          HL, vars_area_start
+_free_heap_loop1:
+        LD          DE, varsa_area_end
+        RST         0x20
+        JR          NC, _free_heap_loop1_end
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop1_next
+        LD          DE, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop1_next:
+        POP         HL
+        INC         HL
+        JR          _free_heap_loop1
+_free_heap_loop1_end:
+        LD          HL, varsa_area_start
+_free_heap_loop2:
+        LD          DE, varsa_area_end
+        RST         0x20
+        RET         NC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
+        EX          DE, HL
+        SBC         HL, BC
+        SBC         HL, BC
+        RRC         H
+        RRC         L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_free_heap_sarray_elements:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop2_next
+        LD          HL, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop2_next:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _free_heap_sarray_elements
+        POP         HL
+        JR          _free_heap_loop2
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -111,6 +512,8 @@ program_run:
         LD          BC, varsa_area_end - var_area_start - 1
         LD          [HL], 0
         LDIR        
+        LD          HL, str_0
+        LD          [vars_area_start], HL
         RET         
 interrupt_process:
         LD          HL, [svari_on_interval_line]
@@ -338,6 +741,8 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
+str_1:
+        DEFB        0x20, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31
 save_stack:
         DEFW        0
 heap_next:
@@ -439,6 +844,8 @@ svari_on_strig4_line:
         DEFW        0
 var_area_end:
 vars_area_start:
+vars_I:
+        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:

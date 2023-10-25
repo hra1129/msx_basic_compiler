@@ -1047,7 +1047,7 @@ sub_setsprite::
 ; =============================================================================
 			scope	sub_putsprite
 sub_putsprite::
-			ld		h, a
+			ld		h, a				; H = スプライト番号
 			ld		a, [scrmod]
 			dec		a
 			cp		a, 12
@@ -1056,12 +1056,12 @@ sub_putsprite::
 			jr		nc, _sprite_mode2
 	_sprite_mode1:
 			; スプライトアトリビュートを求める
-			ld		a, h
+			ld		a, h				; A = スプライト番号
 			push	de					; パターンと色保存
 			push	hl					; フラグ保存
 			call	calatr
 			pop		de					; フラグ復帰
-			ld		a, e
+			ld		a, e				; A = フラグ
 			; 座標指定
 			rrca
 			di
@@ -1116,6 +1116,69 @@ sub_putsprite::
 			ei
 			ret
 	_sprite_mode2:
+			; スプライトアトリビュートを求める
+			ld		a, h
+			ld		[buf + 0], a
+			push	de					; パターンと色保存
+			push	hl					; フラグ保存
+			call	calatr
+			pop		de					; フラグ復帰
+			ld		a, e				; A = フラグ
+			; 座標指定
+			rrca
+			jr		nc, _skip_pos2
+			ld		e, a
+			call	nstwrt
+			ld		a, c
+			out		[vdpport0], a		; Y座標
+			ld		a, b
+			out		[vdpport0], a		; X座標
+			ld		a, e
+	_skip_pos2:
+			inc		hl
+			inc		hl
+			; パターン
+			pop		bc
+			rrca
+			jr		nc, _skip_pat2
+
+			ld		e, a
+			call	nstwrt
+			ld		a, [rg1sav]			; 0bXXXX_XXSX : Sprite Size S:0=8x8, 1=16x16
+			and		a, 0b0000_0010
+			ld		a, c
+			jr		z, _skip_pat2_0
+			add		a, a				; 16x16 の場合は、4倍する
+			add		a, a
+	_skip_pat2_0:
+			out		[vdpport0], a		; パターン
+			ld		a, e
+	_skip_pat2:
+			; 色
+			rrca
+			jr		nc, _skip_col2
+			; カラーテーブル( 4[byte] * 32[plane] = 128[byte] )のアドレスを求める
+			;	             Attribute   Color
+			;	SCREEN 4   : 1E00h-1E7Fh 1C00h-1DFFh
+			;	SCREEN 5,6 : 7600h-767Fh 7400h-75FFh
+			;	SCREEN 7-12: FA00h-FA7Fh F800h-F9FFh
+			ld		a, h
+			and		a, 0xFC
+			rrca
+			ld		h, a
+			ld		a, l
+			and		a, 0x7C
+			add		a, a
+			add		a, a
+			ld		l, a
+			rl		h
+			call	nstwrt
+			ld		a, b
+			ld		b, 16
+	_loop1:
+			out		[vdpport0], a		; 色
+			djnz	_loop1
+	_skip_col2:
 			ret
 			endscope
 
