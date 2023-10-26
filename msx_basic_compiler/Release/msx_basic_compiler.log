@@ -1,7 +1,7 @@
-﻿  beep.cpp
+﻿  expression.cpp
+  expression_pad.cpp
   コード生成しています。
-  0 of 1964 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  Previous IPDB and IOBJ mismatch, fall back to full compilation.
+  All 1971 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

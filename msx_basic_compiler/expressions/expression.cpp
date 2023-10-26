@@ -51,6 +51,7 @@
 #include "expression_log.h"
 #include "expression_mid.h"
 #include "expression_oct.h"
+#include "expression_pad.h"
 #include "expression_peek.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
@@ -642,6 +643,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "OCT$" ) {
 		CEXPRESSION_OCT *p_term = new CEXPRESSION_OCT;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "PAD" ) {
+		CEXPRESSION_PAD *p_term = new CEXPRESSION_PAD;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
