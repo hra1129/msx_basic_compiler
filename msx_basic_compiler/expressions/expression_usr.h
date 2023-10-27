@@ -14,7 +14,7 @@
 //	ŠÖ”ŒÄ‚Ño‚µ
 class CEXPRESSION_USR: public CEXPRESSION_NODE {
 public:
-	int n;
+	int n = 0;
 
 	~CEXPRESSION_USR() {
 		this->release();
