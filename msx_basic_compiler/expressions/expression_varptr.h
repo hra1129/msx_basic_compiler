@@ -14,8 +14,8 @@
 //	ä÷êîåƒÇ—èoÇµ
 class CEXPRESSION_VARPTR: public CEXPRESSION_NODE {
 public:
-	bool is_file_type;				// false: VARPTR(A), true: VARPTR(#1)
-	int file_number;				// #n ÇÃ nÅA0Å`15
+	bool is_file_type = false;			// false: VARPTR(A), true: VARPTR(#1)
+	int file_number = 0;				// #n ÇÃ nÅA0Å`15
 	std::vector< CBASIC_WORD >::const_iterator p_position;
 
 	~CEXPRESSION_VARPTR() {

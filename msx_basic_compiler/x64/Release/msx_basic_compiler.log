@@ -1,5 +1,7 @@
-﻿  expression.cpp
-  expression_pad.cpp
+﻿  expression_operator_ge.cpp
+  expression_operator_gt.cpp
+  expression_operator_le.cpp
+  expression_operator_lt.cpp
   コード生成しています。
   Previous IPDB and IOBJ mismatch, fall back to full compilation.
   All 1971 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
