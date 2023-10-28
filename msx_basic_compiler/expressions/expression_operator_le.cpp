@@ -105,14 +105,14 @@ void CEXPRESSION_OPERATOR_LE::compile( CCOMPILE_INFO *p_info ) {
 	else {
 		//	Ç±ÇÃââéZéqÇ™é¿êîÇÃèÍçá
 		p_info->assembler_list.add_label( "bios_xdcomp", "0x02f5c" );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_xdcomp", COPERAND_TYPE::NONE, "" );	//	ARG <= DAC
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_xdcomp", COPERAND_TYPE::NONE, "" );	//	DAC <= ARG
 		p_info->assembler_list.body.push_back( asm_line );
-		//	A= 1 Å® ARG < DAC : A =-1Ç…ÇµÇΩÇ¢
+		//	A= 1 Å® ARG < DAC : A = 0Ç…ÇµÇΩÇ¢
 		//	A= 0 Å® ARG = DAC : A =-1Ç…ÇµÇΩÇ¢
-		//	A=-1 Å® ARG > DAC : A = 0Ç…ÇµÇΩÇ¢
-		asm_line.set( CMNEMONIC_TYPE::SRA, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+		//	A=-1 Å® ARG > DAC : A =-1Ç…ÇµÇΩÇ¢
+		asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CPL, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::SRA, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );		//	HL = 0 Ç‹ÇΩÇÕ HL = -1
 		p_info->assembler_list.body.push_back( asm_line );
