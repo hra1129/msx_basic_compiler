@@ -86,16 +86,19 @@ void CEXPRESSION_NODE::type_adjust_2op( CCOMPILE_INFO *p_info, CEXPRESSION_NODE 
 			this->type = CEXPRESSION_TYPE::STRING;
 		}
 		else if( p_right->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
+			p_info->assembler_list.add_label( "work_arg", "0x0f847" );
 			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
-			p_info->assembler_list.activate_pop_single_real_arg();
+			p_info->assembler_list.activate_pop_single_real_dac();
 			this->type = CEXPRESSION_TYPE::DOUBLE_REAL;	//	”{¸“x‚É¸Ši
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "work_dac" );
+			//	‰E€‚ğ ARG ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "work_arg" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "4" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_arg", COPERAND_TYPE::NONE, "" );
+			//	¶€‚ğ DAC ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_single_real_dac", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_dac+4]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -103,17 +106,19 @@ void CEXPRESSION_NODE::type_adjust_2op( CCOMPILE_INFO *p_info, CEXPRESSION_NODE 
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			p_info->assembler_list.activate_pop_double_real_arg();
+			p_info->assembler_list.activate_pop_double_real_dac();
 			this->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 			p_info->assembler_list.add_label( "work_arg", "0x0f847" );
 			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "work_dac" );
+			//	‰E€‚ğ ARG ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, "work_arg" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "8" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "pop_double_real_arg", COPERAND_TYPE::NONE, "" );
+			//	¶€‚ğ DAC ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "pop_double_real_dac", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
