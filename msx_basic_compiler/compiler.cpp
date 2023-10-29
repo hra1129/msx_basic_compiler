@@ -31,8 +31,10 @@
 #include "collections/on_goto.h"			//	on gosub もこの中
 #include "collections/on_interval.h"
 #include "collections/on_key.h"
+#include "collections/on_sprite.h"
 #include "collections/on_strig.h"
 #include "collections/out.h"
+#include "collections/play.h"
 #include "collections/poke.h"
 #include "collections/print.h"
 #include "collections/put_sprite.h"
@@ -77,9 +79,11 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new CONINTERVAL );
 	this->collection.push_back( new CONKEY );
+	this->collection.push_back( new CONSPRITE );
 	this->collection.push_back( new CONSTRIG );
 	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB は、ON～GOSUB より後
 	this->collection.push_back( new COUT );
+	this->collection.push_back( new CPLAY );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPRINT );
 	this->collection.push_back( new CPUTSPRITE );
@@ -295,9 +299,15 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_h_timi]", COPERAND_TYPE::REGISTER, "A" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	ON KEY の飛び先初期化
+	//	ON SPRITE の飛び先初期化
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "_code_ret" );
 	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_sprite_line]", COPERAND_TYPE::REGISTER, "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	ON INTERVAL の飛び先初期化
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_interval_line]", COPERAND_TYPE::REGISTER, "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	ON KEY の飛び先初期化
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_key01_line]", COPERAND_TYPE::REGISTER, "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "svari_on_key01_line" );
@@ -560,15 +570,49 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 	//	割り込みフラグ処理ルーチン
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_process", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	割り込みフラグ処理ルーチン ( ON SPRITE )
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_sprite_running]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::LABEL, "_skip_on_sprite", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_sprite_exec]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::LABEL, "_skip_on_sprite", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_sprite_running]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_sprite_line]" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_on_sprite_return_address", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_sprite_running]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_skip_on_sprite", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
 	//	割り込みフラグ処理ルーチン ( ON INTERVAL )
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_interval_line]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "H" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::LABEL, "_skip_on_interval", COPERAND_TYPE::NONE, "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_interval_exec]" );	//	0:Through, 1:Execute
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
@@ -576,6 +620,8 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::LABEL, "_skip_on_interval", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_interval_exec]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[svari_on_interval_line]" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -591,7 +637,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::Z, COPERAND_TYPE::LABEL, "_skip_on_interval", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_skip_on_interval", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	割り込みフラグ処理ルーチン ( ON STRIG )
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "svarf_on_strig0_mode" );
@@ -753,6 +799,25 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "AF", COPERAND_TYPE::NONE, "" );		// VDP S#0 の値 (Aレジスタ) を保存
 	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	H.TIMI処理ルーチン ( ON SPRITE 処理 )
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_sprite_mode]" );	//	0:OFF, 1:ON, 2:STOP
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::LABEL, "_end_of_sprite", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	-- スプライト衝突フラフが立っているか？
+	asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0x20" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "[svarb_on_sprite_exec]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_end_of_sprite", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
 	//	H.TIMI処理ルーチン ( ON INTERVAL 処理 )
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[svarb_on_interval_mode]" );	//	0:OFF, 1:ON, 2:STOP
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -793,6 +858,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_end_of_interval", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
 	//	H.TIMI処理ルーチン ( ON STRIG 処理 )
 	this->info.assembler_list.add_label( "bios_gttrig", "0x00D8" );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "svarf_on_strig0_mode" );
@@ -1146,6 +1212,10 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key08_line", CVARIABLE_TYPE::INTEGER );
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key09_line", CVARIABLE_TYPE::INTEGER );
 	this->info.variable_manager.put_special_variable( &(this->info), "on_key10_line", CVARIABLE_TYPE::INTEGER );
+	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
+	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
+	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_running", CVARIABLE_TYPE::UNSIGNED_BYTE );
+	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_line", CVARIABLE_TYPE::INTEGER );
 
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
