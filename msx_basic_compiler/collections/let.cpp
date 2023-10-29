@@ -18,7 +18,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 
 	if( p_info->list.p_position->s_word == "LET" ) {
 		p_info->list.p_position++;
-		if( p_info->list.is_end() || p_info->list.p_position->line_no != line_no ) {
+		if( p_info->list.is_command_end() ) {
 			//	LET だけで終わってる場合は Syntax error.
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -29,10 +29,11 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word == "SPRITE" ) {
 		//	SPRITE$(n)への代入
 		p_info->list.p_position++;
-		if( !p_info->list.check_word( &(p_info->errors), "$" ) ) {
-			p_info->errors.add( SYNTAX_ERROR, line_no );
-			return true;
+		if( !p_info->list.is_command_end() && p_info->list.p_position->s_word != "$" ) {
+			p_info->list.p_position--;		//	SPRITE ON かもしれないから、エラーは出さない。
+			return false;
 		}
+		p_info->list.p_position++;
 		if( !p_info->list.check_word( &(p_info->errors), "(" ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;

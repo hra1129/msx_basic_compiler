@@ -1,16 +1,16 @@
 // --------------------------------------------------------------------
-//	Compiler collection: On Strig
+//	Compiler collection: On Sprite
 // ====================================================================
 //	2023/July/25th	t.hara
 // --------------------------------------------------------------------
 #include "../compiler.h"
 
-#ifndef __ON_STRIG_H__
-#define __ON_STRIG_H__
+#ifndef __ON_SPRITE_H__
+#define __ON_SPRITE_H__
 
-class CONSTRIG: public CCOMPILER_CONTAINER {
+class CONSPRITE: public CCOMPILER_CONTAINER {
 private:
-	void strig( CCOMPILE_INFO *p_info );
+	void sprite( CCOMPILE_INFO *p_info );
 
 public:
 	bool exec( CCOMPILE_INFO *p_info );
