@@ -45,6 +45,10 @@ mltcgp		:= 0xf3d5
 mltatr		:= 0xf3d7
 mltpat		:= 0xf3d9
 blibslot	:= 0xF3D3
+cliksw		:= 0xF3DB
+csry		:= 0xF3DC
+csrx		:= 0xF3DD
+cnsdfg		:= 0xF3DE
 rg0sav		:= 0xF3DF
 rg1sav		:= 0xF3E0
 rg2sav		:= 0xF3E1
@@ -151,6 +155,8 @@ blib_entries::
 			jp		sub_setsprite
 	blib_putsprite:
 			jp		sub_putsprite
+	blib_tab:
+			jp		sub_tab
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1180,6 +1186,33 @@ sub_putsprite::
 			djnz	_loop1
 	_skip_col2:
 			ret
+			endscope
+
+; =============================================================================
+;	PRINT TAB(A)
+;	input:
+;		A ..... TAB() の引数
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		桁位置が A になるまでスペースを出す
+; =============================================================================
+			scope	sub_tab
+sub_tab::
+			ld		e, a
+			ld		a, [csrx]
+			dec		a						; csrx が +1 の位置なので 0基準に戻す
+	_loop:
+			cp		a, e					; CP 現在の桁位置, 目標桁位置
+			ret		nc
+			ld		c, a
+			ld		a, ' '
+			rst		0x18
+			ld		a, c
+			inc		a
+			jr		_loop
 			endscope
 
 ; =============================================================================
