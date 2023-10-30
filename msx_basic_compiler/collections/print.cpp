@@ -68,7 +68,23 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		else if( p_info->list.p_position->s_word == "TAB(" ) {
 			//	TAB(n) ‚Ìê‡
 			p_info->list.p_position++;
-			//	šT.B.D.
+			p_info->assembler_list.add_label( "blib_tab", "0x04048" );
+			if( exp.compile( p_info ) ) {
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_tab" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				return false;
+			}
+			if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")" ) {
+				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+				return false;
+			}
+			p_info->list.p_position++;
 			has_semicolon = false;
 			exp.release();
 		}
