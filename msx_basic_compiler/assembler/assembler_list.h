@@ -70,6 +70,7 @@ public:
 	void activate_check_array( void );
 	void activate_check_sarray( class CCONSTANT_INFO *p_constants );
 	void activate_calc_array_top( void );
+	void activate_comma( void );
 };
 
 #endif

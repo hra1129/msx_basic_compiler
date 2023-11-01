@@ -91,8 +91,11 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		else if( p_info->list.p_position->s_word == "," ) {
 			//	, ‚Ìê‡
 			p_info->list.p_position++;
-			//	šT.B.D.
-			has_semicolon = false;
+			p_info->assembler_list.activate_comma();
+			p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "print_comma", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			has_semicolon = true;
 		}
 		else if( p_info->list.p_position->s_word == "USING" ) {
 			//	USING ‚Ìê‡
