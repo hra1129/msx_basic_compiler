@@ -1,0 +1,23 @@
+		ld		a, [clmlst]
+		ld		b, a
+		ld		a, [csrx]
+		dec		a
+		jr		z, skip
+		cp		a, b
+		jr		c, loop1
+		ld		a, 10
+		rst		18h
+		ld		a, 13
+		rst		18h
+		ret
+	loop1:
+		sub		a, 14
+		jr		nc, loop1		; -13Å`0
+	skip:
+		add		a, 14			; 1Å`14
+		ld		b, a
+		ld		a, ' '
+	loop2:
+		rst		0x18
+		djnz	loop2
+		ret

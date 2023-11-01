@@ -1648,6 +1648,62 @@ void CASSEMBLER_LIST::activate_calc_array_top( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_comma( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "print_comma" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "print_comma" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE,	COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_clmlst]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE,	COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE,	COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_csrx]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE,COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z,COPERAND_TYPE::LABEL, "_print_comma_skip", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE,	COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C,COPERAND_TYPE::LABEL, "_print_comma_loop1", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE,COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "14" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x18", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE,COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "14" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x18", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_print_comma_loop1", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::SUB, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "14" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NC, COPERAND_TYPE::LABEL, "_print_comma_loop1", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_print_comma_skip", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE,COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "14" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE,	COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT , "' '" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_print_comma_loop2", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x18", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DJNZ, CCONDITION::NONE, COPERAND_TYPE::LABEL, "_print_comma_loop2", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
