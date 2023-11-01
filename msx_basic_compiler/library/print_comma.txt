@@ -13,8 +13,10 @@
 	loop1:
 		sub		a, 14
 		jr		nc, loop1		; -13Å`0
+		jr		nz, skip
+		ld		a, -14			; 0Å®-14
 	skip:
-		add		a, 14			; 1Å`14
+		neg						; 13,12,...,1,14
 		ld		b, a
 		ld		a, ' '
 	loop2:

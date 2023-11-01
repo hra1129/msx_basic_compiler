@@ -93,6 +93,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 			p_info->assembler_list.activate_comma();
 			p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
+			p_info->assembler_list.add_label( "work_clmlst", "0x0f3b2" );
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "print_comma", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			has_semicolon = true;
