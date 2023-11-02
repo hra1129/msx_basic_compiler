@@ -321,20 +321,16 @@ print_comma:
         LD          B, A
         LD          A, [work_csrx]
         DEC         A
-        JR          Z, _print_comma_skip
         CP          A, B
         JR          C, _print_comma_loop1
-        ADD         A, 14
+        LD          A, 10
         RST         0x18
-        ADD         A, 14
+        LD          A, 13
         RST         0x18
         RET         
 _print_comma_loop1:
         SUB         A, 14
         JR          NC, _print_comma_loop1
-        JR          NZ, _print_comma_skip
-        LD          A, -14
-_print_comma_skip:
         NEG         
         LD          B, A
         LD          A, ' '
