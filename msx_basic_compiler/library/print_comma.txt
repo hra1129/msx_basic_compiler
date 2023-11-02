@@ -2,7 +2,6 @@
 		ld		b, a
 		ld		a, [csrx]
 		dec		a
-		jr		z, skip
 		cp		a, b
 		jr		c, loop1
 		ld		a, 10
@@ -12,10 +11,7 @@
 		ret
 	loop1:
 		sub		a, 14
-		jr		nc, loop1		; -13Å`0
-		jr		nz, skip
-		ld		a, -14			; 0Å®-14
-	skip:
+		jr		nc, loop1		; 0à»è„Ç»ÇÁ loop1, -14Å`-1 Ç»ÇÁÉXÉãÅ[
 		neg						; 13,12,...,1,14
 		ld		b, a
 		ld		a, ' '
