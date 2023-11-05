@@ -16,10 +16,7 @@ bios_chgclr                     = 0x00062
 work_forclr                     = 0x0F3E9
 work_bakclr                     = 0x0F3EA
 work_bdrclr                     = 0x0F3EB
-blib_width                      = 0x0403c
 work_prtflg                     = 0x0f416
-work_csrx                       = 0x0f3dd
-work_clmlst                     = 0x0f3b2
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -65,7 +62,7 @@ program_start:
 line_100:
         CALL        interrupt_process
         CALL        interrupt_process
-        LD          HL, 0
+        LD          HL, 1
         LD          A, L
         LD          IX, bios_chgmodp
         CALL        bios_extrom
@@ -80,83 +77,11 @@ line_100:
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
-        CALL        interrupt_process
-        LD          HL, 80
-        LD          ix, blib_width
-        CALL        call_blib
 line_110:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
         LD          HL, str_1
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_120:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        CALL        print_comma
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_3
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_130:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_5
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_6
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_7
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_8
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_9
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        print_comma
-        LD          HL, str_10
         PUSH        HL
         CALL        puts
         POP         HL
@@ -316,28 +241,6 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
-print_comma:
-        LD          A, [work_clmlst]
-        LD          B, A
-        LD          A, [work_csrx]
-        DEC         A
-        CP          A, B
-        JR          C, _print_comma_loop1
-        LD          A, 10
-        RST         0x18
-        LD          A, 13
-        RST         0x18
-        RET         
-_print_comma_loop1:
-        SUB         A, 14
-        JR          NC, _print_comma_loop1
-        NEG         
-        LD          B, A
-        LD          A, ' '
-_print_comma_loop2:
-        RST         0x18
-        DJNZ        _print_comma_loop2
-        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -605,25 +508,9 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x01, 0x2A
-str_10:
-        DEFB        0x01, 0x37
+        DEFB        0x0D, 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x2C, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21
 str_2:
         DEFB        0x02, 0x0D, 0x0A
-str_3:
-        DEFB        0x01, 0x41
-str_4:
-        DEFB        0x01, 0x31
-str_5:
-        DEFB        0x01, 0x32
-str_6:
-        DEFB        0x01, 0x33
-str_7:
-        DEFB        0x01, 0x34
-str_8:
-        DEFB        0x01, 0x35
-str_9:
-        DEFB        0x01, 0x36
 save_stack:
         DEFW        0
 heap_next:
