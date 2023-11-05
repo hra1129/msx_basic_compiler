@@ -4,10 +4,7 @@
 ;	Copyroght (C)2023 HRA!
 ; =============================================================================
 
-enaslt		:= 0x0024
 init		:= 0x4002
-ramad1		:= 0xF342
-mainrom		:= 0xFCC1
 
 			db		0xFE
 			dw		start_address

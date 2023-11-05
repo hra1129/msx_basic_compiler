@@ -5,8 +5,8 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>ele2.bas ele2.asm</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>test.asc test.asm</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>.\eleland</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>.\test002</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

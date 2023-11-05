@@ -9,6 +9,7 @@ vdpport1	:= 0x99
 vdpport2	:= 0x9A
 vdpport3	:= 0x9B
 calslt		:= 0x001C
+enaslt		:= 0x0024
 romver		:= 0x002D
 wrtvdp		:= 0x0047
 setwrt		:= 0x0053
@@ -19,7 +20,10 @@ rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
 nstwrt		:= 0x0171
+fout		:= 0x3425
+pufout		:= 0x3426
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
+ramad1		:= 0xF342
 linl40		:= 0xF3AE
 linl32		:= 0xF3AF
 linlen		:= 0xF3B0
@@ -61,11 +65,16 @@ statfl		:= 0xF3E7
 putpnt		:= 0xF3F8
 getpnt		:= 0xF3FA
 buf			:= 0xF55E
+valtyp		:= 0xF663
+dectm2		:= 0xF7F2
+deccnt		:= 0xF7F4
+dac			:= 0xF7F6
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 dfpage		:= 0xFAF5
 acpage		:= 0xFAF6
 scrmod		:= 0xFCAF
 oldscr		:= 0xFCB0
+mainrom		:= 0xFCC1
 exptbl		:= 0xFCC1
 rg8sav		:= 0xFFE7
 rg9sav		:= 0xFFE8
@@ -157,6 +166,8 @@ blib_entries::
 			jp		sub_putsprite
 	blib_tab:
 			jp		sub_tab
+	blib_using:
+			jp		sub_using
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1216,11 +1227,365 @@ sub_tab::
 			endscope
 
 ; =============================================================================
+;	PRINT USING <buf>
+;	input:
+;		none
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		BUF に書式文字列のアドレス, BUF+2以降にパラメータを格納して呼ぶ
+; =============================================================================
+			scope	sub_using
+sub_using::
+			; 書式文字列の長さとアドレスを得る
+			ld		hl, [buf]
+			ld		a, [hl]
+			or		a, a
+			jp		z, err_illegal_function_call		; 書式文字列が長さ 0 なら Illegal function call
+			inc		hl
+			ld		b, a
+			; 引数のアドレス
+			ld		de, buf+2
+			; 1文字得て書式文字か調べる
+			; 書式の開始文字は、!(21) #(23) &(26) *(2A) +(2B) -(2D) .(2E) @(40) \(5C)
+	main_loop:
+			; HL = 書式, DE = 引数
+			call	get_one
+			cp		a, ','						; 0x2C
+			jr		z, no_format
+			jr		nc, search_r
+
+			;		[0x00:0x2B]: !(21) #(23) &(26) *(2A) +(2B)
+		search_l:
+			cp		a, '&'						; 0x26
+			jp		z, string_column_format
+			jr		nc, search_lr
+
+			;		[0x00:0x25]: !(21) #(23)
+		search_ll:
+			cp		a, '#'
+			jr		z, number_format
+			cp		a, '!'
+			jp		z, char_format
+			jr		no_format
+
+			;		[0x27:0x2B]: *(2A) +(2B)
+		search_lr:
+			cp		a, '*'
+			jr		nc, number_format
+			jr		no_format
+
+			;		[0x2D:0xFF]: -(2D) .(2E) @(40) \(5C)
+		search_r:
+			cp		a, '.' + 1
+			jr		c, number_format
+			cp		a, '\\'
+			jr		z, detect_yenyen
+			cp		a, '@'
+			jp		z, string_format
+
+			; -----------------------------------------------------------------
+			; 書式ではない文字
+	no_format:
+			rst		0x18
+			jr		main_loop
+
+			; -----------------------------------------------------------------
+			; 数値の書式
+			; #(23) *(2A) +(2B) -(2D) .(2E) \(5C)
+	number_format:
+			; pufout へ渡すフォーマット情報を初期化
+			ld		c, a
+			ld		a, 0b1000_0000
+			ld		[deccnt], a
+			ld		a, c
+
+			cp		a, '*'
+			jr		z, number_format_asterisk
+
+			; *(2A): *### **###
+	number_format_asterisk:
+			inc		b
+			dec		b
+			jr		z, no_format				; * で終わってる場合は単独の * 扱い
+
+			ld		a, [hl]
+			cp		a, '*'
+			ld		a, '*'
+			jr		z, no_format				; * が 1個だけなので書式ではない
+
+			ld		a, 2
+			ld		[dectm2 + 1], a				; 整数部 2桁から開始
+			xor		a, a
+			ld		[dectm2], a					; 小数部 0桁
+			ld		a, 0b1010_0000				; * 詰め指定
+			ld		[deccnt], a
+			inc		hl							; 2個目の * の分
+			dec		b
+			jr		nz, detect_yen
+
+			; -----------------------------------------------------------------
+			; 引数の数値を DAC へコピーして pufout を呼ぶ
+	put_number:
+			ex		de, hl						; DE = 書式, HL = 引数
+			ld		a, [hl]						; A = 引数の型
+			or		a, a
+			ret									; 引数がないので終了
+			cp		a, 3
+			jp		z, err_type_mismatch		; フラグ不変: 文字列ならエラー
+			ld		[valtyp], a					; フラグ不変: 2:整数, 4:単精度, 8:倍精度のいずれか
+			push	de							; フラグ不変: 書式の参照位置を保存
+			push	bc							; フラグ不変: サイズ情報を保存
+			inc		hl							; フラグ不変
+			; ブロック転送
+			ld		de, dac						; フラグ不変
+			jr		nc, pufout_skip				; 整数の場合 Cy=1, 単精度・倍精度の場合 Cy=0
+			inc		e							; DAC=F7F6h なので E にだけ 2 足せば充分
+			inc		e
+		pufout_skip:
+			ld		c, a
+			ld		b, 0
+			ldir
+			push	hl							; 引数の参照位置を保存
+			; pufout 呼び出し
+			ld		bc, [dectm2]
+			ld		a, [deccnt]
+			ld		ix, pufout
+			ld		iy, [mainrom - 1]
+			call	calslt
+	pufout_loop:
+			ld		a, [hl]
+			or		a, a
+			jr		z, pufout_loop_exit
+			rst		0x18
+			jr		pufout_loop
+	pufout_loop_exit:
+			pop		de							; 引数の参照位置を復帰
+			pop		bc							; サイズ情報を復帰
+			pop		hl							; 書式の参照位置を復帰
+			jp		main_loop
+
+			; -----------------------------------------------------------------
+			; 通貨記号 ￥
+	detect_yen:
+			ld		a, [hl]
+			cp		a, '/'
+			jr		nz, detect_sharp				; ￥ が無ければ **###、あれば **￥###
+
+			inc		hl
+			dec		b
+			ld		a, 3
+			ld		[dectm2 + 1], a				; 整数部 3桁から開始
+			ld		a, 0b1011_0000				; * 詰め指定, ￥ 詰め指定
+			ld		[deccnt], a
+			jr		nz, detect_sharp
+
+			; -----------------------------------------------------------------
+			; 通貨記号 ￥￥
+	detect_yenyen:
+			inc		b
+			dec		b
+			jr		z, no_format				; ￥ で終わってる場合は単独の ￥ 扱い
+
+			ld		a, [hl]
+			cp		a, '/'
+			ld		a, '/'
+			jp		z, no_format				; ￥ が 1個だけなので書式ではない
+
+			ld		a, 2
+			ld		[dectm2 + 1], a				; 整数部 2桁から開始
+			xor		a, a
+			ld		[dectm2], a					; 小数部 0桁
+			ld		a, 0b1001_0000				; ￥ 詰め指定
+			ld		[deccnt], a
+			inc		hl							; 2個目の ￥ の分
+			dec		b
+			jr		detect_sharp
+
+			; -----------------------------------------------------------------
+			; 数値記号 #
+	detect_sharp:
+
+			; -----------------------------------------------------------------
+			; 文字列の書式 @
+	string_format:
+			ex		de, hl					; HL = 引数, DE = 書式
+			ld		a, [hl]
+			or		a, a
+			ret		z						; 引数型が 0 なら終わり
+			cp		a, 3					; 引数型が 3 でなければ Type mismatch
+			jp		nz, err_type_mismatch
+			push	de						; 書式のアドレスを保存
+			push	bc
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]					; DE = @ にはめ込む文字列のアドレス
+			inc		hl
+			ex		de, hl					; HL = はめ込む文字列, DE = 引数
+			ld		b, [hl]					; B = はめ込む文字列の文字数
+			inc		hl
+
+			inc		b
+			jr		string_loop_1st
+	string_loop:
+			ld		a, [hl]
+			inc		hl
+			rst		0x18
+	string_loop_1st:
+			djnz	string_loop
+			pop		bc
+			pop		hl						; 書式のアドレスを復帰
+			jp		main_loop
+
+			; -----------------------------------------------------------------
+			; 桁制限付き文字列の書式 &&
+	string_column_format:
+			; 最初の & が書式の最後の場合、単なる記号として処理
+			inc		b
+			dec		b
+			jp		z, no_format
+			; 2つ目の & が存在するかチェックする
+			ld		c, b
+			push	hl						; 書式の現在位置を保存
+	string_column_check:
+			ld		a, [hl]
+			cp		a, '&'
+			jr		z, string_column_found
+			cp		a, ' '
+			jr		nz, string_column_not_found
+			inc		hl
+			djnz	string_column_check
+	string_column_not_found:
+			ld		b, c
+			pop		hl						; 書式の現在位置を復帰
+			ld		a, '&'
+			jp		no_format
+	string_column_found:
+			; 引数が文字列か調べる
+			ex		de, hl					; HL = 引数
+			ld		a, [hl]
+			or		a, a
+			ret		z						; 引数型が 0 なら終わり
+			cp		a, 3					; 引数型が 3 でなければ Type mismatch
+			jp		nz, err_type_mismatch
+
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]					; DE = && にはめ込む文字列のアドレス
+			inc		hl
+			ex		[sp], hl				; HL = 書式, スタック = 引数
+
+			ld		a, [de]					; && にはめ込む文字列の長さ
+			inc		de
+			or		a, a					; && にはめ込む文字列が "" なら、最初からスペース挿入
+			ld		b, a
+			jr		nz, replace_first
+			; && にはめ込む文字列が "" の場合
+			ld		a, ' '
+			inc		b
+			jr		replace_first_is_space
+
+	replace_first:
+			; 最初の & の分の出力
+			ld		a, [de]					; && にはめ込む文字
+			inc		de
+	replace_first_is_space:
+			rst		0x18					; 1文字出力
+			dec		b						; && にはめ込む文字列を 1文字消費
+			jr		z, insert_space
+
+	replace_loop:
+			ld		a, [de]					; && にはめ込む文字
+			inc		de
+			rst		0x18					; 1文字出力
+
+			ld		a, [hl]					; 書式上の文字
+			inc		hl
+			dec		c						; 書式文字列を 1文字消費
+			cp		a, '&'
+			jp		z, string_column_exit
+
+			djnz	replace_loop			; && にはめ込む文字がなくなるまで繰り返す
+
+	insert_space:
+			ld		a, ' '					; && にはめ込む文字
+			rst		0x18					; 1文字出力
+
+			ld		a, [hl]					; 書式上の文字
+			inc		hl
+			dec		c						; 書式文字列を 1文字消費
+			cp		a, '&'
+			jp		nz, insert_space
+
+	string_column_exit:
+			pop		de
+			ld		b, c
+			jp		main_loop
+
+			; -----------------------------------------------------------------
+			; 文字の書式 !
+	char_format:
+			ex		de, hl					; HL = 引数, DE = 書式
+			ld		a, [hl]
+			or		a, a
+			ret		z						; 引数型が 0 なら終わり
+			cp		a, 3					; 引数型が 3 でなければ Type mismatch
+			jp		nz, err_type_mismatch
+
+			push	de						; 書式のアドレスを保存
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]					; DE = @ にはめ込む文字列のアドレス
+			inc		hl
+			ex		de, hl					; HL = はめ込む文字列, DE = 引数
+			ld		a, [hl]					; A = はめ込む文字列の文字数
+			inc		hl
+
+			or		a, a
+			ld		a, ' '					; 長さ 0 の文字列だった場合は、' ' を指定したことにする
+			jr		z, blank_string
+			ld		a, [hl]
+	blank_string:
+			rst		0x18
+			pop		hl						; 書式のアドレスを復帰
+			jp		main_loop
+
+			; -----------------------------------------------------------------
+			; 書式文字列から 1文字得る
+	get_one:
+			inc		b
+			dec		b
+			jr		nz, get_one_normal
+			; 書式文字列を全て処理した場合、まだ引数が残っているかチェック
+			ld		a, [de]
+			or		a, a
+			jr		nz, go_next
+			pop		hl
+			ret
+	go_next:
+			ld		hl, [buf]
+			ld		b, [hl]
+			inc		hl
+	get_one_normal:
+			ld		a, [hl]
+			dec		b
+			inc		hl
+			ret
+			endscope
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
 err_illegal_function_call	:= $+1
 			ld		bc, 0x051E
+err_type_mismatch			:= $+1
+			ld		bc, 0x0D1E
 			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT
 			ld		ix, 0x406F				; ERRHNDR
 			jp		calslt

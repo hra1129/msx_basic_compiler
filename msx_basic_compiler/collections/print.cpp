@@ -8,6 +8,148 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
+bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
+	CASSEMBLER_LINE asm_line;
+	CEXPRESSION exp;
+	int offset;
+	bool has_parameter, is_semicolon;
+
+	//	書式文字列
+	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
+	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_buf]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return false;
+	}
+	offset = 2;
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_buf+2" );
+	p_info->assembler_list.body.push_back( asm_line );
+	//	書式と引数の間はセミコロンのみ
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ";" ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return false;
+	}
+	p_info->list.p_position++;
+	has_parameter = false;
+	//	引数
+	for(;;) {
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
+			//	DEに演算結果、HLにBUFの格納先
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			//	型に応じて格納方法が異なる
+			switch( exp.get_type() ) {
+			case CEXPRESSION_TYPE::INTEGER:
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "2" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "E" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "D" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				offset += 3;
+				break;
+			case CEXPRESSION_TYPE::STRING:
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "3" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "E" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "D" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				offset += 3;
+				break;
+			case CEXPRESSION_TYPE::SINGLE_REAL:
+				p_info->assembler_list.activate_ld_de_single_real();
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "4" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				offset += 5;
+				break;
+			case CEXPRESSION_TYPE::DOUBLE_REAL:
+				p_info->assembler_list.activate_ld_de_double_real();
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "8" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				offset += 9;
+				break;
+			default:
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+				return false;
+			}
+			has_parameter = true;
+			exp.release();
+		}
+		else {
+			if( !has_parameter ) {
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+				return false;
+			}
+		}
+		if( p_info->list.is_command_end() ) {
+			break;
+		}
+		if( p_info->list.p_position->s_word != "," && p_info->list.p_position->s_word != ";" ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return false;
+		}
+		is_semicolon = (p_info->list.p_position->s_word == ";");
+		p_info->list.p_position++;
+		if( p_info->list.is_command_end() ) {
+			if( is_semicolon ) {
+				p_info->list.p_position--;
+			}
+			break;
+		}
+	}
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_REGISTER, "[HL]", COPERAND_TYPE::CONSTANT, "0" );
+	p_info->assembler_list.body.push_back( asm_line );
+	offset++;
+	if( offset > 258 ) {
+		//	引数が多すぎて BUF を溢れた場合
+		p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+	}
+	p_info->assembler_list.add_label( "blib_using", "0x0404b" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_using" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	return true;
+}
+
+// --------------------------------------------------------------------
 //  PRINT
 //	PRINT 式 [[;|,] 式 | TAB(n) | SPC(n) ]
 bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
@@ -101,8 +243,17 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		else if( p_info->list.p_position->s_word == "USING" ) {
 			//	USING の場合
 			p_info->list.p_position++;
-			//	★T.B.D.
-			has_semicolon = false;
+			if( !this->exec_using( p_info ) ) {
+				//	エラーだった場合
+				return true;			//	PRINT USING として処理はしたので、true
+			}
+			if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == ";" ) {
+				p_info->list.p_position++;
+				has_semicolon = true;
+			}
+			else {
+				has_semicolon = false;
+			}
 		}
 		else if( p_info->list.p_position->s_word == ";" ) {
 			//	; の場合

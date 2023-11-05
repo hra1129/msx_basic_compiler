@@ -9,6 +9,9 @@
 #define __PRINT_H__
 
 class CPRINT: public CCOMPILER_CONTAINER {
+private:
+	bool exec_using( CCOMPILE_INFO *p_info );
+
 public:
 	bool exec( CCOMPILE_INFO *p_info );
 };
