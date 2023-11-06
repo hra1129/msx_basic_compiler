@@ -810,15 +810,18 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 					else if( s_word.s_word == "ELSE" ) {
 						is_last_jump = true;
 					}
-					else if( s_word.s_word != "," && (s_word.s_word == ":" || s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD) ) {
+					else if( s_word.s_word == "," ) {
+						is_last_jump = true;
+					}
+					else {
 						is_last_jump = false;
 					}
 				}
 				else {
-					if( s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE" ) {
+					if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE") ) {
 						is_last_jump = true;
 					}
-					else if( s_word.s_word == "DATA" ) {
+					else if( s_word.s_word == "DATA" && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
 						is_data = true;
 					}
 				}
