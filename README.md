@@ -30,8 +30,8 @@ MSX-BASICとの相違点
 
 -------------------------------------------------------------------------------
 Special thanks to "MSX-BACON のデバッグに協力して頂いた方々"
-	nkt360さん(@nkt360)
-	ちくわ帝国さん(@chikuwa_empire)
-	b.p.sさん(@BasicProgrammer)
+	nkt360さん（@nkt360）
+	ちくわ帝国さん（@chikuwa_empire）
+	b.p.sさん（@BasicProgrammer）
 
-	※順不同、() は X(旧Twitter) のアカウント
+	※順不同、（）は X（旧Twitter）のアカウント
