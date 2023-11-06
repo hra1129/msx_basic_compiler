@@ -31,13 +31,18 @@ bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->assembler_list.add_label( "work_usrtab", "0x0f39a" );
-	usr_num = stoi( p_info->list.p_position->s_word );
+	if( p_info->list.p_position->s_word.size() == 1 && isdigit( p_info->list.p_position->s_word[0] & 255 ) ) {
+		usr_num = stoi( p_info->list.p_position->s_word );
+		p_info->list.p_position++;
+	}
+	else {
+		usr_num = 0;
+	}
 	if( usr_num < 0 || usr_num > 9 ) {
 		//	DEFUSRn ‚Ì n ‚ª 0`9 ‚Å‚È‚¢ê‡‚Í Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
-	p_info->list.p_position++;
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "=" ) {
 		//	DEFUSRn ‚ÌŒã‚É = ‚ª–³‚¢ê‡‚Í Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );

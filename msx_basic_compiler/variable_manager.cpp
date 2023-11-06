@@ -7,6 +7,7 @@
 #include "variable_manager.h"
 #include "compile_info.h"
 #include "expressions/expression.h"
+#include <algorithm>
 
 // --------------------------------------------------------------------
 void CVARIABLE_MANAGER::skip_statement( CCOMPILE_INFO *p_info ) {
@@ -113,6 +114,7 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 	line_no = p_info->list.p_position->line_no;
 	//	•Ï”–¼‚ğæ“¾‚·‚é
 	s_name = p_info->list.p_position->s_word;
+	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	//	3•¶šˆÈã‚Ìê‡A2•¶š‚ÉØ‚è‹l‚ß‚é
 	if( s_name.size() > 2 ) {
@@ -217,6 +219,7 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	}
 	//	•Ï”–¼‚ğæ“¾
 	s_name = p_info->list.p_position->s_word;
+	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 ) {
 		//	•Ï”–¼Å‘å 2•¶š§ŒÀ
@@ -285,6 +288,7 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 	}
 	//	•Ï”–¼‚ğæ“¾
 	s_name = p_info->list.p_position->s_word;
+	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 ) {
 		//	•Ï”–¼Å‘å 2•¶š§ŒÀ

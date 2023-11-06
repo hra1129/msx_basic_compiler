@@ -183,7 +183,7 @@ int main( int argc, char *argv[] ) {
 	compiler.info.errors.print();
 	if( compiler.info.errors.list.size() ) {
 		printf( "Found %d error(s).\n", (int)compiler.info.errors.list.size() );
-		//return 1;
+		return 1;
 	}
 	if( !compiler.info.assembler_list.save( compiler.info.options.s_output_name, compiler.info.options.output_type ) ) {
 		return 2;
