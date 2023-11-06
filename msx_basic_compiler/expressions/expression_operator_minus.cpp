@@ -12,6 +12,9 @@
 // --------------------------------------------------------------------
 void CEXPRESSION_OPERATOR_MINUS::optimization( CCOMPILE_INFO *p_info ) {
 	
+	if( this->p_right == nullptr ) {
+		return;
+	}
 	this->p_right->optimization( p_info );
 }
 
@@ -19,6 +22,9 @@ void CEXPRESSION_OPERATOR_MINUS::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_OPERATOR_MINUS::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_right == nullptr ) {
+		return;
+	}
 	//	æ‚É€‚ðˆ—
 	this->p_right->compile( p_info );
 

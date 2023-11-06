@@ -1282,7 +1282,7 @@ sub_using::
 			cp		a, '.' + 1
 			jr		c, number_format
 			cp		a, '\\'
-			jr		z, detect_yenyen
+			jp		z, detect_yenyen
 			cp		a, '@'
 			jp		z, string_format
 
@@ -1304,6 +1304,9 @@ sub_using::
 
 			cp		a, '*'
 			jr		z, number_format_asterisk
+			dec		hl
+			inc		b
+			jp		detect_sharp
 
 			; *(2A): *### **###
 	number_format_asterisk:
@@ -1332,7 +1335,7 @@ sub_using::
 			ex		de, hl						; DE = 書式, HL = 引数
 			ld		a, [hl]						; A = 引数の型
 			or		a, a
-			ret									; 引数がないので終了
+			ret		z							; 引数がないので終了
 			cp		a, 3
 			jp		z, err_type_mismatch		; フラグ不変: 文字列ならエラー
 			ld		[valtyp], a					; フラグ不変: 2:整数, 4:単精度, 8:倍精度のいずれか
@@ -1387,7 +1390,7 @@ sub_using::
 	detect_yenyen:
 			inc		b
 			dec		b
-			jr		z, no_format				; ￥ で終わってる場合は単独の ￥ 扱い
+			jp		z, no_format				; ￥ で終わってる場合は単独の ￥ 扱い
 
 			ld		a, [hl]
 			cp		a, '/'
@@ -1407,6 +1410,51 @@ sub_using::
 			; -----------------------------------------------------------------
 			; 数値記号 #
 	detect_sharp:
+			ld		a, [dectm2 + 1]
+			ld		c, a
+			xor		a, a						; '.' ではない値にする
+			inc		b
+			dec		b
+			jr		z, put_number				; 書式文字列がここで終わっていれば桁検出スキップ
+			; 整数部の桁数検出
+	detect_sharp_loop:
+			ld		a, [hl]
+			cp		a, '#'
+			jr		nz, detect_sharp_exit
+			inc		hl
+			inc		c
+			djnz	detect_sharp_loop
+	detect_sharp_exit:
+			cp		a, '.'
+			ld		a, c
+			ld		[dectm2 + 1], a
+			jr		nz, detect_sharp_exit_all	; '.' が無ければ小数部は存在しないのでスキップ
+			inc		hl
+			inc		b
+			dec		b
+			jp		z, put_number				; 書式が終わっていればここで検出おしまい
+			; 小数部の桁数検出
+			ld		a, [dectm2]
+			ld		c, a
+	detect_sharp_loop_2nd:
+			ld		a, [hl]
+			cp		a, '#'
+			jr		nz, detect_sharp_exit
+			inc		hl
+			inc		c
+			djnz	detect_sharp_loop_2nd
+	detect_sharp_exit_2nd:
+			ld		a, c
+			ld		[dectm2], a
+			inc		b
+			dec		b
+			jp		z, put_number				; 書式が終わっていればここで検出おしまい
+	detect_sharp_exit_all:
+			; 指数部
+
+
+
+			jp		put_number
 
 			; -----------------------------------------------------------------
 			; 文字列の書式 @

@@ -12,6 +12,9 @@
 // --------------------------------------------------------------------
 void CEXPRESSION_OPERATOR_INTDIV::optimization( CCOMPILE_INFO *p_info ) {
 	
+	if( this->p_left == nullptr || this->p_right == nullptr ) {
+		return;
+	}
 	this->p_left->optimization( p_info );
 	this->p_right->optimization( p_info );
 }
@@ -20,6 +23,9 @@ void CEXPRESSION_OPERATOR_INTDIV::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_OPERATOR_INTDIV::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_left == nullptr || this->p_right == nullptr ) {
+		return;
+	}
 	//	æ‚É€‚ðˆ—
 	this->p_left->compile( p_info );
 

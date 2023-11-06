@@ -10,13 +10,12 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_chgmodp                    = 0x001B5
-bios_extrom                     = 0x0015F
-bios_chgclr                     = 0x00062
-work_forclr                     = 0x0F3E9
-work_bakclr                     = 0x0F3EA
-work_bdrclr                     = 0x0F3EB
 work_prtflg                     = 0x0f416
+bios_fout                       = 0x03425
+work_dac_int                    = 0x0f7f8
+work_valtyp                     = 0x0f663
+work_csrx                       = 0x0f3dd
+work_linlen                     = 0x0f3b0
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -61,33 +60,85 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-        CALL        interrupt_process
-        LD          HL, 1
-        LD          A, L
-        LD          IX, bios_chgmodp
-        CALL        bios_extrom
-        CALL        interrupt_process
-        LD          HL, 15
-        LD          A, L
-        LD          [work_forclr], A
-        LD          HL, 4
-        LD          A, L
-        LD          [work_bakclr], A
-        LD          HL, 7
-        LD          A, L
-        LD          [work_bdrclr], A
-        CALL        bios_chgclr
 line_110:
+        CALL        interrupt_process
+        LD          HL, vari_I
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
+        PUSH        HL
+        LD          HL, 10
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt1
+        LD          [svari_I_LABEL], HL
+        JR          _pt0
+_pt1:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt2
+        RST         0x20
+        JR          C, _pt3
+        JR          Z, _pt3
+        RET         NC
+_pt2:
+        RST         0x20
+        RET         C
+_pt3:
+        POP         HL
+_pt0:
+line_120:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
-        LD          HL, str_1
+        LD          HL, [vari_I]
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt4
         PUSH        HL
+        LD          HL, str_1
         CALL        puts
         POP         HL
-        CALL        free_string
-        LD          HL, str_2
+_pt4:
         CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_1
+        CALL        puts
+line_130:
+        CALL        interrupt_process
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -130,117 +181,23 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
-free_string:
-        LD          DE, heap_start
-        RST         0x20
-        RET         C
-        LD          DE, [heap_next]
-        RST         0x20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          free_heap
-free_heap:
-        PUSH        HL
-        ADD         HL, BC
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
-        EX          DE, HL
-        LD          HL, [heap_next]
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          A, C
-        OR          A, B
-        JR          Z, _free_heap_loop0
-        LDIR        
-_free_heap_loop0:
-        LD          [heap_next], DE
-        LD          HL, vars_area_start
-_free_heap_loop1:
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          NC, _free_heap_loop1_end
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          DE, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
+str:
+        CALL        bios_fout
+fout_adjust:
         DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
         PUSH        HL
-_free_heap_loop1_next:
+        XOR         A, A
+        LD          B, A
+_str_loop:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _str_loop_exit
+        INC         B
+        JR          _str_loop
+_str_loop_exit:
         POP         HL
-        INC         HL
-        JR          _free_heap_loop1
-_free_heap_loop1_end:
-        LD          HL, varsa_area_start
-_free_heap_loop2:
-        LD          DE, varsa_area_end
-        RST         0x20
-        RET         NC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        LD          C, [HL]
-        INC         HL
-        LD          B, 0
-        ADD         HL, BC
-        ADD         HL, BC
-        EX          DE, HL
-        SBC         HL, BC
-        SBC         HL, BC
-        RRC         H
-        RRC         L
-        LD          C, L
-        LD          B, H
-        EX          DE, HL
-_free_heap_sarray_elements:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop2_next
-        LD          HL, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop2_next:
-        POP         HL
-        INC         HL
-        DEC         BC
-        LD          A, C
-        OR          A, B
-        JR          NZ, _free_heap_sarray_elements
-        POP         HL
-        JR          _free_heap_loop2
+        LD          [HL], B
+        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -508,8 +465,6 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x0D, 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x2C, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21
-str_2:
         DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
@@ -580,6 +535,12 @@ svarf_on_strig6_mode_dummy:
         DEFW        0, 0
 svarf_on_strig7_mode_dummy:
         DEFW        0, 0
+svari_I_FOR_END:
+        DEFW        0
+svari_I_FOR_STEP:
+        DEFW        0
+svari_I_LABEL:
+        DEFW        0
 svari_on_interval_counter:
         DEFW        0
 svari_on_interval_line:
@@ -617,6 +578,8 @@ svari_on_strig2_line:
 svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
+        DEFW        0
+vari_I:
         DEFW        0
 var_area_end:
 vars_area_start:

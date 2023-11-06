@@ -36,7 +36,7 @@ void CEXPRESSION_VPEEK::compile( CCOMPILE_INFO *p_info ) {
 	else {
 		p_info->assembler_list.add_label( "bios_nrdvrm", "0x0174" );
 
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "bios_rdvrm", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "bios_nrdvrm", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::MEMORY_REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
