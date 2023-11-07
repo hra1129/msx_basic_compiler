@@ -25,13 +25,13 @@ bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::INTEGER ) {
+	if( p_info->list.is_command_end() ) {
 		//	DEF ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	p_info->assembler_list.add_label( "work_usrtab", "0x0f39a" );
-	if( p_info->list.p_position->s_word.size() == 1 && isdigit( p_info->list.p_position->s_word[0] & 255 ) ) {
+	if( p_info->list.p_position->type == CBASIC_WORD_TYPE::INTEGER && p_info->list.p_position->s_word.size() == 1 && isdigit( p_info->list.p_position->s_word[0] & 255 ) ) {
 		usr_num = stoi( p_info->list.p_position->s_word );
 		p_info->list.p_position++;
 	}

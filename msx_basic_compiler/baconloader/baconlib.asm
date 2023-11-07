@@ -1353,11 +1353,8 @@ sub_using::
 			ldir
 			push	hl							; ˆø”‚ÌQÆˆÊ’u‚ğ•Û‘¶
 			; pufout ŒÄ‚Ño‚µ
-			ld		bc, [dectm2]
-			ld		a, [deccnt]
 			ld		ix, pufout
-			ld		iy, [mainrom - 1]
-			call	calslt
+			call	calbas
 	pufout_loop:
 			ld		a, [hl]
 			or		a, a
