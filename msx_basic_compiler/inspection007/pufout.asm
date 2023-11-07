@@ -17,13 +17,19 @@ VALTYP	:= 0xF663
 
 		org		0xC000
 start_address:
-		ld		hl, DBLVAL
-		ld		de, DAC
-		ld		bc, 8
-		ldir
+;		ld		hl, DBLVAL
+;		ld		de, DAC
+;		ld		bc, 8
+;		ldir
 
-		ld		a, 8					; î{ê∏ìxé¿êî
+;		ld		a, 8					; î{ê∏ìxé¿êî
+;		ld		[VALTYP], a
+
+		ld		a, 2					; êÆêî
 		ld		[VALTYP], a
+
+		ld		hl, 1234
+		ld		[DAC+2], hl
 
 		ld		b, 2
 		ld		c, 3
