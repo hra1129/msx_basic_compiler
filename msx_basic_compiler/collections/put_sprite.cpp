@@ -89,12 +89,8 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
+			has_color_parameter = true;
 		}
-		else {
-			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
-			return true;
-		}
-		has_color_parameter = true;
 	}
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
@@ -103,12 +99,8 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
+			has_pattern_parameter = true;
 		}
-		else {
-			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
-			return true;
-		}
-		has_pattern_parameter = true;
 	}
 	if( !has_xy_parameter && !has_color_parameter && !has_pattern_parameter ) {
 		//	パラメータが一つも無い場合はエラー
