@@ -280,6 +280,12 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NZ, COPERAND_TYPE::LABEL, "bios_syntax_error", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
+	//	実行の度の blib 初期化
+	this->info.assembler_list.add_label( "blib_init_ncalbas", "0x0404e" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_init_ncalbas" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+	this->info.assembler_list.body.push_back( asm_line );
 	//	初期化処理 (H.TIMIフック)
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "work_h_timi" );
 	this->info.assembler_list.body.push_back( asm_line );
