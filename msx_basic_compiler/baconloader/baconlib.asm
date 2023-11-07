@@ -201,6 +201,41 @@ init_address::
 			ret
 			endscope
 
+ncalbas_trans::
+			org		0
+			scope	ncalbas
+ncalbas::
+			push	af
+			push	bc
+			push	de
+			push	hl
+			ld		a, [mainrom]
+			ld		h, 0x40
+			call	enaslt
+			pop		hl
+			pop		de
+			pop		bc
+			pop		af
+
+ncalbas_address	:= $+1
+			call	0
+
+			push	af
+			push	bc
+			push	de
+			push	hl
+			ld		a, [blibslot]
+			ld		h, 0x40
+			call	enaslt
+			pop		hl
+			pop		de
+			pop		bc
+			pop		af
+			ret
+ncalbas_end::
+			endscope
+			org		ncalbas_trans + (ncalbas_end - ncalbas)
+
 ; =============================================================================
 ;	KEY LIST
 ;	input:
@@ -405,7 +440,7 @@ sub_iotput_int::
 			ld		a, 0x01
 			out		[c], a
 			; 整数型識別コード送信
-			ld		a, 0x01
+			ld		a, 0x41
 			out		[c], a
 			; 送信開始
 			pop		de
@@ -442,7 +477,7 @@ sub_iotput_str::
 			ld		a, 0x01
 			out		[c], a
 			; 文字列型識別コード送信
-			ld		a, 0x03
+			ld		a, 0x43
 			out		[c], a
 			; 送信開始
 			pop		hl
