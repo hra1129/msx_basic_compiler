@@ -66,12 +66,14 @@ putpnt		:= 0xF3F8
 getpnt		:= 0xF3FA
 buf			:= 0xF55E
 valtyp		:= 0xF663
+parm2		:= 0xF750
 dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 dfpage		:= 0xFAF5
 acpage		:= 0xFAF6
+linwrk		:= 0xFC18
 scrmod		:= 0xFCAF
 oldscr		:= 0xFCB0
 mainrom		:= 0xFCC1
@@ -168,6 +170,8 @@ blib_entries::
 			jp		sub_tab
 	blib_using:
 			jp		sub_using
+	blib_init_ncalbas:
+			jp		sub_init_ncalbas
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -202,14 +206,15 @@ init_address::
 			endscope
 
 ncalbas_trans::
-			org		0
+			org		parm2
 			scope	ncalbas
 ncalbas::
 			push	af
 			push	bc
 			push	de
 			push	hl
-			ld		a, [mainrom]
+ncalbas_mainrom := $+1
+			ld		a, 0
 			ld		h, 0x40
 			call	enaslt
 			pop		hl
@@ -224,17 +229,36 @@ ncalbas_address	:= $+1
 			push	bc
 			push	de
 			push	hl
-			ld		a, [blibslot]
+ncalbas_blibslot := $+1
+			ld		a, 0
 			ld		h, 0x40
 			call	enaslt
 			pop		hl
 			pop		de
 			pop		bc
 			pop		af
+			ei
 			ret
 ncalbas_end::
 			endscope
 			org		ncalbas_trans + (ncalbas_end - ncalbas)
+
+; =============================================================================
+;	INITIALIZE NCALBAS
+;
+; =============================================================================
+			scope	sub_init_ncalbas
+sub_init_ncalbas::
+			ld		hl, ncalbas_trans
+			ld		de, ncalbas
+			ld		bc, ncalbas_end - ncalbas
+			ldir
+			ld		a, [mainrom]
+			ld		[ncalbas_mainrom], a
+			ld		a, [blibslot]
+			ld		[ncalbas_blibslot], a
+			ret
+			endscope
 
 ; =============================================================================
 ;	KEY LIST
@@ -1388,13 +1412,15 @@ sub_using::
 			ldir
 			push	hl							; 引数の参照位置を保存
 			; pufout 呼び出し
-			ld		ix, pufout
-			call	calbas
+			ld		hl, pufout
+			ld		[ncalbas_address], hl
+			call	ncalbas
 	pufout_loop:
 			ld		a, [hl]
 			or		a, a
 			jr		z, pufout_loop_exit
 			rst		0x18
+			inc		hl
 			jr		pufout_loop
 	pufout_loop_exit:
 			pop		de							; 引数の参照位置を復帰
