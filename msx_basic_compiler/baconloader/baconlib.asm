@@ -1488,7 +1488,6 @@ sub_using::
 			ld		[dectm2 + 1], a
 			jr		nz, detect_sharp_exit_all	; '.' が無ければ小数部は存在しないのでスキップ
 			inc		hl
-			inc		b
 			dec		b
 			jp		z, put_number				; 書式が終わっていればここで検出おしまい
 			; 小数部の桁数検出
