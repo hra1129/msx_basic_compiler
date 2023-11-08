@@ -90,6 +90,17 @@ line_100:
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
+line_105:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_1
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
 line_110:
         CALL        interrupt_process
         XOR         A, A
@@ -332,6 +343,17 @@ _pt2:
         JP          line_190
 _pt1:
 _pt0:
+line_200:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_3
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
 line_210:
         CALL        interrupt_process
         XOR         A, A
@@ -566,6 +588,1966 @@ _pt5:
         JP          line_290
 _pt4:
 _pt3:
+line_300:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_310:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_320:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_330:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_340:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_350:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_360:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_370:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_380:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_390:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt8
+        DEC         HL
+_pt8:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt7
+        JP          line_390
+_pt7:
+_pt6:
+line_400:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_410:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_420:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_430:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_440:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_450:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_460:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_470:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_480:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_5
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_490:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt11
+        DEC         HL
+_pt11:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt10
+        JP          line_490
+_pt10:
+_pt9:
+line_500:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_510:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_520:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_530:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_540:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_550:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_560:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_570:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_580:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_590:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt14
+        DEC         HL
+_pt14:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt13
+        JP          line_590
+_pt13:
+_pt12:
+line_600:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_610:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_620:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_630:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_640:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_650:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_660:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_670:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_680:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_690:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt17
+        DEC         HL
+_pt17:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt16
+        JP          line_690
+_pt16:
+_pt15:
+line_700:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_710:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_720:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_730:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_740:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_750:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_760:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_770:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_780:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_790:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt20
+        DEC         HL
+_pt20:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt19
+        JP          line_790
+_pt19:
+_pt18:
+line_800:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_810:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_820:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_830:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_840:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_850:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_860:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_870:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_880:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_9
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_890:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt23
+        DEC         HL
+_pt23:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt22
+        JP          line_890
+_pt22:
+_pt21:
+line_900:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_910:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_920:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_930:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_940:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_950:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_960:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_970:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_980:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_990:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt26
+        DEC         HL
+_pt26:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt25
+        JP          line_990
+_pt25:
+_pt24:
+line_1000:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_1010:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1020:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1030:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1040:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1050:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_41123400
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1060:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_42123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1070:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_43123450
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1080:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        LD          [work_buf], HL
+        LD          HL, work_buf+2
+        PUSH        HL
+        LD          HL, const_44123456
+        LD          A, 4
+        LD          [work_valtyp], A
+        CALL        bios_vmovfm
+        CALL        bios_neg
+        LD          HL, work_dac
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 4
+        INC         HL
+        EX          DE, HL
+        CALL        ld_de_single_real
+        EX          DE, HL
+        LD          [HL], 0
+        LD          IX, blib_using
+        CALL        call_blib
+        LD          HL, str_2
+        CALL        puts
+line_1090:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt29
+        DEC         HL
+_pt29:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt28
+        JP          line_1090
+_pt28:
+_pt27:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -607,41 +2589,6 @@ _puts_loop:
         LD          A, [HL]
         RST         0x18
         DJNZ        _puts_loop
-        RET         
-ld_de_single_real:
-        LD          BC, 4
-        LDIR        
-        RET         
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
         RET         
 free_string:
         LD          DE, heap_start
@@ -754,6 +2701,41 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
+ld_de_single_real:
+        LD          BC, 4
+        LDIR        
+        RET         
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -1032,10 +3014,26 @@ str_0:
         DEFB        0x00
 str_1:
         DEFB        0x03, 0x23, 0x23, 0x23
+str_10:
+        DEFB        0x03, 0x2E, 0x23, 0x23
+str_11:
+        DEFB        0x04, 0x2B, 0x2E, 0x23, 0x23
 str_2:
         DEFB        0x02, 0x0D, 0x0A
 str_3:
         DEFB        0x06, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x23
+str_4:
+        DEFB        0x07, 0x2B, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x23
+str_5:
+        DEFB        0x07, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x23, 0x2B
+str_6:
+        DEFB        0x07, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x23, 0x2D
+str_7:
+        DEFB        0x09, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x5E, 0x5E, 0x5E, 0x5E
+str_8:
+        DEFB        0x0A, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x5E, 0x5E, 0x5E, 0x5E, 0x2B
+str_9:
+        DEFB        0x0A, 0x23, 0x23, 0x23, 0x2E, 0x23, 0x5E, 0x5E, 0x5E, 0x5E, 0x2D
 save_stack:
         DEFW        0
 heap_next:

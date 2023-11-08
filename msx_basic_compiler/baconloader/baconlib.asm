@@ -1308,7 +1308,7 @@ sub_using::
 			; 引数のアドレス
 			ld		de, buf+2
 			; 1文字得て書式文字か調べる
-			; 書式の開始文字は、!(21) #(23) &(26) *(2A) +(2B) -(2D) .(2E) @(40) \(5C)
+			; 書式の開始文字は、!(21) #(23) &(26) *(2A) +(2B) .(2E) @(40) \(5C)
 	main_loop:
 			; HL = 書式, DE = 引数
 			call	get_one
@@ -1336,10 +1336,10 @@ sub_using::
 			jr		nc, number_format
 			jr		no_format
 
-			;		[0x2D:0xFF]: -(2D) .(2E) @(40) \(5C)
+			;		[0x2D:0xFF]: .(2E) @(40) \(5C)
 		search_r:
-			cp		a, '.' + 1
-			jr		c, number_format
+			cp		a, '.'
+			jr		z, number_format
 			cp		a, '\\'
 			jp		z, detect_yenyen
 			cp		a, '@'
@@ -1363,6 +1363,8 @@ sub_using::
 
 			cp		a, '*'
 			jr		z, number_format_asterisk
+			cp		a, '+'
+			jp		z, detect_pre_flag_plus
 			dec		hl
 			inc		b
 			jp		detect_sharp
@@ -1507,11 +1509,86 @@ sub_using::
 			dec		b
 			jp		z, put_number				; 書式が終わっていればここで検出おしまい
 	detect_sharp_exit_all:
-			; 指数部
 
+			; -----------------------------------------------------------------
+			; 指数部 ^^^^
+			push	bc
+			push	hl
+			ld		a, [hl]
+			cp		a, '^'
+			jr		nz, detect_post_flag
+			dec		b
+			jr		z, detect_post_flag
+			inc		hl
 
+			ld		a, [hl]
+			cp		a, '^'
+			jr		nz, detect_post_flag
+			dec		b
+			jr		z, detect_post_flag
+			inc		hl
 
+			ld		a, [hl]
+			cp		a, '^'
+			jr		nz, detect_post_flag
+			dec		b
+			jr		z, detect_post_flag
+			inc		hl
+
+			ld		a, [hl]
+			cp		a, '^'
+			jr		nz, detect_post_flag
+			dec		b
+			inc		hl
+
+			ld		a, [deccnt]
+			inc		a							; 指数表示指定
+			ld		[deccnt], a
+
+			pop		af
+			pop		af
+			jr		detect_post_flag_skip_pop
+	detect_post_flag:
+			pop		hl
+			pop		bc
+
+			; -----------------------------------------------------------------
+			; 後置符号 +, -
+	detect_post_flag_skip_pop:
+			inc		b
+			dec		b
+			jp		z, put_number
+
+			ld		a, [deccnt]
+			and		a, 0b0000_1000				; 正の場合も符号付けるフラグが付いてれば、前置フラグが存在してるので、後置はただの記号。
+			jp		nz, put_number
+
+			ld		a, [hl]
+			cp		a, '+'
+			jr		nz, detect_post_flag_minus
+
+			ld		a, [deccnt]
+			or		a, 0b0000_1100				; 正の場合も符号付けるフラグ、後ろに符号を付けるフラグ
+			jr		detect_post_flag_exit
+
+	detect_post_flag_minus:
+			cp		a, '-'
+			jp		nz, put_number
+
+			ld		a, [deccnt]
+			or		a, 0b0000_0100				; 後ろに符号を付けるフラグ
+	detect_post_flag_exit:
+			ld		[deccnt], a
+			inc		hl
+			dec		b
 			jp		put_number
+
+			; -----------------------------------------------------------------
+			; 前置符号 +
+	detect_pre_flag_plus:
+			ld		a, [deccnt]
+			or		a, 0b0000_1000				; 正の場合も符号付けるフラグ
+			jr		detect_post_flag_exit
 
 			; -----------------------------------------------------------------
 			; 文字列の書式 @
