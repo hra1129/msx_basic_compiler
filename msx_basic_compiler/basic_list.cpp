@@ -667,7 +667,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 		i = 0;
 		auto p_name = p->s_name.begin();
 		for( ; p_name != p->s_name.end(); p_name++, i++ ) {
-			if( this->p_file_image[i] != *p_name ) {
+			if( toupper( this->p_file_image[i] & 255 ) != *p_name ) {
 				break;
 			}
 		}
@@ -811,6 +811,9 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 						is_last_jump = true;
 					}
 					else if( s_word.s_word == "," ) {
+						is_last_jump = true;
+					}
+					else if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "ELSE") ) {
 						is_last_jump = true;
 					}
 					else {
