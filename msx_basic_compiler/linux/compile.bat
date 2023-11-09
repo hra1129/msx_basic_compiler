@@ -1,0 +1,2 @@
+wsl ./compile.sh
+pause

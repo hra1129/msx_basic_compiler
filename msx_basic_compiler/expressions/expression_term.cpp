@@ -3,8 +3,6 @@
 // ====================================================================
 //	2023/July/29th	t.hara
 // --------------------------------------------------------------------
-#pragma once
-
 #include <string>
 #include <vector>
 #include "expression_term.h"
@@ -20,7 +18,7 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_info ) {
 
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
 		int i = 0;
-		sscanf_s( this->s_value.c_str(), "%i", &i );
+		sscanf( this->s_value.c_str(), "%i", &i );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, std::to_string( i ) );
 		p_info->assembler_list.body.push_back( asm_line );
 	}

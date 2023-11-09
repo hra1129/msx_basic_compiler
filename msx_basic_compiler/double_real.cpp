@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 
 #include "double_real.h"
+#include <cstring>
 
 //	”{¸“xÀ”‚Ì—LŒøŒ…” 14, lÌŒÜ“ü‚Ì‚½‚ß‚Ì 1Œ…
 constexpr int MANTISSA_MAX = 14 + 1;

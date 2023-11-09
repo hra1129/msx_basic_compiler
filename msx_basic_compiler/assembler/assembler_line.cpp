@@ -129,8 +129,8 @@ std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_t
 	if( s[0] == '0' && s[1] == 'x' ) {
 		int value = 0;
 		char s_value[32];
-		sscanf_s( s.c_str(), "%i", &value );
-		sprintf_s( s_value, "0%Xh", value );
+		sscanf( s.c_str(), "%i", &value );
+		sprintf( s_value, "0%Xh", value );
 		s = s_value;
 	}
 	return s;
@@ -160,8 +160,8 @@ std::string CASSEMBLER_LINE::convert_operand_hl( std::string s, COUTPUT_TYPES ou
 	if( s[0] == '0' && s[1] == 'x' ) {
 		int value = 0;
 		char s_value[32];
-		sscanf_s( s.c_str(), "%i", &value );
-		sprintf_s( s_value, "0%Xh", value );
+		sscanf( s.c_str(), "%i", &value );
+		sprintf( s_value, "0%Xh", value );
 		s = s_value;
 	}
 	return s;
@@ -202,7 +202,7 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		else {
 			if( this->operand2.type == COPERAND_TYPE::CONSTANT ) {
 				int value = 0;
-				sscanf_s( this->operand2.s_value.c_str(), "%i", &value );
+				sscanf( this->operand2.s_value.c_str(), "%i", &value );
 				fprintf( p_file, "%s equ 0%04Xh\n", this->convert_length( this->operand1.s_value, 31 ).c_str(), value );
 			}
 			else {

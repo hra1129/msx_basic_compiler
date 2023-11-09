@@ -332,7 +332,7 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 		this->p_file_image++;
 		s_word.s_word = "";
 		for( i = 0; i < 4; i++ ) {
-			sprintf_s( s, "%02X", this->p_file_image[0] );
+			sprintf( s, "%02X", this->p_file_image[0] );
 			s_word.s_word = s_word.s_word + s;
 			this->p_file_image++;
 		}
@@ -344,7 +344,7 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 		this->p_file_image++;
 		s_word.s_word = "";
 		for( i = 0; i < 4; i++ ) {
-			sprintf_s( s, "%02X", this->p_file_image[0] );
+			sprintf( s, "%02X", this->p_file_image[0] );
 			s_word.s_word = s_word.s_word + s;
 			this->p_file_image++;
 		}
@@ -854,7 +854,7 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 	FILE *p_in;
 	bool result;
 
-	fopen_s( &p_in, s_file_name.c_str(), "rb" );
+	p_in = fopen( s_file_name.c_str(), "rb" );
 	if( p_in == NULL ) {
 		errors.add( "Cannot open the input file (" + s_file_name + ").", 0 );
 		return false;

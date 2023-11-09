@@ -49,7 +49,7 @@ public:
 		}
 		for( i = 0; i < l; i++ ) {
 			this->r_value[i] = p_image[i];
-			sprintf_s( s_name, "%02X", p_image[i] );
+			sprintf( s_name, "%02X", p_image[i] );
 			s_label = s_label + s_name;
 		}
 		this->type = type;
@@ -139,10 +139,10 @@ public:
 				s = "";
 				for( i = 0; i < 4; i++ ) {
 					if( options.output_type == COUTPUT_TYPES::ZMA ) {
-						sprintf_s( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
+						sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					}
 					else {
-						sprintf_s( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
+						sprintf( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					}
 					s = s + s_name;
 				}
@@ -155,10 +155,10 @@ public:
 				s = "";
 				for( i = 0; i < 8; i++ ) {
 					if( options.output_type == COUTPUT_TYPES::ZMA ) {
-						sprintf_s( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
+						sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					}
 					else {
-						sprintf_s( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
+						sprintf( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					}
 					s = s + s_name;
 				}
@@ -174,18 +174,18 @@ public:
 
 		for( auto it = string_list.begin(); it != string_list.end(); it++ ) {
 			if( options.output_type == COUTPUT_TYPES::ZMA ) {
-				sprintf_s( s_name, "0x%02X", (int)it->second.s_value.length & 255 );
+				sprintf( s_name, "0x%02X", (int)it->second.s_value.length & 255 );
 			}
 			else {
-				sprintf_s( s_name, "0%02Xh", (int)it->second.s_value.length & 255 );
+				sprintf( s_name, "0%02Xh", (int)it->second.s_value.length & 255 );
 			}
 			s = s_name;
 			for( i = 0; i < (int)it->second.s_value.length; i++ ) {
 				if( options.output_type == COUTPUT_TYPES::ZMA ) {
-					sprintf_s( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
+					sprintf( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
 				}
 				else {
-					sprintf_s( s_name, ", 0%02Xh", (int)it->second.s_value.image[i] & 255 );
+					sprintf( s_name, ", 0%02Xh", (int)it->second.s_value.image[i] & 255 );
 				}
 				s = s + s_name;
 			}
