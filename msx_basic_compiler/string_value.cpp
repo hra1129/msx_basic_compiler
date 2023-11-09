@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 
 #include "string_value.h"
+#include <cstring>
 
 // --------------------------------------------------------------------
 bool CSTRING::set( std::string s ) {
@@ -15,7 +16,7 @@ bool CSTRING::set( std::string s ) {
 		return false;
 	}
 	this->length = s.size();
-	memset( this->image, 0, sizeof( this->image ) );
+	std::memset( this->image, 0, sizeof( this->image ) );
 	for( i = 0; i < this->length; i++ ) {
 		this->image[i] = s[i];
 	}
@@ -30,7 +31,7 @@ bool CSTRING::set( int length, const char *p_image ) {
 		return false;
 	}
 	this->length = length;
-	memset( this->image, 0, sizeof( this->image ) );
-	memcpy( this->image, p_image, length );
+	std::memset( this->image, 0, sizeof( this->image ) );
+	std::memcpy( this->image, p_image, length );
 	return true;
 }

@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 
 #include "single_real.h"
+#include <cstring>
 
 //	単精度実数の有効桁数 6, 四捨五入のための 1桁
 constexpr int MANTISSA_MAX = 6 + 1;
@@ -28,7 +29,7 @@ bool CSINGLE_REAL::set( std::string s ) {
 	//	数字.数字の桁を読む
 	mi = 0;
 	exponent_offset = 0;
-	memset( mantissa, 0, sizeof(mantissa) );
+	std::memset( mantissa, 0, sizeof(mantissa) );
 	while( i < s.size() ) {
 		if( isdigit(s[i] & 255) ) {
 			if( is_zero ) {

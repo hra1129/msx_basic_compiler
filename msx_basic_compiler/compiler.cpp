@@ -262,7 +262,7 @@ void CCOMPILER::exec_header( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "start_address", COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	sprintf_s( s_buffer, "0x%04X", this->info.options.start_address );
+	sprintf( s_buffer, "0x%04X", this->info.options.start_address );
 	asm_line.set( CMNEMONIC_TYPE::ORG, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_buffer, COPERAND_TYPE::NONE, "" );
 	this->info.assembler_list.body.push_back( asm_line );
 }

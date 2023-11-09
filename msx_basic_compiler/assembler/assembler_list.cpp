@@ -1735,7 +1735,7 @@ bool CASSEMBLER_LIST::save( const std::string s_file_name, COUTPUT_TYPES output_
 	FILE *p_file;
 	bool result = true;
 
-	fopen_s( &p_file, s_file_name.c_str(), "w" );
+	p_file = fopen( s_file_name.c_str(), "w" );
 	if( p_file == NULL ) {
 		fprintf( stderr, "ERROR: Cannot create the '%s'.\n", s_file_name.c_str() );
 		return false;
