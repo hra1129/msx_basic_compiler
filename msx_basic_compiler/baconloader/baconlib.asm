@@ -1359,6 +1359,9 @@ sub_using::
 			ld		c, a
 			ld		a, 0b1000_0000
 			ld		[deccnt], a
+			xor		a, a
+			ld		[dectm2], a
+			ld		[dectm2 + 1], a
 			ld		a, c
 
 			cp		a, '*'
@@ -1414,6 +1417,8 @@ sub_using::
 			ldir
 			push	hl							; 引数の参照位置を保存
 			; pufout 呼び出し
+			ld		a, [deccnt]
+			ld		bc, [dectm2]
 			ld		hl, pufout
 			ld		[ncalbas_address], hl
 			call	ncalbas
@@ -1465,12 +1470,11 @@ sub_using::
 			ld		[deccnt], a
 			inc		hl							; 2個目の ￥ の分
 			dec		b
-			jr		detect_sharp
 
 			; -----------------------------------------------------------------
 			; 数値記号 #
 	detect_sharp:
-			ld		a, [dectm2 + 1]
+			ld		a, [dectm2 + 1]				; 整数部の桁数追加分を数える
 			ld		c, a
 			xor		a, a						; '.' ではない値にする
 			inc		b
@@ -1489,16 +1493,17 @@ sub_using::
 			ld		a, c
 			ld		[dectm2 + 1], a
 			jr		nz, detect_sharp_exit_all	; '.' が無ければ小数部は存在しないのでスキップ
+			ld		a, 1						; 小数点の分の 1
+			ld		[dectm2], a
 			inc		hl
 			dec		b
 			jp		z, put_number				; 書式が終わっていればここで検出おしまい
 			; 小数部の桁数検出
-			ld		a, [dectm2]
 			ld		c, a
 	detect_sharp_loop_2nd:
 			ld		a, [hl]
 			cp		a, '#'
-			jr		nz, detect_sharp_exit
+			jr		nz, detect_sharp_exit_2nd
 			inc		hl
 			inc		c
 			djnz	detect_sharp_loop_2nd
@@ -1588,7 +1593,10 @@ sub_using::
 	detect_pre_flag_plus:
 			ld		a, [deccnt]
 			or		a, 0b0000_1000				; 正の場合も符号付けるフラグ
-			jr		detect_post_flag_exit
+			ld		[deccnt], a
+			ld		a, 1
+			ld		[dectm2+1], a
+			jp		detect_sharp
 
 			; -----------------------------------------------------------------
 			; 文字列の書式 @
