@@ -2307,7 +2307,7 @@ line_1000:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
-        LD          HL, str_4
+        LD          HL, str_11
         PUSH        HL
         CALL        puts
         POP         HL
