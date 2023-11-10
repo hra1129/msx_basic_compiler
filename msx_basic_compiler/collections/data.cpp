@@ -46,6 +46,10 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.is_command_end() ) {
 			break;
 		}
+		if( p_info->list.p_position->type != CBASIC_WORD_TYPE::RESERVED_WORD && p_info->list.p_position->s_word != "," ) {
+			break;
+		}
+		p_info->list.p_position++;
 	}
 	return true;
 }
