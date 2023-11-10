@@ -1381,7 +1381,7 @@ sub_using::
 			ld		a, [hl]
 			cp		a, '*'
 			ld		a, '*'
-			jr		z, no_format				; * が 1個だけなので書式ではない
+			jr		nz, no_format				; NZ なら * が 1個だけなので書式ではない
 
 			ld		a, 2
 			ld		[dectm2 + 1], a				; 整数部 2桁から開始
@@ -1436,10 +1436,10 @@ sub_using::
 			jp		main_loop
 
 			; -----------------------------------------------------------------
-			; 通貨記号 ￥
+			; 通貨記号 ￥ (**￥ の￥)
 	detect_yen:
 			ld		a, [hl]
-			cp		a, '/'
+			cp		a, 0x5C
 			jr		nz, detect_sharp				; ￥ が無ければ **###、あれば **￥###
 
 			inc		hl
@@ -1448,7 +1448,7 @@ sub_using::
 			ld		[dectm2 + 1], a				; 整数部 3桁から開始
 			ld		a, 0b1011_0000				; * 詰め指定, ￥ 詰め指定
 			ld		[deccnt], a
-			jr		nz, detect_sharp
+			jr		detect_sharp
 
 			; -----------------------------------------------------------------
 			; 通貨記号 ￥￥
@@ -1458,8 +1458,8 @@ sub_using::
 			jp		z, no_format				; ￥ で終わってる場合は単独の ￥ 扱い
 
 			ld		a, [hl]
-			cp		a, '/'
-			ld		a, '/'
+			cp		a, 0x5C
+			ld		a, 0x5C
 			jp		z, no_format				; ￥ が 1個だけなので書式ではない
 
 			ld		a, 2
