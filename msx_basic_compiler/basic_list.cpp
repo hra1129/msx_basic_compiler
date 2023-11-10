@@ -788,7 +788,12 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 				s_word = this->get_data_word();
 				if( this->p_file_image != this->file_image.end() ) {
 					if( this->p_file_image[0] == ',' ) {
+						this->words.push_back( s_word );
 						this->p_file_image++;
+
+						s_word.s_word = ",";
+						s_word.line_no = line_no;
+						s_word.type = CBASIC_WORD_TYPE::RESERVED_WORD;
 					}
 					else {
 						is_data = false;
@@ -844,6 +849,14 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 		}
 		if( this->p_file_image[0] == '\n' ) {
 			this->p_file_image++;
+			if( is_data ) {
+				//	DATA hoge, ‚Ì‚æ‚¤‚Èê‡‚É‚±‚±‚É—ˆ‚é
+				s_word.s_word = "";
+				s_word.line_no = line_no;
+				s_word.type = CBASIC_WORD_TYPE::STRING;
+				this->words.push_back( s_word );
+				is_data = false;
+			}
 		}
 	}
 	return true;
