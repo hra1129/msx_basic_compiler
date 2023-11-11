@@ -11,21 +11,29 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_errhand_redim              = 0x0405e
-bios_umult                      = 0x0314a
-bios_errhand                    = 0x0406F
 work_dac                        = 0x0f7f6
 work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
 bios_frcdbl                     = 0x0303a
+blib_iotput_str                 = 0x04024
+blib_iotput_int                 = 0x04021
 bios_decadd                     = 0x0269a
 bios_vmovfm                     = 0x02f08
 bios_vmovam                     = 0x02eef
 bios_xdcomp                     = 0x02f5c
-bios_frcint                     = 0x02f8a
+blib_iotget_int                 = 0x0401b
 work_prtflg                     = 0x0f416
+work_arg                        = 0x0f847
+bios_frcint                     = 0x02f8a
+bios_fcomp                      = 0x02f21
+bios_decsub                     = 0x0268c
+bios_fout                       = 0x03425
+bios_fouth                      = 0x03722
+bios_maf                        = 0x02c4d
+bios_errhand                    = 0x0406F
 work_buf                        = 0x0f55e
-blib_using                      = 0x0404b
+blib_iotget_str                 = 0x0401e
+bios_icomp                      = 0x02f4d
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -70,38 +78,69 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
+line_0:
+        CALL        interrupt_process
+; ----------------------------------------
+line_1:
+        CALL        interrupt_process
+; SAMPLE PROGRAM FOR MSX-BACON
+line_2:
+        CALL        interrupt_process
+; COPYRIGHT 2023 CHIKUWA TEIKOKU
+line_3:
+        CALL        interrupt_process
+; ----------------------------------------
 line_10:
         CALL        interrupt_process
-        LD          HL, [varsa_A]
-        LD          A, L
-        OR          A, H
-        JP          NZ, bios_errhand_redim
-        LD          HL, 9
-        INC         HL
+        LD          HL, vard_RF
         PUSH        HL
-        ADD         HL, HL
-        LD          DE, 5
-        ADD         HL, DE
+        LD          HL, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        CALL        interrupt_process
+        LD          HL, vard_RC
         PUSH        HL
-        LD          C, L
-        LD          B, H
-        CALL        allocate_heap
-        LD          [varsa_A], HL
-        POP         BC
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          B, 1
-        LD          [HL], B
-        INC         HL
-        POP         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
+        LD          HL, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
 line_20:
+        CALL        interrupt_process
+        LD          HL, str_1
+        PUSH        HL
+        LD          HL, str_2
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_str
+        CALL        call_blib
+line_30:
+        CALL        interrupt_process
+        LD          HL, str_3
+        PUSH        HL
+        LD          HL, 80
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_int
+        CALL        call_blib
+line_40:
+        CALL        interrupt_process
+        LD          HL, str_4
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_int
+        CALL        call_blib
+line_50:
         CALL        interrupt_process
         LD          HL, vard_I
         PUSH        HL
@@ -115,7 +154,7 @@ line_20:
         CALL        ld_de_double_real
         LD          HL, svard_I_FOR_END
         PUSH        HL
-        LD          HL, 9
+        LD          HL, 100
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -159,44 +198,25 @@ _pt2:
 _pt3:
         POP         HL
 _pt0:
-line_30:
-        CALL        interrupt_process
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, vard_I
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR        
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_frcint
-        LD          HL, [work_dac_int]
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        EX          DE, HL
-        LD          HL, [data_ptr]
-        LD          C, [HL]
-        INC         HL
-        LD          B, [HL]
-        INC         HL
-        LD          [data_ptr], HL
-        EX          DE, HL
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-line_40:
         CALL        interrupt_process
         LD          HL, [svard_I_LABEL]
         CALL        jp_hl
-line_100:
+line_60:
         CALL        interrupt_process
-line_110:
-        CALL        interrupt_process
-line_120:
+        LD          HL, str_4
+        PUSH        HL
+        LD          HL, vard_CN
+        EX          [SP], HL
+        LD          IX, blib_iotget_int
+        CALL        call_blib
+        LD          A, 2
+        LD          [work_valtyp], A
+        LD          [work_dac + 2], HL
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+line_70:
         CALL        interrupt_process
         LD          HL, vard_I
         PUSH        HL
@@ -210,7 +230,7 @@ line_120:
         CALL        ld_de_double_real
         LD          HL, svard_I_FOR_END
         PUSH        HL
-        LD          HL, 9
+        LD          HL, 10
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -254,61 +274,525 @@ _pt6:
 _pt7:
         POP         HL
 _pt4:
-line_130:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_9
-        LD          [work_buf], HL
-        LD          HL, work_buf+2
-        PUSH        HL
-        LD          HL, vard_I
-        POP         DE
-        EX          DE, HL
-        LD          [HL], 8
-        INC         HL
-        EX          DE, HL
-        CALL        ld_de_double_real
-        EX          DE, HL
-        PUSH        HL
-        LD          HL, varsa_A
-        LD          D, 1
-        LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, vard_I
-        LD          DE, work_dac
-        LD          BC, 8
-        LDIR        
-        LD          A, 8
-        LD          [work_valtyp], A
-        CALL        bios_frcint
-        LD          HL, [work_dac_int]
-        ADD         HL, HL
-        POP         DE
-        ADD         HL, DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], 3
-        INC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        LD          [HL], 0
-        LD          IX, blib_using
-        CALL        call_blib
-        LD          HL, str_10
-        CALL        puts
-line_140:
         CALL        interrupt_process
         LD          HL, [svard_I_LABEL]
         CALL        jp_hl
+line_75:
+        CALL        interrupt_process
+        LD          HL, vard_I
+        PUSH        HL
+        LD          HL, 35666
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, svard_I_FOR_END
+        PUSH        HL
+        LD          HL, 35673
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, svard_I_FOR_STEP
+        PUSH        HL
+        LD          HL, const_4110000000000000
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, _pt9
+        LD          [svard_I_LABEL], HL
+        JR          _pt8
+_pt9:
+        LD          A, 8
+        LD          [work_valtyp], A
+        LD          HL, vard_I
+        CALL        bios_vmovfm
+        LD          HL, svard_I_FOR_STEP
+        CALL        bios_vmovam
+        CALL        bios_decadd
+        LD          HL, work_dac
+        LD          DE, vard_I
+        LD          BC, 8
+        LDIR        
+        LD          HL, svard_I_FOR_END
+        CALL        bios_vmovam
+        LD          A, [svard_I_FOR_STEP]
+        RLCA        
+        JR          C, _pt10
+        CALL        bios_xdcomp
+        DEC         A
+        JR          NZ, _pt11
+        RET         
+_pt10:
+        CALL        bios_xdcomp
+        INC         A
+        RET         Z
+_pt11:
+        POP         HL
+_pt8:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, vard_I
+        CALL        convert_to_integer_from_double_real
+        LD          A, [HL]
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_fouth
+        CALL        fout_adjust
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_5
+        CALL        puts
+        CALL        interrupt_process
+        LD          HL, [svard_I_LABEL]
+        CALL        jp_hl
+line_80:
+        CALL        interrupt_process
+        LD          HL, vard_CN
+        CALL        push_double_real_hl
+        LD          HL, 1
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        CALL        bios_maf
+        CALL        pop_double_real_dac
+        CALL        bios_xdcomp
+        AND         A, 1
+        DEC         A
+        CPL         
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt13
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_6
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_5
+        CALL        puts
+        CALL        interrupt_process
+        JP          program_termination
+        JP          _pt12
+_pt13:
+_pt12:
+line_90:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_7
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_5
+        CALL        puts
+line_100:
+        CALL        interrupt_process
+        LD          HL, vars_SD
+        PUSH        HL
+        LD          HL, str_8
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 13
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        str_add
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 10
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        str_add
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+line_110:
+        CALL        interrupt_process
+        LD          HL, str_9
+        PUSH        HL
+        LD          HL, [vars_SD]
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_str
+        CALL        call_blib
+line_120:
+        CALL        interrupt_process
+        LD          HL, vars_SD
+        PUSH        HL
+        LD          HL, str_10
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 13
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        str_add
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 10
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        str_add
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+line_130:
+        CALL        interrupt_process
+        LD          HL, str_9
+        PUSH        HL
+        LD          HL, [vars_SD]
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_str
+        CALL        call_blib
+line_140:
+        CALL        interrupt_process
+        LD          HL, vars_SD
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 13
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        PUSH        HL
+        LD          A, 1
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, 10
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        str_add
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+line_150:
+        CALL        interrupt_process
+        LD          HL, str_9
+        PUSH        HL
+        LD          HL, [vars_SD]
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_str
+        CALL        call_blib
+line_160:
+        CALL        interrupt_process
+        LD          HL, vard_I
+        PUSH        HL
+        LD          HL, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, svard_I_FOR_END
+        PUSH        HL
+        LD          HL, 100
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, svard_I_FOR_STEP
+        PUSH        HL
+        LD          HL, const_4110000000000000
+        POP         DE
+        CALL        ld_de_double_real
+        LD          HL, _pt15
+        LD          [svard_I_LABEL], HL
+        JR          _pt14
+_pt15:
+        LD          A, 8
+        LD          [work_valtyp], A
+        LD          HL, vard_I
+        CALL        bios_vmovfm
+        LD          HL, svard_I_FOR_STEP
+        CALL        bios_vmovam
+        CALL        bios_decadd
+        LD          HL, work_dac
+        LD          DE, vard_I
+        LD          BC, 8
+        LDIR        
+        LD          HL, svard_I_FOR_END
+        CALL        bios_vmovam
+        LD          A, [svard_I_FOR_STEP]
+        RLCA        
+        JR          C, _pt16
+        CALL        bios_xdcomp
+        DEC         A
+        JR          NZ, _pt17
+        RET         
+_pt16:
+        CALL        bios_xdcomp
+        INC         A
+        RET         Z
+_pt17:
+        POP         HL
+_pt14:
+        CALL        interrupt_process
+        LD          HL, [svard_I_LABEL]
+        CALL        jp_hl
+line_170:
+        CALL        interrupt_process
+        LD          HL, str_9
+        PUSH        HL
+        LD          HL, vars_RD
+        EX          [SP], HL
+        LD          ix, blib_iotget_str
+        CALL        call_blib
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+line_180:
+        CALL        interrupt_process
+        LD          HL, [vars_RD]
+        CALL        copy_string
+        LD          A, [HL]
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          L, A
+        LD          H, 0
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        CALL        bios_icomp
+        AND         A, 1
+        DEC         A
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt19
+        JP          line_220
+_pt19:
+_pt18:
+line_190:
+        CALL        interrupt_process
+        LD          HL, vard_RF
+        PUSH        HL
+        LD          HL, 1
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+line_200:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, [vars_RD]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+line_210:
+        CALL        interrupt_process
+        JP          line_170
+line_220:
+        CALL        interrupt_process
+        LD          HL, vard_RF
+        CALL        push_double_real_hl
+        LD          HL, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        CALL        bios_maf
+        CALL        pop_double_real_dac
+        CALL        bios_xdcomp
+        AND         A, 1
+        DEC         A
+        LD          H, A
+        LD          L, A
+        PUSH        HL
+        LD          HL, vard_RC
+        CALL        push_double_real_hl
+        LD          HL, 3
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        CALL        bios_maf
+        CALL        pop_double_real_dac
+        CALL        bios_xdcomp
+        DEC         A
+        SRA         A
+        CPL         
+        LD          H, A
+        LD          L, A
+        POP         DE
+        LD          A, L
+        AND         A, E
+        LD          L, A
+        LD          A, H
+        AND         A, D
+        LD          H, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt21
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_11
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_5
+        CALL        puts
+        CALL        interrupt_process
+        JP          line_250
+        JP          _pt20
+_pt21:
+_pt20:
+line_230:
+        CALL        interrupt_process
+        LD          HL, vard_RF
+        CALL        push_double_real_hl
+        LD          HL, 1
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        CALL        bios_maf
+        CALL        pop_double_real_dac
+        CALL        bios_xdcomp
+        AND         A, 1
+        DEC         A
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt23
+        CALL        interrupt_process
+        JP          line_250
+        JP          _pt22
+_pt23:
+_pt22:
+line_240:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_5
+        CALL        puts
+        CALL        interrupt_process
+        LD          HL, vard_RC
+        PUSH        HL
+        LD          HL, vard_RC
+        CALL        push_double_real_hl
+        LD          HL, 1
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        bios_frcdbl
+        CALL        bios_maf
+        CALL        pop_double_real_dac
+        CALL        bios_decadd
+        LD          HL, work_dac
+        POP         DE
+        CALL        ld_de_double_real
+        CALL        interrupt_process
+        JP          line_170
+line_250:
+        CALL        interrupt_process
+        LD          HL, str_4
+        PUSH        HL
+        LD          HL, 0
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_iotput_int
+        CALL        call_blib
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -340,110 +824,9 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-allocate_heap:
-        LD          HL, [heap_next]
-        PUSH        HL
-        ADD         HL, BC
-        JR          C, _allocate_heap_error
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_heap_error
-        LD          [heap_next], HL
-        POP         HL
-        PUSH        HL
-        DEC         BC
-        LD          E, L
-        LD          D, H
-        INC         DE
-        LD          [HL], 0
-        LDIR        
-        POP         HL
-        RET         
-_allocate_heap_error:
-        LD          E, 7
-        JP          bios_errhand
 ld_de_double_real:
         LD          BC, 8
         LDIR        
-        RET         
-check_sarray:
-        LD          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        DEC         HL
-        RET         NZ
-        PUSH        DE
-        PUSH        HL
-        PUSH        BC
-        CALL        allocate_heap
-        POP         BC
-        POP         DE
-        POP         AF
-        EX          DE, HL
-        PUSH        HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        EX          DE, HL
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          [HL], A
-        INC         HL
-        OR          A, A
-        RR          B
-        RR          C
-        LD          DE, 11
-_check_sarray_loop:
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        DEC         BC
-        DEC         A
-        JR          NZ, _check_sarray_loop
-        LD          DE, str_0
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        LD          E, L
-        LD          D, H
-        DEC         HL
-        DEC         HL
-        DEC         BC
-        LDIR        
-        POP         HL
-        RET         
-calc_array_top:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        INC         HL
-        INC         HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, 0
-        ADD         HL, DE
-        ADD         HL, DE
-        LD          A, E
-        POP         DE
-        PUSH        HL
-        JR          _calc_array_top_l2
-_calc_array_top_l1:
-        DEC         HL
-        LD          B, [HL]
-        DEC         HL
-        LD          C, [HL]
-        PUSH        BC
-_calc_array_top_l2:
-        DEC         A
-        JR          NZ, _calc_array_top_l1
-        PUSH        DE
         RET         
 puts:
         LD          B, [HL]
@@ -455,6 +838,201 @@ _puts_loop:
         LD          A, [HL]
         RST         0x18
         DJNZ        _puts_loop
+        RET         
+ld_dac_double_real:
+        LD          DE, work_dac
+        LD          BC, 8
+        LDIR        
+        LD          A, 8
+        LD          [work_valtyp], A
+        RET         
+ld_arg_double_real:
+        LD          DE, work_arg
+        LD          BC, 8
+        LDIR        
+        RET         
+convert_to_integer:
+        CALL        bios_frcint
+        LD          HL, [work_dac_int]
+        RET         
+convert_to_integer_from_double_real:
+        CALL        ld_dac_double_real
+        LD          BC, 0x3245
+        LD          DE, 0x8076
+        CALL        bios_fcomp
+        INC         A
+        JR          Z, convert_to_integer
+        LD          HL, const_45327680
+        CALL        ld_arg_double_real
+        CALL        bios_decsub
+        CALL        bios_frcint
+        LD          HL, [work_dac_int]
+        LD          A, H
+        XOR         A, 0x80
+        LD          H, A
+        RET         
+str:
+        CALL        bios_fout
+fout_adjust:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_str_loop:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _str_loop_exit
+        INC         B
+        JR          _str_loop
+_str_loop_exit:
+        POP         HL
+        LD          [HL], B
+        RET         
+free_string:
+        LD          DE, heap_start
+        RST         0x20
+        RET         C
+        LD          DE, [heap_next]
+        RST         0x20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          free_heap
+free_heap:
+        PUSH        HL
+        ADD         HL, BC
+        LD          [heap_move_size], BC
+        LD          [heap_remap_address], HL
+        EX          DE, HL
+        LD          HL, [heap_next]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _free_heap_loop0
+        LDIR        
+_free_heap_loop0:
+        LD          [heap_next], DE
+        LD          HL, vars_area_start
+_free_heap_loop1:
+        LD          DE, varsa_area_end
+        RST         0x20
+        JR          NC, _free_heap_loop1_end
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop1_next
+        LD          DE, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop1_next:
+        POP         HL
+        INC         HL
+        JR          _free_heap_loop1
+_free_heap_loop1_end:
+        LD          HL, varsa_area_start
+_free_heap_loop2:
+        LD          DE, varsa_area_end
+        RST         0x20
+        RET         NC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
+        EX          DE, HL
+        SBC         HL, BC
+        SBC         HL, BC
+        RRC         H
+        RRC         L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_free_heap_sarray_elements:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop2_next
+        LD          HL, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop2_next:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _free_heap_sarray_elements
+        POP         HL
+        JR          _free_heap_loop2
+push_double_real_hl:
+        POP         BC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        DE
+        PUSH        BC
+        RET         
+pop_double_real_dac:
+        POP         BC
+        POP         HL
+        LD          [work_dac+6], HL
+        POP         HL
+        LD          [work_dac+4], HL
+        POP         HL
+        LD          [work_dac+2], HL
+        POP         HL
+        LD          [work_dac+0], HL
+        PUSH        BC
         RET         
 allocate_string:
         LD          HL, [heap_next]
@@ -473,6 +1051,51 @@ allocate_string:
         RET         
 _allocate_string_error:
         LD          E, 7
+        JP          bios_errhand
+str_add:
+        PUSH        DE
+        PUSH        HL
+        LD          C, [HL]
+        LD          A, [DE]
+        ADD         A, C
+        JR          C, _str_add_error
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        INC         HL
+        LD          DE, work_buf+1
+        LD          B, 0
+        INC         C
+        DEC         C
+        JR          Z, _str_add_s1
+        LDIR        
+_str_add_s1:
+        POP         HL
+        LD          C, [HL]
+        INC         HL
+        INC         C
+        DEC         C
+        JR          Z, _str_add_s2
+        LDIR        
+_str_add_s2:
+        LD          [work_buf], A
+        POP         HL
+        CALL        free_string
+        POP         HL
+        CALL        free_string
+        LD          A, [work_buf]
+        CALL        allocate_string
+        PUSH        HL
+        LD          DE, work_buf
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+_str_add_error:
+        LD          E, 15
         JP          bios_errhand
 copy_string:
         LD          A, [HL]
@@ -501,6 +1124,12 @@ program_run:
         LD          DE, var_area_start + 1
         LD          BC, varsa_area_end - var_area_start - 1
         LD          [HL], 0
+        LDIR        
+        LD          HL, str_0
+        LD          [vars_area_start], HL
+        LD          HL, vars_area_start
+        LD          DE, vars_area_start + 2
+        LD          BC, vars_area_end - vars_area_start - 2
         LDIR        
         RET         
 interrupt_process:
@@ -751,42 +1380,36 @@ h_erro_handler:
         CALL        restore_h_erro
         POP         DE
         JP          work_h_erro
-data_100:
-        DEFW        str_1
-        DEFW        str_2
-        DEFW        str_3
-        DEFW        str_4
-        DEFW        str_0
-data_110:
-        DEFW        str_5
-        DEFW        str_6
-        DEFW        str_0
-        DEFW        str_7
-        DEFW        str_8
+const_45327680:
+        DEFB        0x45, 0x32, 0x76, 0x80
 const_4110000000000000:
         DEFB        0x41, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x01, 0x61
+        DEFB        0x18, 0x6D, 0x73, 0x78, 0x2F, 0x6D, 0x65, 0x2F, 0x69, 0x66, 0x2F, 0x4E, 0x45, 0x54, 0x30, 0x2F, 0x63, 0x6F, 0x6E, 0x66, 0x2F, 0x61, 0x64, 0x64, 0x72
 str_10:
-        DEFB        0x02, 0x0D, 0x0A
+        DEFB        0x1D, 0x48, 0x6F, 0x73, 0x74, 0x3A, 0x20, 0x61, 0x62, 0x65, 0x68, 0x69, 0x72, 0x6F, 0x73, 0x68, 0x69, 0x2E, 0x6C, 0x61, 0x2E, 0x63, 0x6F, 0x6F, 0x63, 0x61, 0x6E, 0x2E, 0x6A, 0x70
+str_11:
+        DEFB        0x12, 0x55, 0x4E, 0x41, 0x42, 0x4C, 0x45, 0x20, 0x54, 0x4F, 0x20, 0x52, 0x45, 0x43, 0x45, 0x49, 0x56, 0x45, 0x2E
+str_12:
+        DEFB        0x0B, 0x52, 0x45, 0x54, 0x52, 0x59, 0x49, 0x4E, 0x47, 0x2E, 0x2E, 0x2E
 str_2:
-        DEFB        0x01, 0x62
+        DEFB        0x17, 0x61, 0x62, 0x65, 0x68, 0x69, 0x72, 0x6F, 0x73, 0x68, 0x69, 0x2E, 0x6C, 0x61, 0x2E, 0x63, 0x6F, 0x6F, 0x63, 0x61, 0x6E, 0x2E, 0x6A, 0x70
 str_3:
-        DEFB        0x01, 0x63
+        DEFB        0x18, 0x6D, 0x73, 0x78, 0x2F, 0x6D, 0x65, 0x2F, 0x69, 0x66, 0x2F, 0x4E, 0x45, 0x54, 0x30, 0x2F, 0x63, 0x6F, 0x6E, 0x66, 0x2F, 0x70, 0x6F, 0x72, 0x74
 str_4:
-        DEFB        0x01, 0x64
+        DEFB        0x16, 0x6D, 0x73, 0x78, 0x2F, 0x6D, 0x65, 0x2F, 0x69, 0x66, 0x2F, 0x4E, 0x45, 0x54, 0x30, 0x2F, 0x63, 0x6F, 0x6E, 0x6E, 0x65, 0x63, 0x74
 str_5:
-        DEFB        0x01, 0x66
+        DEFB        0x02, 0x0D, 0x0A
 str_6:
-        DEFB        0x01, 0x67
+        DEFB        0x12, 0x43, 0x4F, 0x4E, 0x4E, 0x45, 0x43, 0x54, 0x49, 0x4F, 0x4E, 0x20, 0x46, 0x41, 0x49, 0x4C, 0x45, 0x44, 0x2E
 str_7:
-        DEFB        0x01, 0x69
+        DEFB        0x0A, 0x43, 0x4F, 0x4E, 0x4E, 0x45, 0x43, 0x54, 0x45, 0x44, 0x2E
 str_8:
-        DEFB        0x01, 0x6A
+        DEFB        0x15, 0x47, 0x45, 0x54, 0x20, 0x2F, 0x74, 0x6F, 0x70, 0x2E, 0x68, 0x74, 0x6D, 0x20, 0x48, 0x54, 0x54, 0x50, 0x2F, 0x31, 0x2E, 0x31
 str_9:
-        DEFB        0x08, 0x41, 0x24, 0x5B, 0x23, 0x5D, 0x3D, 0x40, 0x3B
+        DEFB        0x12, 0x6D, 0x73, 0x78, 0x2F, 0x6D, 0x65, 0x2F, 0x69, 0x66, 0x2F, 0x4E, 0x45, 0x54, 0x30, 0x2F, 0x6D, 0x73, 0x67
 save_stack:
         DEFW        0
 heap_next:
@@ -797,8 +1420,6 @@ heap_move_size:
         DEFW        0
 heap_remap_address:
         DEFW        0
-data_ptr:
-        DEFW        data_100
 var_area_start:
 svarb_on_interval_exec:
         DEFB        0
@@ -902,16 +1523,24 @@ svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
         DEFW        0
+vard_CN:
+        DEFW        0, 0, 0, 0
 vard_I:
+        DEFW        0, 0, 0, 0
+vard_RC:
+        DEFW        0, 0, 0, 0
+vard_RF:
         DEFW        0, 0, 0, 0
 var_area_end:
 vars_area_start:
+vars_RD:
+        DEFW        0
+vars_SD:
+        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:
 varsa_area_start:
-varsa_A:
-        DEFW        0
 varsa_area_end:
 h_timi_backup:
         DEFB        0, 0, 0, 0, 0
