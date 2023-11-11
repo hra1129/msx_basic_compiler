@@ -31,12 +31,12 @@ void CEXPRESSION_STR::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->p_operand->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
-		void activate_ld_dac_single_real( void );
+		p_info->assembler_list.activate_ld_dac_single_real();
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_single_real", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	else if( this->p_operand->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
-		void activate_ld_dac_double_real( void );
+	else if( this->p_operand->type == CEXPRESSION_TYPE::DOUBLE_REAL ) {
+		p_info->assembler_list.activate_ld_dac_double_real();
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "ld_dac_double_real", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
