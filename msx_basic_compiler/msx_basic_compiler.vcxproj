@@ -250,6 +250,7 @@
     <ClCompile Include="expressions\expression_stick.cpp" />
     <ClCompile Include="expressions\expression_str.cpp" />
     <ClCompile Include="expressions\expression_strig.cpp" />
+    <ClCompile Include="expressions\expression_string.cpp" />
     <ClCompile Include="expressions\expression_tan.cpp" />
     <ClCompile Include="expressions\expression_term.cpp" />
     <ClCompile Include="expressions\expression_time.cpp" />
@@ -371,6 +372,7 @@
     <ClInclude Include="expressions\expression_stick.h" />
     <ClInclude Include="expressions\expression_str.h" />
     <ClInclude Include="expressions\expression_strig.h" />
+    <ClInclude Include="expressions\expression_string.h" />
     <ClInclude Include="expressions\expression_tan.h" />
     <ClInclude Include="expressions\expression_term.h" />
     <ClInclude Include="expressions\expression_time.h" />

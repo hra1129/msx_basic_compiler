@@ -57,6 +57,7 @@
 #include "expression_rnd.h"
 #include "expression_sgn.h"
 #include "expression_str.h"
+#include "expression_string.h"
 #include "expression_sgn.h"
 #include "expression_sin.h"
 #include "expression_stick.h"
@@ -785,6 +786,24 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "STRING$" ) {
+		CEXPRESSION_STRING *p_term = new CEXPRESSION_STRING;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
