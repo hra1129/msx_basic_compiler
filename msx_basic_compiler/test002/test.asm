@@ -13,6 +13,12 @@ work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 work_prtflg                     = 0x0f416
 bios_errhand                    = 0x0406F
+blib_instr                      = 0x04051
+bios_fout                       = 0x03425
+work_dac_int                    = 0x0f7f8
+work_valtyp                     = 0x0f663
+work_csrx                       = 0x0f3dd
+work_linlen                     = 0x0f3b0
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -57,7 +63,7 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
-line_100:
+line_10:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
@@ -66,48 +72,35 @@ line_100:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, 10
-        PUSH        HL
         LD          HL, str_3
-        POP         DE
-        CALL        string
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_4
+        POP         DE
+        LD          IX, blib_instr
+        CALL        call_blib
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt0
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_2
         CALL        puts
-line_110:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
         POP         HL
-        CALL        free_string
-        LD          HL, 5
-        PUSH        HL
-        LD          HL, str_3
-        POP         DE
-        CALL        string
-        PUSH        HL
+_pt0:
         CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
+        LD          A, 32
+        RST         0x18
         LD          HL, str_2
         CALL        puts
-line_120:
+line_20:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
@@ -116,23 +109,35 @@ line_120:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, 10
+        LD          HL, str_3
         PUSH        HL
         LD          HL, str_0
         POP         DE
-        CALL        string
+        LD          IX, blib_instr
+        CALL        call_blib
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt1
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_2
         CALL        puts
-line_130:
+        POP         HL
+_pt1:
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_2
+        CALL        puts
+line_30:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
@@ -141,23 +146,35 @@ line_130:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, 8
+        LD          HL, str_3
         PUSH        HL
         LD          HL, str_5
         POP         DE
-        CALL        string
+        LD          IX, blib_instr
+        CALL        call_blib
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt2
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_2
         CALL        puts
-line_140:
+        POP         HL
+_pt2:
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_2
+        CALL        puts
+line_40:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
@@ -166,70 +183,32 @@ line_140:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, 10
+        LD          HL, str_0
         PUSH        HL
-        LD          HL, str_3
-        POP         DE
-        CALL        string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_4
+        POP         DE
+        LD          IX, blib_instr
+        CALL        call_blib
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt3
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
         LD          HL, str_2
         CALL        puts
-line_150:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
         POP         HL
-        CALL        free_string
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, str_3
-        POP         DE
-        CALL        string
-        PUSH        HL
+_pt3:
         CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_160:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, str_6
-        POP         DE
-        CALL        string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
+        LD          A, 32
+        RST         0x18
         LD          HL, str_2
         CALL        puts
 program_termination:
@@ -403,30 +382,35 @@ allocate_string:
 _allocate_string_error:
         LD          E, 7
         JP          bios_errhand
-string:
+copy_string:
         LD          A, [HL]
-        OR          A, A
-        INC         HL
-        LD          A, [HL]
-        JR          NZ, string_skip
-        LD          E, 5
-        JP          bios_errhand
-string_skip:
-        PUSH        AF
-        LD          A, E
-        CALL        allocate_string
-        POP         AF
         PUSH        HL
-        INC         HL
-        LD          B, C
-        INC         B
-        JR          string_loop_enter
-string_loop:
-        LD          [HL], A
-        INC         HL
-string_loop_enter:
-        DJNZ        string_loop
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
         POP         HL
+        RET         
+str:
+        CALL        bios_fout
+fout_adjust:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_str_loop:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _str_loop_exit
+        INC         B
+        JR          _str_loop
+_str_loop_exit:
+        POP         HL
+        LD          [HL], B
         RET         
 program_run:
         LD          HL, heap_start
@@ -695,17 +679,15 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x01, 0x5B
+        DEFB        0x07, 0x49, 0x4E, 0x53, 0x54, 0x52, 0x3A, 0x20
 str_2:
         DEFB        0x02, 0x0D, 0x0A
 str_3:
-        DEFB        0x01, 0x41
+        DEFB        0x05, 0x41, 0x42, 0x43, 0x44, 0x45
 str_4:
-        DEFB        0x01, 0x5D
+        DEFB        0x02, 0x43, 0x44
 str_5:
-        DEFB        0x03, 0x61, 0x62, 0x63
-str_6:
-        DEFB        0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+        DEFB        0x0C, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x4A, 0x53, 0x44, 0x53, 0x46, 0x53
 save_stack:
         DEFW        0
 heap_next:

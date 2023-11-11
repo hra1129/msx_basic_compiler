@@ -172,6 +172,8 @@ blib_entries::
 			jp		sub_using
 	blib_init_ncalbas:
 			jp		sub_init_ncalbas
+	blib_instr:
+			jp		sub_instr
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1765,6 +1767,70 @@ sub_using::
 			ld		a, [hl]
 			dec		b
 			inc		hl
+			ret
+			endscope
+
+; =============================================================================
+;	INSTR( DE, HL )
+;	input:
+;		DE ... 元となる文字列
+;		HL ... 元となる文字列の中から探す文字列
+;	output:
+;		HL ... 見つけた位置
+;	break:
+;		all
+;	comment:
+;		先頭が 1、見つからなかった場合は 0
+; =============================================================================
+			scope	sub_instr
+sub_instr::
+			ld		a, [de]
+			ld		b, [hl]
+			sub		a, b					; A = 先頭から探索する文字数
+			jr		c, _not_found			; 探す文字列の方が長ければ、一致するはずがない
+			ld		c, 1					; 現在の位置
+			inc		b
+			dec		b
+			jr		z, _match_wo_pop
+			inc		a
+			ld		b, a					; 残り探索位置
+			inc		de						; 先頭の文字位置 (元の文字列)
+
+	_search_loop:
+			push	hl
+			push	de
+			push	bc
+			; 着目位置における文字列の一致確認
+			ld		b, [hl]					; 文字数
+			inc		hl						; 先頭の文字位置 (探す文字列)
+	_compare:
+			ld		a, [de]
+			cp		a, [hl]
+			jr		nz, _no_match
+			inc		de
+			inc		hl
+			djnz	_compare
+	_match:
+			pop		hl						; スタック捨て
+			pop		hl						; スタック捨て
+			pop		hl						; スタック捨て
+	_match_wo_pop:
+			ld		l, c
+			ld		h, 0
+			ret
+
+			; 一致しなかった場合
+	_no_match:
+			pop		bc
+			pop		de
+			pop		hl
+			inc		de						; 次の位置へ遷移
+			inc		c						; 次の位置へ遷移
+			djnz	_search_loop
+
+			; 一致する場所が一つも無かった
+	_not_found:
+			ld		hl, 0					; 0 を返す
 			ret
 			endscope
 
