@@ -62,6 +62,7 @@ public:
 	void activate_allocate_heap( void );
 	void activate_free_heap( void );
 	void activate_str( void );
+	void activate_string( void );
 	void activate_convert_to_integer( void );
 	void activate_convert_to_integer_from_sngle_real( class CCONSTANT_INFO *p_constants );
 	void activate_convert_to_integer_from_double_real( class CCONSTANT_INFO *p_constants );
