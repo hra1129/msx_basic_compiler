@@ -94,11 +94,11 @@ _free_heap_loop2:
 	LD			B, 0
 	ADD			HL, BC
 	ADD			HL, BC						; Cy = 0
-	EX			DE, HL
+	EX			DE, HL						; サイズから、要素数格納領域の分を減らす
 	SBC			HL, BC						; Cy = 0
 	SBC			HL, BC						; Cy = 0
-	RRC			H
-	RRC			L
+	RR			H
+	RR			L							; HL = HL >> 1 次元数分の 1 はここで消滅
 	LD			C, L
 	LD			B, H
 	EX			DE, HL

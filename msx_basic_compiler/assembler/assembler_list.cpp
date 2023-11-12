@@ -1152,9 +1152,9 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::SBC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "BC" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::RRC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::RR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::RRC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::RR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "L" );
 	this->subroutines.push_back( asm_line );
