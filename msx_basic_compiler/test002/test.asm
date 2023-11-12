@@ -23,6 +23,7 @@ bios_vmovfm                     = 0x02f08
 bios_vmovam                     = 0x02eef
 bios_xdcomp                     = 0x02f5c
 bios_frcint                     = 0x02f8a
+bios_fout                       = 0x03425
 work_prtflg                     = 0x0f416
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
@@ -156,7 +157,7 @@ line_20:
         CALL        ld_de_double_real
         LD          HL, svard_I_FOR_END
         PUSH        HL
-        LD          HL, 4
+        LD          HL, 0
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -218,17 +219,22 @@ line_30:
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
+        PUSH        HL
+        LD          HL, vard_I
+        CALL        ld_dac_double_real
+        CALL        str
+        CALL        copy_string
+        POP         DE
         EX          DE, HL
-        LD          HL, [data_ptr]
         LD          C, [HL]
+        LD          [HL], E
         INC         HL
         LD          B, [HL]
-        INC         HL
-        LD          [data_ptr], HL
-        EX          DE, HL
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
         LD          HL, varsa_B
         LD          D, 1
         LD          BC, 27
@@ -245,17 +251,18 @@ line_30:
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
         EX          DE, HL
-        LD          HL, [data_ptr]
         LD          C, [HL]
+        LD          [HL], E
         INC         HL
         LD          B, [HL]
-        INC         HL
-        LD          [data_ptr], HL
-        EX          DE, HL
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
 line_40:
         CALL        interrupt_process
         XOR         A, A
@@ -285,24 +292,19 @@ line_40:
         CALL        puts
         POP         HL
         CALL        free_string
-line_50:
-        CALL        interrupt_process
-        LD          HL, [svard_I_LABEL]
-        CALL        jp_hl
-line_60:
-        CALL        interrupt_process
-line_70:
-        CALL        interrupt_process
-line_80:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, varsa_A
+        LD          HL, varsa_B
         LD          D, 1
         LD          BC, 27
         CALL        check_sarray
         CALL        calc_array_top
-        LD          HL, 0
+        LD          HL, vard_I
+        LD          DE, work_dac
+        LD          BC, 8
+        LDIR        
+        LD          A, 8
+        LD          [work_valtyp], A
+        CALL        bios_frcint
+        LD          HL, [work_dac_int]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
@@ -315,8 +317,6 @@ line_80:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_1
-        CALL        puts
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -466,16 +466,29 @@ _calc_array_top_l2:
         JR          NZ, _calc_array_top_l1
         PUSH        DE
         RET         
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
+ld_dac_double_real:
+        LD          DE, work_dac
+        LD          BC, 8
+        LDIR        
+        LD          A, 8
+        LD          [work_valtyp], A
+        RET         
+str:
+        CALL        bios_fout
+fout_adjust:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_str_loop:
         INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
+        CP          A, [HL]
+        JR          Z, _str_loop_exit
+        INC         B
+        JR          _str_loop
+_str_loop_exit:
+        POP         HL
+        LD          [HL], B
         RET         
 allocate_string:
         LD          HL, [heap_next]
@@ -619,6 +632,17 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
+        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -883,44 +907,14 @@ h_erro_handler:
         CALL        restore_h_erro
         POP         DE
         JP          work_h_erro
-data_60:
-        DEFW        str_2
-        DEFW        str_3
-        DEFW        str_4
-        DEFW        str_5
-        DEFW        str_6
-data_70:
-        DEFW        str_7
-        DEFW        str_8
-        DEFW        str_9
-        DEFW        str_10
-        DEFW        str_11
 const_4110000000000000:
         DEFB        0x41, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x02, 0x0D, 0x0A
-str_10:
-        DEFB        0x01, 0x4A
-str_11:
-        DEFB        0x01, 0x4B
-str_2:
         DEFB        0x01, 0x41
-str_3:
-        DEFB        0x01, 0x42
-str_4:
-        DEFB        0x01, 0x43
-str_5:
-        DEFB        0x01, 0x44
-str_6:
-        DEFB        0x01, 0x45
-str_7:
-        DEFB        0x01, 0x47
-str_8:
-        DEFB        0x01, 0x48
-str_9:
-        DEFB        0x01, 0x49
+str_2:
+        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:
@@ -931,8 +925,6 @@ heap_move_size:
         DEFW        0
 heap_remap_address:
         DEFW        0
-data_ptr:
-        DEFW        data_60
 var_area_start:
 svarb_on_interval_exec:
         DEFB        0

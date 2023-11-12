@@ -46,7 +46,10 @@ void CEXPRESSION_STR::compile( CCOMPILE_INFO *p_info ) {
 	}
 
 	p_info->assembler_list.activate_str();
+	p_info->assembler_list.activate_copy_string();
 	this->type = CEXPRESSION_TYPE::STRING;
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "str", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "copy_string", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 }
