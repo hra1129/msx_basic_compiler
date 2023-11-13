@@ -24,7 +24,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	//	ğŒ®
 	s_end_label		= p_info->get_auto_label();
 	s_false_label	= p_info->get_auto_label();
-	if( exp.compile( p_info ) ) {
+	if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
 		if( exp.get_type() == CEXPRESSION_TYPE::STRING ) {
 			p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 			return true;
