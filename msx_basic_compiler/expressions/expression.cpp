@@ -1448,7 +1448,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_imp( CCOMPILE_INFO *p_info )
 	std::string s_operator;
 
 	//	左項を得る
-	p_left = this->makeup_node_operator_or( p_info );
+	p_left = this->makeup_node_operator_xor( p_info );
 	if( p_left == nullptr ) {
 		return nullptr;				//	左項が得られなかった場合
 	}
@@ -1467,7 +1467,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_imp( CCOMPILE_INFO *p_info )
 		//	この演算子のインスタンスを生成
 		p_operator = new CEXPRESSION_OPERATOR_IMP;
 		p_operator->p_left = p_result;
-		p_operator->p_right = this->makeup_node_operator_or( p_info );
+		p_operator->p_right = this->makeup_node_operator_xor( p_info );
 		p_result = p_operator;
 	}
 	return p_result;
