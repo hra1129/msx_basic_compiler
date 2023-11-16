@@ -14,14 +14,8 @@ signature                       = 0x4010
 work_dac                        = 0x0f7f6
 work_dac_int                    = 0x0f7f8
 work_valtyp                     = 0x0f663
+bios_frcint                     = 0x02f8a
 bios_frcdbl                     = 0x0303a
-work_prtflg                     = 0x0f416
-bios_vmovfm                     = 0x02f08
-bios_neg                        = 0x02e8d
-bios_frcsng                     = 0x0303a
-work_csrx                       = 0x0f3dd
-work_linlen                     = 0x0f3b0
-bios_fout                       = 0x03425
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -66,11 +60,27 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
-line_10:
+line_100:
         CALL        interrupt_process
         LD          HL, vard_A
         PUSH        HL
+        LD          HL, vard_A
+        LD          DE, work_dac
+        LD          BC, 8
+        LDIR        
+        LD          A, 8
+        LD          [work_valtyp], A
+        CALL        bios_frcint
+        LD          HL, [work_dac_int]
+        PUSH        HL
         LD          HL, 1
+        POP         DE
+        LD          A, L
+        XOR         A, E
+        LD          L, A
+        LD          A, H
+        XOR         A, D
+        LD          H, A
         LD          [work_dac_int], HL
         LD          A, 2
         LD          [work_valtyp], A
@@ -78,146 +88,6 @@ line_10:
         LD          HL, work_dac
         POP         DE
         CALL        ld_de_double_real
-line_20:
-        CALL        interrupt_process
-        LD          HL, vard_A
-        CALL        double_real_is_zero
-        JP          Z, _pt1
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, 1
-        LD          A, 2
-        LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_frcsng
-        CALL        bios_neg
-        LD          HL, work_dac
-        CALL        ld_dac_single_real
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt2
-        PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt2:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
-        JP          _pt0
-_pt1:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt3
-        PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt3:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
-_pt0:
-line_30:
-        CALL        interrupt_process
-        LD          HL, vard_A
-        PUSH        HL
-        LD          HL, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        bios_frcdbl
-        LD          HL, work_dac
-        POP         DE
-        CALL        ld_de_double_real
-line_40:
-        CALL        interrupt_process
-        LD          HL, vard_A
-        CALL        double_real_is_zero
-        JP          Z, _pt5
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, 1
-        LD          A, 2
-        LD          [work_valtyp], A
-        LD          [work_dac + 2], HL
-        CALL        bios_frcsng
-        CALL        bios_neg
-        LD          HL, work_dac
-        CALL        ld_dac_single_real
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt6
-        PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt6:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
-        JP          _pt4
-_pt5:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, 0
-        LD          [work_dac_int], HL
-        LD          A, 2
-        LD          [work_valtyp], A
-        CALL        str
-        LD          A, [work_linlen]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [work_csrx]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _pt7
-        PUSH        HL
-        LD          HL, str_1
-        CALL        puts
-        POP         HL
-_pt7:
-        CALL        puts
-        LD          A, 32
-        RST         0x18
-        LD          HL, str_1
-        CALL        puts
-_pt4:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -252,57 +122,6 @@ call_blib:
 ld_de_double_real:
         LD          BC, 8
         LDIR        
-        RET         
-double_real_is_zero:
-        INC         HL
-        LD          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        RET         
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
-str:
-        CALL        bios_fout
-fout_adjust:
-        DEC         HL
-        PUSH        HL
-        XOR         A, A
-        LD          B, A
-_str_loop:
-        INC         HL
-        CP          A, [HL]
-        JR          Z, _str_loop_exit
-        INC         B
-        JR          _str_loop
-_str_loop_exit:
-        POP         HL
-        LD          [HL], B
-        RET         
-ld_dac_single_real:
-        LD          DE, work_dac
-        LD          BC, 4
-        LDIR        
-        LD          [work_dac+4], BC
-        LD          [work_dac+6], BC
         RET         
 program_run:
         LD          HL, heap_start
@@ -570,8 +389,6 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
-str_1:
-        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:

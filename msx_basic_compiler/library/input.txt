@@ -1,0 +1,111 @@
+	PUSH		第3引数
+	PUSH		第2引数
+	PUSH		第1引数
+	CALL		sub_input
+	DEFB		2,4,3,0			; 引数の型を第1引数から順に並べる。2:整数, 3:文字列, 4:単精度, 8:倍精度, 0:終端記号
+
+こんな感じで呼ぶルーチンにする。
+ただし、INPUT <文字列>; <引数> ... の <文字列>; はこれより前に puts しておくこと。
+
+bios_qinlin		:= 0x00B4
+
+sub_input::
+		call	bios_qinlin
+		inc		hl				; 入力結果のバッファのアドレス -1 が返ってくるので、+1 しておく。F55Dh とかが返ってくる。
+	_sub_input_string_loop:
+		ex		de, hl
+		pop		hl				; 戻りアドレス = 引数の型情報が入ってる場所
+		ld		a, [hl]
+		cp		a, 3			; 文字列か？
+		jr		z, _sub_input_string
+
+		; 数値の入力
+	_sub_input_number:
+		ex		de, hl
+		push	de				; 戻りアドレス（＋引数型情報）を保存
+		push	hl				; 入力文字列位置保存
+		ld		a, [hl]			; 最初の文字
+		call	bios_fin		; VAL()呼び出し
+		ld		a, d			; 桁数を A にコピー
+		pop		hl				; 入力文字列位置復帰
+		pop		de				; 戻りアドレス復帰
+		or		a, a			; 桁数 = 0 なら Redo from start
+
+		引数の場所へ値をコピー
+		JP		上
+
+		; 文字列の入力
+	_sub_input_string:
+		inc		hl				; 引数型情報を1つ消費
+		pop		bc				; 引数を1つ取得
+		push	hl				; 戻りアドレスを保存
+		ex		de, hl
+		ld		a, [hl]			; 入力文字列の頭を得る
+		cp		a, '"'			; 先頭は " か？
+		jr		z, _get_quote_string
+
+		; " " で囲まれていない文字列を取得
+	_get_normal_string:
+		push	bc				; 引数を一旦保存
+		ld		e, l
+		ld		d, h			; 先頭位置を覚えておく
+		ld		c, 0			; 長さカウンタクリア
+	_get_normal_string_loop:
+		ld		a, [hl]
+		or		a, a			; 端末文字か？
+		jr		z, _get_string_loop_exit
+		cp		a, ','			; 端末文字か？
+		jr		z, _get_string_loop_exit
+		inc		hl
+		inc		c
+		jr		_get_normal_string_loop
+
+		; " " で囲まれた文字列を取得
+	_get_quote_string:
+		push	bc				; 引数を一旦保存
+		inc		hl				; 先頭の " を消費
+		ld		e, l
+		ld		d, h			; 先頭位置を覚えておく
+		ld		c, 0			; 長さカウンタクリア
+	_get_quote_string_loop:
+		ld		a, [hl]
+		or		a, a			; 端末文字か？
+		jr		z, _get_string_loop_exit
+		cp		a, '"'			; 端末文字か？
+		inc		hl
+		jr		z, _get_string_loop_exit
+		inc		c
+		jr		_get_quote_string_loop
+
+		; 文字列の領域を確保する
+	_get_string_loop_exit:
+		ld		a, c
+		or		a, a
+		jr		z, _get_quote_string_zero
+
+		; 文字列が長さ 0 だった場合確保も必要ない
+	_get_quote_string_zero:
+		pop		de				; 引数の変数アドレスを取得
+		ex		de, hl			; DE = ユーザーが入力した文字列の現在参照位置, HL = 引数の変数のアドレス
+		ld		bc, str_0
+		ld		[hl], c
+		inc		hl
+		ld		[hl], b
+		ex		de, hl
+
+		; 次の入力文字列の存在を確認する
+	_check_next_data:
+		ld		a, [hl]
+		or		a, a
+		jr		z, _check_next_parameter
+		inc		hl				; ここにくるのは "," の場合。"," を読み飛ばす。
+		jp		_sub_input_string_loop
+
+		; 次の入力文字が存在しない状態で、次の引数の存在を確認する
+	_check_next_parameter:
+		pop		hl
+		push	hl
+		ld		a, [hl]
+		or		a, a
+		jp		nz, sub_input
+		ret						; 入力文字も、引数も存在しないので戻る

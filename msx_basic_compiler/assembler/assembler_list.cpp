@@ -1803,6 +1803,18 @@ void CASSEMBLER_LIST::activate_comma( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_sub_input( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_input" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_input" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_input", COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
