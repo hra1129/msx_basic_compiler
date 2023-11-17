@@ -117,16 +117,17 @@ line_8040:
         INC         HL
         LD          [HL], B
         INC         HL
-        LD          B, 2
-        LD          [HL], B
+        LD          A, 2
+        LD          [HL], A
         INC         HL
 _pt0:
-        POP         DE
-        LD          [HL], E
+        POP         BC
+        LD          [HL], C
         INC         HL
-        LD          [HL], D
+        LD          [HL], B
         INC         HL
-        DJNZ        _pt0
+        DEC         A
+        JR          NZ, _pt0
         LD          HL, [varia_M0]
         LD          A, L
         OR          A, H
@@ -158,16 +159,17 @@ _pt0:
         INC         HL
         LD          [HL], B
         INC         HL
-        LD          B, 2
-        LD          [HL], B
+        LD          A, 2
+        LD          [HL], A
         INC         HL
 _pt1:
-        POP         DE
-        LD          [HL], E
+        POP         BC
+        LD          [HL], C
         INC         HL
-        LD          [HL], D
+        LD          [HL], B
         INC         HL
-        DJNZ        _pt1
+        DEC         A
+        JR          NZ, _pt1
 line_8210:
         CALL        interrupt_process
         XOR         A, A
