@@ -1,7 +1,7 @@
-﻿  assembler_list.cpp
+﻿  variable_manager.cpp
   コード生成しています。
-  2 of 2044 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  1 of 2044 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    70 functions had inline decision re-evaluated but remain unchanged
+    69 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe
