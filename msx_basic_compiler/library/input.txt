@@ -23,16 +23,73 @@ sub_input::
 	_sub_input_number:
 		ex		de, hl
 		push	de				; 戻りアドレス（＋引数型情報）を保存
-		push	hl				; 入力文字列位置保存
 		ld		a, [hl]			; 最初の文字
 		call	bios_fin		; VAL()呼び出し
 		ld		a, d			; 桁数を A にコピー
-		pop		hl				; 入力文字列位置復帰
-		pop		de				; 戻りアドレス復帰
 		or		a, a			; 桁数 = 0 なら Redo from start
+		jr		z, _sub_input_redo_from_start
 
-		引数の場所へ値をコピー
-		JP		上
+		; 変換した数値部分を読み飛ばす
+		call	_sub_input_skip_white
+		ld		a, [hl]			; 次の文字をチェック
+		or		a, a
+		jr		z, _sub_input_number_branch
+		cp		a, ','
+		jr		z, _sub_input_number_branch
+		jr		_sub_input_redo_from_start
+
+		; 引数の型に変換
+	_sub_input_number_branch:
+		pop		de				; 戻りアドレス（＋引数型情報）を復帰
+		ld		a, [de]
+		inc		de
+		cp		a, 4
+		push	de
+		push	hl
+		jr		z, _sub_input_single_real
+		jr		nc, sub_input_double_real
+
+		; 整数型
+		call	bios_frcint
+		pop		de				; 入力文字列位置復帰
+		pop		bc				; 戻りアドレス復帰
+		pop		hl				; 転送先の変数のアドレス取得
+		push	bc				; 戻りアドレス保存
+		push	de				; 入力文字列位置保存
+		ld		de, [work_dac + 2]
+		ld		[hl], e
+		inc		hl
+		ld		[hl], d			; 整数変数へ格納
+		pop		hl				; 入力文字列位置復帰
+		jr		_check_next_data
+
+		; 単精度実数
+	_sub_input_single_real:
+		call	bios_frcsng
+		pop		hl				; 入力文字列位置復帰
+		pop		bc				; 戻りアドレス復帰
+		pop		de				; 転送先の変数のアドレス取得
+		push	bc				; 戻りアドレス保存
+		push	hl				; 入力文字列位置保存
+		ld		hl, work_dac
+		ld		bc, 4
+		ldir
+		pop		hl				; 入力文字列位置復帰
+		jr		_check_next_data
+
+		; 倍精度実数
+	sub_input_double_real:
+		call	bios_frcdbl
+		pop		hl				; 入力文字列位置復帰
+		pop		bc				; 戻りアドレス復帰
+		pop		de				; 転送先の変数のアドレス取得
+		push	bc				; 戻りアドレス保存
+		push	hl				; 入力文字列位置保存
+		ld		hl, work_dac
+		ld		bc, 8
+		ldir
+		pop		hl				; 入力文字列位置復帰
+		jr		_check_next_data
 
 		; 文字列の入力
 	_sub_input_string:
@@ -40,6 +97,7 @@ sub_input::
 		pop		bc				; 引数を1つ取得
 		push	hl				; 戻りアドレスを保存
 		ex		de, hl
+		call	_sub_input_skip_white
 		ld		a, [hl]			; 入力文字列の頭を得る
 		cp		a, '"'			; 先頭は " か？
 		jr		z, _get_quote_string
@@ -82,12 +140,23 @@ sub_input::
 		ld		a, c
 		or		a, a
 		jr		z, _get_quote_string_zero
+		push	de
+		call	allocate_string
+		pop		de
+		ld		b, 0
+		push	hl
+		inc		hl
+		ex		de, hl
+		ldir					; 文字列をコピー
+		pop		bc
+		jr		_sub_input_copy_string
 
 		; 文字列が長さ 0 だった場合確保も必要ない
 	_get_quote_string_zero:
+		ld		bc, str_0
+	_sub_input_copy_string:
 		pop		de				; 引数の変数アドレスを取得
 		ex		de, hl			; DE = ユーザーが入力した文字列の現在参照位置, HL = 引数の変数のアドレス
-		ld		bc, str_0
 		ld		[hl], c
 		inc		hl
 		ld		[hl], b
@@ -96,8 +165,22 @@ sub_input::
 		; 次の入力文字列の存在を確認する
 	_check_next_data:
 		ld		a, [hl]
+		cp		'"'
+		jr		nz, _check_next_data2
+		inc		hl
+	_check_next_data2:
+		call	_sub_input_skip_white
+		ld		a, [hl]
 		or		a, a
 		jr		z, _check_next_parameter
+
+		; 次の入力文字列が存在する状態で、引数の変数を確認する
+		pop		de
+		push	de
+		ld		a, [de]
+		or		a, a
+		jr		z, _sub_input_extra_ignored
+
 		inc		hl				; ここにくるのは "," の場合。"," を読み飛ばす。
 		jp		_sub_input_string_loop
 
@@ -107,5 +190,39 @@ sub_input::
 		push	hl
 		ld		a, [hl]
 		or		a, a
-		jp		nz, sub_input
-		ret						; 入力文字も、引数も存在しないので戻る
+		ret		z				; 入力文字も、引数も存在しないので戻る
+	_sub_input_retype:
+		ld		a, '?'
+		rst		0x18
+		jp		sub_input
+
+		; Redo from start
+	_sub_input_redo_from_start:
+		push	hl
+		ld		hl, _str_redo_from_start
+		call	puts
+		pop		hl
+		jr		_sub_input_retype
+
+	_str_redo_from_start:
+		defb	18
+		defb	"?Redo from start"
+		defb	13, 10
+
+		; Extra ignored
+	_sub_input_extra_ignored:
+		ld		hl, _str_extra_ignored
+		call	puts
+		ret
+
+	_str_extra_ignored:
+		defb
+		defb	"?Extra ignored"
+		defb	13, 10
+
+	_sub_input_skip_white:
+		ld		a, [hl]
+		cp		a, ' '
+		ret		nz
+		inc		hl
+		jr		_sub_input_skip_white

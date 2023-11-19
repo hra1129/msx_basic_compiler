@@ -40,6 +40,7 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		p_info->list.p_position++;
 	}
 
 	int variable_count = 0;
@@ -74,12 +75,18 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 			s_data = s_data + ", " + std::to_string( var_type );
 		}
 		variable_count++;
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+			break;
+		}
+		p_info->list.p_position++;
 	}
 	if( variable_count == 0 ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	p_info->assembler_list.body.insert( p_info->assembler_list.body.end(), assembler_list_buffer.begin(), assembler_list_buffer.end() );
+
+	s_data = s_data + ", 0";
 
 	p_info->assembler_list.activate_sub_input();
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_input", COPERAND_TYPE::NONE, "" );
