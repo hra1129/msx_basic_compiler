@@ -4,6 +4,7 @@
 ;	Copyright (C)2023 HRA!
 ; =============================================================================
 
+_dosver		:= 0x6F
 vdpport0	:= 0x98
 vdpport1	:= 0x99
 vdpport2	:= 0x9A
@@ -24,6 +25,7 @@ fout		:= 0x3425
 pufout		:= 0x3426
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
 ramad1		:= 0xF342
+bdos		:= 0xf37d
 linl40		:= 0xF3AE
 linl32		:= 0xF3AF
 linlen		:= 0xF3B0
@@ -174,6 +176,10 @@ blib_entries::
 			jp		sub_init_ncalbas
 	blib_instr:
 			jp		sub_instr
+	blib_bload:
+			jp		sub_bload
+	blib_bload_s:
+			jp		sub_bload_s
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -247,7 +253,12 @@ ncalbas_end::
 
 ; =============================================================================
 ;	INITIALIZE NCALBAS
-;
+;	input:
+;		none
+;	output:
+;		A ... DOSバージョン, 0: DOS無し, 1: DOS1, 2: DOS2
+;	break:
+;		all
 ; =============================================================================
 			scope	sub_init_ncalbas
 sub_init_ncalbas::
@@ -259,6 +270,19 @@ sub_init_ncalbas::
 			ld		[ncalbas_mainrom], a
 			ld		a, [blibslot]
 			ld		[ncalbas_blibslot], a
+			; DOSバージョンを調べる
+			ld		c, _dosver
+			call	bdos
+			or		a, a						; エラー発生 (DOS1でもDOS2でもない) か？
+			jr		z, _s1
+			xor		a, a						; DOSが無い場合は、A=0
+			jr		_dosver_exit
+		_s1:
+			ld		a, b
+			or		a, a
+			jr		nz, _dosver_exit
+			inc		a
+		_dosver_exit:
 			ret
 			endscope
 
@@ -1831,6 +1855,38 @@ sub_instr::
 			; 一致する場所が一つも無かった
 	_not_found:
 			ld		hl, 0					; 0 を返す
+			ret
+			endscope
+
+; =============================================================================
+;	BLOAD HL
+;	input:
+;		HL ... ファイル名
+;	output:
+;		HL ... 実行開始アドレス
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_bload
+sub_bload::
+			ret
+			endscope
+
+; =============================================================================
+;	BLOAD HL,S
+;	input:
+;		HL ... ファイル名
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_bload_s
+sub_bload_s::
 			ret
 			endscope
 
