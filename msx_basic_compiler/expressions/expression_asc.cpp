@@ -6,11 +6,30 @@
 #include <string>
 #include <vector>
 #include "expression_asc.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_ASC::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand->optimization( p_info );
+CEXPRESSION_NODE* CEXPRESSION_ASC::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE* p;
+
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
+		//	’è”‚Ìê‡
+		if( this->p_operand->type == CEXPRESSION_TYPE::STRING ) {
+			//	•¶Žš—ñ‚Ìê‡
+			if( this->p_operand->s_value.size() != 0 ) {
+				CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+				p_term->type = CEXPRESSION_TYPE::INTEGER;
+				p_term->s_value = std::to_string( (int)(unsigned char)this->p_operand->s_value[0] );
+				return p_term;
+			}
+		}
+	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

@@ -8,13 +8,14 @@
 #include "expression_mid.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_MID::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_MID::optimization( CCOMPILE_INFO *p_info ) {
 	
 	this->p_operand1->optimization( p_info );
 	this->p_operand2->optimization( p_info );
 	if( this->p_operand3 != nullptr ) {
 		this->p_operand3->optimization( p_info );
 	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

@@ -8,8 +8,10 @@
 #include "expression_term.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_TERM::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_TERM::optimization( CCOMPILE_INFO *p_info ) {
 	
+	//	term ‚ÍA‚±‚êˆÈãÅ“K‰»‚Å‚«‚È‚¢
+	return nullptr;
 }
 
 // --------------------------------------------------------------------
@@ -18,7 +20,7 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_info ) {
 
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
 		int i = 0;
-		sscanf( this->s_value.c_str(), "%i", &i );
+		(void) sscanf( this->s_value.c_str(), "%i", &i );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, std::to_string( i ) );
 		p_info->assembler_list.body.push_back( asm_line );
 	}

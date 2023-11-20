@@ -8,10 +8,11 @@
 #include "expression_right.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_RIGHT::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_RIGHT::optimization( CCOMPILE_INFO *p_info ) {
 	
 	this->p_operand1->optimization( p_info );
 	this->p_operand2->optimization( p_info );
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

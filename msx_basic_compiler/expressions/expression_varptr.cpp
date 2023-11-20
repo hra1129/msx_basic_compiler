@@ -9,8 +9,9 @@
 #include "../compiler.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_VARPTR::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_VARPTR::optimization( CCOMPILE_INFO *p_info ) {
 
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

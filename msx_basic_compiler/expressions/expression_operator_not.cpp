@@ -8,12 +8,18 @@
 #include "expression_operator_not.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info ) {
-	
+CEXPRESSION_NODE* CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE* p;
+
 	if( this->p_right == nullptr ) {
-		return;
+		return nullptr;
 	}
-	this->p_right->optimization( p_info );
+	p = this->p_right->optimization( p_info );
+	if( p != nullptr ) {
+		delete (this->p_right);
+		this->p_right = p;
+	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

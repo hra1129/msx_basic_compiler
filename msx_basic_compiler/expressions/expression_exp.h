@@ -19,7 +19,7 @@ public:
 	}
 	CEXPRESSION_NODE *p_operand = nullptr;
 
-	void optimization( CCOMPILE_INFO *p_info );
+	CEXPRESSION_NODE* optimization( CCOMPILE_INFO *p_info );
 
 	void compile( CCOMPILE_INFO *p_info );
 

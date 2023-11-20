@@ -1508,6 +1508,7 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_eqv( CCOMPILE_INFO *p_info )
 
 // --------------------------------------------------------------------
 void CEXPRESSION::makeup_node( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE *p;
 
 	if( this->p_top_node != nullptr ) {
 		//	既にノード生成済みなら何もしない
@@ -1518,7 +1519,11 @@ void CEXPRESSION::makeup_node( CCOMPILE_INFO *p_info ) {
 
 	if( this->p_top_node != nullptr && p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY ) {
 		//	Node Only 以上の最適化レベルが指定されている場合、NODE の最適化を実施する。
-		this->p_top_node->optimization( p_info );
+		p = this->p_top_node->optimization( p_info );
+		if( p != nullptr ) {
+			delete this->p_top_node;
+			this->p_top_node = p;
+		}
 	}
 }
 
