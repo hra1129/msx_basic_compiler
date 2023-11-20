@@ -8,9 +8,16 @@
 #include "expression_strig.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_STRIG::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand->optimization( p_info );
+CEXPRESSION_NODE* CEXPRESSION_STRIG::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE *p;
+
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	//	STRIGä÷êîÇÕÅAç≈ìKâªÇ≈è¡ñ≈Ç∑ÇÈÇ±Ç∆ÇÕÇ»Ç¢
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

@@ -8,10 +8,11 @@
 #include "expression_string.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_STRING::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_STRING::optimization( CCOMPILE_INFO *p_info ) {
 	
 	this->p_operand1->optimization( p_info );
 	this->p_operand2->optimization( p_info );
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

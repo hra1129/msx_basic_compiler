@@ -23,7 +23,7 @@ public:
 		this->release();
 	}
 
-	void optimization( CCOMPILE_INFO *p_info );
+	CEXPRESSION_NODE* optimization( CCOMPILE_INFO *p_info );
 
 	void compile( CCOMPILE_INFO *p_info );
 

@@ -8,9 +8,10 @@
 #include "expression_variable.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_VARIABLE::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_VARIABLE::optimization( CCOMPILE_INFO *p_info ) {
 	
 	//	配列変数の最適化は、makeup の時点で実施済みなのでここでは何もしない
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

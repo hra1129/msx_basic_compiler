@@ -8,9 +8,15 @@
 #include "expression_cint.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_CINT::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_CINT::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE* p;
 
-	this->p_operand->optimization( p_info );
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

@@ -8,9 +8,10 @@
 #include "expression_log.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_LOG::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_LOG::optimization( CCOMPILE_INFO *p_info ) {
 
 	this->p_operand->optimization( p_info );
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

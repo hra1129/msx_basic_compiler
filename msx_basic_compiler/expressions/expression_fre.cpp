@@ -8,9 +8,16 @@
 #include "expression_fre.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_FRE::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_FRE::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE* p;
 
-	this->p_operand->optimization( p_info );
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	//	freä÷êîÇÕç≈ìKâªÇ≈è¡ñ≈Ç∑ÇÈÇ±Ç∆ÇÕÇ»Ç¢
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

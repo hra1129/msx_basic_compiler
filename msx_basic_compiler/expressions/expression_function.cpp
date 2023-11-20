@@ -8,8 +8,9 @@
 #include "expression_function.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_FUNCTION::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_FUNCTION::optimization( CCOMPILE_INFO *p_info ) {
 	
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

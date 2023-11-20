@@ -54,7 +54,7 @@ public:
 
 	// ----------------------------------------------------------------
 	//	演算式ツリーの中で事前に演算可能なモノは演算してしまう
-	virtual void optimization( CCOMPILE_INFO *p_info ) = 0;
+	virtual CEXPRESSION_NODE *optimization( CCOMPILE_INFO *p_info ) = 0;
 };
 
 // --------------------------------------------------------------------

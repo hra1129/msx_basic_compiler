@@ -8,9 +8,16 @@
 #include "expression_vdp.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_VDP::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_VDP::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE *p;
 
-	this->p_operand->optimization( p_info );
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	//	VDPä÷êîÇÕç≈ìKâªÇ≈è¡ñ≈Ç∑ÇÈÇ±Ç∆ÇÕÇ»Ç¢
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

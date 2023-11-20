@@ -8,9 +8,10 @@
 #include "expression_sgn.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_SGN::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_SGN::optimization( CCOMPILE_INFO *p_info ) {
 
 	this->p_operand->optimization( p_info );
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

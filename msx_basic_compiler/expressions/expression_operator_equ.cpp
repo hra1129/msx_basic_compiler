@@ -8,13 +8,24 @@
 #include "expression_operator_equ.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_OPERATOR_EQU::optimization( CCOMPILE_INFO *p_info ) {
-	
+CEXPRESSION_NODE* CEXPRESSION_OPERATOR_EQU::optimization( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION_NODE* p;
+
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
-		return;
+		return nullptr;
 	}
-	this->p_left->optimization( p_info );
-	this->p_right->optimization( p_info );
+	p = this->p_left->optimization( p_info );
+	if( p != nullptr ) {
+		delete (this->p_left);
+		this->p_left = p;
+	}
+
+	p = this->p_right->optimization( p_info );
+	if( p != nullptr ) {
+		delete (this->p_right);
+		this->p_right = p;
+	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

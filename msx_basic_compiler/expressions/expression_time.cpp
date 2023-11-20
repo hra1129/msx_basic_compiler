@@ -8,8 +8,9 @@
 #include "expression_time.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_TIME::optimization( CCOMPILE_INFO *p_info ) {
+CEXPRESSION_NODE* CEXPRESSION_TIME::optimization( CCOMPILE_INFO *p_info ) {
 	
+	return nullptr;
 }
 
 // --------------------------------------------------------------------

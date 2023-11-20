@@ -8,8 +8,8 @@
 #include "expression_inkey.h"
 
 // --------------------------------------------------------------------
-void CEXPRESSION_INKEY::optimization( CCOMPILE_INFO *p_info ) {
-	
+CEXPRESSION_NODE* CEXPRESSION_INKEY::optimization( CCOMPILE_INFO *p_info ) {
+	return nullptr;
 }
 
 // --------------------------------------------------------------------
