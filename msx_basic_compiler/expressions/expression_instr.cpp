@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_instr.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_INSTR::optimization( CCOMPILE_INFO *p_info ) {

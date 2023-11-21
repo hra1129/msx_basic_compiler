@@ -6,11 +6,35 @@
 #include <string>
 #include <vector>
 #include "expression_str.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_STR::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand->optimization( p_info );
+	CEXPRESSION_NODE *p;
+
+	p = this->p_operand->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand;
+		this->p_operand = p;
+	}
+	//	Ž–‘OŒvŽZˆ—
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::DEEP) && this->p_operand->is_constant ) {
+		//	’è”‚Ìê‡
+		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
+			//	”’l‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::STRING;
+			char s[256] = "0";
+			switch( this->p_operand->type ) {
+			default:
+			case CEXPRESSION_TYPE::INTEGER:			sprintf( s, "%d", std::stol( this->p_operand->s_value ) );		break;
+			case CEXPRESSION_TYPE::SINGLE_REAL:		sprintf( s, "%1.7f", std::stod( this->p_operand->s_value ) );	break;
+			case CEXPRESSION_TYPE::DOUBLE_REAL:		sprintf( s, "%1.14f", std::stod( this->p_operand->s_value ) );	break;
+			}
+			p_term->s_value = s;
+			return p_term;
+		}
+	}
 	return nullptr;
 }
 

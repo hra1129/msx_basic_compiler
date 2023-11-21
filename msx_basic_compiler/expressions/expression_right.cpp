@@ -9,9 +9,18 @@
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_RIGHT::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand1->optimization( p_info );
-	this->p_operand2->optimization( p_info );
+	CEXPRESSION_NODE *p;
+
+	p = this->p_operand1->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand1;
+		this->p_operand1 = p;
+	}
+	p = this->p_operand2->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand2;
+		this->p_operand2 = p;
+	}
 	return nullptr;
 }
 

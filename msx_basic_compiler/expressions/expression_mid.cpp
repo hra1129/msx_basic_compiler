@@ -6,14 +6,28 @@
 #include <string>
 #include <vector>
 #include "expression_mid.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_MID::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand1->optimization( p_info );
-	this->p_operand2->optimization( p_info );
+	CEXPRESSION_NODE* p;
+
+	p = this->p_operand1->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand1;
+		this->p_operand1 = p;
+	}
+	p = this->p_operand2->optimization( p_info );
+	if( p != nullptr ) {
+		delete this->p_operand2;
+		this->p_operand2 = p;
+	}
 	if( this->p_operand3 != nullptr ) {
-		this->p_operand3->optimization( p_info );
+		p = this->p_operand3->optimization( p_info );
+		if( p != nullptr ) {
+			delete this->p_operand3;
+			this->p_operand3 = p;
+		}
 	}
 	return nullptr;
 }
