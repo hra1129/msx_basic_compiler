@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_hex.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_HEX::optimization( CCOMPILE_INFO *p_info ) {
@@ -15,6 +16,27 @@ CEXPRESSION_NODE* CEXPRESSION_HEX::optimization( CCOMPILE_INFO *p_info ) {
 	if( p != nullptr ) {
 		delete this->p_operand;
 		this->p_operand = p;
+	}
+	//	Ž–‘OŒvŽZˆ—
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
+		//	’è”‚Ìê‡
+		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
+			//	”’l‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::STRING;
+			int i = (int) std::stod( this->p_operand->s_value );
+			if( i < -32768 || i > 65535 ) {
+				p_info->errors.add( OVERFLOW_ERROR, p_info->list.get_line_no() );
+			}
+			i = i & 0x0FFFF;
+			std::string s = "";
+			while( i ) {
+				s = ( "0123456789ABCDEF"[ i & 15 ] ) + s;
+				i >>= 4;
+			}
+			p_term->s_value = s;
+			return p_term;
+		}
 	}
 	return nullptr;
 }

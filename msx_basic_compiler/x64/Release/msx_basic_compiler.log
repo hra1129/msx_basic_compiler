@@ -1,7 +1,24 @@
-﻿  expression_atn.cpp
+﻿  expression_cos.cpp
+  expression_exp.cpp
+  expression_instr.cpp
+  expression_int.cpp
+  expression_left.cpp
+  expression_len.cpp
+  expression_log.cpp
+  expression_mid.cpp
+  expression_right.cpp
+  expression_rnd.cpp
+  expression_sgn.cpp
+  expression_sin.cpp
+  expression_sqr.cpp
+  expression_str.cpp
+  expression_string.cpp
+  expression_tan.cpp
+  expression_usr.cpp
+  expression_val.cpp
   コード生成しています。
-  1 of 2049 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  16 of 2052 functions ( 0.8%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    72 functions had inline decision re-evaluated but remain unchanged
+    99 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

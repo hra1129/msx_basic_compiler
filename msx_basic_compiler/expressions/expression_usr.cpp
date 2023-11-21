@@ -9,8 +9,10 @@
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_USR::optimization( CCOMPILE_INFO *p_info ) {
-	
-	this->p_operand->optimization( p_info );
+	CEXPRESSION_NODE *p;
+
+	p = this->p_operand->optimization( p_info );
+	//	USRŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
 	return nullptr;
 }
 
