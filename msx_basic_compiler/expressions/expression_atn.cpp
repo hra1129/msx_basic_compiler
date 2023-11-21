@@ -12,6 +12,7 @@
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_ATN::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE* p;
+	char s[256];
 
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
@@ -19,13 +20,14 @@ CEXPRESSION_NODE* CEXPRESSION_ATN::optimization( CCOMPILE_INFO *p_info ) {
 		this->p_operand = p;
 	}
 	//	–‘OŒvZˆ—
-	if( (p_info->options.optimize_level == COPTIMIZE_LEVEL::DEEP) && this->p_operand->is_constant ) {
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
 		//	’è”‚Ìê‡
 		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
 			//	”’l‚Ìê‡
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
-			p_term->s_value = std::to_string( atan( std::stol( this->p_operand->s_value ) ) );
+			sprintf( s, "%1.14f", ( atan( std::stod( this->p_operand->s_value ) ) ) );
+			p_term->s_value = s;
 			return p_term;
 		}
 	}

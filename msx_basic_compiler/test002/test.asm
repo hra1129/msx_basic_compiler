@@ -65,7 +65,7 @@ line_100:
         CALL        interrupt_process
         LD          HL, vard_A
         PUSH        HL
-        LD          HL, const_4114801360000000
+        LD          HL, const_4114801364395942
         POP         DE
         CALL        ld_de_double_real
         CALL        interrupt_process
@@ -426,8 +426,8 @@ h_erro_handler:
         CALL        restore_h_erro
         POP         DE
         JP          work_h_erro
-const_4114801360000000:
-        DEFB        0x41, 0x14, 0x80, 0x13, 0x60, 0x00, 0x00, 0x00
+const_4114801364395942:
+        DEFB        0x41, 0x14, 0x80, 0x13, 0x64, 0x39, 0x59, 0x42
 str_0:
         DEFB        0x00
 str_1:
