@@ -10,6 +10,7 @@
 //  RUN [s”Ô†]
 bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
+	std::string s_label;
 	int line_no = p_info->list.get_line_no();
 
 	if( p_info->list.p_position->s_word != "RUN" ) {
@@ -27,7 +28,12 @@ bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 		//	RUN {s”Ô†} ‚ÌÀs‚Ìê‡
-		std::string s_label = "line_" + p_info->list.p_position->s_word;
+		if( p_info->list.p_position->s_word[0] == '*' ) {
+			s_label = "label_" + p_info->list.p_position->s_word.substr(1);
+		}
+		else {
+			s_label = "line_" + p_info->list.p_position->s_word;
+		}
 		p_info->list.p_position++;
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::LABEL, s_label );
 		p_info->assembler_list.body.push_back( asm_line );

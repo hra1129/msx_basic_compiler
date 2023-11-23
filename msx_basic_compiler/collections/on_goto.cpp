@@ -15,7 +15,7 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 	bool is_gosub = false;
 	std::vector< CBASIC_WORD >::const_iterator p_position;
-	std::vector< int > line_no_list;
+	std::vector< std::string > line_no_list;
 
 	p_position = p_info->list.p_position;
 	if( p_info->list.p_position->s_word != "ON" ) {
@@ -55,13 +55,13 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 		}
 		if( p_info->list.p_position->s_word == "," ) {
 			//	行番号が省略されている場合
-			line_no_list.push_back( -1 );		//	-1 は省略を示すマジックナンバー
+			line_no_list.push_back( "#" );		//	# は省略を示すマジックナンバー
 			p_info->list.p_position++;
 			continue;
 		}
 		if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 			//	行番号があった場合
-			line_no_list.push_back( std::stoi( p_info->list.p_position->s_word ) );
+			line_no_list.push_back( p_info->list.p_position->s_word );
 			p_info->list.p_position++;
 		}
 		else {
@@ -135,8 +135,13 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_table_label, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	for( size_t i = 0; i < line_no_list.size(); i++ ) {
-		if( line_no_list[i] != -1 ) {
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + std::to_string( line_no_list[i] ), COPERAND_TYPE::NONE, "" );
+		if( line_no_list[i] != "#" ) {
+			if( line_no_list[i][0] == '*' ) {
+				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + line_no_list[i].substr(1), COPERAND_TYPE::NONE, "" );
+			}
+			else {
+				asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + line_no_list[i], COPERAND_TYPE::NONE, "" );
+			}
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {

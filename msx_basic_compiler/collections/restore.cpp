@@ -32,7 +32,7 @@ bool CRESTORE::exec( CCOMPILE_INFO *p_info ) {
 		}
 		return true;
 	}
-	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO ) {
+	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO || p_info->list.p_position->s_word[0] == '*' ) {
 		//	s”Ô†‚Å–³‚¢‰½‚©‚ªŽw’è‚³‚ê‚Ä‚¢‚éê‡
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
