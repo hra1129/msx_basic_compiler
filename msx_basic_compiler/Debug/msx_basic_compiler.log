@@ -1,20 +1,2 @@
-﻿  expression_cos.cpp
-  expression_exp.cpp
-  expression_instr.cpp
-  expression_int.cpp
-  expression_left.cpp
-  expression_len.cpp
-  expression_log.cpp
-  expression_mid.cpp
-  expression_right.cpp
-  expression_rnd.cpp
-  expression_sgn.cpp
-  expression_sin.cpp
-  expression_sqr.cpp
-  expression_str.cpp
-  expression_string.cpp
-  expression_tan.cpp
-  expression_usr.cpp
-  expression_val.cpp
-  コードを生成中...
+﻿  if.cpp
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

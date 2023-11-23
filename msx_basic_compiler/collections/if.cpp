@@ -59,7 +59,12 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
-		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+		if( p_info->list.p_position->s_word[0] == '*' ) {
+			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
+		}
+		else {
+			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+		}
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}
@@ -70,7 +75,12 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 			//	s”Ô†‚Ìê‡
-			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+			if( p_info->list.p_position->s_word[0] == '*' ) {
+				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
+			}
+			else {
+				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+			}
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}
@@ -98,7 +108,12 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 			//	s”Ô†‚Ìê‡
-			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+			if( p_info->list.p_position->s_word[0] == '*' ) {
+				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
+			}
+			else {
+				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+			}
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}

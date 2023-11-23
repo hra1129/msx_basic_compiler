@@ -117,11 +117,17 @@ void CCOMPILER::line_compile( void ) {
 	bool do_exec;
 
 	while( !this->info.list.is_line_end() && this->info.list.p_position->s_word != "ELSE" ) {
-		do_exec = false;
 		if( this->info.list.p_position->s_word == ":" ) {
 			this->info.list.p_position++;
 			continue;
 		}
+		if( this->info.list.p_position->type == CBASIC_WORD_TYPE::LINE_NO && this->info.list.p_position->s_word[0] == '*' ) {
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + this->info.list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
+			this->info.assembler_list.body.push_back( asm_line );
+			this->info.list.p_position++;
+			continue;
+		}
+		do_exec = false;
 		//	割り込み処理用のルーチンを呼び出す
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "interrupt_process", COPERAND_TYPE::NONE, "" );
 		this->info.assembler_list.body.push_back( asm_line );

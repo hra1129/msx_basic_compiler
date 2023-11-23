@@ -598,6 +598,17 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 		s_word.type = CBASIC_WORD_TYPE::UNKNOWN;
 		return s_word;
 	}
+	if( this->p_file_image[0] == '*' ) {
+		this->p_file_image++;
+		s = "*";
+		while( this->p_file_image != this->file_image.end() && (isalpha(this->p_file_image[0] & 255) || isdigit(this->p_file_image[0] & 255)) ) {
+			s = s + (char)this->p_file_image[0];
+			this->p_file_image++;
+		}
+		s_word.s_word = s;
+		s_word.type = CBASIC_WORD_TYPE::LINE_NO;
+		return s_word;
+	}
 	if( this->p_file_image[0] == '"' ) {
 		this->p_file_image++;
 		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != '"' && this->p_file_image[0] != '\r' && this->p_file_image[0] != '\n' ) {
