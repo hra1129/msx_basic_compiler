@@ -1,2 +1,6 @@
-﻿  if.cpp
+﻿  expression_operator_and.cpp
+  expression_operator_not.cpp
+  expression_operator_or.cpp
+  expression_operator_xor.cpp
+  コードを生成中...
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
