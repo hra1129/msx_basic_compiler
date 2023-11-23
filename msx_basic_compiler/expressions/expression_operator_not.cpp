@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_operator_not.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info ) {
@@ -18,6 +19,22 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info 
 	if( p != nullptr ) {
 		delete (this->p_right);
 		this->p_right = p;
+	}
+	//	Ž–‘OŒvŽZˆ—
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_right->is_constant ) {
+		//	’è”‚Ìê‡
+		if( this->p_right->type != CEXPRESSION_TYPE::STRING ) {
+			//	”’l‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::INTEGER;
+			int i = (int) std::stod( this->p_right->s_value );
+			if( i < -32768 || i > 65535 ) {
+				p_info->errors.add( OVERFLOW_ERROR, p_info->list.get_line_no() );
+			}
+			i = i ^ 0x0FFFF;
+			p_term->s_value = std::to_string( i );
+			return p_term;
+		}
 	}
 	return nullptr;
 }
