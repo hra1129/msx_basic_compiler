@@ -100,6 +100,54 @@ rg25sav		:= 0xFFFA
 rg26sav		:= 0xFFFB
 rg27sav		:= 0xFFFC
 
+; BDOS function call
+_TERM0		:= 0x00
+_CONIN		:= 0x01
+_CONOUT		:= 0x02
+_AUXIN		:= 0x03
+_AUXOUT		:= 0x04
+_LSTOUT		:= 0x05
+_DIRIO		:= 0x06
+_DIRIN		:= 0x07
+_INNOE		:= 0x08
+_STROUT		:= 0x09
+_BUFIN		:= 0x0A
+_CONST		:= 0x0B
+_CPMVER		:= 0x0C
+_DSKRST		:= 0x0D
+_SELDSK		:= 0x0E
+_FOPEN		:= 0x0F
+_FCLOSE		:= 0x10
+_SFIRST		:= 0x11
+_SNEXT		:= 0x12
+_FDEL		:= 0x13
+_RDSEQ		:= 0x14
+_WRSEQ		:= 0x15
+_FMAKE		:= 0x16
+_FREN		:= 0x17
+_LOGIN		:= 0x18
+_CURDRV		:= 0x19
+_SETDTA		:= 0x1A
+_ALLOC		:= 0x1B
+_RDRND		:= 0x21
+_WRRND		:= 0x22
+_FSIZE		:= 0x23
+_SETRND		:= 0x24
+_WRBLK		:= 0x26
+_RDBLK		:= 0x27
+_WRSER		:= 0x28
+_GDATE		:= 0x2A
+_SDATE		:= 0x2B
+_GTIME		:= 0x2C
+_STIME		:= 0x2D
+_VERIFY		:= 0x2E
+_RDABS		:= 0x2F
+_WRABS		:= 0x30
+_DPARM		:= 0x31
+_FFIRST		:= 0x40
+_FNEXT		:= 0x41
+_FNEW		:= 0x42
+
 ; SUB-ROM entry
 chgmdp		:= 0x01B5
 
@@ -180,6 +228,18 @@ blib_entries::
 			jp		sub_bload
 	blib_bload_s:
 			jp		sub_bload_s
+	blib_setup_fcb:
+			jp		sub_setup_fcb
+	blib_fopen:
+			jp		sub_fopen
+	blib_fcreate:
+			jp		sub_fcreate
+	blib_fclose:
+			jp		sub_fclose
+	blib_fread:
+			jp		sub_fread
+	blib_fwrite:
+			jp		sub_fwrite
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1891,6 +1951,263 @@ sub_bload_s::
 			endscope
 
 ; =============================================================================
+;	新しいFCBを生成する
+;	input:
+;		HL ... ファイル名
+;		DE ... FCB用のメモリのアドレス (37bytes)
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_setup_fcb
+sub_setup_fcb::
+			; 中身をクリアする
+			push	hl
+			push	de
+			ld		l, e
+			ld		h, d
+			inc		de
+			ld		bc, 36
+			ld		[hl], 0
+			ldir
+			; カレントドライブ取得
+			ld		c, _CURDRV
+			call	bdos
+			inc		a
+			pop		de
+			pop		hl
+			ld		[de], a
+			; ドライブ名の存在チェック
+			ld		a, [hl]
+			inc		hl
+			ld		c, a				; C = 長さ
+			cp		a, 3
+			jr		c, copy_file_name
+			inc		hl
+			ld		a, [hl]				; 2nd char
+			dec		hl
+			cp		a, ':'
+			jr		nc, copy_file_name
+			ld		a, [hl]				; 1st char
+			or		a, a
+			jp		m, copy_file_name
+			and		a, 0b1101_1111
+			cp		a, 'H'+1
+			jr		nc, copy_file_name
+			sub		a, 'A'
+			jr		c, copy_file_name
+			inc		a
+			ld		[de], a				; Driver Number 1:A, 2:B, ... 8:H
+			inc		hl
+			inc		hl
+			dec		c
+			dec		c
+			; ファイル名(Max 8文字) のコピー
+		copy_file_name:
+			inc		de					; DE: ファイル名
+			ld		b, 8				; B: ファイル名の最大サイズ
+			inc		c					; つじつま合わせ
+		copy_file_name_loop:
+			dec		c
+			jr		z, copy_name_finish	; ファイル名のコピーは終わった
+			ld		a, [hl]
+			cp		a, '.'
+			jr		z, copy_ext_name_skip_dot
+			call	check_error_char
+			jp		c, err_bad_file_name
+			ld		[de], a
+			inc		hl
+			inc		de
+			djnz	copy_file_name_loop
+			jr		copy_ext_name
+			; ファイル名の残りの隙間をスキップ
+		copy_ext_name_skip_dot:
+			dec		hl					; '.' を読み飛ばす分のつじつま合わせ
+			inc		b					; '.' を読み飛ばす分
+		copy_ext_name_skip_dot_loop:
+			inc		hl
+			inc		de
+			dec		c
+			jr		z, copy_name_finish	; ファイル名のコピーは終わった
+			djnz	copy_ext_name_skip_dot_loop
+			; 拡張子(Max 3文字) のコピー
+		copy_ext_name:
+			ld		b, 3
+		copy_ext_name_loop:
+			ld		a, [hl]
+			call	check_error_char
+			jp		c, err_bad_file_name
+			ld		[de], a
+			dec		c
+			jr		z, copy_ext_name_padding_loop
+			inc		hl
+			inc		de
+			djnz	copy_ext_name_loop
+			jr		copy_name_finish
+			; 拡張子が 3文字未満ならパディング
+		copy_ext_name_padding_loop:
+			inc		de
+			djnz	copy_ext_name_padding_loop
+			; ファイル名以外のフィールドを初期化する
+		copy_name_finish:
+			inc		de
+			inc		de						; DE = FCB[14]
+			ld		a, 1
+			ld		[de], a					; FCB[14] = 1 (レコードサイズ)
+			ret
+
+	check_error_char:
+			push	hl
+			push	bc
+			ld		hl, error_char
+			ld		b, a
+	check_error_char_loop:
+			ld		a, [hl]
+			or		a, a
+			jr		z, check_error_exit		; 不正な記号には一致しなかった
+			cp		a, b
+			scf
+			jr		z, check_error_exit		; 不正な記号に一致した
+			inc		hl
+			jr		check_error_char_loop
+	check_error_exit:
+			pop		bc
+			pop		hl
+			ret		c						; エラーなら抜ける
+	toupper:
+			ld		a, b
+			cp		a, 'a'
+			jr		c, toupper_exit
+			cp		a, 'z'+1
+			jr		nc, toupper_exit
+			and		a, 0b1101_1111			; a → A ... z → Z
+	toupper_exit:
+			or		a, a					; Cf = 0
+			ret
+	error_char:
+			db		":\"\\^|<>,./*? ", 0
+			endscope
+
+; =============================================================================
+;	ファイルを開く
+;	input:
+;		HL ... ファイル名
+;		DE ... FCB用のメモリのアドレス (37bytes)
+;	output:
+;		A .... 00h: 成功, FFh: 失敗
+;	break:
+;		all
+;	comment:
+;		既に存在するファイルを開く
+; =============================================================================
+			scope	sub_fopen
+sub_fopen::
+			push	de
+			call	sub_setup_fcb
+			pop		de
+			ld		c, _FOPEN
+			jp		bdos
+			endscope
+
+; =============================================================================
+;	ファイルを作る
+;	input:
+;		HL ... ファイル名
+;		DE ... FCB用のメモリのアドレス (37bytes)
+;	output:
+;		A .... 00h: 成功, FFh: 失敗
+;	break:
+;		all
+;	comment:
+;		存在しなければ生成し、存在していれば作り直す
+; =============================================================================
+			scope	sub_fcreate
+sub_fcreate::
+			push	de
+			call	sub_setup_fcb
+			pop		de
+			ld		c, _FMAKE
+			ex		de, hl
+			jp		bdos
+			endscope
+
+; =============================================================================
+;	ファイルを閉じる
+;	input:
+;		HL ... 開いたFCB
+;	output:
+;		A .... 00h: 成功, FFh: 失敗
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_fclose
+sub_fclose::
+			ld		c, _FCLOSE
+			ex		de, hl
+			jp		bdos
+			endscope
+
+; =============================================================================
+;	ファイルを読む
+;	input:
+;		HL ... 開いたFCB
+;		DE ... 読み出し結果を格納するアドレス
+;		BC ... 読み出すサイズ
+;	output:
+;		A .... 00h: 成功, 01h: 失敗またはEOF
+;		HL ... 実際に読んだバイト数
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_fread
+sub_fread::
+			push	bc					; サイズ
+			push	hl					; FCB
+			; 転送先アドレスの指定
+			ld		c, _SETDTA
+			call	bdos
+			; 読み出し
+			pop		de					; FCB
+			pop		hl					; サイズ = レコード数 (1レコード 1byte設定)
+			ld		c, _RDBLK
+			jp		bdos
+			endscope
+
+; =============================================================================
+;	ファイルへ書き込む
+;	input:
+;		HL ... 開いたFCB
+;		DE ... 書き出す内容が格納されているアドレス
+;		BC ... 書き出すサイズ
+;	output:
+;		A .... 00h: 成功, 01h: 失敗
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_fwrite
+sub_fwrite::
+			push	bc					; サイズ
+			push	hl					; FCB
+			; 転送元アドレスの指定
+			ld		c, _SETDTA
+			call	bdos
+			; 読み出し
+			pop		de					; FCB
+			pop		hl					; サイズ = レコード数 (1レコード 1byte設定)
+			ld		c, _WRBLK
+			jp		bdos
+			endscope
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
@@ -1898,6 +2215,8 @@ err_illegal_function_call	:= $+1
 			ld		bc, 0x051E
 err_type_mismatch			:= $+1
 			ld		bc, 0x0D1E
+err_bad_file_name			:= $+1
+			ld		bc, 0x381E
 			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT
 			ld		ix, 0x406F				; ERRHNDR
 			jp		calslt
