@@ -151,6 +151,7 @@
     <ClCompile Include="assembler\assembler_list.cpp" />
     <ClCompile Include="basic_list.cpp" />
     <ClCompile Include="collections\beep.cpp" />
+    <ClCompile Include="collections\bload.cpp" />
     <ClCompile Include="collections\call.cpp" />
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="basic_list.h" />
     <ClInclude Include="basic_types.h" />
     <ClInclude Include="collections\beep.h" />
+    <ClInclude Include="collections\bload.h" />
     <ClInclude Include="collections\call.h" />
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />
