@@ -1935,22 +1935,6 @@ sub_bload::
 			endscope
 
 ; =============================================================================
-;	BLOAD HL,S
-;	input:
-;		HL ... ファイル名
-;	output:
-;		none
-;	break:
-;		all
-;	comment:
-;		none
-; =============================================================================
-			scope	sub_bload_s
-sub_bload_s::
-			ret
-			endscope
-
-; =============================================================================
 ;	新しいFCBを生成する
 ;	input:
 ;		HL ... ファイル名
@@ -1990,7 +1974,7 @@ sub_setup_fcb::
 			ld		a, [hl]				; 2nd char
 			dec		hl
 			cp		a, ':'
-			jr		nc, copy_file_name
+			jr		nz, copy_file_name
 			ld		a, [hl]				; 1st char
 			or		a, a
 			jp		m, copy_file_name
@@ -2025,14 +2009,12 @@ sub_setup_fcb::
 			jr		copy_ext_name
 			; ファイル名の残りの隙間をスキップ
 		copy_ext_name_skip_dot:
-			dec		hl					; '.' を読み飛ばす分のつじつま合わせ
-			inc		b					; '.' を読み飛ばす分
+			ld		a, ' '
 		copy_ext_name_skip_dot_loop:
-			inc		hl
-			inc		de
-			dec		c
-			jr		z, copy_name_finish	; ファイル名のコピーは終わった
+			ld		[de], a				; 隙間は ' ' で埋める
+			inc		de					; 拡張子の位置まで移動
 			djnz	copy_ext_name_skip_dot_loop
+			inc		hl					; '.' を読み飛ばす
 			; 拡張子(Max 3文字) のコピー
 		copy_ext_name:
 			ld		b, 3
@@ -2041,22 +2023,23 @@ sub_setup_fcb::
 			call	check_error_char
 			jp		c, err_bad_file_name
 			ld		[de], a
-			dec		c
-			jr		z, copy_ext_name_padding_loop
 			inc		hl
 			inc		de
+			dec		c
+			jr		z, copy_ext_name_padding
 			djnz	copy_ext_name_loop
 			jr		copy_name_finish
 			; 拡張子が 3文字未満ならパディング
+		copy_ext_name_padding:
+			dec		b
+			jr		z, copy_name_finish
+			ld		a, ' '
 		copy_ext_name_padding_loop:
+			ld		[de], a
 			inc		de
 			djnz	copy_ext_name_padding_loop
 			; ファイル名以外のフィールドを初期化する
 		copy_name_finish:
-			inc		de
-			inc		de						; DE = FCB[14]
-			ld		a, 1
-			ld		[de], a					; FCB[14] = 1 (レコードサイズ)
 			ret
 
 	check_error_char:
@@ -2074,11 +2057,11 @@ sub_setup_fcb::
 			inc		hl
 			jr		check_error_char_loop
 	check_error_exit:
+			ld		a, b
 			pop		bc
 			pop		hl
 			ret		c						; エラーなら抜ける
 	toupper:
-			ld		a, b
 			cp		a, 'a'
 			jr		c, toupper_exit
 			cp		a, 'z'+1
@@ -2108,8 +2091,20 @@ sub_fopen::
 			push	de
 			call	sub_setup_fcb
 			pop		de
+			push	de
 			ld		c, _FOPEN
-			jp		bdos
+			call	bdos
+			pop		hl
+			ld		de, 14
+			add		hl, de
+			push	af
+			ld		a, 1
+			ld		[hl], a
+			dec		a
+			inc		hl
+			ld		[hl], a
+			pop		af
+			ret
 			endscope
 
 ; =============================================================================
@@ -2129,9 +2124,20 @@ sub_fcreate::
 			push	de
 			call	sub_setup_fcb
 			pop		de
+			push	de
 			ld		c, _FMAKE
-			ex		de, hl
-			jp		bdos
+			call	bdos
+			pop		hl
+			ld		de, 14
+			add		hl, de
+			push	af
+			ld		a, 1
+			ld		[hl], a
+			dec		a
+			inc		hl
+			ld		[hl], a
+			pop		af
+			ret
 			endscope
 
 ; =============================================================================
@@ -2208,6 +2214,100 @@ sub_fwrite::
 			endscope
 
 ; =============================================================================
+;	BLOAD ファイル名,S
+;	input:
+;		HL ... ファイル名
+;		DE ... 読みだし用バッファ
+;		BC ... 読みだし用バッファのサイズ
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		読みだし用バッファは、最低でも 128byte 必要
+; =============================================================================
+			scope	sub_bload_s
+sub_bload_s::
+			ld		[buffer_address], de
+			ld		[buffer_size], bc
+			; ファイルを開く
+			ld		de, buf				; FCB を buf に置く
+			call	sub_fopen
+			or		a, a
+			jp		nz, err_file_not_found
+			; ヘッダを読み出す
+			ld		hl, buf				; FCB
+			ld		de, bsave_head
+			ld		bc, 7
+			call	sub_fread
+			or		a, a
+			jr		nz, err_bad_file_mode
+			ld		a, [bsave_head_signature]
+			cp		a, 0xFE
+			jp		nz, err_bad_file_mode
+			; サイズを求める
+			ld		hl, [bsave_head_end]
+			ld		de, [bsave_head_start]
+			sbc		hl, de
+			ld		[bsave_head_size], hl
+			; VRAMアドレスをセットする
+			ld		hl, [bsave_head_start]
+			ld		a, [scrmod]
+			cp		a, 5
+			jr		nc, screen5over
+		screen5under:
+			call	setwrt
+			jr		exit_setwrt
+		screen5over:
+			call	nstwrt
+		exit_setwrt:
+		load_loop:
+			; バッファに読み出す
+			ld		hl, [buffer_size]
+			ld		de, [bsave_head_size]
+			rst		0x20						; CP HL, DE
+			ld		bc, [buffer_size]
+			jr		c, skip1
+			ld		bc, [bsave_head_size]
+		skip1:
+			ld		hl, buf
+			ld		de, [buffer_address]
+			push	bc							; 読み出すサイズ
+			call	sub_fread
+			pop		bc							; 読み出すサイズ
+			or		a, a
+			sbc		hl, bc
+			jp		nz, err_device_io			; 指定のサイズ読めなかった場合は Device I/O Error
+			; 読んだサイズ分を VRAM へ転送する
+			ld		hl, [buffer_address]
+			ld		de, [bsave_head_size]
+		transfer_loop:
+			ld		a, [hl]
+			out		[ vdpport0 ], a
+			inc		hl
+			dec		de
+			dec		bc
+			ld		a, c
+			or		a, b
+			jr		nz, transfer_loop
+			ld		[bsave_head_size], de
+			ld		a, e
+			or		a, d
+			jr		nz, load_loop
+			; ファイルを閉じる
+			ld		hl, buf
+			jp		sub_fclose
+
+	bsave_head				= buf + 37
+	bsave_head_signature	= bsave_head
+	bsave_head_start		= bsave_head + 1
+	bsave_head_end			= bsave_head + 3
+	bsave_head_size			= bsave_head + 5
+	buffer_address			= bsave_head + 7
+	buffer_size				= bsave_head + 9
+			endscope
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
@@ -2215,8 +2315,14 @@ err_illegal_function_call	:= $+1
 			ld		bc, 0x051E
 err_type_mismatch			:= $+1
 			ld		bc, 0x0D1E
+err_device_io				:= $+1
+			ld		bc,	0x131E
+err_file_not_found			:= $+1
+			ld		bc, 0x351E
 err_bad_file_name			:= $+1
 			ld		bc, 0x381E
+err_bad_file_mode			:= $+1
+			ld		bc, 0x3D1E
 			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT
 			ld		ix, 0x406F				; ERRHNDR
 			jp		calslt

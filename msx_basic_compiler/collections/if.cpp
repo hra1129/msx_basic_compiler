@@ -101,7 +101,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.is_line_end() ) {
 		//	ELSE は無い
 	}
-	if( p_info->list.p_position->s_word == "ELSE" ) {
+	if( !p_info->list.is_command_end() &&  p_info->list.p_position->s_word == "ELSE" ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
 			//	THEN で終わる場合。この場合は何もしないだけでエラーでは無い。

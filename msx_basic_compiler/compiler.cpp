@@ -6,6 +6,7 @@
 
 #include "compiler.h"
 #include "collections/beep.h"
+#include "collections/bload.h"
 #include "collections/call.h"
 #include "collections/cls.h"
 #include "collections/color.h"
@@ -56,6 +57,7 @@
 void CCOMPILER::initialize( void ) {
 
 	this->collection.push_back( new CBEEP );
+	this->collection.push_back( new CBLOAD );
 	this->collection.push_back( new CCALL );
 	this->collection.push_back( new CCLS );
 	this->collection.push_back( new CCOMMENT );
