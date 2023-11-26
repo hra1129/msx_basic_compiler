@@ -11,17 +11,8 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_chgclr                     = 0x00062
-work_forclr                     = 0x0F3E9
-work_bakclr                     = 0x0F3EA
-work_bdrclr                     = 0x0F3EB
-bios_chgmodp                    = 0x001B5
-bios_extrom                     = 0x0015F
-blib_bload_s                    = 0x04057
-bios_rstplt                     = 0x00145
+bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
-blib_inkey                      = 0x0402a
-blib_strcmp                     = 0x04027
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -30,6 +21,8 @@ bios_gttrig                     = 0x00D8
         DEFW        start_address
         ORG         0x8010
 start_address:
+        LD          HL, err_return_without_gosub
+        PUSH        HL
         LD          [save_stack], SP
         CALL        check_blib
         JP          NZ, bios_syntax_error
@@ -68,90 +61,18 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-        CALL        interrupt_process
-        LD          HL, 15
-        LD          A, L
-        LD          [work_forclr], A
-        LD          HL, 0
-        LD          A, L
-        LD          [work_bakclr], A
-        LD          HL, 0
-        LD          A, L
-        LD          [work_bdrclr], A
-        CALL        bios_chgclr
-        CALL        interrupt_process
-        LD          HL, 5
-        LD          A, L
-        LD          IX, bios_chgmodp
-        CALL        bios_extrom
-line_110:
-        CALL        interrupt_process
-        LD          HL, str_1
-        PUSH        HL
-        LD          HL, [heap_end]
-        LD          DE, [heap_next]
-        OR          A, A
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        LD          IX, blib_bload_s
-        CALL        call_blib
-line_120:
-        CALL        interrupt_process
-        LD          IX, bios_rstplt
-        CALL        bios_extrom
-line_130:
-        CALL        interrupt_process
-        LD          HL, vars_I
-        PUSH        HL
-        LD          IX, blib_inkey
-        CALL        call_blib
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, [vars_I]
-        CALL        copy_string
-        PUSH        HL
-        LD          HL, str_0
-        POP         DE
-        EX          DE, HL
-        PUSH        HL
-        PUSH        DE
-        LD          IX, blib_strcmp
-        CALL        call_blib
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _pt2
-        DEC         HL
-_pt2:
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt1
-        JP          line_130
-_pt1:
-_pt0:
+        RET         
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
         LD          SP, [save_stack]
-        RET         
+        LD          HL, _basic_end
+        CALL        bios_newstt
+_basic_end:
+        DEFB        ':', 0x81, 0x00
+err_return_without_gosub:
+        LD          E, 3
+        JP          bios_errhand
 check_blib:
         LD          a, [work_blibslot]
         LD          h, 0x40
@@ -178,148 +99,6 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
-free_string:
-        LD          DE, heap_start
-        RST         0x20
-        RET         C
-        LD          DE, [heap_next]
-        RST         0x20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          free_heap
-free_heap:
-        PUSH        HL
-        ADD         HL, BC
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
-        EX          DE, HL
-        LD          HL, [heap_next]
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          A, C
-        OR          A, B
-        JR          Z, _free_heap_loop0
-        LDIR        
-_free_heap_loop0:
-        LD          [heap_next], DE
-        LD          HL, vars_area_start
-_free_heap_loop1:
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          NC, _free_heap_loop1_end
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          DE, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop1_next:
-        POP         HL
-        INC         HL
-        JR          _free_heap_loop1
-_free_heap_loop1_end:
-        LD          HL, varsa_area_start
-_free_heap_loop2:
-        LD          DE, varsa_area_end
-        RST         0x20
-        RET         NC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        LD          C, [HL]
-        INC         HL
-        LD          B, 0
-        ADD         HL, BC
-        ADD         HL, BC
-        EX          DE, HL
-        SBC         HL, BC
-        SBC         HL, BC
-        RR          H
-        RR          L
-        LD          C, L
-        LD          B, H
-        EX          DE, HL
-_free_heap_sarray_elements:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop2_next
-        LD          HL, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop2_next:
-        POP         HL
-        INC         HL
-        DEC         BC
-        LD          A, C
-        OR          A, B
-        JR          NZ, _free_heap_sarray_elements
-        POP         HL
-        JR          _free_heap_loop2
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -335,8 +114,6 @@ program_run:
         LD          BC, varsa_area_end - var_area_start - 1
         LD          [HL], 0
         LDIR        
-        LD          HL, str_0
-        LD          [vars_area_start], HL
         RET         
 interrupt_process:
         LD          A, [svarb_on_sprite_running]
@@ -588,8 +365,6 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
-str_1:
-        DEFB        0x08, 0x54, 0x45, 0x53, 0x54, 0x2E, 0x53, 0x43, 0x35
 save_stack:
         DEFW        0
 heap_next:
@@ -699,8 +474,6 @@ svari_on_strig4_line:
         DEFW        0
 var_area_end:
 vars_area_start:
-vars_I:
-        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:
