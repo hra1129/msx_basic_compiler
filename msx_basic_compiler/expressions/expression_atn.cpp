@@ -5,9 +5,9 @@
 // --------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <cmath>
 #include "expression_atn.h"
 #include "expression_term.h"
-#include <cmath>
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_ATN::optimization( CCOMPILE_INFO *p_info ) {

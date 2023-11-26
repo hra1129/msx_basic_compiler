@@ -27,7 +27,7 @@ CEXPRESSION_NODE* CEXPRESSION_STR::optimization( CCOMPILE_INFO *p_info ) {
 			char s[256] = "0";
 			switch( this->p_operand->type ) {
 			default:
-			case CEXPRESSION_TYPE::INTEGER:			sprintf( s, "%d", std::stol( this->p_operand->s_value ) );		break;
+			case CEXPRESSION_TYPE::INTEGER:			sprintf( s, "%ld", std::stol( this->p_operand->s_value ) );		break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:		sprintf( s, "%1.7f", std::stod( this->p_operand->s_value ) );	break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:		sprintf( s, "%1.14f", std::stod( this->p_operand->s_value ) );	break;
 			}

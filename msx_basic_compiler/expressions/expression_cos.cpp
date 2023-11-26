@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <cmath>
 #include "expression_cos.h"
 #include "expression_term.h"
 

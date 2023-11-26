@@ -5,9 +5,9 @@
 // --------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <cmath>
 #include "expression_exp.h"
 #include "expression_term.h"
-#include <cmath>
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_EXP::optimization( CCOMPILE_INFO *p_info ) {
