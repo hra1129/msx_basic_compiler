@@ -1919,22 +1919,6 @@ sub_instr::
 			endscope
 
 ; =============================================================================
-;	BLOAD HL
-;	input:
-;		HL ... ファイル名
-;	output:
-;		HL ... 実行開始アドレス
-;	break:
-;		all
-;	comment:
-;		none
-; =============================================================================
-			scope	sub_bload
-sub_bload::
-			ret
-			endscope
-
-; =============================================================================
 ;	新しいFCBを生成する
 ;	input:
 ;		HL ... ファイル名
@@ -2241,7 +2225,7 @@ sub_bload_s::
 			ld		bc, 7
 			call	sub_fread
 			or		a, a
-			jr		nz, err_bad_file_mode
+			jp		nz, err_bad_file_mode
 			ld		a, [bsave_head_signature]
 			cp		a, 0xFE
 			jp		nz, err_bad_file_mode
@@ -2305,6 +2289,63 @@ sub_bload_s::
 	bsave_head_size			= bsave_head + 5
 	buffer_address			= bsave_head + 7
 	buffer_size				= bsave_head + 9
+			endscope
+
+; =============================================================================
+;	BLOAD HL
+;	input:
+;		HL ... ファイル名
+;	output:
+;		HL ... 実行開始アドレス
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_bload
+sub_bload::
+			; ファイルを開く
+			ld		de, buf				; FCB を buf に置く
+			call	sub_fopen
+			or		a, a
+			jp		nz, err_file_not_found
+			; ヘッダを読み出す
+			ld		hl, buf				; FCB
+			ld		de, bsave_head
+			ld		bc, 7
+			call	sub_fread
+			or		a, a
+			jp		nz, err_bad_file_mode
+			ld		a, [bsave_head_signature]
+			cp		a, 0xFE
+			jp		nz, err_bad_file_mode
+			; サイズを求める
+			ld		hl, [bsave_head_end]
+			ld		de, [bsave_head_start]
+			sbc		hl, de
+			ld		[bsave_head_size], hl
+			; 読み出す
+			ld		bc, [bsave_head_size]
+			ld		hl, buf
+			ld		de, [bsave_head_start]
+			push	bc							; 読み出すサイズ
+			call	sub_fread
+			pop		bc							; 読み出すサイズ
+			or		a, a
+			sbc		hl, bc
+			jp		nz, err_device_io			; 指定のサイズ読めなかった場合は Device I/O Error
+			; ファイルを閉じる
+			ld		hl, buf
+			call	sub_fclose
+			ld		hl, [bsave_head_exec]
+			ret
+
+	bsave_head				= buf + 37
+	bsave_head_signature	= bsave_head
+	bsave_head_start		= bsave_head + 1
+	bsave_head_end			= bsave_head + 3
+	bsave_head_exec			= bsave_head + 5
+	bsave_head_size			= bsave_head + 7
 			endscope
 
 ; =============================================================================
