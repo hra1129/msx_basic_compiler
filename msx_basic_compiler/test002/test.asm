@@ -11,6 +11,8 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
+work_himem                      = 0x0FC4A
+work_prtflg                     = 0x0f416
 bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
 bios_gttrig                     = 0x00D8
@@ -61,7 +63,28 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-        RET         
+        LD          HL, 49152
+        DI          
+        LD          SP, HL
+        LD          DE, err_return_without_gosub
+        PUSH        DE
+        LD          [work_himem], HL
+        LD          [save_stack], SP
+        EI          
+        LD          DE, _pt0
+        JP          program_run
+_pt0:
+line_110:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_1
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -99,6 +122,128 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
+        RET         
+free_string:
+        LD          DE, heap_start
+        RST         0x20
+        RET         C
+        LD          DE, [heap_next]
+        RST         0x20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          free_heap
+free_heap:
+        PUSH        HL
+        ADD         HL, BC
+        LD          [heap_move_size], BC
+        LD          [heap_remap_address], HL
+        EX          DE, HL
+        LD          HL, [heap_next]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _free_heap_loop0
+        LDIR        
+_free_heap_loop0:
+        LD          [heap_next], DE
+        LD          HL, vars_area_start
+_free_heap_loop1:
+        LD          DE, varsa_area_end
+        RST         0x20
+        JR          NC, _free_heap_loop1_end
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop1_next
+        LD          DE, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop1_next:
+        POP         HL
+        INC         HL
+        JR          _free_heap_loop1
+_free_heap_loop1_end:
+        LD          HL, varsa_area_start
+_free_heap_loop2:
+        LD          DE, varsa_area_end
+        RST         0x20
+        RET         NC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
+        EX          DE, HL
+        SBC         HL, BC
+        SBC         HL, BC
+        RR          H
+        RR          L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_free_heap_sarray_elements:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [heap_remap_address]
+        EX          DE, HL
+        RST         0x20
+        JR          C, _free_heap_loop2_next
+        LD          HL, [heap_move_size]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_free_heap_loop2_next:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _free_heap_sarray_elements
+        POP         HL
+        JR          _free_heap_loop2
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -365,6 +510,10 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
+str_1:
+        DEFB        0x0A, 0x43, 0x6F, 0x6D, 0x70, 0x6C, 0x65, 0x74, 0x65, 0x64, 0x2E
+str_2:
+        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:
