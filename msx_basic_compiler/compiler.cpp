@@ -8,6 +8,7 @@
 #include "collections/beep.h"
 #include "collections/bload.h"
 #include "collections/call.h"
+#include "collections/clear.h"
 #include "collections/cls.h"
 #include "collections/color.h"
 #include "collections/comment.h"
@@ -60,6 +61,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CBLOAD );
 	this->collection.push_back( new CCALL );
 	this->collection.push_back( new CCLS );
+	this->collection.push_back( new CCLEAR );
 	this->collection.push_back( new CCOMMENT );
 	this->collection.push_back( new CCOLOR );
 	this->collection.push_back( new CDATA );
