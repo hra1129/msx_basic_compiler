@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <cmath>
 #include "expression_log.h"
 #include "expression_term.h"
 
