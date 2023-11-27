@@ -240,6 +240,8 @@ blib_entries::
 			jp		sub_fread
 	blib_fwrite:
 			jp		sub_fwrite
+	blib_mid_cmd:
+			jp		sub_mid_cmd
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2297,6 +2299,7 @@ sub_bload_s::
 ;		HL ... ファイル名
 ;	output:
 ;		HL ... 実行開始アドレス
+;		DE ... 先頭アドレス
 ;	break:
 ;		all
 ;	comment:
@@ -2338,6 +2341,7 @@ sub_bload::
 			ld		hl, buf
 			call	sub_fclose
 			ld		hl, [bsave_head_exec]
+			ld		de, [bsave_head_start]
 			ret
 
 	bsave_head				= buf + 37
@@ -2346,6 +2350,71 @@ sub_bload::
 	bsave_head_end			= bsave_head + 3
 	bsave_head_exec			= bsave_head + 5
 	bsave_head_size			= bsave_head + 7
+			endscope
+
+; =============================================================================
+;	MID$( 文字列変数, 書き替え位置, 書き替え文字数 ) = 書き替える文字
+;	input:
+;		HL ... 文字列変数のアドレス(書き替える場所)
+;		DE ... 上書きする文字列のアドレス
+;		B .... 書き替え位置 (先頭は 1)
+;		C .... 書き替え文字数 (省略時は 255)
+;	output:
+;		HLの文字列が書き替えられる
+;	break:
+;		all
+;	comment:
+;		HL の値は保存される
+; =============================================================================
+			scope	sub_mid_cmd
+sub_mid_cmd::
+			; B = 0 はエラー
+			inc		b
+			dec		b
+			jp		z, err_illegal_function_call
+			; 書き替え位置 B がはみ出してないかチェック
+			ld		a, [hl]								; 文字列変数に格納されている文字列の長さ
+			cp		a, b
+			jp		c, err_illegal_function_call
+			; 書き替え文字数が文字列端を越えていないかチェック
+			ld		a, b
+			dec		a
+			add		a, c
+			jr		c, adjust_size
+			cp		a, [hl]
+			jr		nc, after_adjust_size
+		adjust_size:
+			; 文字列端を越えている場合はそこまでの長さに切り詰める
+			ld		a, [hl]
+			sub		a, b
+			inc		a
+			ld		c, a
+		after_adjust_size:
+			; 上書きする文字列 DE が、書き替える長さ C より短いか調べる
+			ld		a, [de]
+			cp		a, c
+			jr		nc, after_adjust_size2
+			; 短かったので、書き替える長さを置き換える
+			ld		c, a
+		after_adjust_size2:
+			; 書き替える長さが 0 になった場合、何もしない
+			inc		c
+			dec		c
+			ret		z
+			push	hl
+			; 書き替える位置へポインタを移動
+			ld		a, l
+			add		a, b
+			ld		l, a
+			ld		a, h
+			ld		b, 0
+			adc		a, b
+			; 書き替え処理
+			inc		de
+			ex		de, hl
+			ldir
+			pop		hl
+			ret
 			endscope
 
 ; =============================================================================
