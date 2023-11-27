@@ -1,0 +1,14 @@
+		呼ぶ前に、restore_h_erro､restore_h_timi を呼んでおく
+
+		ld		iy, [work_blibslot - 1]
+		ld		ix, blib_bload
+		call	bios_calslt
+
+		; 開始アドレス(DE) が HIMEM未満なら END 処理へ
+		push	hl
+		ld		hl, [work_himem]
+		ex		de, hl
+		rst		0x20				; CP HL, DE		CP start, himem
+		jr		c, end_process
+
+		

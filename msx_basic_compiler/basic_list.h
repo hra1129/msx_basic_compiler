@@ -55,7 +55,7 @@ private:
 	CBASIC_WORD get_decimal( const std::string s, const std::string s_type );
 	CBASIC_WORD get_comment( void );
 	CBASIC_WORD get_word( void );
-	CBASIC_WORD get_ascii_word( void );
+	CBASIC_WORD get_ascii_word( bool label_ok );
 	CBASIC_WORD get_data_word( void );
 
 	bool load_binary( FILE *p_file, CERROR_LIST &errors );

@@ -587,7 +587,7 @@ CBASIC_WORD CBASIC_LIST::get_data_word( void ) {
 }
 
 // --------------------------------------------------------------------
-CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
+CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 	CBASIC_WORD s_word;
 	std::string s;
 	int i;
@@ -598,7 +598,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( void ) {
 		s_word.type = CBASIC_WORD_TYPE::UNKNOWN;
 		return s_word;
 	}
-	if( this->p_file_image[0] == '*' ) {
+	if( label_ok && this->p_file_image[0] == '*' ) {
 		this->p_file_image++;
 		s = "*";
 		while( this->p_file_image != this->file_image.end() && (isalpha(this->p_file_image[0] & 255) || isdigit(this->p_file_image[0] & 255)) ) {
@@ -788,10 +788,12 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 	CBASIC_WORD s_word;
 	bool is_last_jump = false;
 	bool is_data = false;
+	bool label_ok = false;
 
 	while( this->p_file_image != this->file_image.end() ) {
 		//	行番号を得る
 		line_no = this->get_integer();
+		label_ok = true;
 		//	行内の解釈
 		while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != '\n' ) {
 			if( is_data ) {
@@ -816,7 +818,10 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 			}
 			else {
 				//	単語を1つ取得して、行番号を付与してリストに追加
-				s_word = this->get_ascii_word();
+				s_word = this->get_ascii_word( label_ok || is_last_jump );
+				if( !(s_word.s_word == ":" && s_word.type == CBASIC_WORD_TYPE::SYMBOL) ) {
+					label_ok = false;
+				}
 				s_word.line_no = line_no;
 				if( is_last_jump ) {
 					if( s_word.type == CBASIC_WORD_TYPE::INTEGER ) {
