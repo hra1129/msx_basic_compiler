@@ -2382,7 +2382,7 @@ sub_mid_cmd::
 			add		a, c
 			jr		c, adjust_size
 			cp		a, [hl]
-			jr		nc, after_adjust_size
+			jr		c, after_adjust_size
 		adjust_size:
 			; •¶š—ñ’[‚ğ‰z‚¦‚Ä‚¢‚éê‡‚Í‚»‚±‚Ü‚Å‚Ì’·‚³‚ÉØ‚è‹l‚ß‚é
 			ld		a, [hl]
