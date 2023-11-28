@@ -6621,9 +6621,9 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:8cyc R800:4cyc
       |000947|48D9|  BE
 ------+------+----+----------------------------------
-  2385|      |    |JR NC, AFTER_ADJUST_SIZE
+  2385|      |    |JR C, AFTER_ADJUST_SIZE
       |      |    |  Z80:13cyc/8cyc R800:3cyc/2cyc
-      |000948|48DA|  30 04
+      |000948|48DA|  38 04
 ------+------+----+----------------------------------
   2386|      |    |ADJUST_SIZE :
       |      |    |  label [SUB_MID_CMD:ADJUST_SIZE] address: 0x0048dc
