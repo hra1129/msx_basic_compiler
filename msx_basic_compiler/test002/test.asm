@@ -11,11 +11,8 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_errhand                    = 0x0406F
-blib_mid_cmd                    = 0x0406c
-work_prtflg                     = 0x0f416
-work_buf                        = 0x0f55e
 bios_newstt                     = 0x04601
+bios_errhand                    = 0x0406F
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -62,122 +59,31 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
-line_10:
+line_100:
         CALL        interrupt_process
-        LD          HL, vars_A
+line_110:
+        CALL        interrupt_process
+        LD          HL, [vari_I]
         PUSH        HL
-        LD          HL, str_1
+        LD          HL, [vari_NP]
         POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        LD          C, 255
-        PUSH        BC
-        LD          HL, [vars_A]
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
         XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_20:
+        SBC         HL, DE
+        JP          P, _pt2
+        DEC         A
+_pt2:
+        LD          H, A
+        LD          L, A
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt1
+        JP          line_110
+_pt1:
+        JP          line_120
+_pt0:
+line_120:
         CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        LD          C, 255
-        PUSH        BC
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        LD          HL, str_0
-        POP         DE
-        CALL        str_add
-        POP         BC
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        POP         HL
-        CALL        free_string
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
+; comment
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -215,204 +121,6 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-free_string:
-        LD          DE, heap_start
-        RST         0x20
-        RET         C
-        LD          DE, [heap_next]
-        RST         0x20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          free_heap
-free_heap:
-        PUSH        HL
-        ADD         HL, BC
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
-        EX          DE, HL
-        LD          HL, [heap_next]
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          A, C
-        OR          A, B
-        JR          Z, _free_heap_loop0
-        LDIR        
-_free_heap_loop0:
-        LD          [heap_next], DE
-        LD          HL, vars_area_start
-_free_heap_loop1:
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          NC, _free_heap_loop1_end
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          DE, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop1_next:
-        POP         HL
-        INC         HL
-        JR          _free_heap_loop1
-_free_heap_loop1_end:
-        LD          HL, varsa_area_start
-_free_heap_loop2:
-        LD          DE, varsa_area_end
-        RST         0x20
-        RET         NC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        LD          C, [HL]
-        INC         HL
-        LD          B, 0
-        ADD         HL, BC
-        ADD         HL, BC
-        EX          DE, HL
-        SBC         HL, BC
-        SBC         HL, BC
-        RR          H
-        RR          L
-        LD          C, L
-        LD          B, H
-        EX          DE, HL
-_free_heap_sarray_elements:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [heap_remap_address]
-        EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop2_next
-        LD          HL, [heap_move_size]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_free_heap_loop2_next:
-        POP         HL
-        INC         HL
-        DEC         BC
-        LD          A, C
-        OR          A, B
-        JR          NZ, _free_heap_sarray_elements
-        POP         HL
-        JR          _free_heap_loop2
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
-str_add:
-        PUSH        DE
-        PUSH        HL
-        LD          C, [HL]
-        LD          A, [DE]
-        ADD         A, C
-        JR          C, _str_add_error
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        INC         HL
-        LD          DE, work_buf+1
-        LD          B, 0
-        INC         C
-        DEC         C
-        JR          Z, _str_add_s1
-        LDIR        
-_str_add_s1:
-        POP         HL
-        LD          C, [HL]
-        INC         HL
-        INC         C
-        DEC         C
-        JR          Z, _str_add_s2
-        LDIR        
-_str_add_s2:
-        LD          [work_buf], A
-        POP         HL
-        CALL        free_string
-        POP         HL
-        CALL        free_string
-        LD          A, [work_buf]
-        CALL        allocate_string
-        PUSH        HL
-        LD          DE, work_buf
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
-_str_add_error:
-        LD          E, 15
-        JP          bios_errhand
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -428,8 +136,6 @@ program_run:
         LD          BC, varsa_area_end - var_area_start - 1
         LD          [HL], 0
         LDIR        
-        LD          HL, str_0
-        LD          [vars_area_start], HL
         RET         
 interrupt_process:
         LD          A, [svarb_on_sprite_running]
@@ -681,10 +387,6 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
-str_1:
-        DEFB        0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-str_2:
-        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:
@@ -792,10 +494,12 @@ svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
         DEFW        0
+vari_I:
+        DEFW        0
+vari_NP:
+        DEFW        0
 var_area_end:
 vars_area_start:
-vars_A:
-        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:
