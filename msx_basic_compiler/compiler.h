@@ -50,7 +50,7 @@ public:
 
 	bool exec( std::string s_name );
 
-	void line_compile( void );
+	void line_compile( bool is_top = false );
 
 	//	•Ï”‚ÌƒAƒhƒŒƒX‚ğæ“¾‚·‚éˆ—
 	CVARIABLE get_variable_address( void );

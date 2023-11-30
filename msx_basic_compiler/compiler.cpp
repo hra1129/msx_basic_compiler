@@ -118,11 +118,11 @@ void CCOMPILER::insert_label( void ) {
 }
 
 // --------------------------------------------------------------------
-void CCOMPILER::line_compile( void ) {
+void CCOMPILER::line_compile( bool is_top ) {
 	CASSEMBLER_LINE asm_line;
 	bool do_exec;
 
-	while( !this->info.list.is_line_end() && this->info.list.p_position->s_word != "ELSE" ) {
+	while( !this->info.list.is_line_end() && !(is_top && this->info.list.p_position->s_word == "ELSE") ) {
 		if( this->info.list.p_position->s_word == ":" ) {
 			this->info.list.p_position++;
 			continue;
@@ -467,7 +467,7 @@ void CCOMPILER::exec_compile_body( void ) {
 			//	新しい行なので、ラベルの挿入をチェックする
 			this->insert_label();
 		}
-		this->line_compile();
+		this->line_compile( true );
 		if( !this->info.list.is_line_end() ) {
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
 			this->info.list.p_position++;
