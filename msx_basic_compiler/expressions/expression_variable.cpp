@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_variable.h"
+using namespace std::string_literals;
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_VARIABLE::optimization( CCOMPILE_INFO *p_info ) {
@@ -17,6 +18,9 @@ CEXPRESSION_NODE* CEXPRESSION_VARIABLE::optimization( CCOMPILE_INFO *p_info ) {
 // --------------------------------------------------------------------
 void CEXPRESSION_VARIABLE::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
+
+	std::string s_name;
+	s_name = "[" + this->variable.s_label + "]";
 
 	if( this->variable.type == CVARIABLE_TYPE::UNKNOWN ) {
 		this->type = CEXPRESSION_TYPE::UNKNOWN;
@@ -38,7 +42,7 @@ void CEXPRESSION_VARIABLE::compile( CCOMPILE_INFO *p_info ) {
 		}
 		else {
 			//	’P“Æ•Ï”‚Ìê‡
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[" + this->variable.s_label + "]" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, s_name );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
@@ -59,11 +63,13 @@ void CEXPRESSION_VARIABLE::compile( CCOMPILE_INFO *p_info ) {
 		}
 		else {
 			//	’P“Æ•Ï”‚Ìê‡
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[" + this->variable.s_label + "]" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, s_name );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "copy_string", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
+		if( !this->no_copy ) {
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "copy_string", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
 	}
 	else {
 		if( this->variable.type == CVARIABLE_TYPE::SINGLE_REAL ) {

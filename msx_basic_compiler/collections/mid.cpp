@@ -6,6 +6,7 @@
 
 #include "mid.h"
 #include "../expressions/expression.h"
+#include "../expressions/expression_variable.h"
 
 // --------------------------------------------------------------------
 //  MID$( 変数名, 置換開始位置 [, 置換サイズ] ) = 置換文字列
@@ -29,8 +30,8 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.activate_copy_string();
 	p_info->assembler_list.activate_free_string();
-	CVARIABLE variable = p_info->p_compiler->get_variable_address();
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );
+	CVARIABLE variable = p_info->p_compiler->get_variable_address();																//	変数のアドレスを得る
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY_REGISTER, "[HL]" );		//	DE = 変数に格納されている文字列のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
@@ -124,24 +125,40 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	//	= の右側の式を処理
-	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		p_info->assembler_list.add_label( "blib_mid_cmd", "0x0406c" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_mid_cmd" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		exp.release();
+	exp.makeup_node( p_info );
+
+	bool is_compatible_mode = false;
+	if( p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE && exp.get_top_node() != nullptr && exp.get_top_node()->is_variable ) {
+		is_compatible_mode = true;
+		CEXPRESSION_VARIABLE *p = reinterpret_cast<CEXPRESSION_VARIABLE*>(exp.get_top_node());
+		p->no_copy = true;
 	}
-	else {
+	if( ! exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	if( !is_compatible_mode ) {
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	p_info->assembler_list.add_label( "blib_mid_cmd", "0x0406c" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_mid_cmd" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	if( !is_compatible_mode ) {
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	exp.release();
 	return true;
 }

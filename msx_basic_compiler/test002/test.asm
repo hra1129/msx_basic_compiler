@@ -14,6 +14,7 @@ signature                       = 0x4010
 bios_errhand                    = 0x0406F
 blib_mid_cmd                    = 0x0406c
 work_prtflg                     = 0x0f416
+work_buf                        = 0x0f55e
 bios_newstt                     = 0x04601
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
@@ -61,9 +62,7 @@ start_address:
 jp_hl:
         JP          HL
 program_start:
-line_100:
-        CALL        interrupt_process
-line_110:
+line_10:
         CALL        interrupt_process
         LD          HL, vars_A
         PUSH        HL
@@ -98,29 +97,26 @@ line_110:
         CALL        free_string
         LD          HL, 3
         LD          B, L
+        LD          C, 255
         PUSH        BC
-        LD          HL, 2
+        LD          HL, [vars_A]
         POP         BC
-        LD          C, L
-        PUSH        BC
+        POP         DE
+        EX          DE, HL
+        LD          IX, blib_mid_cmd
+        CALL        call_blib
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
         LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
         CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_120:
+line_20:
         CALL        interrupt_process
         LD          HL, vars_A
         PUSH        HL
@@ -157,66 +153,20 @@ line_120:
         LD          B, L
         LD          C, 255
         PUSH        BC
-        LD          HL, str_4
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
         LD          HL, [vars_A]
         CALL        copy_string
         PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_130:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        LD          C, 255
-        PUSH        BC
         LD          HL, str_0
+        POP         DE
+        CALL        str_add
         POP         BC
         POP         DE
+        PUSH        HL
         EX          DE, HL
         LD          IX, blib_mid_cmd
         CALL        call_blib
+        POP         HL
+        CALL        free_string
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
@@ -226,514 +176,7 @@ line_130:
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_140:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        LD          C, 255
-        PUSH        BC
-        LD          HL, str_5
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_150:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        LD          C, 255
-        PUSH        BC
-        LD          HL, str_6
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_160:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 1
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
         LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_170:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 2
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_180:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 3
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_190:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 4
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_200:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 5
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_210:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 6
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
-        CALL        puts
-line_220:
-        CALL        interrupt_process
-        LD          HL, vars_A
-        PUSH        HL
-        LD          HL, str_1
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        free_string
-        CALL        interrupt_process
-        LD          HL, vars_A
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        copy_string
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        POP         HL
-        PUSH        DE
-        CALL        free_string
-        LD          HL, 7
-        LD          B, L
-        PUSH        BC
-        LD          HL, 3
-        POP         BC
-        LD          C, L
-        PUSH        BC
-        LD          HL, str_2
-        POP         BC
-        POP         DE
-        EX          DE, HL
-        LD          IX, blib_mid_cmd
-        CALL        call_blib
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, [vars_A]
-        CALL        copy_string
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_3
         CALL        puts
 program_termination:
         CALL        restore_h_erro
@@ -925,6 +368,51 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
+str_add:
+        PUSH        DE
+        PUSH        HL
+        LD          C, [HL]
+        LD          A, [DE]
+        ADD         A, C
+        JR          C, _str_add_error
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        INC         HL
+        LD          DE, work_buf+1
+        LD          B, 0
+        INC         C
+        DEC         C
+        JR          Z, _str_add_s1
+        LDIR        
+_str_add_s1:
+        POP         HL
+        LD          C, [HL]
+        INC         HL
+        INC         C
+        DEC         C
+        JR          Z, _str_add_s2
+        LDIR        
+_str_add_s2:
+        LD          [work_buf], A
+        POP         HL
+        CALL        free_string
+        POP         HL
+        CALL        free_string
+        LD          A, [work_buf]
+        CALL        allocate_string
+        PUSH        HL
+        LD          DE, work_buf
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+_str_add_error:
+        LD          E, 15
+        JP          bios_errhand
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -1196,15 +684,7 @@ str_0:
 str_1:
         DEFB        0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
 str_2:
-        DEFB        0x03, 0x41, 0x42, 0x43
-str_3:
         DEFB        0x02, 0x0D, 0x0A
-str_4:
-        DEFB        0x01, 0x41
-str_5:
-        DEFB        0x04, 0x41, 0x42, 0x43, 0x44
-str_6:
-        DEFB        0x08, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
 save_stack:
         DEFW        0
 heap_next:

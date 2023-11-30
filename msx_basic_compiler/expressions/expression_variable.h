@@ -17,6 +17,7 @@ public:
 	std::string s_value;
 	CVARIABLE variable;
 	std::vector< CEXPRESSION* > exp_list;
+	bool no_copy = false;
 
 	~CEXPRESSION_VARIABLE() {
 		this->release();

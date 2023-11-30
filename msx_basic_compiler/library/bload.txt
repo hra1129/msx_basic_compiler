@@ -11,4 +11,7 @@
 		rst		0x20				; CP HL, DE		CP start, himem
 		jr		c, end_process
 
+		pop		hl
+		ret
+
 		
