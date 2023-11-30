@@ -122,7 +122,7 @@ void CCOMPILER::line_compile( bool is_top ) {
 	CASSEMBLER_LINE asm_line;
 	bool do_exec;
 
-	while( !this->info.list.is_line_end() && !(is_top && this->info.list.p_position->s_word == "ELSE") ) {
+	while( !this->info.list.is_line_end() && !(!is_top && this->info.list.p_position->s_word == "ELSE") ) {
 		if( this->info.list.p_position->s_word == ":" ) {
 			this->info.list.p_position++;
 			continue;

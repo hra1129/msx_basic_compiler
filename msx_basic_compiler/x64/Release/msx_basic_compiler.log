@@ -1,58 +1,7 @@
-﻿  beep.cpp
-  bload.cpp
-  call.cpp
-  clear.cpp
-  cls.cpp
-  color.cpp
-  comment.cpp
-  data.cpp
-  defdbl.cpp
-  defint.cpp
-  defsng.cpp
-  defstr.cpp
-  defusr.cpp
-  dim.cpp
-  end.cpp
-  erase.cpp
-  error.cpp
-  for.cpp
-  gosub.cpp
-  goto.cpp
-  コンパイル中...
-  if.cpp
-  input.cpp
-  key.cpp
-  let.cpp
-  locate.cpp
-  mid.cpp
-  next.cpp
-  on_goto.cpp
-  on_interval.cpp
-  on_key.cpp
-  on_sprite.cpp
-  on_strig.cpp
-  out.cpp
-  play.cpp
-  poke.cpp
-  print.cpp
-  put_sprite.cpp
-  read.cpp
-  restore.cpp
-  return.cpp
-  コンパイル中...
-  run.cpp
-  screen.cpp
-  setpage.cpp
-  setscroll.cpp
-  sound.cpp
-  vpoke.cpp
-  width.cpp
-  compiler.cpp
-  expression_varptr.cpp
-  msx_basic_compiler.cpp
+﻿  compiler.cpp
   コード生成しています。
-  4 of 2026 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    102 functions had inline decision re-evaluated but remain unchanged
+  1 of 2026 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    74 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe
