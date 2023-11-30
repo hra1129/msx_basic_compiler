@@ -17,22 +17,25 @@ static void usage( const char *p_name ) {
 	fprintf( stderr, "\n" );
 	fprintf( stderr, "  [options]\n" );
 	fprintf( stderr, "  Output types.\n" );
-	fprintf( stderr, "    -zma ..... Output files are ZMA type assembly language. (default)\n" );
-	fprintf( stderr, "    -m80 ..... Output files are M80 type assembly language.\n" );
+	fprintf( stderr, "    -zma .......... Output files are ZMA type assembly language. (default)\n" );
+	fprintf( stderr, "    -m80 .......... Output files are M80 type assembly language.\n" );
+	fprintf( stderr, "  Compile mode.\n" );
+	fprintf( stderr, "    -compatible ... Mode for compatibility with MSX-BASIC.\n" );
+	fprintf( stderr, "    -original ..... MSX-BACON Extension Mode.\n" );
 	fprintf( stderr, "  Target types.\n" );
-	fprintf( stderr, "    -msx ..... MSX1 (default)\n");
-	fprintf( stderr, "    -msx2 .... MSX2\n");
-	fprintf( stderr, "    -msx2p ... MSX2+\n");
-	fprintf( stderr, "    -msxtr ... MSXturboR\n");
+	fprintf( stderr, "    -msx .......... MSX1 (default)\n");
+	fprintf( stderr, "    -msx2 ......... MSX2\n");
+	fprintf( stderr, "    -msx2p ........ MSX2+\n");
+	fprintf( stderr, "    -msxtr ........ MSXturboR\n");
 	fprintf( stderr, "  Optimization levels.\n" );
-	fprintf( stderr, "    -O0 ...... No optimization is performed.\n");
-	fprintf( stderr, "    -O1 ...... Only pre-calculation of arithmetic nodes.\n");
-	fprintf( stderr, "    -O2 ...... It also reconstructs the generated code.\n");
-	fprintf( stderr, "    -O3 ...... Maximum optimization.\n");
+	fprintf( stderr, "    -O0 ........... No optimization is performed.\n");
+	fprintf( stderr, "    -O1 ........... Only pre-calculation of arithmetic nodes.\n");
+	fprintf( stderr, "    -O2 ........... It also reconstructs the generated code.\n");
+	fprintf( stderr, "    -O3 ........... Maximum optimization.\n");
 	fprintf( stderr, "  Start address.\n" );
-	fprintf( stderr, "    -start n . Starting address of program code. (Default: 0x8010)\n" );
+	fprintf( stderr, "    -start n ...... Starting address of program code. (Default: 0x8010)\n" );
 	fprintf( stderr, "  Stack size.\n" );
-	fprintf( stderr, "    -stack n . Call stack size. (Default: 256)\n" );
+	fprintf( stderr, "    -stack n ...... Call stack size. (Default: 256)\n" );
 }
 
 // --------------------------------------------------------------------
@@ -94,6 +97,12 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 				}
 				this->stack_size &= ~1;
 			}
+			else if( s == "-compatible" ) {
+				this->compile_mode = CCOMPILE_MODE::COMPATIBLE;
+			}
+			else if( s == "-original" ) {
+				this->compile_mode = CCOMPILE_MODE::ORIGINAL;
+			}
 			else {
 				fprintf( stderr, "ERROR: Unknown option '%s'.\n", s.c_str() );
 				exit(1);
@@ -124,6 +133,14 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 		break;
 	case COUTPUT_TYPES::M80:
 		printf( "  Output type: M80\n" );
+		break;
+	}
+	switch( this->compile_mode ) {
+	case CCOMPILE_MODE::COMPATIBLE:
+		printf( "  Compile mode: MSX-BASIC Compatible.\n" );
+		break;
+	case CCOMPILE_MODE::ORIGINAL:
+		printf( "  Compile mode: MSX-BACON Extension.\n" );
 		break;
 	}
 	switch( this->target_type ) {

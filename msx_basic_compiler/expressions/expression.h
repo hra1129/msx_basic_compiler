@@ -23,10 +23,15 @@ public:
 	std::string s_value;
 
 	// ----------------------------------------------------------------
+	//	この式は変数か。
+	bool is_variable;
+
+	// ----------------------------------------------------------------
 	//	コンストラクタ
 	CEXPRESSION_NODE() {
 		this->type = CEXPRESSION_TYPE::UNKNOWN;
 		this->is_constant = false;
+		this->is_variable = false;
 	}
 
 	// ----------------------------------------------------------------
@@ -119,6 +124,11 @@ public:
 	//	演算式ツリーからアセンブリコードを生成する
 	//	式が省略されていた場合は、false を返す
 	bool compile( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target = CEXPRESSION_TYPE::INTEGER );
+
+	// ----------------------------------------------------------------
+	CEXPRESSION_NODE *get_top_node( void ) {
+		return this->p_top_node;
+	}
 
 	// ----------------------------------------------------------------
 	//	演算結果の型を返す

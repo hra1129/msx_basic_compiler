@@ -290,7 +290,7 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
-	if( s_name.size() > 2 ) {
+	if( s_name.size() > 2 && p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
 		//	ХѕРФЦЉН≈Се 2ХґОЪРІМј
 		s_name.resize( 2 );
 	}

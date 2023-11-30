@@ -54,6 +54,12 @@ enum class COPTIMIZE_LEVEL: int {
 };
 
 // --------------------------------------------------------------------
+enum class CCOMPILE_MODE: int {
+	COMPATIBLE = 0,
+	ORIGINAL = 1,
+};
+
+// --------------------------------------------------------------------
 class COPTIONS {
 public:
 	std::string s_input_name;
@@ -64,6 +70,7 @@ public:
 	COUTPUT_TYPES output_type;
 	CTARGET_TYPES target_type;
 	COPTIMIZE_LEVEL optimize_level;
+	CCOMPILE_MODE compile_mode;
 
 	COPTIONS() {
 		this->output_type = COUTPUT_TYPES::ZMA;
@@ -71,6 +78,7 @@ public:
 		this->start_address = 0x8010;
 		this->stack_size = 256;
 		this->optimize_level = COPTIMIZE_LEVEL::CODE;
+		this->compile_mode = CCOMPILE_MODE::COMPATIBLE;
 	}
 
 	bool parse_options( char *argv[], int argc );
