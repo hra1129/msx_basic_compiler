@@ -111,59 +111,14 @@ void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, cons
 }
 
 // --------------------------------------------------------------------
-std::string CASSEMBLER_LINE::convert_operand( std::string s, COUTPUT_TYPES out_type ) {
+std::string CASSEMBLER_LINE::convert_operand( std::string s ) {
 
-	if( out_type == COUTPUT_TYPES::ZMA ) {
-		return s;
-	}
-
-	//	括弧の付け替え
-	if( s[0] == '[' ) {
-		s[0] = '(';
-	}
-	if( s[ s.size() - 1 ] == ']' ) {
-		s[ s.size() - 1 ] = ')';
-	}
-
-	//	数字の更新
-	if( s[0] == '0' && s[1] == 'x' ) {
-		int value = 0;
-		char s_value[32];
-		sscanf( s.c_str(), "%i", &value );
-		sprintf( s_value, "0%Xh", value );
-		s = s_value;
-	}
 	return s;
 }
 
 // --------------------------------------------------------------------
-std::string CASSEMBLER_LINE::convert_operand_hl( std::string s, COUTPUT_TYPES out_type ) {
+std::string CASSEMBLER_LINE::convert_operand_hl( std::string s ) {
 
-	if( out_type == COUTPUT_TYPES::ZMA ) {
-		return s;
-	}
-
-	//	HL → (HL)
-	if( s == "hl" || s == "HL" ) {
-		s = "(" + s + ")";
-	}
-
-	//	括弧の付け替え
-	if( s[0] == '[' ) {
-		s[0] = '(';
-	}
-	if( s[ s.size() - 1 ] == ']' ) {
-		s[ s.size() - 1 ] = ')';
-	}
-
-	//	数字の更新
-	if( s[0] == '0' && s[1] == 'x' ) {
-		int value = 0;
-		char s_value[32];
-		sscanf( s.c_str(), "%i", &value );
-		sprintf( s_value, "0%Xh", value );
-		s = s_value;
-	}
 	return s;
 }
 
@@ -185,7 +140,7 @@ std::string CASSEMBLER_LINE::convert_condition( CCONDITION condition ) {
 }
 
 // --------------------------------------------------------------------
-bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
+bool CASSEMBLER_LINE::save( FILE *p_file ) {
 
 	if( this->type == CMNEMONIC_TYPE::LABEL ) {
 		fprintf( p_file, "%s:\n", this->operand1.s_value.c_str() );
@@ -196,19 +151,7 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		return true;
 	}
 	if( this->type == CMNEMONIC_TYPE::CONSTANT ) {
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "%s= %s\n", this->convert_length( this->operand1.s_value, 32 ).c_str(), this->operand2.s_value.c_str() );
-		}
-		else {
-			if( this->operand2.type == COPERAND_TYPE::CONSTANT ) {
-				int value = 0;
-				sscanf( this->operand2.s_value.c_str(), "%i", &value );
-				fprintf( p_file, "%s equ 0%04Xh\n", this->convert_length( this->operand1.s_value, 31 ).c_str(), value );
-			}
-			else {
-				fprintf( p_file, "%s equ %s\n", this->convert_length( this->operand1.s_value, 31 ).c_str(), this->operand2.s_value.c_str() );
-			}
-		}
+		fprintf( p_file, "%s= %s\n", this->convert_length( this->operand1.s_value, 32 ).c_str(), this->operand2.s_value.c_str() );
 		return true;
 	}
 
@@ -227,32 +170,25 @@ bool CASSEMBLER_LINE::save( FILE *p_file, COUTPUT_TYPES output_type ) {
 		fprintf( p_file, "        %s%s%s\n", 
 				convert_length( command_type.s_name ).c_str(), 
 				convert_condition( this->condition ).c_str(),
-				convert_operand( this->operand1.s_value, output_type ).c_str() );
+				convert_operand( this->operand1.s_value ).c_str() );
 		return true;
 	case 2:	//	オペランド2個
 		fprintf( p_file, "        %s%s, %s\n", 
 				convert_length( command_type.s_name ).c_str(), 
-				convert_operand( this->operand1.s_value, output_type ).c_str(), 
-				convert_operand( this->operand2.s_value, output_type ).c_str() );
+				convert_operand( this->operand1.s_value ).c_str(), 
+				convert_operand( this->operand2.s_value ).c_str() );
 		return true;
 	case 3:	//	ZMA ではオペランド2個だけど、M80 では1個
-		if( output_type == COUTPUT_TYPES::ZMA ) {
-			fprintf( p_file, "        %s%s, %s\n", 
-					convert_length( command_type.s_name ).c_str(), 
-					this->operand1.s_value.c_str(), 
-					this->operand2.s_value.c_str() );
-		}
-		else {
-			fprintf( p_file, "        %s%s\n", 
-					convert_length( command_type.s_name ).c_str(), 
-					convert_operand( this->operand2.s_value, output_type ).c_str() );
-		}
+		fprintf( p_file, "        %s%s, %s\n", 
+				convert_length( command_type.s_name ).c_str(), 
+				this->operand1.s_value.c_str(), 
+				this->operand2.s_value.c_str() );
 		return true;
 	case 4:	//	オペランド1個、オペランドが HL の場合は、(HL) に置き換える
 		fprintf( p_file, "        %s%s%s\n", 
 			convert_length( command_type.s_name ).c_str(), 
 			convert_condition( this->condition ).c_str(),
-			convert_operand_hl( this->operand1.s_value, output_type ).c_str() );
+			convert_operand_hl( this->operand1.s_value ).c_str() );
 		return true;
 	default:
 		break;

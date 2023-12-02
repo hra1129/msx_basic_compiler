@@ -2189,12 +2189,152 @@ void CASSEMBLER_LIST::activate_sub_input( void ) {
 }
 
 // --------------------------------------------------------------------
-bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type ) {
+void CASSEMBLER_LIST::activate_bload_r( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_bload_r" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_bload_r" );
+	this->add_label( "work_buf", "0x0F55E" );
+	this->add_label( "work_himem", "0x0FC4A" );
+	this->add_label( "blib_bload", "0x04054" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,CCONDITION::NONE, COPERAND_TYPE::LABEL,		"sub_bload_r",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER,  "HL",							COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "restore_h_erro",				COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "restore_h_timi",				COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "HL",							COPERAND_TYPE::NONE, "sub_bload_r_trans_start" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "DE",							COPERAND_TYPE::NONE, "sub_bload_r_trans" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "BC",							COPERAND_TYPE::NONE, "sub_bload_r_trans_end - sub_bload_r_trans" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE,      "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER,  "HL",							COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "sub_bload_r_trans",			COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DI, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "setup_h_timi",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "setup_h_erro",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_r_trans_start",		COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ORG,		CCONDITION::NONE,	COPERAND_TYPE::CONSTANT,	"work_buf + 50",				COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_r_trans",			COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"iy",							COPERAND_TYPE::MEMORY_CONSTANT,	"[work_blibslot - 1]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"ix",							COPERAND_TYPE::LABEL,			"blib_bload" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL,		CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"bios_calslt",					COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"hl",							COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,		CCONDITION::NONE,	COPERAND_TYPE::NONE,		"",								COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_r_trans_end",		COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ORG,		CCONDITION::NONE,	COPERAND_TYPE::CONSTANT,	"sub_bload_r_trans_start + sub_bload_r_trans_end - sub_bload_r_trans", COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_bload( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_bload" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_bload" );
+	this->add_label( "work_buf", "0x0F55E" );
+	this->add_label( "work_himem", "0x0FC4A" );
+	this->add_label( "blib_bload", "0x04054" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,CCONDITION::NONE, COPERAND_TYPE::LABEL,		"sub_bload",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER,  "HL",							COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "restore_h_erro",				COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "restore_h_timi",				COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "HL",							COPERAND_TYPE::NONE, "sub_bload_trans_start" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "DE",							COPERAND_TYPE::NONE, "sub_bload_trans" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::LABEL,       "BC",							COPERAND_TYPE::NONE, "sub_bload_trans_end - sub_bload_trans" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE,      "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER,	"HL",							COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "sub_bload_trans",				COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DI, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "setup_h_timi",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL,     "setup_h_erro",					COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE,	    "",								COPERAND_TYPE::NONE, "" );
+	this->subroutines.push_back( asm_line );
+
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_trans_start",		COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ORG,		CCONDITION::NONE,	COPERAND_TYPE::CONSTANT,	"work_buf + 50",				COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_trans",				COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"iy",							COPERAND_TYPE::MEMORY_CONSTANT,	"[work_blibslot - 1]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"ix",							COPERAND_TYPE::LABEL,			"blib_bload" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL,		CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"bios_calslt",					COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"hl",							COPERAND_TYPE::MEMORY_CONSTANT,	"[work_himem]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"de",							COPERAND_TYPE::REGISTER,		"HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RST,		CCONDITION::NONE,	COPERAND_TYPE::CONSTANT,	"0x20",							COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RET,		CCONDITION::NC,		COPERAND_TYPE::NONE,		"",								COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD,		CCONDITION::NONE,	COPERAND_TYPE::REGISTER,	"HL",							COPERAND_TYPE::LABEL,			"_bload_basic_end" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL,		CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"bios_newstt",					COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"_bload_basic_end",				COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFB,		CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"':', 0x81, 0x00",				COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL,	CCONDITION::NONE,	COPERAND_TYPE::LABEL,		"sub_bload_trans_end",			COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ORG,		CCONDITION::NONE,	COPERAND_TYPE::CONSTANT,	"sub_bload_trans_start + sub_bload_trans_end - sub_bload_trans", COPERAND_TYPE::NONE,			"" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
 
 	for( p = p_list->begin(); p != p_list->end(); p++ ) {
-		b_result = p->save( p_file, output_type ) && b_result;
+		b_result = p->save( p_file ) && b_result;
 	}
 	return b_result;
 }
@@ -2218,7 +2358,7 @@ void CASSEMBLER_LIST::add_label( const std::string s_name, const std::string s_v
 }
 
 // --------------------------------------------------------------------
-bool CASSEMBLER_LIST::save( const std::string s_file_name, COUTPUT_TYPES output_type ) {
+bool CASSEMBLER_LIST::save( const std::string s_file_name ) {
 	FILE *p_file;
 	bool result = true;
 
@@ -2228,16 +2368,16 @@ bool CASSEMBLER_LIST::save( const std::string s_file_name, COUTPUT_TYPES output_
 		return false;
 	}
 
-	result &= this->save_sub( p_file, &(this->header), output_type );
-	result &= this->save_sub( p_file, &(this->define_labels), output_type );
-	result &= this->save_sub( p_file, &(this->body), output_type );
-	result &= this->save_sub( p_file, &(this->subroutines), output_type );
-	result &= this->save_sub( p_file, &(this->datas), output_type );
-	result &= this->save_sub( p_file, &(this->const_single_area), output_type );
-	result &= this->save_sub( p_file, &(this->const_double_area), output_type );
-	result &= this->save_sub( p_file, &(this->const_string_area), output_type );
-	result &= this->save_sub( p_file, &(this->variables_area), output_type );
-	result &= this->save_sub( p_file, &(this->footer), output_type );
+	result &= this->save_sub( p_file, &(this->header) );
+	result &= this->save_sub( p_file, &(this->define_labels) );
+	result &= this->save_sub( p_file, &(this->body) );
+	result &= this->save_sub( p_file, &(this->subroutines) );
+	result &= this->save_sub( p_file, &(this->datas) );
+	result &= this->save_sub( p_file, &(this->const_single_area) );
+	result &= this->save_sub( p_file, &(this->const_double_area) );
+	result &= this->save_sub( p_file, &(this->const_string_area) );
+	result &= this->save_sub( p_file, &(this->variables_area) );
+	result &= this->save_sub( p_file, &(this->footer) );
 	fclose( p_file );
 
 	return result;

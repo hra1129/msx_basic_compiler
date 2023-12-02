@@ -16,7 +16,7 @@ private:
 	std::vector< std::string >			label_list;
 	std::vector< std::string >			subrouines_list;
 
-	bool save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list, COUTPUT_TYPES output_type );
+	bool save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list );
 
 public:
 	std::vector< CASSEMBLER_LINE >		header;
@@ -37,7 +37,7 @@ public:
 	void add_data( int line_no, const std::string s_value, class CCONSTANT_INFO *p_constants );
 	void push_hl( CEXPRESSION_TYPE type );
 
-	bool save( const std::string s_file_name, COUTPUT_TYPES output_type );
+	bool save( const std::string s_file_name );
 
 	bool is_registered_subroutine( std::string s_search_name );
 	void activate_push_single_real_hl( void );
@@ -74,6 +74,8 @@ public:
 	void activate_calc_array_top( void );
 	void activate_comma( void );
 	void activate_sub_input( void );
+	void activate_bload_r( void );
+	void activate_bload( void );
 };
 
 #endif
