@@ -12,12 +12,18 @@
 bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
+	bool is_load = false;
 
 	int line_no = p_info->list.get_line_no();
 
-	if( p_info->list.p_position->s_word != "BLOAD" ) {
+	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::RESERVED_WORD || ( p_info->list.p_position->s_word != "BLOAD" && p_info->list.p_position->s_word != "LOAD" ) ) {
 		return false;
 	}
+
+	if( p_info->list.p_position->s_word == "LOAD" ) {
+		is_load = true;
+	}
+
 	p_info->list.p_position++;
 
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
@@ -46,7 +52,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_bload_r", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		else if( p_info->list.p_position->s_word == "S" ) {
+		else if( !is_load && p_info->list.p_position->s_word == "S" ) {
 			p_info->list.p_position++;
 			//	BLOAD "ƒtƒ@ƒCƒ‹–¼",S
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );

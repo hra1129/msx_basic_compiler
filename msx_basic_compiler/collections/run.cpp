@@ -5,10 +5,12 @@
 // --------------------------------------------------------------------
 
 #include "run.h"
+#include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
 //  RUN [行番号]
 bool CRUN::exec( CCOMPILE_INFO *p_info ) {
+	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
 	std::string s_label;
 	int line_no = p_info->list.get_line_no();
@@ -41,7 +43,26 @@ bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
-	//	RUN ファイル名 の実行の場合 (※ RUN ファイル名,R には非対応)
-	//	★T.B.D.
+	//	RUN ファイル名 の実行の場合
+	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+		exp.release();
+	}
+	p_info->assembler_list.activate_bload_r();
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_bload_r", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+
+	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
+		p_info->list.p_position++;
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( p_info->list.p_position->s_word != "R" ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		p_info->list.p_position++;
+	}
+
 	return true;
 }
