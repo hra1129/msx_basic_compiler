@@ -138,12 +138,7 @@ public:
 			case CCONSTANT_TYPE::SINGLE_REAL:
 				s = "";
 				for( i = 0; i < 4; i++ ) {
-					if( options.output_type == COUTPUT_TYPES::ZMA ) {
-						sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
-					}
-					else {
-						sprintf( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
-					}
+					sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					s = s + s_name;
 				}
 				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
@@ -154,12 +149,7 @@ public:
 			case CCONSTANT_TYPE::DOUBLE_REAL:
 				s = "";
 				for( i = 0; i < 8; i++ ) {
-					if( options.output_type == COUTPUT_TYPES::ZMA ) {
-						sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
-					}
-					else {
-						sprintf( s_name, "%s0%02Xh", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
-					}
+					sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					s = s + s_name;
 				}
 				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
@@ -173,20 +163,10 @@ public:
 		}
 
 		for( auto it = string_list.begin(); it != string_list.end(); it++ ) {
-			if( options.output_type == COUTPUT_TYPES::ZMA ) {
-				sprintf( s_name, "0x%02X", (int)it->second.s_value.length & 255 );
-			}
-			else {
-				sprintf( s_name, "0%02Xh", (int)it->second.s_value.length & 255 );
-			}
+			sprintf( s_name, "0x%02X", (int)it->second.s_value.length & 255 );
 			s = s_name;
 			for( i = 0; i < (int)it->second.s_value.length; i++ ) {
-				if( options.output_type == COUTPUT_TYPES::ZMA ) {
-					sprintf( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
-				}
-				else {
-					sprintf( s_name, ", 0%02Xh", (int)it->second.s_value.image[i] & 255 );
-				}
+				sprintf( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
 				s = s + s_name;
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );

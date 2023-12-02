@@ -26,10 +26,8 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 
 	if( p_info->list.is_command_end() ) {
 		//	BLOAD "ファイル名"
-		p_info->assembler_list.add_label( "blib_bload", "0x04054" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_bload" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.activate_bload();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_bload", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
@@ -44,10 +42,8 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.p_position->s_word == "R" ) {
 			p_info->list.p_position++;
 			//	BLOAD "ファイル名",R
-			p_info->assembler_list.add_label( "blib_bload", "0x04054" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "blib_bload" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.activate_bload_r();
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_bload_r", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else if( p_info->list.p_position->s_word == "S" ) {

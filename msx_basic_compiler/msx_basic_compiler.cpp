@@ -48,13 +48,7 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 	for( int i = 1; i < argc; i++ ) {
 		s = argv[i];
 		if( s[0] == '-' ) {
-			if( s == "-zma" ) {
-				this->output_type = COUTPUT_TYPES::ZMA;
-			}
-			else if( s == "-m80" ) {
-				this->output_type = COUTPUT_TYPES::M80;
-			}
-			else if( s == "-msx" ) {
+			if( s == "-msx" ) {
 				this->target_type = CTARGET_TYPES::MSX1;
 			}
 			else if( s == "-msx2" ) {
@@ -126,15 +120,6 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 		usage( argv[0] );
 		exit(1);
 	}
-	switch( this->output_type ) {
-	default:
-	case COUTPUT_TYPES::ZMA:
-		printf( "  Output type: ZMA\n" );
-		break;
-	case COUTPUT_TYPES::M80:
-		printf( "  Output type: M80\n" );
-		break;
-	}
 	switch( this->compile_mode ) {
 	case CCOMPILE_MODE::COMPATIBLE:
 		printf( "  Compile mode: MSX-BASIC Compatible.\n" );
@@ -202,7 +187,7 @@ int main( int argc, char *argv[] ) {
 		printf( "Found %d error(s).\n", (int)compiler.info.errors.list.size() );
 		return 1;
 	}
-	if( !compiler.info.assembler_list.save( compiler.info.options.s_output_name, compiler.info.options.output_type ) ) {
+	if( !compiler.info.assembler_list.save( compiler.info.options.s_output_name ) ) {
 		return 2;
 	}
 	printf( "Completed.\n" );

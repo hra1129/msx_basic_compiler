@@ -113,11 +113,11 @@ public:
 	COPERAND			operand2;
 
 	void set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 );
-	std::string convert_operand( std::string s, COUTPUT_TYPES out_type );
-	std::string convert_operand_hl( std::string s, COUTPUT_TYPES out_type );
+	std::string convert_operand( std::string s );
+	std::string convert_operand_hl( std::string s );
 	std::string convert_length( std::string s, size_t length = 12 );
 	std::string convert_condition( CCONDITION condition );
-	bool save( FILE *p_file, COUTPUT_TYPES output_type );
+	bool save( FILE *p_file );
 
 	CASSEMBLER_LINE() {
 		this->type = CMNEMONIC_TYPE::COMMENT;

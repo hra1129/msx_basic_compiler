@@ -32,12 +32,6 @@ enum class CBASIC_WORD_TYPE {
 };
 
 // --------------------------------------------------------------------
-enum class COUTPUT_TYPES {
-	ZMA,
-	M80,
-};
-
-// --------------------------------------------------------------------
 enum class CTARGET_TYPES {
 	MSX1,
 	MSX2,
@@ -67,13 +61,11 @@ public:
 	int start_address;
 	int stack_size;
 
-	COUTPUT_TYPES output_type;
 	CTARGET_TYPES target_type;
 	COPTIMIZE_LEVEL optimize_level;
 	CCOMPILE_MODE compile_mode;
 
 	COPTIONS() {
-		this->output_type = COUTPUT_TYPES::ZMA;
 		this->target_type = CTARGET_TYPES::MSX1;
 		this->start_address = 0x8010;
 		this->stack_size = 256;
