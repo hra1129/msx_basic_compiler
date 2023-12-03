@@ -50,6 +50,7 @@ void CEXPRESSION_BIN::compile( CCOMPILE_INFO *p_info ) {
 	this->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand->type );
 
 	p_info->assembler_list.activate_str();		//	fout_adjust
+	p_info->assembler_list.activate_copy_string();
 	p_info->assembler_list.add_label( "work_dac_int", "0x0f7f8" );
 	p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
 	p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );

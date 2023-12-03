@@ -39,6 +39,9 @@
 #include "expression_cos.h"
 #include "expression_csng.h"
 #include "expression_csrlin.h"
+#include "expression_cvd.h"
+#include "expression_cvi.h"
+#include "expression_cvs.h"
 #include "expression_exp.h"
 #include "expression_fix.h"
 #include "expression_fre.h"
@@ -486,6 +489,48 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		CEXPRESSION_CSRLIN *p_term = new CEXPRESSION_CSRLIN;
 		p_result = p_term;
 		p_info->list.p_position++;
+		return p_result;
+	}
+	else if( s_operator == "CVD" ) {
+		CEXPRESSION_CVD *p_term = new CEXPRESSION_CVD;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "CVI" ) {
+		CEXPRESSION_CVI *p_term = new CEXPRESSION_CVI;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "CVS" ) {
+		CEXPRESSION_CVS *p_term = new CEXPRESSION_CVS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
 		return p_result;
 	}
 	else if( s_operator == "EXP" ) {

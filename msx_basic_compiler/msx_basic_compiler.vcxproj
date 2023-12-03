@@ -211,6 +211,9 @@
     <ClCompile Include="expressions\expression_cos.cpp" />
     <ClCompile Include="expressions\expression_csng.cpp" />
     <ClCompile Include="expressions\expression_csrlin.cpp" />
+    <ClCompile Include="expressions\expression_cvd.cpp" />
+    <ClCompile Include="expressions\expression_cvi.cpp" />
+    <ClCompile Include="expressions\expression_cvs.cpp" />
     <ClCompile Include="expressions\expression_exp.cpp" />
     <ClCompile Include="expressions\expression_fix.cpp" />
     <ClCompile Include="expressions\expression_fre.cpp" />
@@ -341,6 +344,9 @@
     <ClInclude Include="expressions\expression_cos.h" />
     <ClInclude Include="expressions\expression_csng.h" />
     <ClInclude Include="expressions\expression_csrlin.h" />
+    <ClInclude Include="expressions\expression_cvd.h" />
+    <ClInclude Include="expressions\expression_cvi.h" />
+    <ClInclude Include="expressions\expression_cvs.h" />
     <ClInclude Include="expressions\expression_exp.h" />
     <ClInclude Include="expressions\expression_fix.h" />
     <ClInclude Include="expressions\expression_fre.h" />
