@@ -12,8 +12,8 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 work_prtflg                     = 0x0f416
-bios_errhand                    = 0x0406F
 bios_newstt                     = 0x04601
+bios_errhand                    = 0x0406F
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -66,51 +66,27 @@ setup_h_erro:
 jp_hl:
         JP          HL
 program_start:
+line_10:
+        CALL        interrupt_process
+line_20:
+        CALL        interrupt_process
+        CALL        line_100
+line_30:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_1
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+        CALL        interrupt_process
+        JP          program_termination
 line_100:
         CALL        interrupt_process
-line_110:
-        CALL        interrupt_process
-        LD          HL, vari_A
-        PUSH        HL
-        LD          HL, 12337
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-line_120:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          A, 3
-        CALL        allocate_string
-        PUSH        HL
-        LD          HL, [vari_A]
-        POP         DE
-        EX          DE, HL
-        INC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        DEC         HL
-        DEC         HL
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_1
-        CALL        puts
-line_130:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_2
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_1
-        CALL        puts
+        RET         
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -159,24 +135,6 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
 free_string:
         LD          DE, heap_start
         RST         0x20
@@ -555,9 +513,9 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x02, 0x0D, 0x0A
+        DEFB        0x03, 0x45, 0x4E, 0x44
 str_2:
-        DEFB        0x02, 0x31, 0x30
+        DEFB        0x02, 0x0D, 0x0A
 save_stack:
         DEFW        0
 heap_next:
@@ -664,8 +622,6 @@ svari_on_strig2_line:
 svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
-        DEFW        0
-vari_A:
         DEFW        0
 var_area_end:
 vars_area_start:
