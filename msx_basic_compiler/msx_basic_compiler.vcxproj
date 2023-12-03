@@ -224,7 +224,9 @@
     <ClCompile Include="expressions\expression_len.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
     <ClCompile Include="expressions\expression_mid.cpp" />
+    <ClCompile Include="expressions\expression_mkd.cpp" />
     <ClCompile Include="expressions\expression_mki.cpp" />
+    <ClCompile Include="expressions\expression_mks.cpp" />
     <ClCompile Include="expressions\expression_oct.cpp" />
     <ClCompile Include="expressions\expression_operator_add.cpp" />
     <ClCompile Include="expressions\expression_operator_and.cpp" />
@@ -352,7 +354,9 @@
     <ClInclude Include="expressions\expression_len.h" />
     <ClInclude Include="expressions\expression_log.h" />
     <ClInclude Include="expressions\expression_mid.h" />
+    <ClInclude Include="expressions\expression_mkd.h" />
     <ClInclude Include="expressions\expression_mki.h" />
+    <ClInclude Include="expressions\expression_mks.h" />
     <ClInclude Include="expressions\expression_oct.h" />
     <ClInclude Include="expressions\expression_operator_add.h" />
     <ClInclude Include="expressions\expression_operator_and.h" />
