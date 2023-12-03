@@ -549,6 +549,7 @@ void CASSEMBLER_LIST::activate_pop_double_real_dac( void ) {
 }
 
 // --------------------------------------------------------------------
+//	single real [HL] Å® [DAC]
 void CASSEMBLER_LIST::activate_ld_dac_single_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -574,6 +575,7 @@ void CASSEMBLER_LIST::activate_ld_dac_single_real( void ) {
 }
 
 // --------------------------------------------------------------------
+//	double real [HL] Å® [DAC]
 void CASSEMBLER_LIST::activate_ld_dac_double_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -600,6 +602,7 @@ void CASSEMBLER_LIST::activate_ld_dac_double_real( void ) {
 }
 
 // --------------------------------------------------------------------
+//	single real [HL] Å® [ARG]
 void CASSEMBLER_LIST::activate_ld_arg_single_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -630,6 +633,7 @@ void CASSEMBLER_LIST::activate_ld_arg_single_real( void ) {
 }
 
 // --------------------------------------------------------------------
+//	double real [HL] Å® [ARG]
 void CASSEMBLER_LIST::activate_ld_arg_double_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -651,6 +655,7 @@ void CASSEMBLER_LIST::activate_ld_arg_double_real( void ) {
 }
 
 // --------------------------------------------------------------------
+//	single real [HL] Å® [DE]
 void CASSEMBLER_LIST::activate_ld_de_single_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -669,6 +674,7 @@ void CASSEMBLER_LIST::activate_ld_de_single_real( void ) {
 }
 
 // --------------------------------------------------------------------
+//	double real [HL] Å® [DE]
 void CASSEMBLER_LIST::activate_ld_de_double_real( void ) {
 	CASSEMBLER_LINE asm_line;
 
