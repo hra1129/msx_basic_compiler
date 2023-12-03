@@ -12,11 +12,8 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 work_prtflg                     = 0x0f416
-work_buf                        = 0x0F55E
-work_himem                      = 0x0FC4A
-blib_bload                      = 0x04054
-bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
+bios_newstt                     = 0x04601
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -69,33 +66,50 @@ setup_h_erro:
 jp_hl:
         JP          HL
 program_start:
-line_10:
+line_100:
         CALL        interrupt_process
-line_20:
+line_110:
+        CALL        interrupt_process
+        LD          HL, vari_A
+        PUSH        HL
+        LD          HL, 12337
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+line_120:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
+        LD          A, 3
+        CALL        allocate_string
+        PUSH        HL
+        LD          HL, [vari_A]
+        POP         DE
+        EX          DE, HL
+        INC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        DEC         HL
+        DEC         HL
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
         LD          HL, str_1
-        PUSH        HL
         CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, str_2
-        CALL        puts
-line_30:
-        CALL        interrupt_process
-        LD          HL, str_3
-        CALL        sub_bload_r
-line_40:
+line_130:
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
-        LD          HL, str_4
+        LD          HL, str_2
         PUSH        HL
         CALL        puts
         POP         HL
         CALL        free_string
-        LD          HL, str_2
+        LD          HL, str_1
         CALL        puts
 program_termination:
         CALL        restore_h_erro
@@ -145,6 +159,24 @@ _puts_loop:
         RST         0x18
         DJNZ        _puts_loop
         RET         
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
 free_string:
         LD          DE, heap_start
         RST         0x20
@@ -256,31 +288,6 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
-sub_bload_r:
-        PUSH        HL
-        CALL        restore_h_erro
-        CALL        restore_h_timi
-        LD          HL, sub_bload_r_trans_start
-        LD          DE, sub_bload_r_trans
-        LD          BC, sub_bload_r_trans_end - sub_bload_r_trans
-        LDIR        
-        POP         HL
-        CALL        sub_bload_r_trans
-        DI          
-        CALL        setup_h_timi
-        CALL        setup_h_erro
-        EI          
-        RET         
-sub_bload_r_trans_start:
-        ORG         work_buf + 50
-sub_bload_r_trans:
-        LD          iy, [work_blibslot - 1]
-        LD          ix, blib_bload
-        CALL        bios_calslt
-        PUSH        hl
-        RET         
-sub_bload_r_trans_end:
-        ORG         sub_bload_r_trans_start + sub_bload_r_trans_end - sub_bload_r_trans
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -548,13 +555,9 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x14, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x54, 0x45, 0x53, 0x54, 0x2E, 0x41, 0x53, 0x43, 0x20, 0x5B, 0x31, 0x5D
-str_2:
         DEFB        0x02, 0x0D, 0x0A
-str_3:
-        DEFB        0x09, 0x54, 0x45, 0x53, 0x54, 0x32, 0x2E, 0x42, 0x49, 0x4E
-str_4:
-        DEFB        0x14, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x54, 0x45, 0x53, 0x54, 0x2E, 0x41, 0x53, 0x43, 0x20, 0x5B, 0x32, 0x5D
+str_2:
+        DEFB        0x02, 0x31, 0x30
 save_stack:
         DEFW        0
 heap_next:
@@ -661,6 +664,8 @@ svari_on_strig2_line:
 svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
+        DEFW        0
+vari_A:
         DEFW        0
 var_area_end:
 vars_area_start:
