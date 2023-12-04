@@ -23,6 +23,9 @@ bool CPLAY::exec( CCOMPILE_INFO *p_info ) {
 	//	第1引数 <Ch1>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
+		p_info->assembler_list.activate_free_string();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( p_info->list.is_command_end() || p_info->list.p_position->s_word == "," ) {
 		//	第1引数無しは、エラー
@@ -43,6 +46,9 @@ bool CPLAY::exec( CCOMPILE_INFO *p_info ) {
 	//	第2引数 <Ch2>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
+		p_info->assembler_list.activate_free_string();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( p_info->list.is_command_end() || p_info->list.p_position->s_word == "," ) {
 		//	第2引数無しは、エラー
@@ -63,6 +69,9 @@ bool CPLAY::exec( CCOMPILE_INFO *p_info ) {
 	//	第3引数 <Ch2>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
+		p_info->assembler_list.activate_free_string();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
 		//	第3引数無しは、エラー
