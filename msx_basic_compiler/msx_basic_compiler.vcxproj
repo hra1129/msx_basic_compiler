@@ -257,6 +257,7 @@
     <ClCompile Include="expressions\expression_rnd.cpp" />
     <ClCompile Include="expressions\expression_sgn.cpp" />
     <ClCompile Include="expressions\expression_sin.cpp" />
+    <ClCompile Include="expressions\expression_space.cpp" />
     <ClCompile Include="expressions\expression_sqr.cpp" />
     <ClCompile Include="expressions\expression_stick.cpp" />
     <ClCompile Include="expressions\expression_str.cpp" />
@@ -390,6 +391,7 @@
     <ClInclude Include="expressions\expression_rnd.h" />
     <ClInclude Include="expressions\expression_sgn.h" />
     <ClInclude Include="expressions\expression_sin.h" />
+    <ClInclude Include="expressions\expression_space.h" />
     <ClInclude Include="expressions\expression_sqr.h" />
     <ClInclude Include="expressions\expression_stick.h" />
     <ClInclude Include="expressions\expression_str.h" />
