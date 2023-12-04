@@ -45,7 +45,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( !p_info->list.is_command_end() ) {
-		if( p_info->list.p_position->s_word == "R" ) {
+		if( p_info->list.p_position->s_word == "R" || p_info->list.p_position->s_word == "r" ) {
 			p_info->list.p_position++;
 			//	BLOAD "ƒtƒ@ƒCƒ‹–¼",R
 			p_info->assembler_list.activate_bload_r();

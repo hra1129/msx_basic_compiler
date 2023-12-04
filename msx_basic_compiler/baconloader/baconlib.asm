@@ -242,6 +242,10 @@ blib_entries::
 			jp		sub_fwrite
 	blib_mid_cmd:
 			jp		sub_mid_cmd
+	blib_bsave:
+			jp		sub_bsave
+	blib_bsave_s:
+			jp		sub_bsave_s
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2415,6 +2419,124 @@ sub_mid_cmd::
 			ldir
 			pop		hl
 			ret
+			endscope
+
+; =============================================================================
+;	BSAVE HL
+;	input:
+;		HL ... ファイル名
+;		DE ... 開始アドレス、終了アドレス、実行アドレスが格納されているアドレス
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_bsave
+sub_bsave::
+			; ファイルを開く
+			push	de
+			ld		de, buf				; FCB を buf に置く
+			call	sub_fcreate
+			or		a, a
+			jp		nz, err_device_io
+			pop		hl
+			; ヘッダを作る
+			ld		de, bsave_head_start
+			ld		bc, 6
+			ldir
+			ld		a, 0xFE
+			ld		[bsave_head_signature], a
+			; ヘッダを書き出す
+			ld		hl, buf				; FCB
+			ld		de, bsave_head
+			ld		bc, 7
+			call	sub_fwrite
+			or		a, a
+			jp		nz, err_device_io
+			; 書き出すサイズを計算 (bsave_head_end - bsave_head_start + 1)
+			ld		hl, [bsave_head_end]
+			ld		de, [bsave_head_start]
+			sbc		hl, de
+			inc		hl
+			ld		c, l
+			ld		b, h
+			; 書き出す
+			ld		hl, buf				; FCB
+			call	sub_fwrite
+			or		a, a
+			jp		nz, err_device_io
+			; ファイルを閉じる
+			ld		hl, buf
+			call	sub_fclose
+			ret
+
+	bsave_head				= buf + 37
+	bsave_head_signature	= bsave_head
+	bsave_head_start		= bsave_head + 1
+	bsave_head_end			= bsave_head + 3
+	bsave_head_exec			= bsave_head + 5
+	bsave_head_size			= bsave_head + 7
+			endscope
+
+; =============================================================================
+;	BSAVE HL,S
+;	input:
+;		HL ... ファイル名
+;		DE ... 開始アドレス、終了アドレス、実行アドレスが格納されているアドレス
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_bsave_s
+sub_bsave_s::
+			; ファイルを開く
+			push	de
+			ld		de, buf				; FCB を buf に置く
+			call	sub_fcreate
+			or		a, a
+			jp		nz, err_device_io
+			pop		hl
+			; ヘッダを作る
+			ld		de, bsave_head_start
+			ld		bc, 6
+			ldir
+			ld		a, 0xFE
+			ld		[bsave_head_signature], a
+			; ヘッダを書き出す
+			ld		hl, buf				; FCB
+			ld		de, bsave_head
+			ld		bc, 7
+			call	sub_fwrite
+			or		a, a
+			jp		nz, err_device_io
+			; 書き出すサイズを計算 (bsave_head_end - bsave_head_start + 1)
+			ld		hl, [bsave_head_end]
+			ld		de, [bsave_head_start]
+			sbc		hl, de
+			inc		hl
+			ld		c, l
+			ld		b, h
+			; 書き出す
+			ld		hl, buf				; FCB
+			call	sub_fwrite
+			or		a, a
+			jp		nz, err_device_io
+			; ファイルを閉じる
+			ld		hl, buf
+			call	sub_fclose
+			ret
+
+	bsave_head				= buf + 37
+	bsave_head_signature	= bsave_head
+	bsave_head_start		= bsave_head + 1
+	bsave_head_end			= bsave_head + 3
+	bsave_head_exec			= bsave_head + 5
+	bsave_head_size			= bsave_head + 7
 			endscope
 
 ; =============================================================================
