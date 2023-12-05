@@ -13,7 +13,8 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 work_buf                        = 0x0F55E
-blib_bsave                      = 0x0406f
+bios_imult                      = 0x03193
+blib_bsave_s                    = 0x04072
 work_prtflg                     = 0x0f416
 bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
@@ -75,15 +76,23 @@ line_110:
         CALL        interrupt_process
         LD          HL, str_1
         PUSH        HL
-        LD          HL, 32784
+        LD          HL, 0
         LD          [work_buf + 50], HL
-        LD          HL, 49151
+        LD          HL, 8
+        PUSH        HL
+        LD          HL, 256
+        POP         DE
+        CALL        bios_imult
         LD          [work_buf + 52], HL
         LD          HL, [work_buf + 50]
         LD          [work_buf + 54], HL
+        LD          HL, heap_start
+        LD          [work_buf + 56], HL
+        LD          HL, [heap_end]
+        LD          [work_buf + 58], HL
         POP         HL
         LD          DE, work_buf + 50
-        LD          IX, blib_bsave
+        LD          IX, blib_bsave_s
         CALL        call_blib
 line_120:
         CALL        interrupt_process
@@ -522,7 +531,7 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x09, 0x44, 0x55, 0x4D, 0x4D, 0x59, 0x2E, 0x42, 0x49, 0x4E
+        DEFB        0x08, 0x46, 0x4F, 0x4E, 0x54, 0x2E, 0x53, 0x43, 0x31
 str_2:
         DEFB        0x06, 0x53, 0x61, 0x76, 0x65, 0x64, 0x2E
 str_3:

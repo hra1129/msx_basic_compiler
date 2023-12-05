@@ -13,6 +13,7 @@ calslt		:= 0x001C
 enaslt		:= 0x0024
 romver		:= 0x002D
 wrtvdp		:= 0x0047
+setrd		:= 0x0050
 setwrt		:= 0x0053
 calpat		:= 0x0084
 calatr		:= 0x0087
@@ -20,6 +21,7 @@ chget		:= 0x009F
 rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
+nsetrd		:= 0x016E
 nstwrt		:= 0x0171
 fout		:= 0x3425
 pufout		:= 0x3426
@@ -2484,7 +2486,7 @@ sub_bsave::
 ;	BSAVE HL,S
 ;	input:
 ;		HL ... ファイル名
-;		DE ... 開始アドレス、終了アドレス、実行アドレスが格納されているアドレス
+;		DE ... 開始アドレス、終了アドレス、実行アドレス、ワークエリア開始アドレス、終了アドレスが格納されているアドレス
 ;	output:
 ;		none
 ;	break:
@@ -2503,7 +2505,7 @@ sub_bsave_s::
 			pop		hl
 			; ヘッダを作る
 			ld		de, bsave_head_start
-			ld		bc, 6
+			ld		bc, 10
 			ldir
 			ld		a, 0xFE
 			ld		[bsave_head_signature], a
@@ -2514,18 +2516,66 @@ sub_bsave_s::
 			call	sub_fwrite
 			or		a, a
 			jp		nz, err_device_io
+			; ワークエリアサイズを計算
+			ld		hl, [bsave_work_end]
+			ld		de, [bsave_work_start]
+			or		a, a
+			sbc		hl, de
+			ld		[bsave_work_size], hl
 			; 書き出すサイズを計算 (bsave_head_end - bsave_head_start + 1)
 			ld		hl, [bsave_head_end]
 			ld		de, [bsave_head_start]
 			sbc		hl, de
+			ld		[bsave_data_size], hl
+			; VRAMアドレスをセット
+			ld		hl, [bsave_head_start]
+			ld		a, [romver]
+			or		a, a
+			jr		z, skip1
+			call	nsetrd					; VRAM ADDRESSセット for MSX2/2+/turboR
+			jr		loop
+		skip1:
+			call	setrd					; VRAM ADDRESSセット for MSX1
+		loop:
+			; 残りサイズを計算
+			ld		hl, [bsave_data_size]
+			ld		de, [bsave_work_size]
+			or		a, a
+			sbc		hl, de
+			jr		c, work_is_big
+		data_is_big:
+			ld		[bsave_data_size], hl
+			ld		c, e
+			ld		b, d
+			jr		skip2
+		work_is_big:
+			ld		bc, [bsave_data_size]
+			ld		hl, 0
+			ld		[bsave_data_size], hl
+		skip2:
+			ld		hl, [bsave_work_start]
+			push	hl
+			push	bc
+		vram_read:
+			in		a, [vdpport0]
+			ld		[hl], a
 			inc		hl
-			ld		c, l
-			ld		b, h
+			dec		bc
+			ld		a, c
+			or		a, b
+			jr		nz, vram_read
 			; 書き出す
-			ld		hl, buf				; FCB
+			ld		hl, buf					; FCB
+			pop		bc						; size
+			pop		de						; work
 			call	sub_fwrite
 			or		a, a
 			jp		nz, err_device_io
+			; 書き終えたか？
+			ld		bc, [bsave_data_size]
+			ld		a, c
+			or		a, b
+			jr		nz, loop
 			; ファイルを閉じる
 			ld		hl, buf
 			call	sub_fclose
@@ -2536,7 +2586,10 @@ sub_bsave_s::
 	bsave_head_start		= bsave_head + 1
 	bsave_head_end			= bsave_head + 3
 	bsave_head_exec			= bsave_head + 5
-	bsave_head_size			= bsave_head + 7
+	bsave_work_start		= bsave_head + 7
+	bsave_work_end			= bsave_head + 9
+	bsave_data_size			= bsave_head + 11
+	bsave_work_size			= bsave_head + 13
 			endscope
 
 ; =============================================================================
