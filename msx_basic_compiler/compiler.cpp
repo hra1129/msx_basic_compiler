@@ -30,6 +30,7 @@
 #include "collections/input.h"
 #include "collections/key.h"
 #include "collections/let.h"
+#include "collections/lset.h"
 #include "collections/locate.h"
 #include "collections/next.h"
 #include "collections/mid.h"
@@ -84,6 +85,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CINPUT );
 	this->collection.push_back( new CKEY );
 	this->collection.push_back( new CLET );
+	this->collection.push_back( new CLSET );
 	this->collection.push_back( new CLOCATE );
 	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new CMID );
