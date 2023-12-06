@@ -176,6 +176,7 @@
     <ClCompile Include="collections\key.cpp" />
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\locate.cpp" />
+    <ClCompile Include="collections\lset.cpp" />
     <ClCompile Include="collections\mid.cpp" />
     <ClCompile Include="collections\next.cpp" />
     <ClCompile Include="collections\on_goto.cpp" />
@@ -309,6 +310,7 @@
     <ClInclude Include="collections\key.h" />
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\locate.h" />
+    <ClInclude Include="collections\lset.h" />
     <ClInclude Include="collections\mid.h" />
     <ClInclude Include="collections\next.h" />
     <ClInclude Include="collections\on_goto.h" />

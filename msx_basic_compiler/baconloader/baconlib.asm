@@ -248,6 +248,10 @@ blib_entries::
 			jp		sub_bsave
 	blib_bsave_s:
 			jp		sub_bsave_s
+	blib_lset:
+			jp		sub_lset
+	blib_rset:
+			jp		sub_rset
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2590,6 +2594,108 @@ sub_bsave_s::
 	bsave_work_end			= bsave_head + 9
 	bsave_data_size			= bsave_head + 11
 	bsave_work_size			= bsave_head + 13
+			endscope
+
+; =============================================================================
+;	LSET HL=DE
+;	input:
+;		HL ... 上書きされる変数のアドレス
+;		DE ... 上書きする文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_lset
+sub_lset::
+			; 変数のアドレスから文字列アドレスを取得
+			ld		a, [hl]
+			inc		hl
+			ld		h, [hl]
+			ld		l, a
+			; 長さを比べる
+			ex		de, hl			; DE = 上書きされる文字列, HL = 上書きする文字列
+			ld		a, [de]			; A = 上書きされる文字列の長さ
+			ld		c, [hl]			; C = 上書きする文字列の長さ
+			ld		b, a
+			cp		a, c
+			jr		nc, skip		; 上書きする文字列が短ければ skip
+			; A > C の場合 : 上書きされる文字列の方が短い場合
+			ld		c, a			; 上書きする文字列の長さを、上書きされる文字列の長さに切り詰める
+		skip:
+			ld		a, b			; A は HL の文字列の長さ
+			sub		a, c
+			inc		c
+			dec		c
+			inc		de
+			jr		z, skip_fill	; 更新が 0 なら何もしない
+			; 文字列をコピーする
+			ld		b, 0
+			inc		hl
+			ldir
+		skip_fill:
+			; 残りをスペースで埋める
+			or		a, a			; 残りが無い場合は何もしない
+			ret		z
+			ld		b, a
+			ld		a, ' '
+		loop:
+			ld		[de], a
+			inc		de
+			djnz	loop
+			ret
+			endscope
+
+; =============================================================================
+;	RSET HL=DE
+;	input:
+;		HL ... 上書きされる変数のアドレス
+;		DE ... 上書きする文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_rset
+sub_rset::
+			; 変数のアドレスから文字列アドレスを取得
+			ld		a, [hl]
+			inc		hl
+			ld		h, [hl]
+			ld		l, a
+			; 長さを比べる
+			ex		de, hl			; DE = 上書きされる文字列, HL = 上書きする文字列
+			ld		a, [de]			; A = 上書きされる文字列の長さ
+			ld		c, [hl]			; C = 上書きする文字列の長さ
+			ld		b, a
+			cp		a, c
+			jr		nc, skip		; 上書きする文字列が短ければ skip
+			; A > C の場合 : 上書きされる文字列の方が短い場合
+			ld		c, a			; 上書きする文字列の長さを、上書きされる文字列の長さに切り詰める
+		skip:
+			ld		a, b			; A は HL の文字列の長さ
+			inc		de
+			inc		hl
+			sub		a, c
+			jr		z, fill_end
+		fill:
+			ld		b, a
+			ld		a, ' '
+		loop1:
+			ld		[de], a
+			inc		de
+			djnz	loop1
+		fill_end:
+			inc		c
+			dec		c
+			ret		z
+			; 残りを指定の文字列に置き換える
+			ldir
+			ret
 			endscope
 
 ; =============================================================================

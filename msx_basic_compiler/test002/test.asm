@@ -12,12 +12,13 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-work_buf                        = 0x0F55E
-bios_imult                      = 0x03193
-blib_bsave_s                    = 0x04072
-work_prtflg                     = 0x0f416
-bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
+blib_lset                       = 0x04075
+work_prtflg                     = 0x0f416
+blib_inkey                      = 0x0402a
+blib_strcmp                     = 0x04027
+blib_rset                       = 0x04078
+bios_newstt                     = 0x04601
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
@@ -72,33 +73,1036 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-line_110:
-        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
         LD          HL, str_1
-        PUSH        HL
-        LD          HL, 0
-        LD          [work_buf + 50], HL
-        LD          HL, 8
-        PUSH        HL
-        LD          HL, 256
         POP         DE
-        CALL        bios_imult
-        LD          [work_buf + 52], HL
-        LD          HL, [work_buf + 50]
-        LD          [work_buf + 54], HL
-        LD          HL, heap_start
-        LD          [work_buf + 56], HL
-        LD          HL, [heap_end]
-        LD          [work_buf + 58], HL
-        POP         HL
-        LD          DE, work_buf + 50
-        LD          IX, blib_bsave_s
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
         CALL        call_blib
-line_120:
+        POP         HL
+        CALL        free_string
         CALL        interrupt_process
         XOR         A, A
         LD          [work_prtflg], A
         LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_110:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_5
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_120:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_6
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_130:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_7
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_140:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_8
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_150:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_9
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_160:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_10
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_170:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_11
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_lset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_2
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_180:
+        CALL        interrupt_process
+        LD          HL, vars_I
+        PUSH        HL
+        LD          IX, blib_inkey
+        CALL        call_blib
+        CALL        copy_string
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, blib_strcmp
+        CALL        call_blib
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        POP         HL
+        PUSH        AF
+        CALL        free_string
+        POP         AF
+        LD          HL, 0
+        JR          NZ, _pt2
+        DEC         HL
+_pt2:
+        LD          A, L
+        OR          A, H
+        JP          Z, _pt1
+        JP          line_180
+_pt1:
+_pt0:
+line_200:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_0
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_210:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_5
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_220:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_6
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_230:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_7
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_240:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_8
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_250:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_9
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_260:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_10
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_3
+        CALL        puts
+line_270:
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          HL, str_1
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        free_string
+        CALL        interrupt_process
+        LD          HL, vars_A
+        PUSH        HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        free_string
+        POP         AF
+        CALL        allocate_string
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, str_11
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, blib_rset
+        CALL        call_blib
+        POP         HL
+        CALL        free_string
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_12
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_A]
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_4
         PUSH        HL
         CALL        puts
         POP         HL
@@ -142,17 +1146,6 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-puts:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_puts_loop:
-        INC         HL
-        LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
-        RET         
 free_string:
         LD          DE, heap_start
         RST         0x20
@@ -264,6 +1257,48 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
+        RET         
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -278,6 +1313,12 @@ program_run:
         LD          DE, var_area_start + 1
         LD          BC, varsa_area_end - var_area_start - 1
         LD          [HL], 0
+        LDIR        
+        LD          HL, str_0
+        LD          [vars_area_start], HL
+        LD          HL, vars_area_start
+        LD          DE, vars_area_start + 2
+        LD          BC, vars_area_end - vars_area_start - 2
         LDIR        
         RET         
 interrupt_process:
@@ -531,11 +1572,29 @@ h_erro_handler:
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x08, 0x46, 0x4F, 0x4E, 0x54, 0x2E, 0x53, 0x43, 0x31
+        DEFB        0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+str_10:
+        DEFB        0x06, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
+str_11:
+        DEFB        0x07, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47
+str_12:
+        DEFB        0x02, 0x52, 0x5B
 str_2:
-        DEFB        0x06, 0x53, 0x61, 0x76, 0x65, 0x64, 0x2E
+        DEFB        0x02, 0x4C, 0x5B
 str_3:
         DEFB        0x02, 0x0D, 0x0A
+str_4:
+        DEFB        0x01, 0x5D
+str_5:
+        DEFB        0x01, 0x41
+str_6:
+        DEFB        0x02, 0x41, 0x42
+str_7:
+        DEFB        0x03, 0x41, 0x42, 0x43
+str_8:
+        DEFB        0x04, 0x41, 0x42, 0x43, 0x44
+str_9:
+        DEFB        0x05, 0x41, 0x42, 0x43, 0x44, 0x45
 heap_next:
         DEFW        0
 heap_end:
@@ -643,6 +1702,10 @@ svari_on_strig4_line:
         DEFW        0
 var_area_end:
 vars_area_start:
+vars_A:
+        DEFW        0
+vars_I:
+        DEFW        0
 vars_area_end:
 vara_area_start:
 vara_area_end:
