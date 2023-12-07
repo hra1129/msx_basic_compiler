@@ -32,6 +32,7 @@
 #include "expression_abs.h"
 #include "expression_asc.h"
 #include "expression_atn.h"
+#include "expression_base.h"
 #include "expression_bin.h"
 #include "expression_cdbl.h"
 #include "expression_chr.h"
@@ -60,6 +61,7 @@
 #include "expression_oct.h"
 #include "expression_pad.h"
 #include "expression_peek.h"
+#include "expression_peekw.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
 #include "expression_sgn.h"
@@ -390,6 +392,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "ATN" ) {
 		CEXPRESSION_ATN *p_term = new CEXPRESSION_ATN;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "BASE" ) {
+		CEXPRESSION_BASE *p_term = new CEXPRESSION_BASE;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
@@ -787,6 +803,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "PEEK" ) {
 		CEXPRESSION_PEEK *p_term = new CEXPRESSION_PEEK;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "PEEKW" ) {
+		CEXPRESSION_PEEKW *p_term = new CEXPRESSION_PEEKW;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {

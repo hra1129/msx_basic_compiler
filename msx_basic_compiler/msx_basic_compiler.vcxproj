@@ -206,6 +206,7 @@
     <ClCompile Include="expressions\expression_abs.cpp" />
     <ClCompile Include="expressions\expression_asc.cpp" />
     <ClCompile Include="expressions\expression_atn.cpp" />
+    <ClCompile Include="expressions\expression_base.cpp" />
     <ClCompile Include="expressions\expression_bin.cpp" />
     <ClCompile Include="expressions\expression_cdbl.cpp" />
     <ClCompile Include="expressions\expression_chr.cpp" />
@@ -255,6 +256,7 @@
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_pad.cpp" />
     <ClCompile Include="expressions\expression_peek.cpp" />
+    <ClCompile Include="expressions\expression_peekw.cpp" />
     <ClCompile Include="expressions\expression_right.cpp" />
     <ClCompile Include="expressions\expression_rnd.cpp" />
     <ClCompile Include="expressions\expression_sgn.cpp" />
@@ -342,6 +344,7 @@
     <ClInclude Include="expressions\expression_abs.h" />
     <ClInclude Include="expressions\expression_asc.h" />
     <ClInclude Include="expressions\expression_atn.h" />
+    <ClInclude Include="expressions\expression_base.h" />
     <ClInclude Include="expressions\expression_bin.h" />
     <ClInclude Include="expressions\expression_cdbl.h" />
     <ClInclude Include="expressions\expression_chr.h" />
@@ -391,6 +394,7 @@
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_pad.h" />
     <ClInclude Include="expressions\expression_peek.h" />
+    <ClInclude Include="expressions\expression_peekw.h" />
     <ClInclude Include="expressions\expression_right.h" />
     <ClInclude Include="expressions\expression_rnd.h" />
     <ClInclude Include="expressions\expression_sgn.h" />

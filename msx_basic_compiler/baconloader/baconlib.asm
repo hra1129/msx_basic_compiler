@@ -252,6 +252,8 @@ blib_entries::
 			jp		sub_lset
 	blib_rset:
 			jp		sub_rset
+	blib_base:
+			jp		sub_base
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2696,6 +2698,83 @@ sub_rset::
 			; 残りを指定の文字列に置き換える
 			ldir
 			ret
+			endscope
+
+; =============================================================================
+;	BASE(HL)
+;	input:
+;		HL ... 番号
+;	output:
+;		HL ... アドレス
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_base
+sub_base::
+			ld		a, l
+			cp		a, 20
+			jr		nc, msx2_mode
+			; MSX1 のモードの場合
+			ld		h, 0xF3
+			add		a, a
+			add		a, 0xB3
+	finish:
+			ld		l, a
+			ld		a, [hl]
+			inc		hl
+			ld		h, [hl]
+			ld		l, a
+			ret
+	msx2_mode:
+			sub		a, 20
+			cp		a, 5
+			jr		nc, screen56_mode
+			; SCREEN4
+			ld		h, screen4_base >> 8
+			add		a, a
+			add		a, screen4_base & 0xFF
+			jr		finish
+	screen56_mode:
+			cp		a, 15
+			jr		nc, screen78_mode
+			call	mod5
+			; SCREEN5～6
+			ld		h, screen5_base >> 8
+			add		a, a
+			add		a, screen5_base & 0xFF
+			jr		finish
+	screen78_mode:
+			call	mod5
+			; SCREEN7～12
+			ld		h, screen7_base >> 8
+			add		a, a
+			add		a, screen7_base & 0xFF
+			jr		finish
+	mod5:
+			sub		a, 5
+			jr		nc, mod5
+			add		a, 5
+			ret
+	screen4_base:
+			dw		0x1800			; Name Table
+			dw		0x2000			; Color Table
+			dw		0x0000			; Pattern Generator Table
+			dw		0x1E00			; Sprite Attribute Table
+			dw		0x3800			; Sprite Pattern Generator Table
+	screen5_base:
+			dw		0x0000			; Name Table
+			dw		0x0000			; Color Table
+			dw		0x0000			; Pattern Generator Table
+			dw		0x7600			; Sprite Attribute Table
+			dw		0x7800			; Sprite Pattern Generator Table
+	screen7_base:
+			dw		0x0000			; Name Table
+			dw		0x0000			; Color Table
+			dw		0x0000			; Pattern Generator Table
+			dw		0xFA00			; Sprite Attribute Table
+			dw		0xF000			; Sprite Pattern Generator Table
 			endscope
 
 ; =============================================================================
