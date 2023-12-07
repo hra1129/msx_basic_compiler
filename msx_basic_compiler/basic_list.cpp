@@ -58,6 +58,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0xB6 },				"MERGE" },
 	{ { 0xCD },				"MOTOR" },
 	{ { 0xBF },				"PAINT" },
+	{ { -1 },				"PEEKW"	},
 	{ { 0xED },				"POINT" },
 	{ { 0x91 },				"PRINT" },
 	{ { 0xAA },				"RENUM" },
