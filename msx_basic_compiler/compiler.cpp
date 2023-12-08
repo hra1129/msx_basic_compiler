@@ -52,6 +52,7 @@
 #include "collections/setpage.h"
 #include "collections/setscroll.h"
 #include "collections/sound.h"
+#include "collections/swap.h"
 #include "collections/vpoke.h"
 #include "collections/width.h"
 #include "variable_manager.h"
@@ -107,6 +108,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CSETPAGE );
 	this->collection.push_back( new CSETSCROLL );
 	this->collection.push_back( new CSOUND );
+	this->collection.push_back( new CSWAP );
 	this->collection.push_back( new CVPOKE );
 	this->collection.push_back( new CWIDTH );
 }

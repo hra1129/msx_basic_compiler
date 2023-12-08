@@ -197,6 +197,7 @@
     <ClCompile Include="collections\setpage.cpp" />
     <ClCompile Include="collections\setscroll.cpp" />
     <ClCompile Include="collections\sound.cpp" />
+    <ClCompile Include="collections\swap.cpp" />
     <ClCompile Include="collections\vpoke.cpp" />
     <ClCompile Include="collections\width.cpp" />
     <ClCompile Include="compiler.cpp" />
@@ -333,6 +334,7 @@
     <ClInclude Include="collections\setpage.h" />
     <ClInclude Include="collections\setscroll.h" />
     <ClInclude Include="collections\sound.h" />
+    <ClInclude Include="collections\swap.h" />
     <ClInclude Include="collections\vpoke.h" />
     <ClInclude Include="collections\width.h" />
     <ClInclude Include="compiler.h" />
