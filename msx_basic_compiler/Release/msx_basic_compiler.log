@@ -1,7 +1,8 @@
-﻿  compiler.cpp
+﻿  pokew.cpp
+  compiler.cpp
   コード生成しています。
-  5 of 2097 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    131 functions had inline decision re-evaluated but remain unchanged
+  5 of 2099 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    2 functions were new in current compilation
+    195 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

@@ -187,6 +187,7 @@
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\play.cpp" />
     <ClCompile Include="collections\poke.cpp" />
+    <ClCompile Include="collections\pokew.cpp" />
     <ClCompile Include="collections\print.cpp" />
     <ClCompile Include="collections\put_sprite.cpp" />
     <ClCompile Include="collections\read.cpp" />
@@ -324,6 +325,7 @@
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\play.h" />
     <ClInclude Include="collections\poke.h" />
+    <ClInclude Include="collections\pokew.h" />
     <ClInclude Include="collections\print.h" />
     <ClInclude Include="collections\put_sprite.h" />
     <ClInclude Include="collections\read.h" />
