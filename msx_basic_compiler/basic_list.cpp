@@ -149,7 +149,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0x82 },				"FOR" },
 	{ { 0xFF, 0x8F },		"FRE" },
 	{ { 0xB2 },				"GET" },
-	{ { 0xFA },				"INP" },
+	{ { 0xFA },				"IMP" },
 	{ { 0xFF, 0x90 },		"INP" },
 	{ { 0xFF, 0x85 },		"INT" },
 	{ { 0xD5 },				"IPL" },
@@ -522,7 +522,6 @@ std::string CBASIC_LIST::get_word_in_charlist( const char *p_charlist, bool igno
 	while( this->p_file_image != this->file_image.end() && strchr( p_charlist, (char)this->p_file_image[0] ) != NULL ) {
 		s = s + (char)this->p_file_image[0];
 		this->p_file_image++;
-		this->skip_white_space();
 	}
 	return s;
 }

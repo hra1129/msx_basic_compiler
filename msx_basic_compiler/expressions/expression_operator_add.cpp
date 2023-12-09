@@ -29,14 +29,28 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info 
 
 	if( this->p_left->is_constant && this->p_right->is_constant ) {
 		//	左右の項が両方とも定数の場合
-		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
-		CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
-		double r = p_left->get_value() + p_right->get_value();
+		if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
+			//	文字列の場合
+			if( this->p_left->type != this->p_right->type ) {
+				//	文字列と何かを + している場合、エラーなので何もしない
+				return nullptr;
+			}
+			CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::STRING;
+			p_term->s_value = this->p_left->s_value + this->p_right->s_value;
+			return p_term;
+		}
+		else {
+			//	数値の場合
+			CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
+			CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
+			double r = p_left->get_value() + p_right->get_value();
 
-		CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
-		p_term->set_type( p_left->type, p_right->type );
-		p_term->set_double( r );
-		return p_term;
+			CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
+			p_term->set_type( p_left->type, p_right->type );
+			p_term->set_double( r );
+			return p_term;
+		}
 	}
 	return nullptr;
 }
