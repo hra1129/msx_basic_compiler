@@ -20,6 +20,11 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_NOT::optimization( CCOMPILE_INFO *p_info 
 		delete (this->p_right);
 		this->p_right = p;
 	}
+
+	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
+		//	エラーなので何もしない
+		return nullptr;
+	}
 	//	事前計算処理
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_right->is_constant ) {
 		//	定数の場合

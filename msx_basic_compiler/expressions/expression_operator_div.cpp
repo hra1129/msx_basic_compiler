@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include "expression_operator_div.h"
+#include "expression_term.h"
+#include "expression_operator_minus.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_OPERATOR_DIV::optimization( CCOMPILE_INFO *p_info ) {
@@ -24,6 +26,55 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_DIV::optimization( CCOMPILE_INFO *p_info 
 	if( p != nullptr ) {
 		delete (this->p_right);
 		this->p_right = p;
+	}
+
+	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
+		return nullptr;
+	}
+
+	if( this->p_left->is_constant && this->p_right->is_constant ) {
+		//	¶‰E‚Ì€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
+		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
+		CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
+
+		if( p_right->get_value() == 0.0 ) {
+			return nullptr;
+		}
+		double r = p_left->get_value() / p_right->get_value();
+
+		CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
+		p_term->set_type( p_left->type, p_right->type );
+		p_term->set_double( r );
+		return p_term;
+	}
+	if( this->p_left->is_constant ) {
+		//	¶‚Ì€‚ª’è”
+		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
+		CEXPRESSION_NODE *p_right = this->p_right;
+		double r = p_left->get_value();
+		if( r == 0.0 ) {
+			this->p_left = nullptr;
+			return p_left;
+		}
+	}
+	if( this->p_right->is_constant ) {
+		//	‰E‚Ì€‚ª’è”
+		CEXPRESSION_TERM *p_right  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
+		CEXPRESSION_NODE *p_left = this->p_left;
+		double r = p_right->get_value();
+		if( r == 1.0 ) {
+			this->p_left = nullptr;
+			return p_left;
+		}
+		if( r == 0.0 ) {
+			return nullptr;
+		}
+		if( r == -1.0 ) {
+			CEXPRESSION_OPERATOR_MINUS *p_minus = new CEXPRESSION_OPERATOR_MINUS();
+			p_minus->type = p_left->type;
+			this->p_left = nullptr;
+			return p_left;
+		}
 	}
 	return nullptr;
 }

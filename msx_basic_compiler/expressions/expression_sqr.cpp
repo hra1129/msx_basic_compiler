@@ -12,7 +12,6 @@
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_SQR::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE *p;
-	char s[256];
 
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
@@ -26,8 +25,7 @@ CEXPRESSION_NODE* CEXPRESSION_SQR::optimization( CCOMPILE_INFO *p_info ) {
 			//	”’l‚Ìê‡
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
-			sprintf( s, "%1.14f", ( sqrt( std::stod( this->p_operand->s_value ) ) ) );
-			p_term->s_value = s;
+			p_term->set_double( sqrt( std::stod( this->p_operand->s_value ) ) );
 			return p_term;
 		}
 	}

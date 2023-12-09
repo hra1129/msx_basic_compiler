@@ -27,6 +27,10 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_SUB::optimization( CCOMPILE_INFO *p_info 
 		this->p_right = p;
 	}
 
+	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
+		return nullptr;
+	}
+
 	if( this->p_left->is_constant && this->p_right->is_constant ) {
 		//	¶‰E‚Ì€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
 		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
