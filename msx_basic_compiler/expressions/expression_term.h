@@ -24,6 +24,10 @@ public:
 
 	CEXPRESSION_NODE* optimization( CCOMPILE_INFO *p_info );
 
+	double get_value( void );
+	void set_type( CEXPRESSION_TYPE type1, CEXPRESSION_TYPE type2 );
+	void set_double( double r );
+
 	void compile( CCOMPILE_INFO *p_info );
 
 	void release( void ) {

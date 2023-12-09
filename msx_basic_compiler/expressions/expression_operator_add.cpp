@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_operator_add.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info ) {
@@ -24,6 +25,18 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info 
 	if( p != nullptr ) {
 		delete (this->p_right);
 		this->p_right = p;
+	}
+
+	if( this->p_left->is_constant && this->p_right->is_constant ) {
+		//	¶‰E‚Ì€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
+		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
+		CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
+		double r = p_left->get_value() + p_right->get_value();
+
+		CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
+		p_term->set_type( p_left->type, p_right->type );
+		p_term->set_double( r );
+		return p_term;
 	}
 	return nullptr;
 }
