@@ -1287,5 +1287,37 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 	this->exec_subroutines();
 
+	//	最適化
+	if( this->info.options.optimize_level != COPTIMIZE_LEVEL::NONE ) {
+		this->optimize();
+	}
 	return( this->info.errors.list.size() == 0 );
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::optimize( void ) {
+
+	this->optimize_interrupt_process();	
+}
+
+// --------------------------------------------------------------------
+//	過剰に出し過ぎた call interrupt_process を削減する
+void CCOMPILER::optimize_interrupt_process( void ) {
+	std::vector< CASSEMBLER_LINE >::iterator p, p_search, p_next;
+
+	//	単純に連続実行されている場合
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::CALL && p->condition == CCONDITION::NONE && p->operand1.type == COPERAND_TYPE::LABEL && p->operand1.s_value == "interrupt_process" ) {
+			for( p_search = p + 1; p_search != this->info.assembler_list.body.end(); ) {
+				if( p_search->type == CMNEMONIC_TYPE::CALL && p_search->condition == CCONDITION::NONE && p_search->operand1.type == COPERAND_TYPE::LABEL && p_search->operand1.s_value == "interrupt_process" ) {
+					p_next = p_search - 1;
+					this->info.assembler_list.body.erase( p_search );
+					p_search = p_next + 1;
+				}
+				else {
+					break;
+				}
+			}
+		}
+	}
 }

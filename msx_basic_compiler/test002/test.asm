@@ -12,6 +12,12 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
+bios_chgclr                     = 0x00062
+work_forclr                     = 0x0F3E9
+work_bakclr                     = 0x0F3EA
+work_bdrclr                     = 0x0F3EB
+work_romver                     = 0x0002D
+bios_chgmod                     = 0x0005F
 bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
 work_gxpos                      = 0x0FCB3
@@ -22,7 +28,6 @@ bios_line                       = 0x058FC
 bios_lineb                      = 0x05912
 bios_linebf                     = 0x058C1
 bios_setatr                     = 0x0011A
-work_forclr                     = 0x0F3E9
 bios_pset                       = 0x057F5
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
@@ -80,11 +85,28 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
+        LD          HL, 15
+        LD          A, L
+        LD          [work_forclr], A
+        LD          HL, 4
+        LD          A, L
+        LD          [work_bakclr], A
+        LD          HL, 7
+        LD          A, L
+        LD          [work_bdrclr], A
+        CALL        bios_chgclr
         CALL        interrupt_process
         LD          HL, 2
+        LD          A, [work_romver]
+        OR          A, A
         LD          A, L
+        JR          NZ, _pt0
+        CALL        bios_chgmod
+        JR          _pt1
+_pt0:
         LD          IX, bios_chgmodp
         CALL        bios_extrom
+_pt1:
 line_110:
         CALL        interrupt_process
         LD          HL, 0
@@ -301,15 +323,15 @@ line_1000:
         CALL        free_string
         POP         AF
         LD          HL, 0
-        JR          NZ, _pt2
+        JR          NZ, _pt4
         DEC         HL
-_pt2:
+_pt4:
         LD          A, L
         OR          A, H
-        JP          Z, _pt1
+        JP          Z, _pt3
         JP          line_1000
-_pt1:
-_pt0:
+_pt3:
+_pt2:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi

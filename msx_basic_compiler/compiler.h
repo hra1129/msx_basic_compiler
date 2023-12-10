@@ -34,6 +34,9 @@ private:
 	//	現在の行が飛び先として指定されている場合、ラベルを生成する
 	void insert_label( void );
 
+	// --------------------------------------------------------------------
+	//	最適化の処理
+	void optimize_interrupt_process( void );
 public:
 	CCOMPILE_INFO info;
 
@@ -58,6 +61,8 @@ public:
 	CVARIABLE get_variable_address_wo_array( void );
 	//	変数へ値を格納する処理
 	void write_variable_value( CVARIABLE &variable );
+	//	body の最適化
+	void optimize( void );
 };
 
 #endif

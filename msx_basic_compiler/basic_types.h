@@ -32,14 +32,6 @@ enum class CBASIC_WORD_TYPE {
 };
 
 // --------------------------------------------------------------------
-enum class CTARGET_TYPES {
-	MSX1,
-	MSX2,
-	MSX2P,
-	MSXTR,
-};
-
-// --------------------------------------------------------------------
 enum class COPTIMIZE_LEVEL: int {
 	NONE = 0,
 	NODE_ONLY = 1,
@@ -61,12 +53,10 @@ public:
 	int start_address;
 	int stack_size;
 
-	CTARGET_TYPES target_type;
 	COPTIMIZE_LEVEL optimize_level;
 	CCOMPILE_MODE compile_mode;
 
 	COPTIONS() {
-		this->target_type = CTARGET_TYPES::MSX1;
 		this->start_address = 0x8010;
 		this->stack_size = 256;
 		this->optimize_level = COPTIMIZE_LEVEL::CODE;
