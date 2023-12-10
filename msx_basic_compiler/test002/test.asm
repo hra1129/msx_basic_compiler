@@ -16,8 +16,11 @@ bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
 work_gxpos                      = 0x0FCB3
 work_gypos                      = 0x0FCB5
+work_grpacx                     = 0x0FCB7
+work_grpacy                     = 0x0FCB9
 bios_line                       = 0x058FC
-bios_linebox                    = 0x058C1
+bios_lineb                      = 0x05912
+bios_linebf                     = 0x058C1
 bios_setatr                     = 0x0011A
 work_forclr                     = 0x0F3E9
 bios_errhand                    = 0x0406F
@@ -85,8 +88,10 @@ line_110:
         CALL        interrupt_process
         LD          HL, 0
         LD          [work_gxpos], HL
+        LD          [work_grpacx], HL
         LD          HL, 0
         LD          [work_gypos], HL
+        LD          [work_grpacy], HL
         LD          HL, 15
         LD          A, L
         CALL        bios_setatr
@@ -139,8 +144,10 @@ line_140:
         CALL        interrupt_process
         LD          HL, 0
         LD          [work_gxpos], HL
+        LD          [work_grpacx], HL
         LD          HL, 0
         LD          [work_gypos], HL
+        LD          [work_grpacy], HL
         LD          A, [work_forclr]
         CALL        bios_setatr
         LD          HL, 20
@@ -159,8 +166,10 @@ line_150:
         CALL        interrupt_process
         LD          HL, 50
         LD          [work_gxpos], HL
+        LD          [work_grpacx], HL
         LD          HL, 50
         LD          [work_gypos], HL
+        LD          [work_grpacy], HL
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
@@ -171,12 +180,35 @@ line_150:
         POP         BC
         PUSH        DE
         PUSH        BC
-        CALL        bios_linebox
+        CALL        bios_linebf
         POP         HL
         LD          [work_gxpos], HL
         POP         HL
         LD          [work_gypos], HL
 line_160:
+        CALL        interrupt_process
+        LD          HL, 150
+        LD          [work_gxpos], HL
+        LD          [work_grpacx], HL
+        LD          HL, 60
+        LD          [work_gypos], HL
+        LD          [work_grpacy], HL
+        LD          HL, 13
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 170
+        PUSH        HL
+        LD          HL, 80
+        EX          DE, HL
+        POP         BC
+        PUSH        DE
+        PUSH        BC
+        CALL        bios_lineb
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
+line_170:
         CALL        interrupt_process
         LD          HL, vars_I
         PUSH        HL
@@ -219,7 +251,7 @@ _pt2:
         LD          A, L
         OR          A, H
         JP          Z, _pt1
-        JP          line_150
+        JP          line_170
 _pt1:
 _pt0:
 program_termination:
