@@ -23,6 +23,7 @@ bios_lineb                      = 0x05912
 bios_linebf                     = 0x058C1
 bios_setatr                     = 0x0011A
 work_forclr                     = 0x0F3E9
+bios_pset                       = 0x057F5
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
 blib_strcmp                     = 0x04027
@@ -210,6 +211,61 @@ line_160:
         LD          [work_gypos], HL
 line_170:
         CALL        interrupt_process
+        LD          HL, 6
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 180
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_180:
+        CALL        interrupt_process
+        LD          HL, 8
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 181
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_190:
+        CALL        interrupt_process
+        LD          HL, 9
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 182
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_200:
+        CALL        interrupt_process
+        LD          HL, 10
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 183
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_210:
+        CALL        interrupt_process
+        LD          HL, 15
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 192
+        PUSH        HL
+        LD          HL, 184
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_1000:
+        CALL        interrupt_process
         LD          HL, vars_I
         PUSH        HL
         LD          IX, blib_inkey
@@ -251,7 +307,7 @@ _pt2:
         LD          A, L
         OR          A, H
         JP          Z, _pt1
-        JP          line_170
+        JP          line_1000
 _pt1:
 _pt0:
 program_termination:

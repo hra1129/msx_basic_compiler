@@ -45,6 +45,7 @@
 #include "collections/poke.h"
 #include "collections/pokew.h"
 #include "collections/print.h"
+#include "collections/pset.h"
 #include "collections/put_sprite.h"
 #include "collections/read.h"
 #include "collections/restore.h"
@@ -103,6 +104,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPOKEW );
 	this->collection.push_back( new CPRINT );
+	this->collection.push_back( new CPSET );
 	this->collection.push_back( new CPUTSPRITE );
 	this->collection.push_back( new CREAD );
 	this->collection.push_back( new CRESTORE );
