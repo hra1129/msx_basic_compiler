@@ -28,6 +28,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "work_gxpos", "0x0FCB3" );
 	p_info->assembler_list.add_label( "work_gypos", "0x0FCB5" );
 	p_info->assembler_list.add_label( "bios_line", "0x058FC" );
+	p_info->assembler_list.add_label( "bios_linebox", "0x058C1" );
 	p_info->assembler_list.add_label( "bios_setatr", "0x0011A" );
 
 	if( p_info->list.p_position->s_word == "(" ) {
@@ -210,12 +211,43 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "B" ) {
 		//	B の場合
+		p_info->list.p_position++;
+		//	LINE (x,y)-(x,y),c,b で終わってる場合。四角を描く。
 		p_info->errors.add( SYNTAX_ERROR, line_no );		//	★まだ対応してない
 		return true;
 	}
 	else if( p_info->list.p_position->s_word == "BF" ) {
 		//	BF の場合
-		p_info->errors.add( SYNTAX_ERROR, line_no );		//	★まだ対応してない
+		p_info->list.p_position++;
+		//	LINE (x,y)-(x,y),c,bf で終わってる場合。塗りつぶし四角を描く。
+		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_linebox", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gxpos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gypos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
 	//	★ロジカルオペレーションは SCREEN5以上で指定可能
