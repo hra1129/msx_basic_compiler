@@ -48,19 +48,7 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 	for( int i = 1; i < argc; i++ ) {
 		s = argv[i];
 		if( s[0] == '-' ) {
-			if( s == "-msx" ) {
-				this->target_type = CTARGET_TYPES::MSX1;
-			}
-			else if( s == "-msx2" ) {
-				this->target_type = CTARGET_TYPES::MSX2;
-			}
-			else if( s == "-msx2p" ) {
-				this->target_type = CTARGET_TYPES::MSX2P;
-			}
-			else if( s == "-msxtr" ) {
-				this->target_type = CTARGET_TYPES::MSXTR;
-			}
-			else if( s == "-O0" ) {
+			if( s == "-O0" ) {
 				this->optimize_level = COPTIMIZE_LEVEL::NONE;
 			}
 			else if( s == "-O1" ) {
@@ -126,20 +114,6 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 		break;
 	case CCOMPILE_MODE::ORIGINAL:
 		printf( "  Compile mode: MSX-BACON Extension.\n" );
-		break;
-	}
-	switch( this->target_type ) {
-	case CTARGET_TYPES::MSX1:
-		printf( "  Output type: MSX1\n" );
-		break;
-	case CTARGET_TYPES::MSX2:
-		printf( "  Output type: MSX2\n" );
-		break;
-	case CTARGET_TYPES::MSX2P:
-		printf( "  Output type: MSX2+\n" );
-		break;
-	case CTARGET_TYPES::MSXTR:
-		printf( "  Output type: MSXturboR\n" );
 		break;
 	}
 	switch( this->optimize_level ) {

@@ -26,14 +26,8 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	if( p_info->options.target_type == CTARGET_TYPES::MSX1 ) {
-		p_info->errors.add( SYNTAX_ERROR, line_no );
-		return true;
-	}
-	else {
-		p_info->assembler_list.add_label( "bios_setpag", "0x013d" );
-		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-	}
+	p_info->assembler_list.add_label( "bios_setpag", "0x013d" );
+	p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 
 	if( p_info->list.is_command_end() ) {
 		p_info->errors.add( MISSING_OPERAND, line_no );
