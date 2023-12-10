@@ -27,8 +27,11 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "work_gxpos", "0x0FCB3" );
 	p_info->assembler_list.add_label( "work_gypos", "0x0FCB5" );
+	p_info->assembler_list.add_label( "work_grpacx", "0x0FCB7" );
+	p_info->assembler_list.add_label( "work_grpacy", "0x0FCB9" );
 	p_info->assembler_list.add_label( "bios_line", "0x058FC" );
-	p_info->assembler_list.add_label( "bios_linebox", "0x058C1" );
+	p_info->assembler_list.add_label( "bios_lineb", "0x05912" );
+	p_info->assembler_list.add_label( "bios_linebf", "0x058C1" );
 	p_info->assembler_list.add_label( "bios_setatr", "0x0011A" );
 
 	if( p_info->list.p_position->s_word == "(" ) {
@@ -38,6 +41,8 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		//	XÀ•W
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gxpos]", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_grpacx]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
 		}
@@ -54,6 +59,8 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		//	YÀ•W
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gypos]", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_grpacy]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
 		}
@@ -212,8 +219,35 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word == "B" ) {
 		//	B ‚Ìê‡
 		p_info->list.p_position++;
-		//	LINE (x,y)-(x,y),c,b ‚ÅI‚í‚Á‚Ä‚éê‡BlŠp‚ğ•`‚­B
-		p_info->errors.add( SYNTAX_ERROR, line_no );		//	š‚Ü‚¾‘Î‰‚µ‚Ä‚È‚¢
+		//	LINE (x,y)-(x,y),c,b ‚ÅI‚í‚Á‚Ä‚éê‡B“h‚è‚Â‚Ô‚µlŠp‚ğ•`‚­B
+		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_lineb", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gxpos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gypos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
 	else if( p_info->list.p_position->s_word == "BF" ) {
@@ -238,7 +272,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_linebox", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_linebf", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
