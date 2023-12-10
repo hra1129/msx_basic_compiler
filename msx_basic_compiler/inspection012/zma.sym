@@ -1,9 +1,8 @@
 CHGMOD equ 05fh
-END_ADDRESS equ 0c03ch
+END_ADDRESS equ 0c016h
 GXPOS equ 0fcb3h
 GYPOS equ 0fcb5h
-LINE equ 058fch
-LINEBOX equ 058c1h
-LOOP equ 0c039h
+LOOP equ 0c013h
+PSET equ 057f5h
 SETATR equ 011ah
 START_ADDRESS equ 0c000h
