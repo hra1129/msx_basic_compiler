@@ -18,6 +18,7 @@ work_gxpos                      = 0x0FCB3
 work_gypos                      = 0x0FCB5
 bios_line                       = 0x058FC
 bios_setatr                     = 0x0011A
+work_forclr                     = 0x0F3E9
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
 blib_strcmp                     = 0x04027
@@ -93,7 +94,13 @@ line_110:
         LD          HL, 100
         EX          DE, HL
         POP         BC
+        PUSH        DE
+        PUSH        BC
         CALL        bios_line
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
 line_120:
         CALL        interrupt_process
         LD          HL, 6
@@ -104,27 +111,49 @@ line_120:
         LD          HL, 10
         EX          DE, HL
         POP         BC
+        PUSH        DE
+        PUSH        BC
         CALL        bios_line
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
 line_130:
         CALL        interrupt_process
+        LD          A, [work_forclr]
+        CALL        bios_setatr
         LD          HL, 0
         PUSH        HL
         LD          HL, 0
         EX          DE, HL
         POP         BC
+        PUSH        DE
+        PUSH        BC
         CALL        bios_line
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
 line_140:
         CALL        interrupt_process
         LD          HL, 0
         LD          [work_gxpos], HL
         LD          HL, 0
         LD          [work_gypos], HL
+        LD          A, [work_forclr]
+        CALL        bios_setatr
         LD          HL, 20
         PUSH        HL
         LD          HL, 100
         EX          DE, HL
         POP         BC
+        PUSH        DE
+        PUSH        BC
         CALL        bios_line
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
 line_150:
         CALL        interrupt_process
         LD          HL, vars_I
