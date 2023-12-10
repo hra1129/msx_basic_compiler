@@ -17,6 +17,7 @@ bios_extrom                     = 0x0015F
 work_gxpos                      = 0x0FCB3
 work_gypos                      = 0x0FCB5
 bios_line                       = 0x058FC
+bios_linebox                    = 0x058C1
 bios_setatr                     = 0x0011A
 work_forclr                     = 0x0F3E9
 bios_errhand                    = 0x0406F
@@ -155,6 +156,27 @@ line_140:
         POP         HL
         LD          [work_gypos], HL
 line_150:
+        CALL        interrupt_process
+        LD          HL, 50
+        LD          [work_gxpos], HL
+        LD          HL, 50
+        LD          [work_gypos], HL
+        LD          HL, 6
+        LD          A, L
+        CALL        bios_setatr
+        LD          HL, 70
+        PUSH        HL
+        LD          HL, 70
+        EX          DE, HL
+        POP         BC
+        PUSH        DE
+        PUSH        BC
+        CALL        bios_linebox
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
+line_160:
         CALL        interrupt_process
         LD          HL, vars_I
         PUSH        HL
