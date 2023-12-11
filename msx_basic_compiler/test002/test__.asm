@@ -153,6 +153,7 @@ line_130:
         CALL        bios_setatr
         LD          HL, 0
         PUSH        HL
+        LD          HL, 0
         EX          DE, HL
         POP         BC
         PUSH        DE
@@ -197,6 +198,7 @@ line_150:
         CALL        bios_setatr
         LD          HL, 70
         PUSH        HL
+        LD          HL, 70
         EX          DE, HL
         POP         BC
         PUSH        DE
