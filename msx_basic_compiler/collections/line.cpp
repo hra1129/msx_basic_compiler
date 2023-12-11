@@ -29,6 +29,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "work_gypos", "0x0FCB5" );
 	p_info->assembler_list.add_label( "work_grpacx", "0x0FCB7" );
 	p_info->assembler_list.add_label( "work_grpacy", "0x0FCB9" );
+	p_info->assembler_list.add_label( "work_scrmod", "0x0FCAF" );
 	p_info->assembler_list.add_label( "bios_line", "0x058FC" );
 	p_info->assembler_list.add_label( "bios_lineb", "0x05912" );
 	p_info->assembler_list.add_label( "bios_linebf", "0x058C1" );
@@ -264,6 +265,9 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	else if( p_info->list.p_position->s_word == "BF" ) {
+		p_info->assembler_list.add_label( "work_romver", "0x0002D" );
+		p_info->assembler_list.add_label( "bios_nvbxfl", "0x000CD" );
+		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 		//	BF の場合
 		p_info->list.p_position++;
 		//	ロジカルオペレーション
@@ -279,6 +283,9 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		std::string s_label1 = p_info->get_auto_label();
+		std::string s_label2 = p_info->get_auto_label();
+
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
@@ -287,7 +294,23 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_scrmod]" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "5" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NC, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_linebf", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NZ, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_nvbxfl" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NZ, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );

@@ -24,11 +24,13 @@ work_gxpos                      = 0x0FCB3
 work_gypos                      = 0x0FCB5
 work_grpacx                     = 0x0FCB7
 work_grpacy                     = 0x0FCB9
+work_scrmod                     = 0x0FCAF
 bios_line                       = 0x058FC
 bios_lineb                      = 0x05912
 bios_linebf                     = 0x058C1
 bios_setatr                     = 0x0011A
 work_logopr                     = 0x0fB02
+bios_nvbxfl                     = 0x000CD
 bios_pset                       = 0x057F5
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
@@ -214,7 +216,15 @@ line_150:
         POP         BC
         PUSH        DE
         PUSH        BC
+        LD          A, [work_scrmod]
+        CP          A, 5
+        JR          NC, _pt2
         CALL        bios_linebf
+        JR          _pt3
+_pt2:
+        LD          IX, bios_nvbxfl
+        CALL        bios_extrom
+_pt3:
         POP         HL
         LD          [work_gxpos], HL
         POP         HL
@@ -387,15 +397,15 @@ line_1000:
         CALL        free_string
         POP         AF
         LD          HL, 0
-        JR          NZ, _pt4
+        JR          NZ, _pt6
         DEC         HL
-_pt4:
+_pt6:
         LD          A, L
         OR          A, H
-        JP          Z, _pt3
+        JP          Z, _pt5
         JP          line_1000
-_pt3:
-_pt2:
+_pt5:
+_pt4:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
