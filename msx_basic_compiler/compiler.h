@@ -38,6 +38,7 @@ private:
 	//	最適化の処理
 	void optimize_interrupt_process( void );
 	void optimize_push_pop( void );
+
 public:
 	CCOMPILE_INFO info;
 
@@ -64,6 +65,10 @@ public:
 	void write_variable_value( CVARIABLE &variable );
 	//	body の最適化
 	void optimize( void );
+
+	// --------------------------------------------------------------------
+	//	汎用のコンパイル処理
+	void put_logical_operation( void );
 };
 
 #endif

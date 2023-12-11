@@ -111,7 +111,12 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	//	,
 	if( p_info->list.is_command_end() ) {
 		//	LINE (x,y)-(x,y) で終わってる場合。線を描く。
-
+		//	ロジカルオペレーションは PSET固定
+		p_info->assembler_list.add_label( "work_logopr", "0x0fB02" );
+		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_logopr]", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
 		//	色は前景色になる
 		p_info->assembler_list.add_label( "work_forclr", "0x0F3E9" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_forclr]" );
@@ -160,6 +165,12 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	//	色
 	if( p_info->list.p_position->s_word != "," ){
+		//	ロジカルオペレーションは PSET固定
+		p_info->assembler_list.add_label( "work_logopr", "0x0fB02" );
+		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_logopr]", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
 		//	色の指定がある
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
@@ -219,6 +230,8 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word == "B" ) {
 		//	B の場合
 		p_info->list.p_position++;
+		//	ロジカルオペレーション
+		p_info->p_compiler->put_logical_operation();
 		//	LINE (x,y)-(x,y),c,b で終わってる場合。塗りつぶし四角を描く。
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -253,6 +266,8 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	else if( p_info->list.p_position->s_word == "BF" ) {
 		//	BF の場合
 		p_info->list.p_position++;
+		//	ロジカルオペレーション
+		p_info->p_compiler->put_logical_operation();
 		//	LINE (x,y)-(x,y),c,bf で終わってる場合。塗りつぶし四角を描く。
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -284,7 +299,39 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
-	//	★ロジカルオペレーションは SCREEN5以上で指定可能
+	else if( p_info->list.p_position->s_word == "," ) {
+		//	ロジカルオペレーション
+		p_info->p_compiler->put_logical_operation();
+		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_line", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gxpos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_gypos]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		return true;
+	}
 	p_info->errors.add( SYNTAX_ERROR, line_no );
 	return true;
 }

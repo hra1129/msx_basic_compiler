@@ -28,6 +28,7 @@ bios_line                       = 0x058FC
 bios_lineb                      = 0x05912
 bios_linebf                     = 0x058C1
 bios_setatr                     = 0x0011A
+work_logopr                     = 0x0fB02
 bios_pset                       = 0x057F5
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
@@ -96,7 +97,7 @@ line_100:
         LD          [work_bdrclr], A
         CALL        bios_chgclr
         CALL        interrupt_process
-        LD          HL, 2
+        LD          HL, 5
         LD          A, [work_romver]
         OR          A, A
         LD          A, L
@@ -115,6 +116,8 @@ line_110:
         LD          HL, 0
         LD          [work_gypos], HL
         LD          [work_grpacy], HL
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 15
         LD          A, L
         CALL        bios_setatr
@@ -132,6 +135,8 @@ line_110:
         LD          [work_gypos], HL
 line_120:
         CALL        interrupt_process
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
@@ -149,6 +154,8 @@ line_120:
         LD          [work_gypos], HL
 line_130:
         CALL        interrupt_process
+        XOR         A, A
+        LD          [work_logopr], A
         LD          A, [work_forclr]
         CALL        bios_setatr
         LD          HL, 0
@@ -170,6 +177,8 @@ line_140:
         LD          HL, 0
         LD          [work_gypos], HL
         LD          [work_grpacy], HL
+        XOR         A, A
+        LD          [work_logopr], A
         LD          A, [work_forclr]
         CALL        bios_setatr
         LD          HL, 20
@@ -192,9 +201,13 @@ line_150:
         LD          HL, 50
         LD          [work_gypos], HL
         LD          [work_grpacy], HL
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 70
         PUSH        HL
         EX          DE, HL
@@ -214,9 +227,13 @@ line_160:
         LD          HL, 60
         LD          [work_gypos], HL
         LD          [work_grpacy], HL
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 13
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 170
         PUSH        HL
         LD          HL, 80
@@ -234,6 +251,8 @@ line_170:
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 192
         PUSH        HL
         LD          HL, 180
@@ -245,6 +264,8 @@ line_180:
         LD          HL, 8
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 192
         PUSH        HL
         LD          HL, 181
@@ -256,6 +277,8 @@ line_190:
         LD          HL, 9
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 192
         PUSH        HL
         LD          HL, 182
@@ -267,6 +290,8 @@ line_200:
         LD          HL, 10
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 192
         PUSH        HL
         LD          HL, 183
@@ -278,9 +303,50 @@ line_210:
         LD          HL, 15
         LD          A, L
         CALL        bios_setatr
+        XOR         A, A
+        LD          [work_logopr], A
         LD          HL, 192
         PUSH        HL
         LD          HL, 184
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_220:
+        CALL        interrupt_process
+        LD          HL, 0
+        LD          [work_gxpos], HL
+        LD          [work_grpacx], HL
+        LD          HL, 0
+        LD          [work_gypos], HL
+        LD          [work_grpacy], HL
+        XOR         A, A
+        LD          [work_logopr], A
+        LD          HL, 15
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 50
+        PUSH        HL
+        EX          DE, HL
+        POP         BC
+        PUSH        DE
+        PUSH        BC
+        CALL        bios_line
+        POP         HL
+        LD          [work_gxpos], HL
+        POP         HL
+        LD          [work_gypos], HL
+line_230:
+        CALL        interrupt_process
+        LD          HL, 4
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 10
+        PUSH        HL
+        LD          HL, 180
         EX          DE, HL
         POP         BC
         CALL        bios_pset
