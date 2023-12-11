@@ -1,20 +1,2 @@
-﻿  erase.cpp
-  error.cpp
-  play.cpp
-  poke.cpp
-  setpage.cpp
-  setscroll.cpp
-  vpoke.cpp
-  width.cpp
-  expression_asc.cpp
-  expression_atn.cpp
-  expression_instr.cpp
-  expression_int.cpp
-  expression_operator_lt.cpp
-  expression_operator_minus.cpp
-  expression_str.cpp
-  expression_vpeek.cpp
-  msx_basic_compiler.cpp
-  variable_manager.cpp
-  コードを生成中...
+﻿  compiler.cpp
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe

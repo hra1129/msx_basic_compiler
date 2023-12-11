@@ -1297,7 +1297,8 @@ bool CCOMPILER::exec( std::string s_name ) {
 // --------------------------------------------------------------------
 void CCOMPILER::optimize( void ) {
 
-	this->optimize_interrupt_process();	
+	this->optimize_interrupt_process();
+	this->optimize_push_pop();
 }
 
 // --------------------------------------------------------------------
@@ -1318,6 +1319,83 @@ void CCOMPILER::optimize_interrupt_process( void ) {
 					break;
 				}
 			}
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+//	âﬂèËÇ…èoÇµâﬂÇ¨ÇΩ push/pop ÇçÌå∏Ç∑ÇÈ
+void CCOMPILER::optimize_push_pop( void ) {
+	std::vector< CASSEMBLER_LINE >::iterator p, p_next, p_back;
+
+	//	push rp; pop rp ÇçÌèúÇ∑ÇÈ
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) {
+				break;
+			}
+			if( p_next->type == CMNEMONIC_TYPE::POP && p->operand1.s_value == p_next->operand1.s_value ) {
+				p_back = p - 1;
+				this->info.assembler_list.body.erase( p );
+				this->info.assembler_list.body.erase( p_next );
+				p = p_back;
+			}
+		}
+	}
+
+	//	LD HL, xxx
+	//	PUSH HL
+	//	LD HL, yyy
+	//	EX DE, HL
+	//	Å´
+	//	LD DE, xxx
+	//	LD HL, yyy
+	//	PUSH DE
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && (p->operand2.type == COPERAND_TYPE::CONSTANT || p->operand2.type == COPERAND_TYPE::LABEL)) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::PUSH || p_next->operand1.s_value != "HL" ) continue;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.s_value != "HL" || (p_next->operand2.type != COPERAND_TYPE::CONSTANT && p_next->operand2.type != COPERAND_TYPE::LABEL) ) continue;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::EX || p_next->operand1.s_value != "DE" ) continue;
+
+			p->operand1.s_value = "DE";
+			p++;
+			p_next = p + 1;
+			p->set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, p_next->operand2.s_value );
+			p_next->set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_next++;
+			this->info.assembler_list.body.erase( p_next );
+		}
+	}
+
+	//	PUSH rp1
+	//	POP rp2
+	//	Å´
+	//	LD  rp2l, rp1l
+	//	LD  rp2h, rp1h
+	std::string s_reg1, s_reg2, s_reg10, s_reg20, s_reg11, s_reg21;
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::PUSH ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::POP ) continue;
+
+			s_reg1 = p->operand1.s_value;
+			s_reg2 = p_next->operand1.s_value;
+			s_reg10 = s_reg1[0];
+			s_reg20 = s_reg2[0];
+			s_reg11 = s_reg1[1];
+			s_reg21 = s_reg2[1];
+			p->set(      CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, s_reg21, COPERAND_TYPE::REGISTER, s_reg11 );
+			p_next->set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, s_reg20, COPERAND_TYPE::REGISTER, s_reg10 );
 		}
 	}
 }
