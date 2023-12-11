@@ -118,11 +118,10 @@ line_110:
         LD          HL, 15
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 200
-        PUSH        HL
+        LD          DE, 200
         LD          HL, 100
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_line
@@ -135,11 +134,10 @@ line_120:
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 200
-        PUSH        HL
+        LD          DE, 200
         LD          HL, 10
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_line
@@ -151,11 +149,10 @@ line_130:
         CALL        interrupt_process
         LD          A, [work_forclr]
         CALL        bios_setatr
+        LD          DE, 0
         LD          HL, 0
-        PUSH        HL
-        LD          HL, 0
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_line
@@ -173,11 +170,10 @@ line_140:
         LD          [work_grpacy], HL
         LD          A, [work_forclr]
         CALL        bios_setatr
-        LD          HL, 20
-        PUSH        HL
+        LD          DE, 20
         LD          HL, 100
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_line
@@ -196,11 +192,10 @@ line_150:
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
+        LD          DE, 70
         LD          HL, 70
-        PUSH        HL
-        LD          HL, 70
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_linebf
@@ -219,11 +214,10 @@ line_160:
         LD          HL, 13
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 170
-        PUSH        HL
+        LD          DE, 170
         LD          HL, 80
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         PUSH        DE
         PUSH        BC
         CALL        bios_lineb
@@ -236,55 +230,50 @@ line_170:
         LD          HL, 6
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 192
-        PUSH        HL
+        LD          DE, 192
         LD          HL, 180
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         CALL        bios_pset
 line_180:
         CALL        interrupt_process
         LD          HL, 8
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 192
-        PUSH        HL
+        LD          DE, 192
         LD          HL, 181
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         CALL        bios_pset
 line_190:
         CALL        interrupt_process
         LD          HL, 9
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 192
-        PUSH        HL
+        LD          DE, 192
         LD          HL, 182
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         CALL        bios_pset
 line_200:
         CALL        interrupt_process
         LD          HL, 10
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 192
-        PUSH        HL
+        LD          DE, 192
         LD          HL, 183
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         CALL        bios_pset
 line_210:
         CALL        interrupt_process
         LD          HL, 15
         LD          A, L
         CALL        bios_setatr
-        LD          HL, 192
-        PUSH        HL
+        LD          DE, 192
         LD          HL, 184
-        EX          DE, HL
-        POP         BC
+        LD          C, E
+        LD          B, D
         CALL        bios_pset
 line_1000:
         CALL        interrupt_process
