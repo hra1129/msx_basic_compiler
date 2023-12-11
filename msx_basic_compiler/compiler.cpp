@@ -1387,3 +1387,52 @@ void CCOMPILER::optimize_push_pop( void ) {
 		}
 	}
 }
+
+// --------------------------------------------------------------------
+void CCOMPILER::put_logical_operation( void ) {
+	CASSEMBLER_LINE asm_line;
+	const char* s_rop[] = {
+		"AND", "OR", "XOR", "PSET", "PRESET", "TAND", "TOR", "TXOR", "TPSET", "TPRESET"
+	};
+	const int i_rop[] = {
+		1, 2, 3, 0, 4, 1+8, 2+8, 3+8, 0+8, 4+8 
+	};
+	int i, rop = 0;
+
+	if( this->info.list.is_command_end() ) {
+		rop = 0;
+	}
+	else if( this->info.list.p_position->s_word == "," ) {
+		this->info.list.p_position++;
+		if( this->info.list.is_command_end() ) {
+			rop = 0;
+			this->info.errors.add( SYNTAX_ERROR, this->info.list.p_position->line_no );
+		}
+		else {
+			for( i = 0; i < sizeof(s_rop)/sizeof(s_rop[0]); i++ ) {
+				if( this->info.list.p_position->s_word == s_rop[i] ) {
+					break;
+				}
+			}
+			if(i >= sizeof( s_rop ) / sizeof( s_rop[ 0 ] )){
+				rop = 0;
+				this->info.errors.add( SYNTAX_ERROR, this->info.list.p_position->line_no );
+			}
+			else {
+				rop = i_rop[i];
+				this->info.list.p_position++;
+			}
+		}
+	}
+
+	this->info.assembler_list.add_label( "work_logopr", "0x0fB02" );
+	if( rop == 0 ) {
+		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	}
+	else {
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, std::to_string( rop ) );
+	}
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_logopr]", COPERAND_TYPE::REGISTER, "A" );
+	this->info.assembler_list.body.push_back( asm_line );
+}

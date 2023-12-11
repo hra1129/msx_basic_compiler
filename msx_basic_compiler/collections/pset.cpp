@@ -47,6 +47,12 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
 		//	PSET(x,y) の場合
+		//	ロジカルオペレーションは PSET固定
+		p_info->assembler_list.add_label( "work_logopr", "0x0fB02" );
+		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_logopr]", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
 		//	色は前景色になる
 		p_info->assembler_list.add_label( "work_forclr", "0x0F3E9" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_forclr]" );
@@ -89,6 +95,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_setatr", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
+		//	ロジカルオペレーション
+		p_info->p_compiler->put_logical_operation();
 		//	X座標
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -114,7 +122,6 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
-	//	★ロジカルオペレーションは SCREEN5以上で指定可能
 	p_info->errors.add( SYNTAX_ERROR, line_no );
 	return true;
 }
