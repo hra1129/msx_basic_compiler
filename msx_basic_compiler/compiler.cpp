@@ -1346,12 +1346,10 @@ void CCOMPILER::optimize_push_pop( void ) {
 
 	//	LD HL, xxx
 	//	PUSH HL
-	//	LD HL, yyy
-	//	EX DE, HL
+	//	LD HL, xxx
 	//	«
-	//	LD DE, xxx
-	//	LD HL, yyy
-	//	PUSH DE
+	//	LD HL, xxx
+	//	PUSH HL
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && (p->operand2.type == COPERAND_TYPE::CONSTANT || p->operand2.type == COPERAND_TYPE::LABEL)) {
 			p_next = p + 1;
@@ -1360,18 +1358,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 
 			p_next++;
 			if( p_next == this->info.assembler_list.body.end() ) break;
-			if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.s_value != "HL" || (p_next->operand2.type != COPERAND_TYPE::CONSTANT && p_next->operand2.type != COPERAND_TYPE::LABEL) ) continue;
+			if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.s_value != "HL" || p_next->operand2.s_value != p->operand2.s_value ) continue;
 
-			p_next++;
-			if( p_next == this->info.assembler_list.body.end() ) break;
-			if( p_next->type != CMNEMONIC_TYPE::EX || p_next->operand1.s_value != "DE" ) continue;
-
-			p->operand1.s_value = "DE";
-			p++;
-			p_next = p + 1;
-			p->set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, p_next->operand2.s_value );
-			p_next->set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-			p_next++;
 			this->info.assembler_list.body.erase( p_next );
 		}
 	}
