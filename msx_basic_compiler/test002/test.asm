@@ -22,6 +22,9 @@ bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
 bios_pset                       = 0x057F5
 bios_setatr                     = 0x0011A
+subrom_setc                     = 0x009D
+work_cloc                       = 0xF92A
+work_cmask                      = 0xF92C
 work_logopr                     = 0x0fB02
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
@@ -112,7 +115,17 @@ line_110:
         PUSH        HL
         EX          DE, HL
         POP         BC
+        LD          A, [work_romver]
+        OR          A, A
+        JR          NZ, _pt2
         CALL        bios_pset
+        JR          _pt3
+_pt2:
+        LD          [work_cloc], BC
+        LD          [work_cmask], DE
+        LD          IX, subrom_setc
+        CALL        bios_extrom
+_pt3:
 line_120:
         CALL        interrupt_process
         LD          HL, 4
@@ -125,7 +138,17 @@ line_120:
         LD          HL, 10
         EX          DE, HL
         POP         BC
+        LD          A, [work_romver]
+        OR          A, A
+        JR          NZ, _pt4
         CALL        bios_pset
+        JR          _pt5
+_pt4:
+        LD          [work_cloc], BC
+        LD          [work_cmask], DE
+        LD          IX, subrom_setc
+        CALL        bios_extrom
+_pt5:
 line_130:
         CALL        interrupt_process
         LD          HL, 5
@@ -138,7 +161,17 @@ line_130:
         LD          HL, 10
         EX          DE, HL
         POP         BC
+        LD          A, [work_romver]
+        OR          A, A
+        JR          NZ, _pt6
         CALL        bios_pset
+        JR          _pt7
+_pt6:
+        LD          [work_cloc], BC
+        LD          [work_cmask], DE
+        LD          IX, subrom_setc
+        CALL        bios_extrom
+_pt7:
 line_140:
         CALL        interrupt_process
         LD          HL, 5
@@ -151,7 +184,17 @@ line_140:
         LD          HL, 10
         EX          DE, HL
         POP         BC
+        LD          A, [work_romver]
+        OR          A, A
+        JR          NZ, _pt8
         CALL        bios_pset
+        JR          _pt9
+_pt8:
+        LD          [work_cloc], BC
+        LD          [work_cmask], DE
+        LD          IX, subrom_setc
+        CALL        bios_extrom
+_pt9:
 line_150:
         CALL        interrupt_process
         LD          HL, 6
@@ -164,7 +207,17 @@ line_150:
         LD          HL, 10
         EX          DE, HL
         POP         BC
+        LD          A, [work_romver]
+        OR          A, A
+        JR          NZ, _pt10
         CALL        bios_pset
+        JR          _pt11
+_pt10:
+        LD          [work_cloc], BC
+        LD          [work_cmask], DE
+        LD          IX, subrom_setc
+        CALL        bios_extrom
+_pt11:
 line_1000:
         CALL        interrupt_process
         LD          HL, vars_I
@@ -202,15 +255,15 @@ line_1000:
         CALL        free_string
         POP         AF
         LD          HL, 0
-        JR          NZ, _pt4
+        JR          NZ, _pt14
         DEC         HL
-_pt4:
+_pt14:
         LD          A, L
         OR          A, H
-        JP          Z, _pt3
+        JP          Z, _pt13
         JP          line_1000
-_pt3:
-_pt2:
+_pt13:
+_pt12:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi

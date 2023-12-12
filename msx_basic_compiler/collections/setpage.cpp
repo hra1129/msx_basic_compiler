@@ -26,7 +26,7 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	p_info->assembler_list.add_label( "bios_setpag", "0x013d" );
+	p_info->assembler_list.add_label( "subrom_setpag", "0x013d" );
 	p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 
 	if( p_info->list.is_command_end() ) {
@@ -67,7 +67,7 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 		has_parameter = false;
 	}
 
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_setpag" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "subrom_setpag" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
