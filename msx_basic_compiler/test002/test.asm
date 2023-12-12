@@ -20,18 +20,9 @@ work_romver                     = 0x0002D
 bios_chgmod                     = 0x0005F
 bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
-work_gxpos                      = 0x0FCB3
-work_gypos                      = 0x0FCB5
-work_grpacx                     = 0x0FCB7
-work_grpacy                     = 0x0FCB9
-work_scrmod                     = 0x0FCAF
-bios_line                       = 0x058FC
-bios_lineb                      = 0x05912
-bios_linebf                     = 0x058C1
+bios_pset                       = 0x057F5
 bios_setatr                     = 0x0011A
 work_logopr                     = 0x0fB02
-bios_nvbxfl                     = 0x000CD
-bios_pset                       = 0x057F5
 bios_errhand                    = 0x0406F
 blib_inkey                      = 0x0402a
 blib_strcmp                     = 0x04027
@@ -94,7 +85,7 @@ line_100:
         LD          HL, 4
         LD          A, L
         LD          [work_bakclr], A
-        LD          HL, 7
+        LD          HL, 0
         LD          A, L
         LD          [work_bdrclr], A
         CALL        bios_chgclr
@@ -112,243 +103,6 @@ _pt0:
 _pt1:
 line_110:
         CALL        interrupt_process
-        LD          HL, 0
-        LD          [work_gxpos], HL
-        LD          [work_grpacx], HL
-        LD          HL, 0
-        LD          [work_gypos], HL
-        LD          [work_grpacy], HL
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 15
-        LD          A, L
-        CALL        bios_setatr
-        LD          HL, 200
-        PUSH        HL
-        LD          HL, 100
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_line
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_120:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 6
-        LD          A, L
-        CALL        bios_setatr
-        LD          HL, 200
-        PUSH        HL
-        LD          HL, 10
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_line
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_130:
-        CALL        interrupt_process
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          A, [work_forclr]
-        CALL        bios_setatr
-        LD          HL, 0
-        PUSH        HL
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_line
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_140:
-        CALL        interrupt_process
-        LD          HL, 0
-        LD          [work_gxpos], HL
-        LD          [work_grpacx], HL
-        LD          HL, 0
-        LD          [work_gypos], HL
-        LD          [work_grpacy], HL
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          A, [work_forclr]
-        CALL        bios_setatr
-        LD          HL, 20
-        PUSH        HL
-        LD          HL, 100
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_line
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_150:
-        CALL        interrupt_process
-        LD          HL, 50
-        LD          [work_gxpos], HL
-        LD          [work_grpacx], HL
-        LD          HL, 50
-        LD          [work_gypos], HL
-        LD          [work_grpacy], HL
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 6
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 70
-        PUSH        HL
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        LD          A, [work_scrmod]
-        CP          A, 5
-        JR          NC, _pt2
-        CALL        bios_linebf
-        JR          _pt3
-_pt2:
-        LD          IX, bios_nvbxfl
-        CALL        bios_extrom
-_pt3:
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_160:
-        CALL        interrupt_process
-        LD          HL, 150
-        LD          [work_gxpos], HL
-        LD          [work_grpacx], HL
-        LD          HL, 60
-        LD          [work_gypos], HL
-        LD          [work_grpacy], HL
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 13
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 170
-        PUSH        HL
-        LD          HL, 80
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_lineb
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_170:
-        CALL        interrupt_process
-        LD          HL, 6
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 192
-        PUSH        HL
-        LD          HL, 180
-        EX          DE, HL
-        POP         BC
-        CALL        bios_pset
-line_180:
-        CALL        interrupt_process
-        LD          HL, 8
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 192
-        PUSH        HL
-        LD          HL, 181
-        EX          DE, HL
-        POP         BC
-        CALL        bios_pset
-line_190:
-        CALL        interrupt_process
-        LD          HL, 9
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 192
-        PUSH        HL
-        LD          HL, 182
-        EX          DE, HL
-        POP         BC
-        CALL        bios_pset
-line_200:
-        CALL        interrupt_process
-        LD          HL, 10
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 192
-        PUSH        HL
-        LD          HL, 183
-        EX          DE, HL
-        POP         BC
-        CALL        bios_pset
-line_210:
-        CALL        interrupt_process
-        LD          HL, 15
-        LD          A, L
-        CALL        bios_setatr
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 192
-        PUSH        HL
-        LD          HL, 184
-        EX          DE, HL
-        POP         BC
-        CALL        bios_pset
-line_220:
-        CALL        interrupt_process
-        LD          HL, 0
-        LD          [work_gxpos], HL
-        LD          [work_grpacx], HL
-        LD          HL, 0
-        LD          [work_gypos], HL
-        LD          [work_grpacy], HL
-        XOR         A, A
-        LD          [work_logopr], A
-        LD          HL, 15
-        LD          A, L
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 50
-        PUSH        HL
-        EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        bios_line
-        POP         HL
-        LD          [work_gxpos], HL
-        POP         HL
-        LD          [work_gypos], HL
-line_230:
-        CALL        interrupt_process
         LD          HL, 4
         LD          A, L
         CALL        bios_setatr
@@ -356,7 +110,58 @@ line_230:
         LD          [work_logopr], A
         LD          HL, 10
         PUSH        HL
-        LD          HL, 180
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_120:
+        CALL        interrupt_process
+        LD          HL, 4
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 11
+        PUSH        HL
+        LD          HL, 10
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_130:
+        CALL        interrupt_process
+        LD          HL, 5
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 12
+        PUSH        HL
+        LD          HL, 10
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_140:
+        CALL        interrupt_process
+        LD          HL, 5
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 13
+        PUSH        HL
+        LD          HL, 10
+        EX          DE, HL
+        POP         BC
+        CALL        bios_pset
+line_150:
+        CALL        interrupt_process
+        LD          HL, 6
+        LD          A, L
+        CALL        bios_setatr
+        LD          A, 3
+        LD          [work_logopr], A
+        LD          HL, 14
+        PUSH        HL
+        LD          HL, 10
         EX          DE, HL
         POP         BC
         CALL        bios_pset
@@ -397,15 +202,15 @@ line_1000:
         CALL        free_string
         POP         AF
         LD          HL, 0
-        JR          NZ, _pt6
+        JR          NZ, _pt4
         DEC         HL
-_pt6:
+_pt4:
         LD          A, L
         OR          A, H
-        JP          Z, _pt5
+        JP          Z, _pt3
         JP          line_1000
-_pt5:
-_pt4:
+_pt3:
+_pt2:
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi

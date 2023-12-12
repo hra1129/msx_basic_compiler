@@ -12,12 +12,14 @@
 bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp, exp_x, exp_y;
-	bool has_step = false;
+	bool is_preset = false;
 	int line_no = p_info->list.get_line_no();
 
 	if( p_info->list.p_position->s_word != "PSET" && p_info->list.p_position->s_word != "PRESET" ) {
 		return false;
 	}
+	is_preset = (p_info->list.p_position->s_word != "PRESET");
+
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
 		//	PSET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
@@ -53,9 +55,15 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_logopr]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	F‚Í‘OŒiF‚É‚È‚é
-		p_info->assembler_list.add_label( "work_forclr", "0x0F3E9" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_forclr]" );
+		//	F‚Í PSET ‚È‚ç‘OŒiF‚ÉAPRESET ‚È‚ç”wŒiF‚É‚È‚é
+		if( is_preset ) {
+			p_info->assembler_list.add_label( "work_bakclr", "0x0F3EA" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_bakclr]" );
+		}
+		else {
+			p_info->assembler_list.add_label( "work_forclr", "0x0F3E9" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_forclr]" );
+		}
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_setatr", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
