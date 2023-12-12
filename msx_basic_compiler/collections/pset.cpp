@@ -15,7 +15,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	bool has_step = false;
 	int line_no = p_info->list.get_line_no();
 
-	if( p_info->list.p_position->s_word != "PSET" ) {
+	if( p_info->list.p_position->s_word != "PSET" && p_info->list.p_position->s_word != "PRESET" ) {
 		return false;
 	}
 	p_info->list.p_position++;
