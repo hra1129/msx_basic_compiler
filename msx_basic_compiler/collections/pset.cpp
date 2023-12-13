@@ -80,16 +80,18 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
-		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	YÀ•W
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
-		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "DE" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cmask]", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_romver]" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -102,10 +104,6 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]", COPERAND_TYPE::REGISTER, "BC" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cmask]", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -138,16 +136,18 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
-		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	YÀ•W
 		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cmask]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_romver]" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -160,10 +160,6 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cloc]", COPERAND_TYPE::REGISTER, "BC" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY_CONSTANT, "[work_cmask]", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );

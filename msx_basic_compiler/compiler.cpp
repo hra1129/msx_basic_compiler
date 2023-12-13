@@ -1386,6 +1386,28 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p_next->set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, s_reg20, COPERAND_TYPE::REGISTER, s_reg10 );
 		}
 	}
+
+	//	LD HL, constant
+	//	LD A, L
+	//	«
+	//	LD A, constant
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) {
+				break;
+			}
+			if( p_next->type == CMNEMONIC_TYPE::LD && p_next->operand1.type == COPERAND_TYPE::REGISTER && p_next->operand1.s_value == "A" && p_next->operand2.type == COPERAND_TYPE::REGISTER && p_next->operand2.s_value == "L" ) {
+				this->info.assembler_list.body.erase( p_next );
+				if( p->operand2.s_value == "0" ) {
+					p->operand2.s_value = "A";
+					p->operand2.type = COPERAND_TYPE::REGISTER;
+					p->type = CMNEMONIC_TYPE::XOR;
+				}
+				p->operand1.s_value = "A";
+			}
+		}
+	}
 }
 
 // --------------------------------------------------------------------
