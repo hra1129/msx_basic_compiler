@@ -1337,8 +1337,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 			}
 			if( p_next->type == CMNEMONIC_TYPE::POP && p->operand1.s_value == p_next->operand1.s_value ) {
 				p_back = p - 1;
-				this->info.assembler_list.body.erase( p );
 				this->info.assembler_list.body.erase( p_next );
+				this->info.assembler_list.body.erase( p );
 				p = p_back;
 			}
 		}

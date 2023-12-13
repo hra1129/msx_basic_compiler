@@ -254,6 +254,8 @@ blib_entries::
 			jp		sub_rset
 	blib_base:
 			jp		sub_base
+	blib_input:
+			jp		sub_input
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2775,6 +2777,34 @@ sub_base::
 			dw		0x0000			; Pattern Generator Table
 			dw		0xFA00			; Sprite Attribute Table
 			dw		0xF000			; Sprite Pattern Generator Table
+			endscope
+
+; =============================================================================
+;	INKEY$
+;	input:
+;		HL .... 入力された文字列を格納するメモリ ( [HL+0]:サイズ, [HL+1]～[HL+1+サイズ]:文字列 )
+;	output:
+;		HL .... 入力された文字 (BASIC形式)
+;	break:
+;		A, B, C, D, E, H, L, F
+;	comment:
+;		[HL+1]～[HL+1+サイズ] は上書きされる
+; =============================================================================
+			scope	sub_input
+sub_input::
+			ld		a, [hl]
+			or		a, a
+			ret		z
+			push	hl
+			ld		b, a
+			inc		hl
+		loop:
+			call	chget
+			ld		[hl], a
+			inc		hl
+			djnz	loop
+			pop		hl
+			ret
 			endscope
 
 ; =============================================================================

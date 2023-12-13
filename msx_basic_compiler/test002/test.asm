@@ -20,15 +20,15 @@ work_romver                     = 0x0002D
 bios_chgmod                     = 0x0005F
 bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
-bios_pset                       = 0x057F5
-bios_setatr                     = 0x0011A
-subrom_setc                     = 0x009D
-work_cloc                       = 0xF92A
-work_cmask                      = 0xF92C
-work_logopr                     = 0x0fB02
+work_prtflg                     = 0x0f416
 bios_errhand                    = 0x0406F
-blib_inkey                      = 0x0402a
-blib_strcmp                     = 0x04027
+blib_input                      = 0x0407e
+blib_mid                        = 0x04033
+bios_fout                       = 0x03425
+work_dac_int                    = 0x0f7f8
+work_valtyp                     = 0x0f663
+work_csrx                       = 0x0f3dd
+work_linlen                     = 0x0f3b0
 bios_newstt                     = 0x04601
 bios_gttrig                     = 0x00D8
 ; BSAVE header -----------------------------------------------------------
@@ -86,11 +86,11 @@ line_100:
         LD          [work_forclr], A
         LD          A, 4
         LD          [work_bakclr], A
-        XOR         A, A
+        LD          A, 7
         LD          [work_bdrclr], A
         CALL        bios_chgclr
         CALL        interrupt_process
-        LD          HL, 5
+        LD          HL, 1
         LD          A, [work_romver]
         OR          A, A
         LD          A, L
@@ -103,116 +103,21 @@ _pt0:
 _pt1:
 line_110:
         CALL        interrupt_process
-        LD          A, 4
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 10
-        LD          [work_cloc], HL
-        LD          HL, 10
-        LD          [work_cmask], HL
-        EX          DE, HL
-        LD          BC, [work_cloc]
-        LD          A, [work_romver]
-        OR          A, A
-        JR          NZ, _pt2
-        CALL        bios_pset
-        JR          _pt3
-_pt2:
-        LD          IX, subrom_setc
-        CALL        bios_extrom
-_pt3:
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_1
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
 line_120:
-        CALL        interrupt_process
-        LD          A, 4
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 11
-        LD          [work_cloc], HL
-        LD          HL, 10
-        LD          [work_cmask], HL
-        EX          DE, HL
-        LD          BC, [work_cloc]
-        LD          A, [work_romver]
-        OR          A, A
-        JR          NZ, _pt4
-        CALL        bios_pset
-        JR          _pt5
-_pt4:
-        LD          IX, subrom_setc
-        CALL        bios_extrom
-_pt5:
-line_130:
-        CALL        interrupt_process
-        LD          A, 5
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 12
-        LD          [work_cloc], HL
-        LD          HL, 10
-        LD          [work_cmask], HL
-        EX          DE, HL
-        LD          BC, [work_cloc]
-        LD          A, [work_romver]
-        OR          A, A
-        JR          NZ, _pt6
-        CALL        bios_pset
-        JR          _pt7
-_pt6:
-        LD          IX, subrom_setc
-        CALL        bios_extrom
-_pt7:
-line_140:
-        CALL        interrupt_process
-        LD          A, 5
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 13
-        LD          [work_cloc], HL
-        LD          HL, 10
-        LD          [work_cmask], HL
-        EX          DE, HL
-        LD          BC, [work_cloc]
-        LD          A, [work_romver]
-        OR          A, A
-        JR          NZ, _pt8
-        CALL        bios_pset
-        JR          _pt9
-_pt8:
-        LD          IX, subrom_setc
-        CALL        bios_extrom
-_pt9:
-line_150:
-        CALL        interrupt_process
-        LD          A, 6
-        CALL        bios_setatr
-        LD          A, 3
-        LD          [work_logopr], A
-        LD          HL, 14
-        LD          [work_cloc], HL
-        LD          HL, 10
-        LD          [work_cmask], HL
-        EX          DE, HL
-        LD          BC, [work_cloc]
-        LD          A, [work_romver]
-        OR          A, A
-        JR          NZ, _pt10
-        CALL        bios_pset
-        JR          _pt11
-_pt10:
-        LD          IX, subrom_setc
-        CALL        bios_extrom
-_pt11:
-line_1000:
         CALL        interrupt_process
         LD          HL, vars_I
         PUSH        HL
-        LD          IX, blib_inkey
+        LD          A, 5
+        CALL        allocate_string
+        LD          IX, blib_input
         CALL        call_blib
-        CALL        copy_string
         POP         DE
         EX          DE, HL
         LD          C, [HL]
@@ -224,34 +129,126 @@ line_1000:
         LD          H, B
         CALL        free_string
         CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
         LD          HL, [vars_I]
         CALL        copy_string
         PUSH        HL
-        LD          HL, str_0
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_130:
+        CALL        interrupt_process
+        LD          HL, vari_I
+        PUSH        HL
+        LD          HL, 1
         POP         DE
         EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_END
         PUSH        HL
-        PUSH        DE
-        LD          IX, blib_strcmp
+        LD          HL, 5
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, svari_I_FOR_STEP
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          HL, _pt3
+        LD          [svari_I_LABEL], HL
+        JR          _pt2
+_pt3:
+        LD          HL, [vari_I]
+        LD          DE, [svari_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [vari_I], HL
+        LD          A, D
+        LD          DE, [svari_I_FOR_END]
+        RLCA        
+        JR          C, _pt4
+        RST         0x20
+        JR          C, _pt5
+        JR          Z, _pt5
+        RET         NC
+_pt4:
+        RST         0x20
+        RET         C
+_pt5:
+        POP         HL
+_pt2:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_3
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, [vars_I]
+        CALL        copy_string
+        PUSH        HL
+        LD          HL, [vari_I]
+        PUSH        HL
+        LD          HL, 1
+        LD          C, L
+        POP         HL
+        LD          B, L
+        POP         HL
+        PUSH        HL
+        LD          IX, blib_mid
         CALL        call_blib
-        POP         HL
-        PUSH        AF
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
         CALL        free_string
-        POP         AF
         POP         HL
-        PUSH        AF
-        CALL        free_string
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _pt14
+        CALL        copy_string
+        INC         HL
+        LD          A, [HL]
         DEC         HL
-_pt14:
-        LD          A, L
-        OR          A, H
-        JP          Z, _pt13
-        JP          line_1000
-_pt13:
-_pt12:
+        LD          L, A
+        LD          H, 0
+        LD          [work_dac_int], HL
+        LD          A, 2
+        LD          [work_valtyp], A
+        CALL        str
+        LD          A, [work_linlen]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [work_csrx]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _pt6
+        PUSH        HL
+        LD          HL, str_2
+        CALL        puts
+        POP         HL
+_pt6:
+        CALL        puts
+        LD          A, 32
+        RST         0x18
+        LD          HL, str_4
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+        CALL        interrupt_process
+        LD          HL, [svari_I_LABEL]
+        CALL        jp_hl
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
@@ -289,36 +286,16 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
-allocate_string:
-        LD          HL, [heap_next]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
         INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_allocate_string_error:
-        LD          E, 7
-        JP          bios_errhand
-copy_string:
         LD          A, [HL]
-        PUSH        HL
-        CALL        allocate_string
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
+        RST         0x18
+        DJNZ        _puts_loop
         RET         
 free_string:
         LD          DE, heap_start
@@ -431,6 +408,55 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+        CALL        free_string
+str:
+        CALL        bios_fout
+fout_adjust:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_str_loop:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _str_loop_exit
+        INC         B
+        JR          _str_loop
+_str_loop_exit:
+        POP         HL
+        LD          [HL], B
+        RET         
 program_run:
         LD          HL, heap_start
         LD          [heap_next], HL
@@ -701,6 +727,14 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
+str_1:
+        DEFB        0x0C, 0x49, 0x4E, 0x50, 0x55, 0x54, 0x20, 0x35, 0x43, 0x48, 0x41, 0x52, 0x3A
+str_2:
+        DEFB        0x02, 0x0D, 0x0A
+str_3:
+        DEFB        0x01, 0x5B
+str_4:
+        DEFB        0x01, 0x5D
 heap_next:
         DEFW        0
 heap_end:
@@ -768,6 +802,12 @@ svarf_on_strig6_mode_dummy:
         DEFW        0, 0
 svarf_on_strig7_mode_dummy:
         DEFW        0, 0
+svari_I_FOR_END:
+        DEFW        0
+svari_I_FOR_STEP:
+        DEFW        0
+svari_I_LABEL:
+        DEFW        0
 svari_on_interval_counter:
         DEFW        0
 svari_on_interval_line:
@@ -805,6 +845,8 @@ svari_on_strig2_line:
 svari_on_strig3_line:
         DEFW        0
 svari_on_strig4_line:
+        DEFW        0
+vari_I:
         DEFW        0
 var_area_end:
 vars_area_start:
