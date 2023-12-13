@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <cmath>
 #include "expression_term.h"
 
 // --------------------------------------------------------------------
