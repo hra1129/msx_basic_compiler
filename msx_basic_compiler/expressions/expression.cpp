@@ -49,6 +49,7 @@
 #include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
+#include "expression_input.h"
 #include "expression_int.h"
 #include "expression_instr.h"
 #include "expression_left.h"
@@ -626,6 +627,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "INPUT$" ) {
+		CEXPRESSION_INPUT *p_term = new CEXPRESSION_INPUT;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+		}
 	else if( s_operator == "INT" ) {
 		CEXPRESSION_INT *p_term = new CEXPRESSION_INT;
 		p_result = p_term;

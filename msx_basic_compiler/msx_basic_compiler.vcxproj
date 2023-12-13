@@ -228,6 +228,7 @@
     <ClCompile Include="expressions\expression_hex.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
     <ClCompile Include="expressions\expression_inp.cpp" />
+    <ClCompile Include="expressions\expression_input.cpp" />
     <ClCompile Include="expressions\expression_instr.cpp" />
     <ClCompile Include="expressions\expression_int.cpp" />
     <ClCompile Include="expressions\expression_left.cpp" />
@@ -370,6 +371,7 @@
     <ClInclude Include="expressions\expression_hex.h" />
     <ClInclude Include="expressions\expression_inkey.h" />
     <ClInclude Include="expressions\expression_inp.h" />
+    <ClInclude Include="expressions\expression_input.h" />
     <ClInclude Include="expressions\expression_instr.h" />
     <ClInclude Include="expressions\expression_int.h" />
     <ClInclude Include="expressions\expression_left.h" />

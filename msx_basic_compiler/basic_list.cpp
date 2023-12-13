@@ -27,6 +27,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0xAB },				"DEFSTR" },
 	{ { 0xA8 },				"DELETE" },
 	{ { 0xEC },				"INKEY$" },
+	{ { -1 },				"INPUT$" },
 	{ { 0xBB },				"LFILES" },
 	{ { 0xD8 },				"LOCATE" },
 	{ { 0x9D },				"LPRINT" },
