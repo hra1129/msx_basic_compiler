@@ -1,8 +1,7 @@
 ﻿  compiler.cpp
-  expression_term.cpp
   コード生成しています。
-  9 of 2118 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
+  2 of 2118 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    86 functions had inline decision re-evaluated but remain unchanged
+    84 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

@@ -82,14 +82,11 @@ jp_hl:
 program_start:
 line_100:
         CALL        interrupt_process
-        LD          HL, 15
-        LD          A, L
+        LD          A, 15
         LD          [work_forclr], A
-        LD          HL, 4
-        LD          A, L
+        LD          A, 4
         LD          [work_bakclr], A
-        LD          HL, 0
-        LD          A, L
+        XOR         A, A
         LD          [work_bdrclr], A
         CALL        bios_chgclr
         CALL        interrupt_process
@@ -106,115 +103,106 @@ _pt0:
 _pt1:
 line_110:
         CALL        interrupt_process
-        LD          HL, 4
-        LD          A, L
+        LD          A, 4
         CALL        bios_setatr
         LD          A, 3
         LD          [work_logopr], A
         LD          HL, 10
-        PUSH        HL
+        LD          [work_cloc], HL
+        LD          HL, 10
+        LD          [work_cmask], HL
         EX          DE, HL
-        POP         BC
+        LD          BC, [work_cloc]
         LD          A, [work_romver]
         OR          A, A
         JR          NZ, _pt2
         CALL        bios_pset
         JR          _pt3
 _pt2:
-        LD          [work_cloc], BC
-        LD          [work_cmask], DE
         LD          IX, subrom_setc
         CALL        bios_extrom
 _pt3:
 line_120:
         CALL        interrupt_process
-        LD          HL, 4
-        LD          A, L
+        LD          A, 4
         CALL        bios_setatr
         LD          A, 3
         LD          [work_logopr], A
         LD          HL, 11
-        PUSH        HL
+        LD          [work_cloc], HL
         LD          HL, 10
+        LD          [work_cmask], HL
         EX          DE, HL
-        POP         BC
+        LD          BC, [work_cloc]
         LD          A, [work_romver]
         OR          A, A
         JR          NZ, _pt4
         CALL        bios_pset
         JR          _pt5
 _pt4:
-        LD          [work_cloc], BC
-        LD          [work_cmask], DE
         LD          IX, subrom_setc
         CALL        bios_extrom
 _pt5:
 line_130:
         CALL        interrupt_process
-        LD          HL, 5
-        LD          A, L
+        LD          A, 5
         CALL        bios_setatr
         LD          A, 3
         LD          [work_logopr], A
         LD          HL, 12
-        PUSH        HL
+        LD          [work_cloc], HL
         LD          HL, 10
+        LD          [work_cmask], HL
         EX          DE, HL
-        POP         BC
+        LD          BC, [work_cloc]
         LD          A, [work_romver]
         OR          A, A
         JR          NZ, _pt6
         CALL        bios_pset
         JR          _pt7
 _pt6:
-        LD          [work_cloc], BC
-        LD          [work_cmask], DE
         LD          IX, subrom_setc
         CALL        bios_extrom
 _pt7:
 line_140:
         CALL        interrupt_process
-        LD          HL, 5
-        LD          A, L
+        LD          A, 5
         CALL        bios_setatr
         LD          A, 3
         LD          [work_logopr], A
         LD          HL, 13
-        PUSH        HL
+        LD          [work_cloc], HL
         LD          HL, 10
+        LD          [work_cmask], HL
         EX          DE, HL
-        POP         BC
+        LD          BC, [work_cloc]
         LD          A, [work_romver]
         OR          A, A
         JR          NZ, _pt8
         CALL        bios_pset
         JR          _pt9
 _pt8:
-        LD          [work_cloc], BC
-        LD          [work_cmask], DE
         LD          IX, subrom_setc
         CALL        bios_extrom
 _pt9:
 line_150:
         CALL        interrupt_process
-        LD          HL, 6
-        LD          A, L
+        LD          A, 6
         CALL        bios_setatr
         LD          A, 3
         LD          [work_logopr], A
         LD          HL, 14
-        PUSH        HL
+        LD          [work_cloc], HL
         LD          HL, 10
+        LD          [work_cmask], HL
         EX          DE, HL
-        POP         BC
+        LD          BC, [work_cloc]
         LD          A, [work_romver]
         OR          A, A
         JR          NZ, _pt10
         CALL        bios_pset
         JR          _pt11
 _pt10:
-        LD          [work_cloc], BC
-        LD          [work_cmask], DE
         LD          IX, subrom_setc
         CALL        bios_extrom
 _pt11:
