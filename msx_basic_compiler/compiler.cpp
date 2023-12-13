@@ -1409,12 +1409,12 @@ void CCOMPILER::put_logical_operation( void ) {
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.p_position->line_no );
 		}
 		else {
-			for( i = 0; i < sizeof(s_rop)/sizeof(s_rop[0]); i++ ) {
+			for( i = 0; i < (int)(sizeof(s_rop)/sizeof(s_rop[0])); i++ ) {
 				if( this->info.list.p_position->s_word == s_rop[i] ) {
 					break;
 				}
 			}
-			if(i >= sizeof( s_rop ) / sizeof( s_rop[ 0 ] )){
+			if(i >= (int)(sizeof( s_rop ) / sizeof( s_rop[ 0 ] ))){
 				rop = 0;
 				this->info.errors.add( SYNTAX_ERROR, this->info.list.p_position->line_no );
 			}
