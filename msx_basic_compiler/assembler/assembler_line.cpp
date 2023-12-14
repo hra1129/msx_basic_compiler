@@ -7,6 +7,7 @@
 #include "assembler_line.h"
 #include <cstring>
 #include <map>
+#include <algorithm>
 
 struct CCOMMAND_TYPE {
 	int		parameter_type = 0;
@@ -101,6 +102,82 @@ std::map< CCONDITION, std::string > condition_list_for_ret = {
 };
 
 // --------------------------------------------------------------------
+std::map< std::string, CMNEMONIC_TYPE > command_name_list = {
+	{ ";",			CMNEMONIC_TYPE::COMMENT },
+	{ "LABEL",		CMNEMONIC_TYPE::LABEL },
+	{ "CONSTANT",	CMNEMONIC_TYPE::CONSTANT },
+	{ "LD",			CMNEMONIC_TYPE::LD },
+	{ "EX",			CMNEMONIC_TYPE::EX },
+	{ "EXX",		CMNEMONIC_TYPE::EXX },
+	{ "PUSH",		CMNEMONIC_TYPE::PUSH },
+	{ "POP",		CMNEMONIC_TYPE::POP },
+	{ "JP",			CMNEMONIC_TYPE::JP },
+	{ "JR",			CMNEMONIC_TYPE::JR },
+	{ "CALL",		CMNEMONIC_TYPE::CALL },
+	{ "RET",		CMNEMONIC_TYPE::RET },
+	{ "RR",			CMNEMONIC_TYPE::RR },
+	{ "RL",			CMNEMONIC_TYPE::RL },
+	{ "RRC",		CMNEMONIC_TYPE::RRC },
+	{ "RLC",		CMNEMONIC_TYPE::RLC },
+	{ "SRA",		CMNEMONIC_TYPE::SRA },
+	{ "SRL",		CMNEMONIC_TYPE::SRL },
+	{ "SLA",		CMNEMONIC_TYPE::SLA },
+	{ "BIT",		CMNEMONIC_TYPE::BIT },
+	{ "RES",		CMNEMONIC_TYPE::RES },
+	{ "SET",		CMNEMONIC_TYPE::SET },
+	{ "CPL",		CMNEMONIC_TYPE::CPL },
+	{ "CP",			CMNEMONIC_TYPE::CP },
+	{ "AND",		CMNEMONIC_TYPE::AND },
+	{ "OR",			CMNEMONIC_TYPE::OR },
+	{ "XOR",		CMNEMONIC_TYPE::XOR },
+	{ "NEG",		CMNEMONIC_TYPE::NEG },
+	{ "INC",		CMNEMONIC_TYPE::INC },
+	{ "DEC",		CMNEMONIC_TYPE::DEC },
+	{ "ADD",		CMNEMONIC_TYPE::ADD },
+	{ "ADC",		CMNEMONIC_TYPE::ADC },
+	{ "SUB",		CMNEMONIC_TYPE::SUB },
+	{ "SBC",		CMNEMONIC_TYPE::SBC },
+	{ "CCF",		CMNEMONIC_TYPE::CCF },
+	{ "SCF",		CMNEMONIC_TYPE::SCF },
+	{ "LDIR",		CMNEMONIC_TYPE::LDIR },
+	{ "LDDR",		CMNEMONIC_TYPE::LDDR },
+	{ "CPI",		CMNEMONIC_TYPE::CPI },
+	{ "CPD",		CMNEMONIC_TYPE::CPD },
+	{ "OUT",		CMNEMONIC_TYPE::OUT },
+	{ "IN",			CMNEMONIC_TYPE::IN },
+	{ "OTIR",		CMNEMONIC_TYPE::OTIR },
+	{ "OUTI",		CMNEMONIC_TYPE::OUTI },
+	{ "OTDR",		CMNEMONIC_TYPE::OTDR },
+	{ "OUTD",		CMNEMONIC_TYPE::OUTD },
+	{ "INIR",		CMNEMONIC_TYPE::INIR },
+	{ "INI",		CMNEMONIC_TYPE::INI },
+	{ "INDR",		CMNEMONIC_TYPE::INDR },
+	{ "IND",		CMNEMONIC_TYPE::IND },
+	{ "HALT",		CMNEMONIC_TYPE::HALT },
+	{ "DJNZ",		CMNEMONIC_TYPE::DJNZ },
+	{ "ORG",		CMNEMONIC_TYPE::ORG },
+	{ "DEFB",		CMNEMONIC_TYPE::DEFB },
+	{ "DEFW",		CMNEMONIC_TYPE::DEFW },
+	{ "RST",		CMNEMONIC_TYPE::RST },
+	{ "RLCA",		CMNEMONIC_TYPE::RLCA },
+	{ "RRCA",		CMNEMONIC_TYPE::RRCA },
+	{ "EI",			CMNEMONIC_TYPE::EI },
+	{ "DI",			CMNEMONIC_TYPE::DI },
+};
+
+std::map< std::string, CCONDITION > condition_name_list = {
+	{ "",	CCONDITION::NONE,	},
+	{ "Z",	CCONDITION::Z,		},
+	{ "NZ",	CCONDITION::NZ,		},
+	{ "C",	CCONDITION::C,		},
+	{ "NC",	CCONDITION::NC,		},
+	{ "PE",	CCONDITION::PE,		},
+	{ "PO",	CCONDITION::PO,		},
+	{ "P",	CCONDITION::P,		},
+	{ "M",	CCONDITION::M,		},
+};
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 ) {
 	this->type = t;
 	this->condition = cond;
@@ -108,6 +185,44 @@ void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, cons
 	this->operand1.s_value = s_o1;
 	this->operand2.type = o2t;
 	this->operand2.s_value = s_o2;
+}
+
+// --------------------------------------------------------------------
+COPERAND_TYPE CASSEMBLER_LINE::detect_operand_type( const std::string s_operand ) {
+
+	if( s_operand == "" ) {
+		return COPERAND_TYPE::NONE;
+	}
+	if( s_operand[ 0 ] == '[' ) {
+		return COPERAND_TYPE::MEMORY;
+	}
+	if( s_operand == "A" || s_operand == "B" || s_operand == "C" || s_operand == "D" || s_operand == "E" || s_operand == "H" || s_operand == "L" ) {
+		return COPERAND_TYPE::REGISTER;
+	}
+	if( s_operand == "AF" || s_operand == "AF'" || s_operand == "BC" || s_operand == "DE" || s_operand == "HL" || s_operand == "SP" ) {
+		return COPERAND_TYPE::REGISTER;
+	}
+	return COPERAND_TYPE::CONSTANT;
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LINE::set( const char *p_mnemonic, const char *p_cond, const char *p_operand1, const char *p_operand2 ) {
+	std::string s_mnemonic = p_mnemonic;
+	std::string s_cond = p_cond;
+	std::string s_operand1 = p_operand1;
+	std::string s_operand2 = p_operand2;
+
+	std::transform( s_mnemonic.begin(), s_mnemonic.end(), s_mnemonic.begin(), ::toupper );
+	std::transform( s_cond.begin(),     s_cond.end(),     s_cond.begin(),     ::toupper );
+	std::transform( s_operand1.begin(), s_operand1.end(), s_operand1.begin(), ::toupper );
+	std::transform( s_operand2.begin(), s_operand2.end(), s_operand2.begin(), ::toupper );
+
+	this->type = command_name_list[ s_mnemonic ];
+	this->condition = condition_name_list[ s_cond ];
+	this->operand1.type = this->detect_operand_type( s_operand1 );
+	this->operand1.s_value = s_operand1;
+	this->operand2.type = this->detect_operand_type( s_operand2 );
+	this->operand2.s_value = s_operand1;
 }
 
 // --------------------------------------------------------------------

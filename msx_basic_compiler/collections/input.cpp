@@ -31,9 +31,9 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 		value.set( p_info->list.p_position->s_word );
 		p_info->assembler_list.activate_puts();
 		std::string s_label = p_info->constants.add( value );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "puts", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "puts", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ";" ) {
@@ -89,7 +89,7 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 	s_data = s_data + ", 0";
 
 	p_info->assembler_list.activate_sub_input();
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "sub_input", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_input", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_data, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );

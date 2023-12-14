@@ -31,21 +31,21 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "ON" ) {
 		p_info->assembler_list.add_label( "bios_dspfnk", "0x000CF" );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_dspfnk", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_dspfnk", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}
 	else if( p_info->list.p_position->s_word == "OFF" ) {
 		p_info->assembler_list.add_label( "bios_erafnk", "0x000CC" );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_erafnk", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_erafnk", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}
 	else if( p_info->list.p_position->s_word == "LIST" ) {
 		p_info->assembler_list.add_label( "blib_key_list", "0x04018" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::LABEL, "blib_key_list" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::CONSTANT, "blib_key_list" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "call_blib", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 	}

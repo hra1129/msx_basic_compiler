@@ -20,7 +20,7 @@ void CEXPRESSION_CSRLIN::compile( CCOMPILE_INFO *p_info ) {
 	this->type = CEXPRESSION_TYPE::INTEGER;
 	p_info->assembler_list.add_label( "work_csry", "0x0f3dc" );
 
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[work_csry]" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[work_csry]" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::CONSTANT, "0" );
 	p_info->assembler_list.body.push_back( asm_line );

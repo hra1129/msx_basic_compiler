@@ -1,2 +1,9 @@
-﻿  compiler.cpp
+﻿  assembler_list.cpp
+  print.cpp
+  expression.cpp
+  expression_bin.cpp
+  expression_hex.cpp
+  expression_oct.cpp
+  expression_str.cpp
+  コードを生成中...
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

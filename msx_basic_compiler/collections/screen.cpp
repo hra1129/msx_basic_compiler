@@ -35,25 +35,25 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		s_label2 = p_info->get_auto_label();
 		//	MSX2以上では BASIC の SCREEN 命令で画面モードを切り替えるとパレットを初期化するため、chgmodp の方を呼ぶ必要がある
 		//	chgmodp は、SUB-ROM に存在するため、MSX1 では chgmod を呼ぶ必要あり。
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_romver]" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_romver]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, s_label1, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_chgmod", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_chgmod", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label1, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label1, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_chgmodp" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_chgmodp" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label2, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;
@@ -81,7 +81,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY_CONSTANT, "[work_rg1sv]" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_rg1sv]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0xFC" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -91,7 +91,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::CONSTANT, "1" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_wrtvdp", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_wrtvdp", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;
@@ -176,7 +176,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.type = CMNEMONIC_TYPE::JR;
 		asm_line.condition = CCONDITION::Z;
 		asm_line.operand1.s_value = s_label;
-		asm_line.operand1.type = COPERAND_TYPE::LABEL;
+		asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 		asm_line.operand2.s_value = "";
 		asm_line.operand2.type = COPERAND_TYPE::NONE;
 		p_info->assembler_list.body.push_back( asm_line );
@@ -191,7 +191,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 
 		asm_line.type = CMNEMONIC_TYPE::LABEL;
 		asm_line.operand1.s_value = s_label;
-		asm_line.operand1.type = COPERAND_TYPE::LABEL;
+		asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 		asm_line.operand2.s_value = "";
 		asm_line.operand2.type = COPERAND_TYPE::NONE;
 		p_info->assembler_list.body.push_back( asm_line );
@@ -200,7 +200,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.operand1.s_value = "DE";
 		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 		asm_line.operand2.s_value = "work_low";
-		asm_line.operand2.type = COPERAND_TYPE::LABEL;
+		asm_line.operand2.type = COPERAND_TYPE::CONSTANT;
 		p_info->assembler_list.body.push_back( asm_line );
 
 		asm_line.type = CMNEMONIC_TYPE::LD;
@@ -306,7 +306,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.operand1.s_value = "A";
 		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
 		asm_line.operand2.s_value = "[work_rg9sv]";
-		asm_line.operand2.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand2.type = COPERAND_TYPE::MEMORY;
 		p_info->assembler_list.body.push_back( asm_line );
 
 		asm_line.type = CMNEMONIC_TYPE::AND;
@@ -339,7 +339,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 
 		asm_line.type = CMNEMONIC_TYPE::CALL;
 		asm_line.operand1.s_value = "bios_wrtvdp";
-		asm_line.operand1.type = COPERAND_TYPE::LABEL;
+		asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 		asm_line.operand2.s_value = "";
 		asm_line.operand2.type = COPERAND_TYPE::NONE;
 		p_info->assembler_list.body.push_back( asm_line );

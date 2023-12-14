@@ -20,7 +20,7 @@ bool CBEEP::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	p_info->assembler_list.add_label( "bios_beep", "0x00C0" );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_beep", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_beep", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

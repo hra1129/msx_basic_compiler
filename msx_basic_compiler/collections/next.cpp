@@ -54,9 +54,9 @@ bool CNEXT::exec( CCOMPILE_INFO *p_info ) {
 		}
 		//	1変数文のループ処理
 		variable_loopl = p_info->variables.dictionary[ "s" + variable_loop.s_label + "_LABEL" ];
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY_CONSTANT, "[" + variable_loopl.s_label + "]" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[" + variable_loopl.s_label + "]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "jp_hl", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "jp_hl", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	次の変数記述があるか調べる
 		if( p_info->list.is_command_end() ) {

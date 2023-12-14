@@ -141,7 +141,7 @@ public:
 					sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					s = s + s_name;
 				}
-				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 				asm_list.const_single_area.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
 				asm_list.const_single_area.push_back( asm_line );
@@ -152,7 +152,7 @@ public:
 					sprintf( s_name, "%s0x%02X", ((i==0) ? "": ", "), (int)it->second.r_value[i] & 255 );
 					s = s + s_name;
 				}
-				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 				asm_list.const_double_area.push_back( asm_line );
 				asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
 				asm_list.const_double_area.push_back( asm_line );
@@ -169,7 +169,7 @@ public:
 				sprintf( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
 				s = s + s_name;
 			}
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, it->first, COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.const_string_area.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
 			asm_list.const_string_area.push_back( asm_line );

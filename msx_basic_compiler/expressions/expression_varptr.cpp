@@ -20,7 +20,7 @@ void CEXPRESSION_VARPTR::compile( CCOMPILE_INFO *p_info ) {
 
 	if( this->is_file_type ) {
 		//	#n �̏ꍇ
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, "fcb_" + std::to_string( this->file_number ) );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "fcb_" + std::to_string( this->file_number ) );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {

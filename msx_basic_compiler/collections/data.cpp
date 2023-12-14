@@ -29,7 +29,7 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( !has_data_label ) {
 		s_label = "data_" + std::to_string( line_no );
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.datas.push_back( asm_line );
 		p_info->assembler_list.data_lines.push_back( line_no );
 	}
@@ -40,7 +40,7 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 		}
 		value.set( p_info->list.p_position->s_word );
 		s_label = p_info->constants.add( value );
-		asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::LABEL, s_label, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.datas.push_back( asm_line );
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
