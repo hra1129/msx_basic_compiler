@@ -11,6 +11,9 @@
 CEXPRESSION_NODE* CEXPRESSION_CHR::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE* p;
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand;
@@ -23,6 +26,9 @@ CEXPRESSION_NODE* CEXPRESSION_CHR::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_CHR::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	p_info->assembler_list.activate_allocate_string();
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "1" );
 	p_info->assembler_list.body.push_back( asm_line );

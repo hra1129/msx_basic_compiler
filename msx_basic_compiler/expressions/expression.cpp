@@ -46,6 +46,7 @@
 #include "expression_exp.h"
 #include "expression_fix.h"
 #include "expression_fre.h"
+#include "expression_frnd.h"
 #include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
@@ -592,6 +593,19 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "FRND" ) {
+		CEXPRESSION_FRND *p_term = new CEXPRESSION_FRND;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+		}
 	else if( s_operator == "HEX$" ) {
 		CEXPRESSION_HEX *p_term = new CEXPRESSION_HEX;
 		p_result = p_term;

@@ -169,6 +169,7 @@
     <ClCompile Include="collections\erase.cpp" />
     <ClCompile Include="collections\error.cpp" />
     <ClCompile Include="collections\for.cpp" />
+    <ClCompile Include="collections\frandomize.cpp" />
     <ClCompile Include="collections\gosub.cpp" />
     <ClCompile Include="collections\goto.cpp" />
     <ClCompile Include="collections\if.cpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="expressions\expression_exp.cpp" />
     <ClCompile Include="expressions\expression_fix.cpp" />
     <ClCompile Include="expressions\expression_fre.cpp" />
+    <ClCompile Include="expressions\expression_frnd.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
     <ClCompile Include="expressions\expression_hex.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
@@ -310,6 +312,7 @@
     <ClInclude Include="collections\erase.h" />
     <ClInclude Include="collections\error.h" />
     <ClInclude Include="collections\for.h" />
+    <ClInclude Include="collections\frandomize.h" />
     <ClInclude Include="collections\gosub.h" />
     <ClInclude Include="collections\goto.h" />
     <ClInclude Include="collections\if.h" />
@@ -367,6 +370,7 @@
     <ClInclude Include="expressions\expression_exp.h" />
     <ClInclude Include="expressions\expression_fix.h" />
     <ClInclude Include="expressions\expression_fre.h" />
+    <ClInclude Include="expressions\expression_frnd.h" />
     <ClInclude Include="expressions\expression_function.h" />
     <ClInclude Include="expressions\expression_hex.h" />
     <ClInclude Include="expressions\expression_inkey.h" />

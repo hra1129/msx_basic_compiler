@@ -14,6 +14,9 @@ CEXPRESSION_NODE* CEXPRESSION_SIN::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE *p;
 	char s[256];
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand;

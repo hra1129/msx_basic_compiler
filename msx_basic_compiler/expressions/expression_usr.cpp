@@ -11,6 +11,9 @@
 CEXPRESSION_NODE* CEXPRESSION_USR::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE *p;
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	//	USRŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
 	return nullptr;

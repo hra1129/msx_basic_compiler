@@ -11,6 +11,9 @@
 CEXPRESSION_NODE* CEXPRESSION_STRING::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE *p;
 
+	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand1->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand1;

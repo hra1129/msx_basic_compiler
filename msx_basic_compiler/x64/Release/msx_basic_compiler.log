@@ -1,13 +1,29 @@
-﻿  assembler_list.cpp
-  print.cpp
-  expression.cpp
+﻿  expression_abs.cpp
+  expression_asc.cpp
+  expression_atn.cpp
+  expression_base.cpp
   expression_bin.cpp
+  expression_cdbl.cpp
+  expression_chr.cpp
+  expression_cint.cpp
+  expression_cos.cpp
+  expression_csng.cpp
+  expression_cvd.cpp
+  expression_cvi.cpp
+  expression_cvs.cpp
+  expression_exp.cpp
+  expression_fix.cpp
   expression_hex.cpp
-  expression_oct.cpp
-  expression_str.cpp
+  expression_inp.cpp
+  expression_input.cpp
+  expression_instr.cpp
+  expression_int.cpp
+  コンパイル中...
+  expression_left.cpp
+  expression_rnd.cpp
   コード生成しています。
-  25 of 2287 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
+  22 of 2315 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    122 functions had inline decision re-evaluated but remain unchanged
+    72 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

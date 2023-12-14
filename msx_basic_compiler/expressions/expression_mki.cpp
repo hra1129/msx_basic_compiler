@@ -14,6 +14,9 @@ CEXPRESSION_NODE* CEXPRESSION_MKI::optimization( CCOMPILE_INFO *p_info ) {
 	int d;
 	std::string s1, s2;
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand;

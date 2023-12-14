@@ -26,6 +26,9 @@ CEXPRESSION_NODE* CEXPRESSION_BASE::optimization( CCOMPILE_INFO *p_info ) {
 		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN12
 	};
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand;
@@ -65,6 +68,9 @@ void CEXPRESSION_BASE::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	æ‚Éˆø”‚ðˆ—
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	this->p_operand->compile( p_info );
 
 	if( this->p_operand->type != CEXPRESSION_TYPE::INTEGER ) {
