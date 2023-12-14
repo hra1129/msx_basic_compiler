@@ -12,6 +12,9 @@
 CEXPRESSION_NODE* CEXPRESSION_LEFT::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE* p;
 
+	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand1->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand1;
@@ -30,6 +33,9 @@ void CEXPRESSION_LEFT::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	æ‚Éˆø”‚ðˆ—
+	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
+		return;
+	}
 	this->p_operand1->compile( p_info );
 
 	if( this->p_operand1->type == CEXPRESSION_TYPE::STRING ) {

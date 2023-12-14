@@ -12,6 +12,9 @@
 CEXPRESSION_NODE* CEXPRESSION_HEX::optimization( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION_NODE* p;
 
+	if( this->p_operand == nullptr ) {
+		return nullptr;
+	}
 	p = this->p_operand->optimization( p_info );
 	if( p != nullptr ) {
 		delete this->p_operand;
@@ -46,6 +49,9 @@ void CEXPRESSION_HEX::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	//	æ‚Éˆø”‚ðˆ—
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	this->p_operand->compile( p_info );
 	this->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand->type );
 

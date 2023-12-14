@@ -199,7 +199,7 @@ COPERAND_TYPE CASSEMBLER_LINE::detect_operand_type( const std::string s_operand 
 	if( s_operand == "A" || s_operand == "B" || s_operand == "C" || s_operand == "D" || s_operand == "E" || s_operand == "H" || s_operand == "L" ) {
 		return COPERAND_TYPE::REGISTER;
 	}
-	if( s_operand == "AF" || s_operand == "AF'" || s_operand == "BC" || s_operand == "DE" || s_operand == "HL" || s_operand == "SP" ) {
+	if( s_operand == "AF" || s_operand == "AF'" || s_operand == "BC" || s_operand == "DE" || s_operand == "HL" || s_operand == "SP" || s_operand == "IX" || s_operand == "IY" ) {
 		return COPERAND_TYPE::REGISTER;
 	}
 	return COPERAND_TYPE::CONSTANT;
@@ -222,7 +222,7 @@ void CASSEMBLER_LINE::set( const char *p_mnemonic, const char *p_cond, const cha
 	this->operand1.type = this->detect_operand_type( s_operand1 );
 	this->operand1.s_value = s_operand1;
 	this->operand2.type = this->detect_operand_type( s_operand2 );
-	this->operand2.s_value = s_operand1;
+	this->operand2.s_value = s_operand2;
 }
 
 // --------------------------------------------------------------------

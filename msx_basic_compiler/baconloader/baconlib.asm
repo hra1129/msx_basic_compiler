@@ -74,6 +74,7 @@ parm2		:= 0xF750
 dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
+rndx		:= 0xF857
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 dfpage		:= 0xFAF5
 acpage		:= 0xFAF6
@@ -256,6 +257,10 @@ blib_entries::
 			jp		sub_base
 	blib_input:
 			jp		sub_input
+	blib_frnd:
+			jp		sub_frnd
+	blib_frandomize:
+			jp		sub_frandomize
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2804,6 +2809,76 @@ sub_input::
 			inc		hl
 			djnz	loop
 			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	FRND (※BACON独自関数)
+;	input:
+;		none
+;	output:
+;		HL .... 乱数
+;	break:
+;		all
+;	comment:
+;		-32768～32767 の乱数を返す
+;		MSX-BASIC標準の RND() のワークエリアである RNDX を使うため、
+;		両方使う場合は要注意
+; =============================================================================
+			scope	sub_frnd
+sub_frnd::
+			ld		hl, [rndx + 2]
+			ld		de, [rndx + 4]
+			ld		a, l
+			xor		a, 0x53
+			rrca
+			add		a, 29
+			xor		a, d
+			rlca
+			ld		l, a
+			ld		a, h
+			xor		a, 0xA8
+			rlca
+			add		a, 53
+			xor		a, e
+			rlca
+			ld		h, a
+			ld		[rndx + 4], hl
+			ld		[rndx + 2], de
+			ret
+			endscope
+
+; =============================================================================
+;	FRANDOMIZE (※BACON独自関数)
+;	input:
+;		none
+;	output:
+;		HL .... 初期値
+;	break:
+;		all
+;	comment:
+;		乱数を初期化する
+;		MSX-BASIC標準の RND() のワークエリアである RNDX を使うため、
+;		両方使う場合は要注意
+; =============================================================================
+			scope	sub_frandomize
+sub_frandomize::
+			ld		a, l
+			xor		a, 0x43
+			rrca
+			ld		d, a
+			ld		a, h
+			xor		a, 0x52
+			rlca
+			ld		e, a
+			ld		[rndx + 2], de
+			xor		a, 0x3C
+			rrca
+			ld		h, a
+			xor		a, l
+			add		a, 19
+			ld		l, a
+			ld		[rndx + 4], hl
 			ret
 			endscope
 

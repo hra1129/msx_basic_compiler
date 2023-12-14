@@ -24,6 +24,7 @@
 #include "collections/erase.h"
 #include "collections/error.h"
 #include "collections/for.h"
+#include "collections/frandomize.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
 #include "collections/if.h"
@@ -83,6 +84,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CERASE );
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );
+	this->collection.push_back( new CFRANDOMIZE );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
 	this->collection.push_back( new CIF );
@@ -1286,6 +1288,11 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->info.variables.dump( this->info.assembler_list, this->info.options );
 
 	this->exec_subroutines();
+
+	if( this->info.errors.list.size() ) {
+		//	エラーがある場合終了する
+		return false;
+	}
 
 	//	最適化
 	if( this->info.options.optimize_level != COPTIMIZE_LEVEL::NONE ) {
