@@ -19,7 +19,7 @@ bool CEND::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	asm_line.type = CMNEMONIC_TYPE::JP;
 	asm_line.operand1.s_value = "program_termination";
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
+	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

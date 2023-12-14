@@ -73,7 +73,7 @@ bool CSOUND::exec( CCOMPILE_INFO *p_info ) {
 
 	asm_line.type = CMNEMONIC_TYPE::CALL;
 	asm_line.operand1.s_value = "bios_wrtpsg";
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
+	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 	asm_line.operand2.s_value = "";
 	asm_line.operand2.type = COPERAND_TYPE::NONE;
 	p_info->assembler_list.body.push_back( asm_line );

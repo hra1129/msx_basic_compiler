@@ -126,7 +126,7 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_info ) {
 		value.set( this->s_value );
 		std::string s_label = p_info->constants.add( value );
 
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->type == CEXPRESSION_TYPE::DOUBLE_REAL ) {
@@ -134,14 +134,14 @@ void CEXPRESSION_TERM::compile( CCOMPILE_INFO *p_info ) {
 		value.set( this->s_value );
 		std::string s_label = p_info->constants.add( value );
 
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
 		CSTRING value;
 		value.set( this->s_value );
 		std::string s_label = p_info->constants.add( value );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::LABEL, s_label );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 }

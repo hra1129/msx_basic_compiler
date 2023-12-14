@@ -13,7 +13,7 @@ static void put_call( CCOMPILE_INFO *p_info ) {
 
 	asm_line.type = CMNEMONIC_TYPE::CALL;
 	asm_line.operand1.s_value = "bios_chgclr";
-	asm_line.operand1.type = COPERAND_TYPE::LABEL;
+	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
 	p_info->assembler_list.body.push_back( asm_line );
 }
 
@@ -41,9 +41,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		//	COLOR単独実行の場合
 		p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_iniplt" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_iniplt" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
@@ -58,9 +58,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			//	COLOR=NEW の場合
 			p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_iniplt" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_iniplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}
@@ -68,9 +68,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			//	COLOR=RESTORE の場合
 			p_info->assembler_list.add_label( "bios_rstplt", "0x00145" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_rstplt" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_rstplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}
@@ -172,9 +172,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::REGISTER, "L" );		//	パレット番号を D へ
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::LABEL, "bios_setplt" );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_setplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::LABEL, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
@@ -195,7 +195,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 
 		asm_line.type = CMNEMONIC_TYPE::LD;
 		asm_line.operand1.s_value = "[work_forclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
 		asm_line.operand2.s_value = "A";
 		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 		p_info->assembler_list.body.push_back( asm_line );
@@ -225,7 +225,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 
 		asm_line.type = CMNEMONIC_TYPE::LD;
 		asm_line.operand1.s_value = "[work_bakclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
 		asm_line.operand2.s_value = "A";
 		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 		p_info->assembler_list.body.push_back( asm_line );
@@ -259,7 +259,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 
 		asm_line.type = CMNEMONIC_TYPE::LD;
 		asm_line.operand1.s_value = "[work_bdrclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY_CONSTANT;
+		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
 		asm_line.operand2.s_value = "A";
 		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
 		p_info->assembler_list.body.push_back( asm_line );

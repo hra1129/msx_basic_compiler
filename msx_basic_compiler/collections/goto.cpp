@@ -28,10 +28,10 @@ bool CGOTO::exec( CCOMPILE_INFO *p_info ) {
 	}
 
 	if( p_info->list.p_position->s_word[0] == '*' ) {
-		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
 	}
 	else {
-		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::LABEL, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "line_" + p_info->list.p_position->s_word, COPERAND_TYPE::NONE, "" );
 	}
 	p_info->assembler_list.body.push_back( asm_line );
 	p_info->list.p_position++;

@@ -89,10 +89,8 @@ enum class CCONDITION: int {
 enum class COPERAND_TYPE: int {	//	ex.
 	NONE,						//	‚È‚µ
 	CONSTANT,					//	1234h
-	MEMORY_CONSTANT,			//	(1234h)
+	MEMORY,						//	[1234h] ‚â [HL]
 	REGISTER,					//	HL
-	MEMORY_REGISTER,			//	(HL)
-	LABEL,						//	LABEL1
 };
 
 class COPERAND {
@@ -106,6 +104,9 @@ public:
 };
 
 class CASSEMBLER_LINE {
+private:
+	COPERAND_TYPE detect_operand_type( const std::string s_operand );
+
 public:
 	CMNEMONIC_TYPE		type;
 	CCONDITION			condition;
@@ -113,6 +114,7 @@ public:
 	COPERAND			operand2;
 
 	void set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 );
+	void set( const char *p_mnemonic, const char *p_cond, const char *p_operand1 = "", const char *p_operand2 = "" );
 	std::string convert_operand( std::string s );
 	std::string convert_operand_hl( std::string s );
 	std::string convert_length( std::string s, size_t length = 12 );
