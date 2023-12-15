@@ -45,6 +45,7 @@
 #include "collections/play.h"
 #include "collections/poke.h"
 #include "collections/pokew.h"
+#include "collections/pokes.h"
 #include "collections/print.h"
 #include "collections/pset.h"
 #include "collections/put_sprite.h"
@@ -58,6 +59,7 @@
 #include "collections/sound.h"
 #include "collections/swap.h"
 #include "collections/vpoke.h"
+#include "collections/vpokes.h"
 #include "collections/width.h"
 #include "variable_manager.h"
 #include "./expressions/expression.h"
@@ -105,6 +107,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CPLAY );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPOKEW );
+	this->collection.push_back( new CPOKES );
 	this->collection.push_back( new CPRINT );
 	this->collection.push_back( new CPSET );
 	this->collection.push_back( new CPUTSPRITE );
@@ -118,6 +121,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CSOUND );
 	this->collection.push_back( new CSWAP );
 	this->collection.push_back( new CVPOKE );
+	this->collection.push_back( new CVPOKES );
 	this->collection.push_back( new CWIDTH );
 }
 

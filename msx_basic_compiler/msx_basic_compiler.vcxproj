@@ -189,6 +189,7 @@
     <ClCompile Include="collections\out.cpp" />
     <ClCompile Include="collections\play.cpp" />
     <ClCompile Include="collections\poke.cpp" />
+    <ClCompile Include="collections\pokes.cpp" />
     <ClCompile Include="collections\pokew.cpp" />
     <ClCompile Include="collections\print.cpp" />
     <ClCompile Include="collections\pset.cpp" />
@@ -203,6 +204,7 @@
     <ClCompile Include="collections\sound.cpp" />
     <ClCompile Include="collections\swap.cpp" />
     <ClCompile Include="collections\vpoke.cpp" />
+    <ClCompile Include="collections\vpokes.cpp" />
     <ClCompile Include="collections\width.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="double_real.cpp" />
@@ -263,6 +265,7 @@
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_pad.cpp" />
     <ClCompile Include="expressions\expression_peek.cpp" />
+    <ClCompile Include="expressions\expression_peeks.cpp" />
     <ClCompile Include="expressions\expression_peekw.cpp" />
     <ClCompile Include="expressions\expression_right.cpp" />
     <ClCompile Include="expressions\expression_rnd.cpp" />
@@ -283,6 +286,7 @@
     <ClCompile Include="expressions\expression_varptr.cpp" />
     <ClCompile Include="expressions\expression_vdp.cpp" />
     <ClCompile Include="expressions\expression_vpeek.cpp" />
+    <ClCompile Include="expressions\expression_vpeeks.cpp" />
     <ClCompile Include="msx_basic_compiler.cpp" />
     <ClCompile Include="single_real.cpp" />
     <ClCompile Include="string_value.cpp" />
@@ -332,6 +336,7 @@
     <ClInclude Include="collections\out.h" />
     <ClInclude Include="collections\play.h" />
     <ClInclude Include="collections\poke.h" />
+    <ClInclude Include="collections\pokes.h" />
     <ClInclude Include="collections\pokew.h" />
     <ClInclude Include="collections\print.h" />
     <ClInclude Include="collections\pset.h" />
@@ -346,6 +351,7 @@
     <ClInclude Include="collections\sound.h" />
     <ClInclude Include="collections\swap.h" />
     <ClInclude Include="collections\vpoke.h" />
+    <ClInclude Include="collections\vpokes.h" />
     <ClInclude Include="collections\width.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
@@ -408,6 +414,7 @@
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_pad.h" />
     <ClInclude Include="expressions\expression_peek.h" />
+    <ClInclude Include="expressions\expression_peeks.h" />
     <ClInclude Include="expressions\expression_peekw.h" />
     <ClInclude Include="expressions\expression_right.h" />
     <ClInclude Include="expressions\expression_rnd.h" />
@@ -428,6 +435,7 @@
     <ClInclude Include="expressions\expression_varptr.h" />
     <ClInclude Include="expressions\expression_vdp.h" />
     <ClInclude Include="expressions\expression_vpeek.h" />
+    <ClInclude Include="expressions\expression_vpeeks.h" />
     <ClInclude Include="single_real.h" />
     <ClInclude Include="string_value.h" />
     <ClInclude Include="variable_info.h" />

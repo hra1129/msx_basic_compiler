@@ -206,11 +206,7 @@ COPERAND_TYPE CASSEMBLER_LINE::detect_operand_type( const std::string s_operand 
 }
 
 // --------------------------------------------------------------------
-void CASSEMBLER_LINE::set( const char *p_mnemonic, const char *p_cond, const char *p_operand1, const char *p_operand2 ) {
-	std::string s_mnemonic = p_mnemonic;
-	std::string s_cond = p_cond;
-	std::string s_operand1 = p_operand1;
-	std::string s_operand2 = p_operand2;
+void CASSEMBLER_LINE::set( std::string s_mnemonic, std::string s_cond, std::string s_operand1, std::string s_operand2 ) {
 
 	std::transform( s_mnemonic.begin(), s_mnemonic.end(), s_mnemonic.begin(), ::toupper );
 	std::transform( s_cond.begin(),     s_cond.end(),     s_cond.begin(),     ::toupper );

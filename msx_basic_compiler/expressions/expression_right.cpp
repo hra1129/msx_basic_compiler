@@ -31,6 +31,9 @@ CEXPRESSION_NODE* CEXPRESSION_RIGHT::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_RIGHT::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
+		return;
+	}
 	//	æ‚Éˆø”‚ðˆ—
 	this->p_operand1->compile( p_info );
 
