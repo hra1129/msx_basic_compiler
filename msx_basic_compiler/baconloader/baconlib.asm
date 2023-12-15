@@ -257,10 +257,10 @@ blib_entries::
 			jp		sub_base
 	blib_input:
 			jp		sub_input
-	blib_frnd:
-			jp		sub_frnd
-	blib_frandomize:
-			jp		sub_frandomize
+	blib_irnd:
+			jp		sub_irnd
+	blib_irandomize:
+			jp		sub_irandomize
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2813,7 +2813,7 @@ sub_input::
 			endscope
 
 ; =============================================================================
-;	FRND (※BACON独自関数)
+;	IRND (※BACON独自関数)
 ;	input:
 ;		none
 ;	output:
@@ -2825,8 +2825,8 @@ sub_input::
 ;		MSX-BASIC標準の RND() のワークエリアである RNDX を使うため、
 ;		両方使う場合は要注意
 ; =============================================================================
-			scope	sub_frnd
-sub_frnd::
+			scope	sub_irnd
+sub_irnd::
 			ld		hl, [rndx + 2]
 			ld		de, [rndx + 4]
 			ld		a, l
@@ -2849,7 +2849,7 @@ sub_frnd::
 			endscope
 
 ; =============================================================================
-;	FRANDOMIZE (※BACON独自関数)
+;	IRANDOMIZE (※BACON独自関数)
 ;	input:
 ;		none
 ;	output:
@@ -2861,8 +2861,8 @@ sub_frnd::
 ;		MSX-BASIC標準の RND() のワークエリアである RNDX を使うため、
 ;		両方使う場合は要注意
 ; =============================================================================
-			scope	sub_frandomize
-sub_frandomize::
+			scope	sub_irandomize
+sub_irandomize::
 			ld		a, l
 			xor		a, 0x43
 			rrca

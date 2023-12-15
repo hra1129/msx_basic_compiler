@@ -41,8 +41,8 @@ LINE# |OFFSET|ADDR|MNEMONIC
     15|      |    |WORK_JIFFY = 0x0FC9E
       |      |    |  Integer symbol [WORK_JIFFY] = 64670 (0xfc9e)
 ------+------+----+----------------------------------
-    16|      |    |BLIB_FRANDOMIZE = 0x04084
-      |      |    |  Integer symbol [BLIB_FRANDOMIZE] = 16516 (0x4084)
+    16|      |    |BLIB_IRANDOMIZE = 0x04084
+      |      |    |  Integer symbol [BLIB_IRANDOMIZE] = 16516 (0x4084)
 ------+------+----+----------------------------------
     17|      |    |BIOS_CHGCLR = 0x00062
       |      |    |  Integer symbol [BIOS_CHGCLR] = 98 (0x62)
@@ -68,8 +68,8 @@ LINE# |OFFSET|ADDR|MNEMONIC
     24|      |    |BIOS_EXTROM = 0x0015F
       |      |    |  Integer symbol [BIOS_EXTROM] = 351 (0x15f)
 ------+------+----+----------------------------------
-    25|      |    |BLIB_FRND = 0x04081
-      |      |    |  Integer symbol [BLIB_FRND] = 16513 (0x4081)
+    25|      |    |BLIB_IRND = 0x04081
+      |      |    |  Integer symbol [BLIB_IRND] = 16513 (0x4081)
 ------+------+----+----------------------------------
     26|      |    |WORK_GXPOS = 0x0FCB3
       |      |    |  Integer symbol [WORK_GXPOS] = 64691 (0xfcb3)
@@ -302,7 +302,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:17cyc R800:7cyc
       |00006F|8078|  2A 9E FC
 ------+------+----+----------------------------------
-    91|      |    |LD IX, BLIB_FRANDOMIZE
+    91|      |    |LD IX, BLIB_IRANDOMIZE
       |      |    |  Z80:16cyc R800:4cyc
       |000072|807B|  DD 21 84 40
 ------+------+----+----------------------------------
@@ -403,7 +403,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:12cyc R800:6cyc
       |0000AD|80B6|  E5
 ------+------+----+----------------------------------
-   117|      |    |LD IX, BLIB_FRND
+   117|      |    |LD IX, BLIB_IRND
       |      |    |  Z80:16cyc R800:4cyc
       |0000AE|80B7|  DD 21 81 40
 ------+------+----+----------------------------------
@@ -479,7 +479,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:12cyc R800:6cyc
       |0000CB|80D4|  E5
 ------+------+----+----------------------------------
-   136|      |    |LD IX, BLIB_FRND
+   136|      |    |LD IX, BLIB_IRND
       |      |    |  Z80:16cyc R800:4cyc
       |0000CC|80D5|  DD 21 81 40
 ------+------+----+----------------------------------
@@ -555,7 +555,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:12cyc R800:6cyc
       |0000E9|80F2|  E5
 ------+------+----+----------------------------------
-   155|      |    |LD IX, BLIB_FRND
+   155|      |    |LD IX, BLIB_IRND
       |      |    |  Z80:16cyc R800:4cyc
       |0000EA|80F3|  DD 21 81 40
 ------+------+----+----------------------------------
@@ -631,7 +631,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:12cyc R800:6cyc
       |000107|8110|  E5
 ------+------+----+----------------------------------
-   174|      |    |LD IX, BLIB_FRND
+   174|      |    |LD IX, BLIB_IRND
       |      |    |  Z80:16cyc R800:4cyc
       |000108|8111|  DD 21 81 40
 ------+------+----+----------------------------------
@@ -707,7 +707,7 @@ LINE# |OFFSET|ADDR|MNEMONIC
       |      |    |  Z80:12cyc R800:6cyc
       |000125|812E|  E5
 ------+------+----+----------------------------------
-   193|      |    |LD IX, BLIB_FRND
+   193|      |    |LD IX, BLIB_IRND
       |      |    |  Z80:16cyc R800:4cyc
       |000126|812F|  DD 21 81 40
 ------+------+----+----------------------------------
@@ -2463,9 +2463,9 @@ BIOS_LINEBF .................. 22721 ( 0x58c1 )
 BIOS_NEWSTT .................. 17921 ( 0x4601 )
 BIOS_SETATR .................. 282 ( 0x11a )
 BIOS_SYNTAX_ERROR ............ 16469 ( 0x4055 )
-BLIB_FRANDOMIZE .............. 16516 ( 0x4084 )
-BLIB_FRND .................... 16513 ( 0x4081 )
 BLIB_INIT_NCALBAS ............ 16462 ( 0x404e )
+BLIB_IRANDOMIZE .............. 16516 ( 0x4084 )
+BLIB_IRND .................... 16513 ( 0x4081 )
 CALL_BLIB .................... 33224 ( 0x81c8 )
 CHECK_BLIB ................... 33178 ( 0x819a )
 END_ADDRESS .................. 33826 ( 0x8422 )

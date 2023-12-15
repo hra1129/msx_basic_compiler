@@ -13,7 +13,7 @@ work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
 work_jiffy                      = 0x0fc9e
-blib_frandomize                 = 0x04084
+blib_irandomize                 = 0x04084
 bios_chgclr                     = 0x00062
 work_forclr                     = 0x0F3E9
 work_bakclr                     = 0x0F3EA
@@ -22,7 +22,7 @@ work_romver                     = 0x0002D
 bios_chgmod                     = 0x0005F
 bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
-blib_frnd                       = 0x04081
+blib_irnd                       = 0x04081
 work_gxpos                      = 0x0FCB3
 work_gypos                      = 0x0FCB5
 work_grpacx                     = 0x0FCB7
@@ -88,7 +88,7 @@ program_start:
 line_100:
         CALL        interrupt_process
         LD          HL, [WORK_JIFFY]
-        LD          IX, BLIB_FRANDOMIZE
+        LD          IX, BLIB_IRANDOMIZE
         CALL        CALL_BLIB
         CALL        interrupt_process
         LD          A, 15
@@ -114,7 +114,7 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_X1
         PUSH        HL
-        LD          IX, BLIB_FRND
+        LD          IX, BLIB_IRND
         CALL        CALL_BLIB
         PUSH        HL
         LD          HL, 255
@@ -133,7 +133,7 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_X2
         PUSH        HL
-        LD          IX, BLIB_FRND
+        LD          IX, BLIB_IRND
         CALL        CALL_BLIB
         PUSH        HL
         LD          HL, 255
@@ -152,7 +152,7 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_Y1
         PUSH        HL
-        LD          IX, BLIB_FRND
+        LD          IX, BLIB_IRND
         CALL        CALL_BLIB
         PUSH        HL
         LD          HL, 255
@@ -171,7 +171,7 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_Y2
         PUSH        HL
-        LD          IX, BLIB_FRND
+        LD          IX, BLIB_IRND
         CALL        CALL_BLIB
         PUSH        HL
         LD          HL, 255
@@ -190,7 +190,7 @@ line_110:
         CALL        interrupt_process
         LD          HL, vari_C
         PUSH        HL
-        LD          IX, BLIB_FRND
+        LD          IX, BLIB_IRND
         CALL        CALL_BLIB
         PUSH        HL
         LD          HL, 15

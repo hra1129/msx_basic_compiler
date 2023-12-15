@@ -429,10 +429,10 @@
     <ClCompile Include="expressions\expression_input.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="collections\frandomize.cpp">
+    <ClCompile Include="collections\irandomize.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="expressions\expression_frnd.cpp">
+    <ClCompile Include="expressions\expression_irnd.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -860,10 +860,10 @@
     <ClInclude Include="expressions\expression_input.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="collections\frandomize.h">
+    <ClInclude Include="collections\irandomize.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="expressions\expression_frnd.h">
+    <ClInclude Include="expressions\expression_irnd.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
