@@ -42,6 +42,9 @@ CEXPRESSION_NODE* CEXPRESSION_SPACE::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_SPACE::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	//	æ‚Éˆø”‚ðˆ—
 	this->p_operand->compile( p_info );
 	this->p_operand->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand->type );

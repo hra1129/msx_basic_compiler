@@ -27,6 +27,9 @@ CEXPRESSION_NODE* CEXPRESSION_PEEK::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_PEEK::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	if( this->p_operand->is_constant && this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
 		//	ˆø”‚ª’è”‚Ìê‡
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[" + this->p_operand->s_value + "]" );

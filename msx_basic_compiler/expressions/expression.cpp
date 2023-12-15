@@ -64,6 +64,7 @@
 #include "expression_pad.h"
 #include "expression_peek.h"
 #include "expression_peekw.h"
+#include "expression_peeks.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
 #include "expression_sgn.h"
@@ -81,6 +82,7 @@
 #include "expression_varptr.h"
 #include "expression_vdp.h"
 #include "expression_vpeek.h"
+#include "expression_vpeeks.h"
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
@@ -857,6 +859,25 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "PEEKS$" ) {
+		CEXPRESSION_PEEKS *p_term = new CEXPRESSION_PEEKS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "RIGHT$" ) {
 		CEXPRESSION_RIGHT *p_term = new CEXPRESSION_RIGHT;
 		p_result = p_term;
@@ -1126,6 +1147,25 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "VPEEKS$" ) {
+		CEXPRESSION_VPEEKS *p_term = new CEXPRESSION_VPEEKS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}

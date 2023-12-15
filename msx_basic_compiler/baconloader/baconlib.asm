@@ -18,6 +18,8 @@ setwrt		:= 0x0053
 calpat		:= 0x0084
 calatr		:= 0x0087
 chget		:= 0x009F
+ldirmv		:= 0x0059
+ldirvm		:= 0x005C
 rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
@@ -261,6 +263,14 @@ blib_entries::
 			jp		sub_irnd
 	blib_irandomize:
 			jp		sub_irandomize
+	blib_pokes:
+			jp		sub_pokes
+	blib_peeks:
+			jp		sub_peeks
+	blib_vpokes:
+			jp		sub_vpokes
+	blib_vpeeks:
+			jp		sub_vpeeks
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2879,6 +2889,116 @@ sub_irandomize::
 			add		a, 19
 			ld		l, a
 			ld		[rndx + 4], hl
+			ret
+			endscope
+
+; =============================================================================
+;	POKES アドレス, 文字列 (※BACON独自関数)
+;	input:
+;		HL .... アドレス
+;		DE .... 文字列
+;	output:
+;		HL .... 文字列
+;	break:
+;		all
+;	comment:
+;		アドレスへ文字列を書き込む
+; =============================================================================
+			scope	sub_pokes
+sub_pokes::
+			ld		a, [de]
+			or		a, a
+			ret		z
+
+			push	de
+			inc		de
+			ex		de, hl
+			ld		c, a
+			ld		b, 0
+			ldir
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	PEEKS$( アドレス, 文字数 ) (※BACON独自関数)
+;	input:
+;		HL .... アドレス
+;		DE .... 文字列
+;	output:
+;		HL .... 文字列 (※確保済みの文字列領域に上書きする)
+;	break:
+;		all
+;	comment:
+;		アドレスから読み出して文字列を返す
+; =============================================================================
+			scope	sub_peeks
+sub_peeks::
+			ld		a, [de]
+			or		a, a
+			ret		z
+
+			push	de
+			inc		de
+			ld		c, a
+			ld		b, 0
+			ldir
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	VPOKES アドレス, 文字列 (※BACON独自関数)
+;	input:
+;		HL .... アドレス
+;		DE .... 文字列
+;	output:
+;		HL .... 文字列
+;	break:
+;		all
+;	comment:
+;		アドレスへ文字列を書き込む
+; =============================================================================
+			scope	sub_vpokes
+sub_vpokes::
+			ld		a, [de]
+			or		a, a
+			ret		z
+
+			push	de
+			inc		de
+			ex		de, hl
+			ld		c, a
+			ld		b, 0
+			call	ldirvm
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	VPEEKS$( アドレス, 文字数 ) (※BACON独自関数)
+;	input:
+;		HL .... アドレス
+;		DE .... 文字列
+;	output:
+;		HL .... 文字列 (※確保済みの文字列領域に上書きする)
+;	break:
+;		all
+;	comment:
+;		アドレスから読み出して文字列を返す
+; =============================================================================
+			scope	sub_vpeeks
+sub_vpeeks::
+			ld		a, [de]
+			or		a, a
+			ret		z
+
+			push	de
+			inc		de
+			ld		c, a
+			ld		b, 0
+			call	ldirmv
+			pop		hl
 			ret
 			endscope
 

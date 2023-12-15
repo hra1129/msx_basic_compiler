@@ -26,6 +26,9 @@ CEXPRESSION_NODE* CEXPRESSION_SGN::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_SGN::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	//	æ‚Éˆø”‚ðˆ—
 	this->p_operand->compile( p_info );
 

@@ -28,6 +28,9 @@ void CEXPRESSION_VPEEK::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	std::string s_label1, s_label2;
 
+	if( this->p_operand == nullptr ) {
+		return;
+	}
 	//	æ‚Éˆø”‚ðˆ—
 	this->p_operand->compile( p_info );
 	this->p_operand->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand->type );
