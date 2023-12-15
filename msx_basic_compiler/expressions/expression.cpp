@@ -46,13 +46,13 @@
 #include "expression_exp.h"
 #include "expression_fix.h"
 #include "expression_fre.h"
-#include "expression_frnd.h"
 #include "expression_hex.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
 #include "expression_input.h"
 #include "expression_int.h"
 #include "expression_instr.h"
+#include "expression_irnd.h"
 #include "expression_left.h"
 #include "expression_len.h"
 #include "expression_log.h"
@@ -593,8 +593,8 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
-	else if( s_operator == "FRND" ) {
-		CEXPRESSION_FRND *p_term = new CEXPRESSION_FRND;
+	else if( s_operator == "IRND" ) {
+		CEXPRESSION_IRND *p_term = new CEXPRESSION_IRND;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {

@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------
-//	Expression FRND
+//	Expression IRND
 // ====================================================================
 //	2023/July/29th	t.hara
 // --------------------------------------------------------------------
@@ -7,14 +7,14 @@
 #include <vector>
 #include "expression.h"
 
-#ifndef __EXPRESSION_FRND_H__
-#define __EXPRESSION_FRND_H__
+#ifndef __EXPRESSION_IRND_H__
+#define __EXPRESSION_IRND_H__
 
 // --------------------------------------------------------------------
 //	ŠÖ”ŒÄ‚Ño‚µ
-class CEXPRESSION_FRND: public CEXPRESSION_NODE {
+class CEXPRESSION_IRND: public CEXPRESSION_NODE {
 public:
-	~CEXPRESSION_FRND() {
+	~CEXPRESSION_IRND() {
 		this->release();
 	}
 
