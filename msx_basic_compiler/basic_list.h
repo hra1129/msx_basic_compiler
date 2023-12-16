@@ -58,8 +58,8 @@ private:
 	CBASIC_WORD get_ascii_word( bool label_ok );
 	CBASIC_WORD get_data_word( void );
 
-	bool load_binary( FILE *p_file, CERROR_LIST &errors );
-	bool load_ascii( FILE *p_file, CERROR_LIST &errors );
+	bool load_binary( CERROR_LIST &errors );
+	bool load_ascii( CERROR_LIST &errors );
 
 public:
 	std::string s_source_type;

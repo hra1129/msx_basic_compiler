@@ -5,6 +5,80 @@
 // --------------------------------------------------------------------
 
 #include "data.h"
+#include <cctype>
+
+// --------------------------------------------------------------------
+int CDATA::hexchar( int c ) {
+
+	if( isdigit( c & 255 ) ) {
+		return c - '0';
+	}
+	c = c | 0x60;
+	if( isalpha( c & 255 ) && (c <= 'f' ) ) {
+		return c - 'a' + 10;
+	}
+	return -1;
+}
+
+// --------------------------------------------------------------------
+std::string CDATA::hexdata( CCOMPILE_INFO *p_info, std::string s_data ) {
+	std::string s_result;
+
+	if( (s_data.size() & 1) != 0 ) {
+		p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+		return s_result;
+	}
+
+	size_t i;
+	int d, dd;
+	for( i = 0; i < s_data.size(); i += 2 ) {
+		//	ãˆÊŒ…
+		dd = this->hexchar( s_data[i+0] );
+		if( dd == -1 ) {
+			p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+			return s_result;
+		}
+		d = dd << 4;
+		//	‰ºˆÊŒ…
+		dd = this->hexchar( s_data[i+1] );
+		if( dd == -1 ) {
+			p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+			return s_result;
+		}
+		d = d | dd;
+		s_result.push_back( (char) d );
+	}
+
+	return s_result;
+}
+
+// --------------------------------------------------------------------
+std::string CDATA::bindata( CCOMPILE_INFO *p_info, std::string s_data ) {
+	std::string s_result;
+
+	if( (s_data.size() & 7) != 0 ) {
+		p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+		return s_result;
+	}
+
+	size_t i, j;
+	int d, dd;
+	for( i = 0; i < s_data.size(); i += 8 ) {
+		d = 0;
+		for( j = 0; j < 8; j++ ) {
+			//	ãˆÊŒ…
+			dd = this->hexchar( s_data[i+j] );
+			if( dd == -1 || dd >= 2 ) {
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+				return s_result;
+			}
+			d = (d << 1) | dd;
+		}
+		s_result.push_back( (char) d );
+	}
+
+	return s_result;
+}
 
 // --------------------------------------------------------------------
 //  DATA ƒf[ƒ^
@@ -13,9 +87,20 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 	CSTRING value;
 	std::string s_label;
+	std::string s_data;
+	int mode;		//	0: data, 1: hexdata, 2: bindata
 
-	if( p_info->list.p_position->s_word != "DATA" ) {
+	if( p_info->list.p_position->s_word != "DATA" && p_info->list.p_position->s_word != "HEXDATA" && p_info->list.p_position->s_word != "BINDATA" ) {
 		return false;
+	}
+	if( p_info->list.p_position->s_word == "HEXDATA" ) {
+		mode = 1;
+	}
+	else if( p_info->list.p_position->s_word == "BINDATA" ) {
+		mode = 2;
+	}
+	else {
+		mode = 0;
 	}
 	p_info->list.p_position++;
 
@@ -38,9 +123,16 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.p_position->type != CBASIC_WORD_TYPE::STRING ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 		}
-		value.set( p_info->list.p_position->s_word );
+		s_data = p_info->list.p_position->s_word;
+		if( mode == 1 ) {
+			s_data = this->hexdata( p_info, s_data );
+		}
+		else if( mode == 2 ) {
+			s_data = this->bindata( p_info, s_data );
+		}
+		value.set( s_data );
 		s_label = p_info->constants.add( value );
-		asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
+		asm_line.set( "DEFW", "", s_label, "" );
 		p_info->assembler_list.datas.push_back( asm_line );
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
