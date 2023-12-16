@@ -271,6 +271,10 @@ blib_entries::
 			jp		sub_vpokes
 	blib_vpeeks:
 			jp		sub_vpeeks
+	blib_hexchr:
+			jp		sub_hexchr
+	blib_chrhex:
+			jp		sub_chrhex
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2999,6 +3003,114 @@ sub_vpeeks::
 			ld		b, 0
 			call	ldirmv
 			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	HEXCHR$( 文字列 ) (※BACON独自関数)
+;	input:
+;		HL .... 入力文字列
+;	output:
+;		HL .... 変換結果の文字列
+;	break:
+;		all
+;	comment:
+;		入力文字列の 2文字を2桁の16進数と見なして結果へ格納。これを全文字に行う。
+;		16進数以外の文字が入っていた場合の挙動は不定。
+; =============================================================================
+			scope	sub_hexchr
+sub_hexchr::
+			ld		a, [hl]
+			and		a, 0xFE
+			ret		z
+
+			ld		de, buf
+			rrca
+			ld		b, a
+			ld		[de], a
+
+			inc		de
+			inc		hl
+		loop:
+			ld		a, [hl]
+			call	hexchr
+			add		a, a
+			add		a, a
+			add		a, a
+			add		a, a
+			ld		c, a
+			inc		hl
+			ld		a, [hl]
+			inc		hl
+			call	hexchr
+			or		a, c
+			ld		[de], a
+			inc		de
+			djnz	loop
+			ld		hl, buf
+			ret
+		hexchr:
+			cp		a, '9' + 1
+			jr		nc, is_alpha
+			sub		a, '0'
+			ret
+		is_alpha:
+			or		a, 0x60
+			sub		a, 'a'-10
+			ret
+			endscope
+
+; =============================================================================
+;	CHRHEX$( 文字列 ) (※BACON独自関数)
+;	input:
+;		HL .... 入力文字列
+;	output:
+;		HL .... 変換結果の文字列のアドレス
+;	break:
+;		all
+;	comment:
+;		入力文字列の文字コードを 16進数文字列に変換する。これを全文字に行う。
+; =============================================================================
+			scope	sub_chrhex
+sub_chrhex::
+			ld		a, [hl]
+			or		a, a
+			ret		z
+
+			ld		de, buf
+			ld		b, a
+			add		a, a
+			ld		[de], a
+
+			inc		de
+			inc		hl
+		loop:
+			ld		a, [hl]
+			inc		hl
+			ld		c, a
+			rrca
+			rrca
+			rrca
+			rrca
+			and		a, 0x0F
+			call	chrhex
+			ld		[de], a
+			inc		de
+			ld		a, c
+			and		a, 0x0F
+			call	chrhex
+			ld		[de], a
+			inc		de
+			djnz	loop
+			ld		hl, buf
+			ret
+		chrhex:
+			cp		a, 10
+			jr		nc, is_alpha
+			add		a, '0'
+			ret
+		is_alpha:
+			add		a, 'A'-10
 			ret
 			endscope
 

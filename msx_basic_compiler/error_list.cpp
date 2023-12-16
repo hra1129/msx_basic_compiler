@@ -18,6 +18,7 @@ static std::map< int, std::string > error_name = {
 	{ UNDIFINED_LINE_NUMBER, "Undifined line number." },
 	{ SUBSCRIPT_OUT_OF_RANGE, "Subscript out of range." },
 	{ OVERFLOW_ERROR, "Overflow." },
+	{ STRING_TOO_LONG, "String too long." },
 };
 
 // --------------------------------------------------------------------
