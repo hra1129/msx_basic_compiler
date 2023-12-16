@@ -36,6 +36,7 @@
 #include "expression_bin.h"
 #include "expression_cdbl.h"
 #include "expression_chr.h"
+#include "expression_chrhex.h"
 #include "expression_cint.h"
 #include "expression_cos.h"
 #include "expression_csng.h"
@@ -47,6 +48,7 @@
 #include "expression_fix.h"
 #include "expression_fre.h"
 #include "expression_hex.h"
+#include "expression_hexchr.h"
 #include "expression_inkey.h"
 #include "expression_inp.h"
 #include "expression_input.h"
@@ -463,6 +465,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "CHRHEX$" ) {
+		CEXPRESSION_CHRHEX *p_term = new CEXPRESSION_CHRHEX;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+		}
 	else if( s_operator == "CINT" ) {
 		CEXPRESSION_CINT *p_term = new CEXPRESSION_CINT;
 		p_result = p_term;
@@ -622,6 +638,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "HEXCHR$" ) {
+		CEXPRESSION_HEXCHR *p_term = new CEXPRESSION_HEXCHR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+		}
 	else if( s_operator == "INKEY$" ) {
 		CEXPRESSION_INKEY *p_term = new CEXPRESSION_INKEY;
 		p_result = p_term;

@@ -217,6 +217,7 @@
     <ClCompile Include="expressions\expression_bin.cpp" />
     <ClCompile Include="expressions\expression_cdbl.cpp" />
     <ClCompile Include="expressions\expression_chr.cpp" />
+    <ClCompile Include="expressions\expression_chrhex.cpp" />
     <ClCompile Include="expressions\expression_cint.cpp" />
     <ClCompile Include="expressions\expression_cos.cpp" />
     <ClCompile Include="expressions\expression_csng.cpp" />
@@ -229,6 +230,7 @@
     <ClCompile Include="expressions\expression_fre.cpp" />
     <ClCompile Include="expressions\expression_function.cpp" />
     <ClCompile Include="expressions\expression_hex.cpp" />
+    <ClCompile Include="expressions\expression_hexchr.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
     <ClCompile Include="expressions\expression_inp.cpp" />
     <ClCompile Include="expressions\expression_input.cpp" />
@@ -366,6 +368,7 @@
     <ClInclude Include="expressions\expression_bin.h" />
     <ClInclude Include="expressions\expression_cdbl.h" />
     <ClInclude Include="expressions\expression_chr.h" />
+    <ClInclude Include="expressions\expression_chrhex.h" />
     <ClInclude Include="expressions\expression_cint.h" />
     <ClInclude Include="expressions\expression_cos.h" />
     <ClInclude Include="expressions\expression_csng.h" />
@@ -378,6 +381,7 @@
     <ClInclude Include="expressions\expression_fre.h" />
     <ClInclude Include="expressions\expression_function.h" />
     <ClInclude Include="expressions\expression_hex.h" />
+    <ClInclude Include="expressions\expression_hexchr.h" />
     <ClInclude Include="expressions\expression_inkey.h" />
     <ClInclude Include="expressions\expression_inp.h" />
     <ClInclude Include="expressions\expression_input.h" />
