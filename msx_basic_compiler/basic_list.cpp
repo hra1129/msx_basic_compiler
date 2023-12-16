@@ -18,7 +18,9 @@ struct CBASIC_RESERVED_WORD {
 static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { -1 },				"FRANDOMIZE" },
 	{ { -1 },				"INTERVAL" },
+	{ { -1 },				"BINDATA" },
 	{ { -1 },				"CHRHEX$" },
+	{ { -1 },				"HEXDATA" },
 	{ { -1 },				"HEXCHR$" },
 	{ { 0x8C },				"RESTORE" },
 	{ { 0xE3 },				"STRING$" },
@@ -738,7 +740,7 @@ CBASIC_WORD CBASIC_LIST::get_comment( void ) {
 }
 
 // --------------------------------------------------------------------
-bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
+bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 	int next_address;
 	CBASIC_WORD s_word;
 	bool is_data = false;
@@ -760,7 +762,7 @@ bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
 			s_word = this->get_word();
 			s_word.line_no = line_no;
 			this->words.push_back( s_word );
-			if( !is_data && s_word.s_word == "DATA" && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
+			if( !is_data && (s_word.s_word == "DATA" || s_word.s_word == "HEXDATA" || s_word.s_word == "BINDATA") && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
 				is_data = true;
 			}
 			else if( is_data ) {
@@ -794,7 +796,7 @@ bool CBASIC_LIST::load_binary( FILE *p_file, CERROR_LIST &errors ) {
 }
 
 // --------------------------------------------------------------------
-bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
+bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 	CBASIC_WORD s_word;
 	bool is_last_jump = false;
 	bool is_data = false;
@@ -855,7 +857,7 @@ bool CBASIC_LIST::load_ascii( FILE *p_file, CERROR_LIST &errors ) {
 					if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE") ) {
 						is_last_jump = true;
 					}
-					else if( s_word.s_word == "DATA" && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
+					else if( (s_word.s_word == "DATA" || s_word.s_word == "HEXDATA" || s_word.s_word == "BINDATA") && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
 						is_data = true;
 					}
 				}
@@ -905,11 +907,11 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 
 	if( this->check_binary_program( p_in ) ) {
 		this->s_source_type = "Precompiled code";
-		result = this->load_binary( p_in, errors );
+		result = this->load_binary( errors );
 	}
 	else {
 		this->s_source_type = "ASCII code";
-		result = this->load_ascii( p_in, errors );
+		result = this->load_ascii( errors );
 	}
 	fclose( p_in );
 	return result;
