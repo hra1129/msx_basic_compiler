@@ -168,6 +168,7 @@
     <ClCompile Include="collections\end.cpp" />
     <ClCompile Include="collections\erase.cpp" />
     <ClCompile Include="collections\error.cpp" />
+    <ClCompile Include="collections\files.cpp" />
     <ClCompile Include="collections\for.cpp" />
     <ClCompile Include="collections\gosub.cpp" />
     <ClCompile Include="collections\goto.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="collections\end.h" />
     <ClInclude Include="collections\erase.h" />
     <ClInclude Include="collections\error.h" />
+    <ClInclude Include="collections\files.h" />
     <ClInclude Include="collections\for.h" />
     <ClInclude Include="collections\gosub.h" />
     <ClInclude Include="collections\goto.h" />

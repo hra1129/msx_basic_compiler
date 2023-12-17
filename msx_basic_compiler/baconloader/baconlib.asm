@@ -275,6 +275,10 @@ blib_entries::
 			jp		sub_hexchr
 	blib_chrhex:
 			jp		sub_chrhex
+	blib_files:
+			jp		sub_files
+	blib_puts:
+			jp		sub_puts
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1963,7 +1967,7 @@ sub_instr::
 ;	break:
 ;		all
 ;	comment:
-;		none
+;		ワイルドカード '*' は、'?' に展開する
 ; =============================================================================
 			scope	sub_setup_fcb
 sub_setup_fcb::
@@ -2019,6 +2023,8 @@ sub_setup_fcb::
 			ld		a, [hl]
 			cp		a, '.'
 			jr		z, copy_ext_name_skip_dot
+			cp		a, '*'
+			jr		z, copy_ext_name_skip_wildcard
 			call	check_error_char
 			jp		c, err_bad_file_name
 			ld		[de], a
@@ -2026,6 +2032,11 @@ sub_setup_fcb::
 			inc		de
 			djnz	copy_file_name_loop
 			jr		copy_ext_name
+			; ファイル名の残りをワイルドカードで埋める
+		copy_ext_name_skip_wildcard:
+			ld		a, '?'
+			inc		hl
+			jr		copy_ext_name_skip_dot_loop
 			; ファイル名の残りの隙間をスキップ
 		copy_ext_name_skip_dot:
 			ld		a, ' '
@@ -2039,6 +2050,8 @@ sub_setup_fcb::
 			ld		b, 3
 		copy_ext_name_loop:
 			ld		a, [hl]
+			cp		a, '*'
+			jr		z, copy_ext_name_padding_wildcard
 			call	check_error_char
 			jp		c, err_bad_file_name
 			ld		[de], a
@@ -2048,6 +2061,10 @@ sub_setup_fcb::
 			jr		z, copy_ext_name_padding
 			djnz	copy_ext_name_loop
 			jr		copy_name_finish
+			; * を ? に置換
+		copy_ext_name_padding_wildcard:
+			ld		a, '?'
+			jr		copy_ext_name_padding_loop
 			; 拡張子が 3文字未満ならパディング
 		copy_ext_name_padding:
 			dec		b
@@ -2090,7 +2107,7 @@ sub_setup_fcb::
 			or		a, a					; Cf = 0
 			ret
 	error_char:
-			db		":\"\\^|<>,./*? ", 0
+			db		":\"\\^|<>,./ ", 0
 			endscope
 
 ; =============================================================================
@@ -3115,6 +3132,144 @@ sub_chrhex::
 			endscope
 
 ; =============================================================================
+;	CHRHEX$( 文字列 ) (※BACON独自関数)
+;	input:
+;		HL .... ワイルドカード文字列 (0000h を指定すると *.* になる)
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		DiskBASIC1.x の FILES 相当。DiskBASIC2.x の FILES,L には非対応。
+; =============================================================================
+			scope	sub_files
+find_file_name		= buf + 37
+find_file_name_fcb	= find_file_name
+
+sub_files::
+			; HL=0 ?
+			ld		a, l
+			or		a, h
+			jr		nz, skip
+			ld		hl, wildcard_all
+		skip:
+			; FCB生成
+			ld		de, buf
+			call	sub_setup_fcb
+
+			; 転送元アドレスの指定 (見つけたファイルの FCB が格納される)
+			ld		de, find_file_name_fcb
+			ld		c, _SETDTA
+			call	bdos
+
+			; カーソルが左端に居るか調べる
+			ld		a, [csrx]				; 左端は 1 (0ではないので要注意)
+			dec		a
+			jr		nz, skip_print_crlf
+			; カーソルが左端にないので改行する
+			ld		hl, data_crlf
+			call	sub_puts
+		skip_print_crlf:
+
+			; 最初の検索
+			ld		de, buf
+			ld		c, _SFIRST
+			call	bdos
+			or		a, a
+			jr		nz, end_files			; 失敗した場合 (1つもヒットしない場合)、何もしない。
+
+		loop:
+			; 見つけたファイルを表示する
+			call	put_one_file
+			; 次のファイルを検索
+			ld		c, _SNEXT
+			call	bdos
+			or		a, a
+			jr		nz, end_files
+			; 次を表示できる位置か確認
+			ld		a, [csrx]				; 左端を 1 とする X座標
+			ld		b, a
+			ld		a, [linlen]				; WIDTH n の n
+			sub		a, b
+			cp		a, 13
+			jr		nc, loop
+			; これ以上右に表示できないので改行
+		put_return:
+			ld		hl, data_crlf
+			call	sub_puts
+			jr		loop
+
+		end_files:
+			; カーソルが左端でなければ改行
+			ld		a, [csrx]				; 左端は 1 (0ではないので要注意)
+			dec		a
+			jr		z, finish
+			; カーソルが左端にないので改行する
+			ld		hl, data_crlf
+			call	sub_puts
+		finish:
+			ret
+
+			; ファイル名を一つ分表示する
+		put_one_file:
+			; 左端か？
+			ld		a, [csrx]
+			dec		a
+			jr		z, put_name
+			; 左端でないので ' ' を表示
+			ld		a, ' '
+			rst		0x18
+			; ファイル名 8文字
+		put_name:
+			ld		a, 8
+			ld		hl, find_file_name
+			ld		[hl], a
+			call	sub_puts
+			; 拡張子が空っぽか調べる
+			ld		hl, [find_file_name_fcb + 1 + 8]
+			ld		a, [find_file_name_fcb + 1 + 10]
+			or		a, l
+			or		a, h
+			; 空っぽでなければ '.' を、空っぽなら ' ' を表示する
+			cp		a, ' '
+			jr		z, blank_ext
+			ld		a, '.'
+		blank_ext:
+			rst		0x18
+			; 拡張子 3文字
+			ld		a, 3
+			ld		hl, find_file_name_fcb + 1 + 8 - 1
+			ld		[hl], a
+			call	sub_puts
+			ret
+			endscope
+
+; =============================================================================
+;	PUTS
+;	input:
+;		HL .... 表示する文字列
+;	output:
+;		none
+;	break:
+;		A, B, H, L, F
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_puts
+sub_puts::
+			ld		b, [hl]
+			inc		b
+			dec		b
+			ret		z
+		loop:
+			inc		hl
+			ld		a, [hl]
+			rst		0x18
+			djnz	loop
+			ret
+			endscope
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
@@ -3133,4 +3288,11 @@ err_bad_file_mode			:= $+1
 			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT
 			ld		ix, 0x406F				; ERRHNDR
 			jp		calslt
+			endscope
+
+			scope	public_data
+data_crlf::
+			db		2, 0x0A, 0x0D
+wildcard_all::
+			db		3, "*.*"
 			endscope
