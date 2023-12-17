@@ -240,6 +240,22 @@ line_230:
         LD          HL, 0
         LD          IX, BLIB_FILES
         CALL        CALL_BLIB
+line_240:
+        CALL        interrupt_process
+        LD          HL, str_12
+        PUSH        HL
+        LD          IX, BLIB_KILL
+        CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
+line_250:
+        CALL        interrupt_process
+        LD          HL, str_11
+        PUSH        HL
+        LD          IX, BLIB_KILL
+        CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
 program_termination:
         CALL        restore_h_erro
         CALL        restore_h_timi
