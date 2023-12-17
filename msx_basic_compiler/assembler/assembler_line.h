@@ -114,7 +114,7 @@ public:
 	COPERAND			operand2;
 
 	void set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 );
-	void set( std::string s_mnemonic, std::string s_cond, std::string s_operand1 = "", std::string s_operand2 = "" );
+	void set( std::string s_mnemonic, std::string s_cond = "", std::string s_operand1 = "", std::string s_operand2 = "" );
 	std::string convert_operand( std::string s );
 	std::string convert_operand_hl( std::string s );
 	std::string convert_length( std::string s, size_t length = 12 );

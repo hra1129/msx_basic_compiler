@@ -35,5 +35,6 @@ nkt360さん (@nkt360)
 ちくわ帝国さん (@chikuwa_empire)
 b.p.sさん (@BasicProgrammer)
 naoさん (@nyaonyao21)
+SAILORMAN BRAVO BROSさん（@brapunch2000）
 ```
 	※順不同、（）は X（旧Twitter）のアカウント
