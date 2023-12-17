@@ -2023,7 +2023,7 @@ sub_setup_fcb::
 			inc		c					; つじつま合わせ
 		copy_file_name_loop:
 			dec		c
-			jr		z, copy_name_finish	; ファイル名のコピーは終わった
+			jr		z, fill_name_padding	; ファイル名のコピーは終わった
 			ld		a, [hl]
 			cp		a, '.'
 			jr		z, copy_ext_name_skip_dot
@@ -2042,6 +2042,9 @@ sub_setup_fcb::
 			inc		hl
 			jr		copy_ext_name_skip_dot_loop
 			; ファイル名の残りの隙間をスキップ
+		fill_name_padding:
+			dec		hl					; '.' を読み飛ばす処理のつじつま合わせ
+			inc		c					; '.' を読み飛ばす処理のつじつま合わせ
 		copy_ext_name_skip_dot:
 			ld		a, ' '
 		copy_ext_name_skip_dot_loop:
@@ -2049,9 +2052,13 @@ sub_setup_fcb::
 			inc		de					; 拡張子の位置まで移動
 			djnz	copy_ext_name_skip_dot_loop
 			inc		hl					; '.' を読み飛ばす
+			dec		c					; '.' を読み飛ばす
 			; 拡張子(Max 3文字) のコピー
 		copy_ext_name:
 			ld		b, 3
+			inc		c
+			dec		c
+			jr		z, fill_ext_padding
 		copy_ext_name_loop:
 			ld		a, [hl]
 			cp		a, '*'
@@ -2073,6 +2080,7 @@ sub_setup_fcb::
 		copy_ext_name_padding:
 			dec		b
 			jr		z, copy_name_finish
+		fill_ext_padding:
 			ld		a, ' '
 		copy_ext_name_padding_loop:
 			ld		[de], a
@@ -3316,7 +3324,7 @@ sub_name::
 			ld		de, buf
 			call	sub_setup_fcb
 			pop		hl
-			ld		de, buf + 17
+			ld		de, buf + 16
 			call	sub_setup_fcb
 
 			; ファイルを変更する
