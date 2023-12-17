@@ -279,6 +279,10 @@ blib_entries::
 			jp		sub_files
 	blib_puts:
 			jp		sub_puts
+	blib_kill:
+			jp		sub_kill
+	blib_name:
+			jp		sub_name
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -3132,7 +3136,7 @@ sub_chrhex::
 			endscope
 
 ; =============================================================================
-;	CHRHEX$( 文字列 ) (※BACON独自関数)
+;	FILES <ワイルドカード>
 ;	input:
 ;		HL .... ワイルドカード文字列 (0000h を指定すると *.* になる)
 ;	output:
@@ -3266,6 +3270,59 @@ sub_puts::
 			ld		a, [hl]
 			rst		0x18
 			djnz	loop
+			ret
+			endscope
+
+; =============================================================================
+;	KILL <ワイルドカード>
+;	input:
+;		HL .... ワイルドカード文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイルを削除する
+; =============================================================================
+			scope	sub_kill
+sub_kill::
+			; FCB生成
+			ld		de, buf
+			call	sub_setup_fcb
+
+			; ファイルを削除する
+			ld		de, buf
+			ld		c, _FDEL
+			call	bdos
+			ret
+			endscope
+
+; =============================================================================
+;	NAME <ワイルドカード> AS <ワイルドカード>
+;	input:
+;		HL .... ワイルドカード文字列
+;		DE .... ワイルドカード文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイル名を変更する
+; =============================================================================
+			scope	sub_name
+sub_name::
+			; FCB生成
+			push	de
+			ld		de, buf
+			call	sub_setup_fcb
+			pop		hl
+			ld		de, buf + 17
+			call	sub_setup_fcb
+
+			; ファイルを変更する
+			ld		de, buf
+			ld		c, _FREN
+			call	bdos
 			ret
 			endscope
 

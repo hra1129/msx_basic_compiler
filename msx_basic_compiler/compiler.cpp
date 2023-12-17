@@ -31,10 +31,12 @@
 #include "collections/input.h"
 #include "collections/irandomize.h"
 #include "collections/key.h"
+#include "collections/kill.h"
 #include "collections/let.h"
 #include "collections/lset.h"
 #include "collections/line.h"
 #include "collections/locate.h"
+#include "collections/name.h"
 #include "collections/next.h"
 #include "collections/mid.h"
 #include "collections/on_goto.h"			//	on gosub ‚à‚±‚Ì’†
@@ -94,10 +96,12 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CINPUT );
 	this->collection.push_back( new CIRANDOMIZE );
 	this->collection.push_back( new CKEY );
+	this->collection.push_back( new CKILL );
 	this->collection.push_back( new CLET );
 	this->collection.push_back( new CLSET );
 	this->collection.push_back( new CLINE );
 	this->collection.push_back( new CLOCATE );
+	this->collection.push_back( new CNAME );
 	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new CMID );
 	this->collection.push_back( new CONINTERVAL );

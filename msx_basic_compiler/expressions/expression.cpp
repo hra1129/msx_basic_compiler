@@ -1559,6 +1559,9 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_operator_not( CCOMPILE_INFO *p_info )
 	CEXPRESSION_OPERATOR_NOT *p_operator;
 	std::string s_operator;
 
+	if( p_info->list.is_command_end() ) {
+		return nullptr;
+	}
 	s_operator = p_info->list.p_position->s_word;
 	if( s_operator != "NOT" || p_info->list.p_position->type != CBASIC_WORD_TYPE::RESERVED_WORD ) {
 		//	Š–]‚Ì‰‰ŽZŽq‚Å‚Í‚È‚¢‚Ì‚Å‰E€‚ð‚»‚Ì‚Ü‚Ü•Ô‚·

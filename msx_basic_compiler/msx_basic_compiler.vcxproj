@@ -176,11 +176,13 @@
     <ClCompile Include="collections\input.cpp" />
     <ClCompile Include="collections\irandomize.cpp" />
     <ClCompile Include="collections\key.cpp" />
+    <ClCompile Include="collections\kill.cpp" />
     <ClCompile Include="collections\let.cpp" />
     <ClCompile Include="collections\line.cpp" />
     <ClCompile Include="collections\locate.cpp" />
     <ClCompile Include="collections\lset.cpp" />
     <ClCompile Include="collections\mid.cpp" />
+    <ClCompile Include="collections\name.cpp" />
     <ClCompile Include="collections\next.cpp" />
     <ClCompile Include="collections\on_goto.cpp" />
     <ClCompile Include="collections\on_interval.cpp" />
@@ -326,11 +328,13 @@
     <ClInclude Include="collections\input.h" />
     <ClInclude Include="collections\irandomize.h" />
     <ClInclude Include="collections\key.h" />
+    <ClInclude Include="collections\kill.h" />
     <ClInclude Include="collections\let.h" />
     <ClInclude Include="collections\line.h" />
     <ClInclude Include="collections\locate.h" />
     <ClInclude Include="collections\lset.h" />
     <ClInclude Include="collections\mid.h" />
+    <ClInclude Include="collections\name.h" />
     <ClInclude Include="collections\next.h" />
     <ClInclude Include="collections\on_goto.h" />
     <ClInclude Include="collections\on_interval.h" />
