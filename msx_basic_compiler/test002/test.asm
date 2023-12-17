@@ -20,7 +20,12 @@ work_romver                     = 0x0002D
 bios_chgmod                     = 0x0005F
 bios_chgmodp                    = 0x001B5
 bios_extrom                     = 0x0015F
+work_prtflg                     = 0x0f416
+work_buf                        = 0x0F55E
+blib_bsave                      = 0x0406f
 blib_files                      = 0x04099
+blib_kill                       = 0x0409f
+blib_name                       = 0x040a2
 bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
 bios_gttrig                     = 0x00D8
@@ -96,6 +101,142 @@ _pt0:
 _pt1:
 line_110:
         CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_1
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_120:
+        CALL        interrupt_process
+        LD          HL, str_3
+        PUSH        HL
+        LD          HL, 32768
+        LD          [work_buf + 50], HL
+        LD          HL, 36864
+        LD          [work_buf + 52], HL
+        LD          HL, [work_buf + 50]
+        LD          [work_buf + 54], HL
+        POP         HL
+        LD          DE, work_buf + 50
+        LD          IX, blib_bsave
+        CALL        call_blib
+line_130:
+        CALL        interrupt_process
+        LD          HL, str_4
+        PUSH        HL
+        LD          HL, 32768
+        LD          [work_buf + 50], HL
+        LD          HL, 36864
+        LD          [work_buf + 52], HL
+        LD          HL, [work_buf + 50]
+        LD          [work_buf + 54], HL
+        POP         HL
+        LD          DE, work_buf + 50
+        LD          IX, blib_bsave
+        CALL        call_blib
+line_140:
+        CALL        interrupt_process
+        LD          HL, str_5
+        PUSH        HL
+        LD          HL, 32768
+        LD          [work_buf + 50], HL
+        LD          HL, 36864
+        LD          [work_buf + 52], HL
+        LD          HL, [work_buf + 50]
+        LD          [work_buf + 54], HL
+        POP         HL
+        LD          DE, work_buf + 50
+        LD          IX, blib_bsave
+        CALL        call_blib
+line_150:
+        CALL        interrupt_process
+        LD          HL, str_6
+        PUSH        HL
+        LD          HL, 32768
+        LD          [work_buf + 50], HL
+        LD          HL, 36864
+        LD          [work_buf + 52], HL
+        LD          HL, [work_buf + 50]
+        LD          [work_buf + 54], HL
+        POP         HL
+        LD          DE, work_buf + 50
+        LD          IX, blib_bsave
+        CALL        call_blib
+line_160:
+        CALL        interrupt_process
+        LD          HL, str_7
+        PUSH        HL
+        LD          HL, 32768
+        LD          [work_buf + 50], HL
+        LD          HL, 36864
+        LD          [work_buf + 52], HL
+        LD          HL, [work_buf + 50]
+        LD          [work_buf + 54], HL
+        POP         HL
+        LD          DE, work_buf + 50
+        LD          IX, blib_bsave
+        CALL        call_blib
+line_170:
+        CALL        interrupt_process
+        LD          HL, 0
+        LD          IX, BLIB_FILES
+        CALL        CALL_BLIB
+line_180:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_8
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_190:
+        CALL        interrupt_process
+        LD          HL, str_9
+        PUSH        HL
+        LD          IX, BLIB_KILL
+        CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
+line_200:
+        CALL        interrupt_process
+        LD          HL, 0
+        LD          IX, BLIB_FILES
+        CALL        CALL_BLIB
+line_210:
+        CALL        interrupt_process
+        XOR         A, A
+        LD          [work_prtflg], A
+        LD          HL, str_10
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_2
+        CALL        puts
+line_220:
+        CALL        interrupt_process
+        LD          HL, str_11
+        PUSH        HL
+        LD          HL, str_12
+        POP         DE
+        EX          DE, HL
+        PUSH        HL
+        PUSH        DE
+        LD          IX, BLIB_NAME
+        CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
+        POP         HL
+        CALL        FREE_STRING
+line_230:
+        CALL        interrupt_process
         LD          HL, 0
         LD          IX, BLIB_FILES
         CALL        CALL_BLIB
@@ -136,6 +277,17 @@ signature_ref:
 call_blib:
         LD          iy, [work_blibslot - 1]
         JP          bios_calslt
+puts:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_puts_loop:
+        INC         HL
+        LD          A, [HL]
+        RST         0x18
+        DJNZ        _puts_loop
+        RET         
 free_string:
         LD          DE, heap_start
         RST         0x20
@@ -515,6 +667,30 @@ h_erro_handler:
         JP          work_h_erro
 str_0:
         DEFB        0x00
+str_1:
+        DEFB        0x10, 0x43, 0x52, 0x45, 0x41, 0x54, 0x45, 0x20, 0x54, 0x45, 0x53, 0x54, 0x20, 0x46, 0x49, 0x4C, 0x45
+str_10:
+        DEFB        0x15, 0x4E, 0x41, 0x4D, 0x45, 0x20, 0x44, 0x4D, 0x59, 0x2A, 0x2E, 0x2A, 0x20, 0x41, 0x53, 0x20, 0x48, 0x4F, 0x47, 0x2A, 0x2E, 0x2A
+str_11:
+        DEFB        0x06, 0x44, 0x4D, 0x59, 0x2A, 0x2E, 0x2A
+str_12:
+        DEFB        0x06, 0x48, 0x4F, 0x47, 0x2A, 0x2E, 0x2A
+str_2:
+        DEFB        0x02, 0x0D, 0x0A
+str_3:
+        DEFB        0x0B, 0x44, 0x4D, 0x59, 0x30, 0x30, 0x30, 0x31, 0x2E, 0x42, 0x49, 0x4E
+str_4:
+        DEFB        0x0B, 0x44, 0x4D, 0x59, 0x30, 0x30, 0x30, 0x32, 0x2E, 0x42, 0x41, 0x53
+str_5:
+        DEFB        0x0B, 0x44, 0x4D, 0x59, 0x30, 0x30, 0x30, 0x33, 0x2E, 0x41, 0x53, 0x43
+str_6:
+        DEFB        0x07, 0x44, 0x4D, 0x59, 0x30, 0x30, 0x30, 0x34
+str_7:
+        DEFB        0x0B, 0x44, 0x4D, 0x59, 0x30, 0x30, 0x30, 0x35, 0x2E, 0x5A, 0x5A, 0x5A
+str_8:
+        DEFB        0x0C, 0x4B, 0x49, 0x4C, 0x4C, 0x20, 0x44, 0x4D, 0x59, 0x2A, 0x2E, 0x42, 0x2A
+str_9:
+        DEFB        0x07, 0x44, 0x4D, 0x59, 0x2A, 0x2E, 0x42, 0x2A
 heap_next:
         DEFW        0
 heap_end:

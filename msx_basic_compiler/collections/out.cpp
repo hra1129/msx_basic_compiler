@@ -37,7 +37,7 @@ bool COUT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	if( p_info->list.p_position->s_word != "," ) {
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
