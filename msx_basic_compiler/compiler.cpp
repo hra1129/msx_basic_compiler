@@ -23,6 +23,7 @@
 #include "collections/end.h"
 #include "collections/erase.h"
 #include "collections/error.h"
+#include "collections/files.h"
 #include "collections/for.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
@@ -86,6 +87,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CERASE );
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );
+	this->collection.push_back( new CFILES );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
 	this->collection.push_back( new CIF );
