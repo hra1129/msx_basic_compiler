@@ -468,7 +468,11 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "iy", "[work_blibslot - 1]" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JP", "", "bios_calslt", "" );
+	asm_line.set( "CALL", "", "bios_calslt", "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "EI" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	‰Šú‰»ˆ——p•Ï”
 	asm_line.set( "LABEL", "", "heap_next", "" );
@@ -994,8 +998,6 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
 	asm_line.set( "LABEL", "", "_end_of_strig", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DI" );			//	GTTRIG ‚ª EI ‚µ‚Ä‚µ‚Ü‚¤‚Ì‚Å DI ‚µ‚Ä‚¨‚­
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON KEY ˆ— )
 	asm_line.set( "IN", "", "A", "[0xAA]" );
