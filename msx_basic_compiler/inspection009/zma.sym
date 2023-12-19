@@ -1,6 +1,0 @@
-DAC equ 0f7f6h
-END_ADDRESS equ 0c00eh
-FIN equ 03299h
-START_ADDRESS equ 0c000h
-STR1 equ 0c008h
-VALTYP equ 0f663h

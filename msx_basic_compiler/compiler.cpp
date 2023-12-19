@@ -339,30 +339,6 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "setup_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	ON SPRITE の飛び先初期化
-	asm_line.set( "LD", "", "HL", "_code_ret" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[svari_on_sprite_line]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	ON INTERVAL の飛び先初期化
-	asm_line.set( "LD", "", "[svari_on_interval_line]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	ON KEY の飛び先初期化
-	asm_line.set( "LD", "", "[svari_on_key01_line]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svari_on_key01_line" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "svari_on_key01_line + 2" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "20 - 2" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LDIR" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	初期化処理 (H.ERROフック)
-	asm_line.set( "CALL", "", "setup_h_erro", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "EI" );
-	this->info.assembler_list.body.push_back( asm_line );
 	//	初期化処理 (プログラム起動)
 	asm_line.set( "LD", "", "DE", "program_start" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -599,6 +575,39 @@ void CCOMPILER::exec_sub_run( void ) {
 	asm_line.set( "LD", "", "[heap_end]", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
+	asm_line.set( "DI" );
+	this->info.assembler_list.body.push_back( asm_line );
+	if( this->info.use_on_sprite ) {
+		//	ON SPRITE の飛び先初期化
+		asm_line.set( "LD", "", "HL", "_code_ret" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[svari_on_sprite_line]", "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+	}
+	if( this->info.use_on_interval ) {
+		//	ON INTERVAL の飛び先初期化
+		asm_line.set( "LD", "", "[svari_on_interval_line]", "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+	}
+	if( this->info.use_on_key ) {
+		//	ON KEY の飛び先初期化
+		asm_line.set( "LD", "", "[svari_on_key01_line]", "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svari_on_key01_line" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "svari_on_key01_line + 2" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "BC", "20 - 2" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LDIR" );
+		this->info.assembler_list.body.push_back( asm_line );
+	}
+	//	初期化処理 (H.ERROフック)
+	asm_line.set( "CALL", "", "setup_h_erro", "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "EI" );
+	this->info.assembler_list.body.push_back( asm_line );
+
 	//	RUN用サブルーチンの中で変数領域をクリアする
 	int variable_area_bytes = this->info.variables.var_area_size + this->info.variables.vars_area_count + this->info.variables.vara_area_count;
 	if( variable_area_bytes == 0 ) {
@@ -647,237 +656,248 @@ void CCOMPILER::exec_sub_run( void ) {
 void CCOMPILER::exec_sub_interrupt_process( void ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	割り込みフラグ処理ルーチン
-	asm_line.set( "LABEL", "", "interrupt_process", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	割り込みフラグ処理ルーチン ( ON SPRITE )
-	asm_line.set( "LD", "", "A", "[svarb_on_sprite_running]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_skip_on_sprite", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[svarb_on_sprite_exec]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_skip_on_sprite", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_sprite_running]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.is_interrupt_use() ) {
+		//	割り込みフラグ処理ルーチン
+		asm_line.set( "LABEL", "", "interrupt_process", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_sprite ) {
+		//	割り込みフラグ処理ルーチン ( ON SPRITE )
+		asm_line.set( "LD", "", "A", "[svarb_on_sprite_running]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_on_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_sprite_exec]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_skip_on_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_sprite_running]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 
-	asm_line.set( "LD", "", "HL", "[svari_on_sprite_line]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "jp_hl", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_on_sprite_return_address", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_on_sprite_line]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "jp_hl", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_on_sprite_return_address", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 
-	asm_line.set( "XOR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_sprite_running]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_skip_on_sprite", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-
-	//	割り込みフラグ処理ルーチン ( ON INTERVAL )
-	asm_line.set( "LD", "", "A", "[svarb_on_interval_exec]" );		//	0:Through, 1:Execute
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_skip_on_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_interval_exec]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[svari_on_interval_line]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "jp_hl", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CP", "", "A", "2" );								//	割り込み保留なら解除する
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_skip_on_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_interval_mode]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_skip_on_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	割り込みフラグ処理ルーチン ( ON STRIG )
-	asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "svari_on_strig0_line" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "5" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- STRIG(n)
-	asm_line.set( "LABEL", "", "_on_strig_loop1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- svarf_on_strig0_mode[+00] を確認する
-	asm_line.set( "LD", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );									//	1:ON か？
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0:OFF/STOP なら処理をスキップする
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- svarf_on_strig0_mode[+01] を確認する
-	asm_line.set( "OR", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_skip_strig1", "" );						// 0x00 なら処理をスキップする
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- svarf_on_strig0_mode[+02] を確認する
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0xFF なら処理をスキップする
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- svari_on_strig0_line を CALL する
-	asm_line.set( "PUSH", "", "HL", "" );								// svarf_on_strig0_mode + 01 を保存
-	this->info.assembler_list.subroutines.push_back( asm_line );		//	飛び先へ飛ぶ前に「STACK 1段」
-	asm_line.set( "EX", "", "DE", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "E", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "D", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );				// svari_on_strig0_line 保存
-	this->info.assembler_list.subroutines.push_back( asm_line );																//	飛び先へ飛ぶ前に「STACK 2段」
-	asm_line.set( "EX", "", "DE", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "BC", "" );				//	飛び先へ飛ぶ前に「STACK 3段」
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "jp_hl", "" );				//	割り込みの飛び先
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "BC", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- 次へ
-	asm_line.set( "LABEL", "", "_skip_strig1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DJNZ", "", "_on_strig_loop1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	割り込みフラグ処理ルーチン (ON KEY)
-	asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "svari_on_key01_line" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x0A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_on_key_loop1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_skip_key1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );	//	飛び先へ飛ぶ前に「STACK 1段」
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "EX", "", "DE", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "E", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "D", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "EX", "", "DE", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "DE", "" );	//	飛び先へ飛ぶ前に「STACK 2段」
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "BC", "" );	//	飛び先へ飛ぶ前に「STACK 3段」
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "jp_hl", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "BC", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_skip_key1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "DE", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DJNZ", "", "_on_key_loop1", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	割り込みフラグ処理ルーチン終わり
-	asm_line.set( "RET" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "interrupt_process_end", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "XOR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_sprite_running]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_skip_on_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_interval ) {
+		//	割り込みフラグ処理ルーチン ( ON INTERVAL )
+		asm_line.set( "LD", "", "A", "[svarb_on_interval_exec]" );		//	0:Through, 1:Execute
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_on_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_interval_exec]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_on_interval_line]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "jp_hl", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CP", "", "A", "2" );								//	割り込み保留なら解除する
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_on_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_interval_mode]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_skip_on_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_strig ) {
+		//	割り込みフラグ処理ルーチン ( ON STRIG )
+		asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "svari_on_strig0_line" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "5" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- STRIG(n)
+		asm_line.set( "LABEL", "", "_on_strig_loop1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- svarf_on_strig0_mode[+00] を確認する
+		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );									//	1:ON か？
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0:OFF/STOP なら処理をスキップする
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- svarf_on_strig0_mode[+01] を確認する
+		asm_line.set( "OR", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_skip_strig1", "" );						// 0x00 なら処理をスキップする
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- svarf_on_strig0_mode[+02] を確認する
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0xFF なら処理をスキップする
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- svari_on_strig0_line を CALL する
+		asm_line.set( "PUSH", "", "HL", "" );								// svarf_on_strig0_mode + 01 を保存
+		this->info.assembler_list.subroutines.push_back( asm_line );		//	飛び先へ飛ぶ前に「STACK 1段」
+		asm_line.set( "EX", "", "DE", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "E", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "D", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				// svari_on_strig0_line 保存
+		this->info.assembler_list.subroutines.push_back( asm_line );																//	飛び先へ飛ぶ前に「STACK 2段」
+		asm_line.set( "EX", "", "DE", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "BC", "" );				//	飛び先へ飛ぶ前に「STACK 3段」
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "jp_hl", "" );				//	割り込みの飛び先
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "BC", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- 次へ
+		asm_line.set( "LABEL", "", "_skip_strig1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DJNZ", "", "_on_strig_loop1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_key ) {
+		//	割り込みフラグ処理ルーチン (ON KEY)
+		asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "svari_on_key01_line" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x0A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_on_key_loop1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_skip_key1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );	//	飛び先へ飛ぶ前に「STACK 1段」
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "EX", "", "DE", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "E", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "D", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "EX", "", "DE", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "DE", "" );	//	飛び先へ飛ぶ前に「STACK 2段」
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "BC", "" );	//	飛び先へ飛ぶ前に「STACK 3段」
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "jp_hl", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "BC", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_skip_key1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "DE", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DJNZ", "", "_on_key_loop1", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.is_interrupt_use() ) {
+		//	割り込みフラグ処理ルーチン終わり
+		asm_line.set( "RET" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "interrupt_process_end", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 }
 
 // --------------------------------------------------------------------
@@ -887,259 +907,271 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 	//	H.TIMI処理ルーチン
 	asm_line.set( "LABEL", "", "h_timi_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "AF", "" );		// VDP S#0 の値 (Aレジスタ) を保存
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	H.TIMI処理ルーチン ( ON SPRITE 処理 )
-	asm_line.set( "LD", "", "B", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[svarb_on_sprite_mode]" );	//	0:OFF, 1:ON, 2:STOP
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_end_of_sprite", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "B" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- スプライト衝突フラフが立っているか？
-	asm_line.set( "AND", "", "A", "0x20" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_sprite_exec]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_end_of_sprite", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.is_interrupt_use() ) {
+		asm_line.set( "PUSH", "", "AF", "" );		// VDP S#0 の値 (Aレジスタ) を保存
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_sprite ) {
+		//	H.TIMI処理ルーチン ( ON SPRITE 処理 )
+		asm_line.set( "LD", "", "B", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_sprite_mode]" );	//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_end_of_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "B" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- スプライト衝突フラフが立っているか？
+		asm_line.set( "AND", "", "A", "0x20" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_sprite_exec]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_end_of_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_interval ) {
+		//	H.TIMI処理ルーチン ( ON INTERVAL 処理 )
+		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );	//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_end_of_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- デクリメントカウンターを減算
+		asm_line.set( "LD", "", "HL", "[svari_on_interval_counter]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "L" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "H" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_happned_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "", "_end_of_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_happned_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );			//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_end_of_interval", "" );		//	STOP なら保留
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "A", "" );									//	1:Execute
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_interval_exec]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_on_interval_value]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_end_of_interval", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_strig ) {
+		//	H.TIMI処理ルーチン ( ON STRIG 処理 )
+		this->info.assembler_list.add_label( "bios_gttrig", "0x00D8" );
+		asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "BC", "0x0500" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- STRIG(n)
+		asm_line.set( "LABEL", "", "_on_strig_loop2", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_skip_strig2", "" );					//	0:OFF なら、処理をスキップ
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "A" );							//	1つ前の GTTRIG状態を更新
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "C" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "BC", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "bios_gttrig", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "BC", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_skip_strig2", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "C", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DJNZ", "", "_on_strig_loop2", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 
-	//	H.TIMI処理ルーチン ( ON INTERVAL 処理 )
-	asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );	//	0:OFF, 1:ON, 2:STOP
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_end_of_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- デクリメントカウンターを減算
-	asm_line.set( "LD", "", "HL", "[svari_on_interval_counter]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "L" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "H" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_happned_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "", "_end_of_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_happned_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );			//	0:OFF, 1:ON, 2:STOP
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "_end_of_interval", "" );		//	STOP なら保留
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "A", "" );									//	1:Execute
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svarb_on_interval_exec]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[svari_on_interval_value]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_end_of_interval", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-
-	//	H.TIMI処理ルーチン ( ON STRIG 処理 )
-	this->info.assembler_list.add_label( "bios_gttrig", "0x00D8" );
-	asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "0x0500" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	-- STRIG(n)
-	asm_line.set( "LABEL", "", "_on_strig_loop2", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_skip_strig2", "" );					//	0:OFF なら、処理をスキップ
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "A" );							//	1つ前の GTTRIG状態を更新
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "C" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "BC", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "bios_gttrig", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "BC", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_skip_strig2", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "C", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DJNZ", "", "_on_strig_loop2", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-
-	asm_line.set( "LABEL", "", "_end_of_strig", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	H.TIMI処理ルーチン ( ON KEY 処理 )
-	asm_line.set( "IN", "", "A", "[0xAA]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "0xF0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "6" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OUT", "", "[0xAA]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "IN", "", "A", "[0xA9]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "0x1E" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RRCA", "", "", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "C", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "B" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OUT", "", "[0xAA]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "IN", "", "A", "[0xA9]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "0xFC" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "C" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "C", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key06_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x90" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key07_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0xA0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key08_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0xC0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key09_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x81" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key10_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x82" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "C" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "XOR", "", "A", "0x80" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "C", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x90" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key02_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0xA0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key03_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0xC0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key04_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x81" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "svarf_on_key05_mode" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "0x82" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_end_of_strig", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_key ) {
+		//	H.TIMI処理ルーチン ( ON KEY 処理 )
+		asm_line.set( "IN", "", "A", "[0xAA]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "0xF0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "6" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OUT", "", "[0xAA]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "IN", "", "A", "[0xA9]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "0x1E" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RRCA", "", "", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "C", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "B" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OUT", "", "[0xAA]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "IN", "", "A", "[0xA9]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "0xFC" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "C" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "C", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key06_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x90" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key07_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0xA0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key08_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0xC0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key09_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x81" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key10_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x82" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "C" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "XOR", "", "A", "0x80" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "C", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x90" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key02_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0xA0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key03_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0xC0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key04_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x81" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "svarf_on_key05_mode" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "0x82" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 	//	H.TIMI処理ルーチン終了処理
-	asm_line.set( "POP", "", "AF", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.is_interrupt_use() ) {
+		asm_line.set( "POP", "", "AF", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 	asm_line.set( "JP", "", "h_timi_backup", "" );		// VDP S#0 の値 (Aレジスタ) を復帰
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	H.TIMI処理ルーチンの中のサブルーチン
-	asm_line.set( "LABEL", "", "_on_key_sub", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "B" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "D", "[HL]" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "0" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RET", "Z", "", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "C" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RET", "NZ", "", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "AND", "", "A", "D" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RET", "NZ", "", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "", "A", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "A" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RET" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.use_on_key ) {
+		//	H.TIMI処理ルーチンの中のサブルーチン
+		asm_line.set( "LABEL", "", "_on_key_sub", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "B" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "D", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RET", "Z", "", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "C" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RET", "NZ", "", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "D" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RET", "NZ", "", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[HL]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RET" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 }
 
 // --------------------------------------------------------------------
@@ -1227,6 +1259,7 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->exec_sub_h_timi();
 	this->exec_sub_restore_h_timi();
 	this->exec_sub_on_error();
+	this->optimize_remove_interrupt_process();
 }
 
 // --------------------------------------------------------------------
@@ -1256,55 +1289,62 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->exec_data();
 
 	//	割り込みフラグ
-	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_value", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_interval_counter", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig0_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig1_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig2_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig3_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig4_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig5_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig6_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig7_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig0_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig1_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig2_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig3_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_strig4_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key01_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key02_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key03_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key04_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key05_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key06_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key07_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key08_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key09_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key10_mode", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key11_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key12_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key13_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key14_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key15_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key16_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key01_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key02_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key03_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key04_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key05_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key06_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key07_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key08_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key09_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_key10_line", CVARIABLE_TYPE::INTEGER );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_running", CVARIABLE_TYPE::UNSIGNED_BYTE );
-	this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_line", CVARIABLE_TYPE::INTEGER );
-
+	if( this->info.use_on_interval ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_value", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_counter", CVARIABLE_TYPE::INTEGER );
+	}
+	if( this->info.use_on_strig ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig0_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig1_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig2_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig3_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig4_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig5_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig6_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig7_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig0_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig1_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig2_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig3_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_strig4_line", CVARIABLE_TYPE::INTEGER );
+	}
+	if( this->info.use_on_key ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key01_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key02_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key03_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key04_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key05_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key06_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key07_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key08_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key09_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key10_mode", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key11_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key12_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key13_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key14_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key15_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key16_mode_dummy", CVARIABLE_TYPE::SINGLE_REAL );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key01_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key02_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key03_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key04_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key05_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key06_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key07_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key08_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key09_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_key10_line", CVARIABLE_TYPE::INTEGER );
+	}
+	if( this->info.use_on_sprite ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_running", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_line", CVARIABLE_TYPE::INTEGER );
+	}
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
 	this->info.variables.dump( this->info.assembler_list, this->info.options );
@@ -1450,6 +1490,23 @@ void CCOMPILER::optimize_push_pop( void ) {
 				}
 				p->operand1.s_value = "A";
 			}
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::optimize_remove_interrupt_process( void ) {
+	std::vector< CASSEMBLER_LINE >::iterator p, p_search, p_next;
+
+	if( this->info.is_interrupt_use() ) {
+		return;
+	}
+
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::CALL && p->condition == CCONDITION::NONE && p->operand1.type == COPERAND_TYPE::CONSTANT && p->operand1.s_value == "INTERRUPT_PROCESS" ) {
+			p_next = p - 1;
+			this->info.assembler_list.body.erase( p );
+			p = p_next;
 		}
 	}
 }

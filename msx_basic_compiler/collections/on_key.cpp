@@ -17,7 +17,6 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
-		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return;
 	}
 	p_info->list.p_position++;
@@ -40,6 +39,7 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
+		p_info->use_on_key = true;
 	}
 	else {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -70,11 +70,13 @@ void CONKEY::key( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_key = true;
 	}
 	else if( p_info->list.p_position->s_word == "ON" ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "0xFF" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_key = true;
 	}
 	else {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -150,5 +152,6 @@ bool CONKEY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
+	p_info->use_on_key = true;
 	return true;
 }

@@ -70,11 +70,13 @@ void CONSTRIG::strig( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_strig = true;
 	}
 	else if( p_info->list.p_position->s_word == "ON" ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "1" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_strig = true;
 	}
 	else {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -150,5 +152,6 @@ bool CONSTRIG::exec( CCOMPILE_INFO *p_info ) {
 	}
 	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
+	p_info->use_on_strig = true;
 	return true;
 }

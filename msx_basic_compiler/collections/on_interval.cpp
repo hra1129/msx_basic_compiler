@@ -27,10 +27,15 @@ void CONINTERVAL::interval( CCOMPILE_INFO *p_info ) {
 	else if( p_info->list.p_position->s_word == "STOP" ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
 	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return;
+	}
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svarb_on_interval_mode]", COPERAND_TYPE::REGISTER, "A" );
 	p_info->assembler_list.body.push_back( asm_line );
 	p_info->list.p_position++;
+	p_info->use_on_interval = true;
 }
 
 // --------------------------------------------------------------------
@@ -100,5 +105,6 @@ bool CONINTERVAL::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( CMNEMONIC_TYPE::EI, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	p_info->list.p_position++;
+	p_info->use_on_interval = true;
 	return true;
 }

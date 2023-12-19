@@ -77,6 +77,18 @@ public:
 	//	FOR文のループ変数スタック
 	// ----------------------------------------------------------------
 	std::vector< CVARIABLE > for_variable_array;
+
+	// ----------------------------------------------------------------
+	//	割り込み処理の利用フラグ
+	// ----------------------------------------------------------------
+	bool use_on_interval = false;
+	bool use_on_strig = false;
+	bool use_on_sprite = false;
+	bool use_on_key = false;
+
+	bool is_interrupt_use( void ) const {
+		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_key );
+	}
 };
 
 // --------------------------------------------------------------------
