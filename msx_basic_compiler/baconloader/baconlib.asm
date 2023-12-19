@@ -365,6 +365,7 @@ ncalbas_end::
 ; =============================================================================
 			scope	sub_init_ncalbas
 sub_init_ncalbas::
+			ei
 			ld		hl, ncalbas_trans
 			ld		de, ncalbas
 			ld		bc, ncalbas_end - ncalbas
@@ -402,6 +403,7 @@ sub_init_ncalbas::
 ; =============================================================================
 			scope	sub_key_list
 sub_key_list::
+			ei
 			ld		hl, fnkstr			; ファンクションキー文字列の場所
 			ld		de, 16				; 1つのキーは 16文字
 			ld		b, 10				; 10個のキーを表示する
@@ -516,6 +518,7 @@ _send_string::
 ; =============================================================================
 			scope	sub_iotget_int
 sub_iotget_int::
+			ei
 			call	_send_device_path
 			; 受信コマンド送信
 			ld		a, 0xe0
@@ -547,6 +550,7 @@ sub_iotget_int::
 ; =============================================================================
 			scope	sub_iotget_str
 sub_iotget_str::
+			ei
 			call	_send_device_path
 			; 受信コマンド送信
 			ld		a, 0xe0
@@ -585,6 +589,7 @@ sub_iotget_str::
 ; =============================================================================
 			scope	sub_iotput_int
 sub_iotput_int::
+			ei
 			push	de
 			call	_send_device_path
 			; 受信コマンド送信
@@ -622,6 +627,7 @@ sub_iotput_int::
 ; =============================================================================
 			scope	sub_iotput_str
 sub_iotput_str::
+			ei
 			push	de
 			call	_send_device_path
 			; 受信コマンド送信
@@ -960,6 +966,7 @@ sub_rdvdp::
 ; =============================================================================
 			scope	sub_width
 sub_width::
+			ei
 			; 幅に変更があるか調べる
 			ld		a, [linlen]
 			cp		a, l
@@ -1252,6 +1259,7 @@ sub_setsprite::
 ; =============================================================================
 			scope	sub_putsprite
 sub_putsprite::
+			ei
 			ld		h, a				; H = スプライト番号
 			ld		a, [scrmod]
 			dec		a
@@ -1427,6 +1435,7 @@ sub_tab::
 ; =============================================================================
 			scope	sub_using
 sub_using::
+			ei
 			; 書式文字列の長さとアドレスを得る
 			ld		hl, [buf]
 			ld		a, [hl]
@@ -2276,6 +2285,7 @@ sub_fwrite::
 ; =============================================================================
 			scope	sub_bload_s
 sub_bload_s::
+			ei
 			ld		[buffer_address], de
 			ld		[buffer_size], bc
 			; ファイルを開く
@@ -2369,6 +2379,7 @@ sub_bload_s::
 ; =============================================================================
 			scope	sub_bload
 sub_bload::
+			ei
 			; ファイルを開く
 			ld		de, buf				; FCB を buf に置く
 			call	sub_fopen
@@ -2493,6 +2504,7 @@ sub_mid_cmd::
 ; =============================================================================
 			scope	sub_bsave
 sub_bsave::
+			ei
 			; ファイルを開く
 			push	de
 			ld		de, buf				; FCB を buf に置く
@@ -2552,6 +2564,7 @@ sub_bsave::
 ; =============================================================================
 			scope	sub_bsave_s
 sub_bsave_s::
+			ei
 			; ファイルを開く
 			push	de
 			ld		de, buf				; FCB を buf に置く
@@ -2840,6 +2853,7 @@ sub_base::
 ; =============================================================================
 			scope	sub_input
 sub_input::
+			ei
 			ld		a, [hl]
 			or		a, a
 			ret		z
@@ -3159,6 +3173,7 @@ find_file_name		= buf + 37
 find_file_name_fcb	= find_file_name
 
 sub_files::
+			ei
 			; HL=0 ?
 			ld		a, l
 			or		a, h
