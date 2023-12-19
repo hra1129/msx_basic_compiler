@@ -1,4 +1,4 @@
-SRCS = assembler/assembler_line.cpp \
+SRCS =	assembler/assembler_line.cpp \
 	assembler/assembler_list.cpp \
 	basic_list.cpp \
 	collections/beep.cpp \
@@ -146,7 +146,7 @@ SRCS = assembler/assembler_line.cpp \
 	msx_basic_compiler.cpp \
 	single_real.cpp \
 	string_value.cpp \
-	variable_manager.cpp
+	variable_manager.cpp \
 
 OBJS    = $(SRCS:.cpp=.o)
 CC      = g++
@@ -162,7 +162,8 @@ $(TARGET): $(OBJS)
 all: clean
 #	time make -j9 $(TARGET) > make.log 2>&1
 	time make -j9 $(TARGET) 2>&1 | tee make.log
-
+mk:
+	python makefile_gen.py
 clean:
 	-rm -f $(OBJS) $(TARGET) make.log
 install:
