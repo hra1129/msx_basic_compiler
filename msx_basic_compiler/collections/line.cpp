@@ -358,6 +358,8 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "EI" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, s_label2, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );

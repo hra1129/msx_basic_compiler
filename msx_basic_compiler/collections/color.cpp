@@ -11,9 +11,7 @@
 static void put_call( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	asm_line.type = CMNEMONIC_TYPE::CALL;
-	asm_line.operand1.s_value = "bios_chgclr";
-	asm_line.operand1.type = COPERAND_TYPE::CONSTANT;
+	asm_line.set( "CALL", "", "bios_chgclr" );
 	p_info->assembler_list.body.push_back( asm_line );
 }
 
@@ -41,9 +39,11 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		//	COLOR’P“ÆÀs‚Ìê‡
 		p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_iniplt" );
+		asm_line.set( "LD", "", "IX", "bios_iniplt" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "CALL", "", "bios_extrom" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "EI" );
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
@@ -58,9 +58,11 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			//	COLOR=NEW ‚Ìê‡
 			p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_iniplt" );
+			asm_line.set( "LD", "","IX", "bios_iniplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_extrom" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "EI" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}
@@ -68,9 +70,11 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			//	COLOR=RESTORE ‚Ìê‡
 			p_info->assembler_list.add_label( "bios_rstplt", "0x00145" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_rstplt" );
+			asm_line.set( "LD", "","IX", "bios_rstplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_extrom" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "EI" );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->list.p_position++;
 		}
@@ -81,7 +85,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 			//	ƒpƒŒƒbƒg”Ô†
 			if( exp.compile( p_info ) ) {
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "PUSH", "","HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				exp.release();
 			}
@@ -96,7 +100,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 			//	R‚Ìİ’è’l
 			if( exp.compile( p_info ) ) {
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "PUSH", "", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				exp.release();
 			}
@@ -111,7 +115,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 			//	G‚Ìİ’è’l
 			if( exp.compile( p_info ) ) {
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "PUSH", "", "HL");
 				p_info->assembler_list.body.push_back( asm_line );
 				exp.release();
 			}
@@ -138,45 +142,47 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			}
 			p_info->list.p_position++;
 			//	BIOSƒR[ƒ‹
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );		//	Â‚ğ A ‚ÖŠi”[
+			asm_line.set( "LD", "","A", "L" );		//	Â‚ğ A ‚ÖŠi”[
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0x07" );
+			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::REGISTER, "L" );		//	Â‚ğ D ‚ÖŠi”[
+			asm_line.set( "LD", "","D", "L" );		//	Â‚ğ D ‚ÖŠi”[
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );			//	—Î‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	—Î‚ğ•œŒ³
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
+			asm_line.set( "LD", "","A", "L" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0x07" );
+			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::REGISTER, "A" );		//	—Î‚ğ E ‚ÖŠi”[
+			asm_line.set( "LD", "","E", "A" );		//	—Î‚ğ E ‚ÖŠi”[
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );			//	Ô‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	Ô‚ğ•œŒ³
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );		//	Ô‚ğ A ‚ÖŠi”[
+			asm_line.set( "LD", "","A", "L" );		//	Ô‚ğ A ‚ÖŠi”[
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::AND, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0x07" );
+			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RRCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RRCA" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RRCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RRCA" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RRCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RRCA" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RRCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RRCA" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "D" );		//	ÔEÂ‚ğ A ‚Ö
+			asm_line.set( "OR", "","A", "D" );		//	ÔEÂ‚ğ A ‚Ö
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );			//	ƒpƒŒƒbƒg”Ô†‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	ƒpƒŒƒbƒg”Ô†‚ğ•œŒ³
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::REGISTER, "L" );		//	ƒpƒŒƒbƒg”Ô†‚ğ D ‚Ö
+			asm_line.set( "OR", "","D", "L" );		//	ƒpƒŒƒbƒg”Ô†‚ğ D ‚Ö
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "bios_setplt" );
+			asm_line.set( "LD", "","IX", "bios_setplt" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_extrom" );
 			p_info->assembler_list.body.push_back( asm_line );
-		}
+			asm_line.set( "EI" );
+			p_info->assembler_list.body.push_back( asm_line );
+			}
 		else {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		}
@@ -186,18 +192,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	//	‘æ1ˆø” <‘OŒiF>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "A", "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "[work_forclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
-		asm_line.operand2.s_value = "A";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "[work_forclr]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;
@@ -216,18 +213,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	//	‘æ2ˆø” <”wŒiF>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "A", "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "[work_bakclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
-		asm_line.operand2.s_value = "A";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "[work_bakclr]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;
@@ -250,18 +238,9 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	//	‘æ3ˆø” <ü•ÓF>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "A";
-		asm_line.operand1.type = COPERAND_TYPE::REGISTER;
-		asm_line.operand2.s_value = "L";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "A", "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-
-		asm_line.type = CMNEMONIC_TYPE::LD;
-		asm_line.operand1.s_value = "[work_bdrclr]";
-		asm_line.operand1.type = COPERAND_TYPE::MEMORY;
-		asm_line.operand2.s_value = "A";
-		asm_line.operand2.type = COPERAND_TYPE::REGISTER;
+		asm_line.set( "LD", "", "[work_bdrclr]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 		has_parameter = true;

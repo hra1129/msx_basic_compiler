@@ -71,5 +71,7 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_extrom", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "EI" );
+	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }
