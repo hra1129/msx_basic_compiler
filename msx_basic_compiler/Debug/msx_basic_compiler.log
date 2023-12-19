@@ -1,6 +1,2 @@
-﻿  line.cpp
-  pset.cpp
-  screen.cpp
-  setpage.cpp
-  コードを生成中...
+﻿  compiler.cpp
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe

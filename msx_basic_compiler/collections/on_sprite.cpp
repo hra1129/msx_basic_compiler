@@ -27,6 +27,7 @@ void CONSPRITE::sprite( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svarb_on_sprite_mode]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_sprite = true;
 	}
 	else if( p_info->list.p_position->s_word == "ON" ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
@@ -34,6 +35,7 @@ void CONSPRITE::sprite( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svarb_on_sprite_mode]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_sprite = true;
 	}
 	else {
 		p_info->list.p_position--;
@@ -93,6 +95,7 @@ bool CONSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svari_on_sprite_line]", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
+		p_info->use_on_sprite = true;
 	}
 	return true;
 }

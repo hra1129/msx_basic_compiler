@@ -1,0 +1,6 @@
+DAC equ 0f7f6h
+DBLVAL equ 0c014h
+END_ADDRESS equ 0c01ch
+FRCINT equ 02f8ah
+START_ADDRESS equ 0c000h
+VALTYP equ 0f663h

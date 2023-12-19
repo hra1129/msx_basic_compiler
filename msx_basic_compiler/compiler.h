@@ -38,6 +38,7 @@ private:
 	//	Å“K‰»‚Ìˆ—
 	void optimize_interrupt_process( void );
 	void optimize_push_pop( void );
+	void optimize_remove_interrupt_process( void );
 
 public:
 	CCOMPILE_INFO info;
