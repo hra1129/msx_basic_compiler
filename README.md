@@ -46,5 +46,6 @@ nkt360さん (@nkt360)
 b.p.sさん (@BasicProgrammer)
 naoさん (@nyaonyao21)
 SAILORMAN BRAVO BROSさん（@brapunch2000）
+櫻井洋志さん (@h_sakurai)
 ```
 	※順不同、（）は X（旧Twitter）のアカウント
