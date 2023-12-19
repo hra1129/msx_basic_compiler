@@ -28,6 +28,16 @@ MSX-BASICとの相違点
 ## 4. ソースコード関連の命令は使用不可能
 	LIST, RENUM, TRON, TROFF, MERGE など。
 
+## 5. MacOS
+
+```
+$ cd msx_basic_compiler
+$ make
+$ make install
+```
+
+インストール先は /opt/homebrew/bin/msx_bacon になっているので環境に合わせて Makefile を書き換えてください。
+
 -------------------------------------------------------------------------------
 ### Special thanks to "MSX-BACON のデバッグに協力して頂いた方々"
 ```
