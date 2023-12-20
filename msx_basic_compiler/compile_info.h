@@ -85,9 +85,11 @@ public:
 	bool use_on_strig = false;
 	bool use_on_sprite = false;
 	bool use_on_key = false;
+	bool use_on_stop = false;
+	bool use_return_line_no = false;
 
 	bool is_interrupt_use( void ) const {
-		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_key );
+		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_key || this->use_on_stop );
 	}
 };
 
