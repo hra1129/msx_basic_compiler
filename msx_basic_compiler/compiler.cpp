@@ -44,6 +44,7 @@
 #include "collections/on_key.h"
 #include "collections/on_sprite.h"
 #include "collections/on_strig.h"
+#include "collections/on_stop.h"
 #include "collections/out.h"
 #include "collections/play.h"
 #include "collections/poke.h"
@@ -108,6 +109,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CONKEY );
 	this->collection.push_back( new CONSPRITE );
 	this->collection.push_back( new CONSTRIG );
+	this->collection.push_back( new CONSTOP );
 	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB は、ON～GOSUB より後
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPLAY );
@@ -704,6 +706,49 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		asm_line.set( "LABEL", "", "_skip_on_sprite", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
+	if( this->info.use_on_stop ) {
+		//	割り込みフラグ処理ルーチン ( ON STOP )
+		asm_line.set( "LD", "", "A", "[svarb_on_stop_running]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_skip_on_stop", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_stop_exec]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_skip_on_stop", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_stop_running]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+
+		asm_line.set( "LD", "", "HL", "[svari_on_stop_line]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 1段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 2段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL", "" );				//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "jp_hl", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_on_stop_return_address", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+
+		asm_line.set( "XOR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_stop_running]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_skip_on_stop", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 	if( this->info.use_on_interval ) {
 		//	割り込みフラグ処理ルーチン ( ON INTERVAL )
 		asm_line.set( "LD", "", "A", "[svarb_on_interval_exec]" );		//	0:Through, 1:Execute
@@ -723,6 +768,8 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		asm_line.set( "PUSH", "", "HL", "" );							//	飛び先へ飛ぶ前に「STACK 3段」 数あわせのダミー
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "CALL", "", "jp_hl", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_on_interval_return_address", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -901,6 +948,108 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 }
 
 // --------------------------------------------------------------------
+void CCOMPILER::sub_return_line_num( void ) {
+	CASSEMBLER_LINE asm_line;
+	std::string s_label;
+
+	if( !this->info.use_return_line_no ) {
+		return;
+	}
+	asm_line.set( "LABEL", "",  "_return_line_num",  "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	元の戻りアドレスを取得
+	asm_line.set( "POP", "",  "HL",  "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "",  "BC",  "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( !this->info.is_interrupt_use() ) {
+		asm_line.set( "RET" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		return;
+	}
+
+	asm_line.set( "LD", "",  "DE",  "interrupt_process" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "RST", "",  "0x20" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "RET", "C" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	asm_line.set( "LD", "",  "DE",  "interrupt_process_end" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "RST", "",  "0x20" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "RET", "NC" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	if( this->info.use_on_interval ) {
+		asm_line.set( "LD", "",  "DE",  "_on_interval_return_address" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RST", "",  "0x20" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		s_label = this->info.get_auto_label();
+		asm_line.set( "JR", "NZ",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CP", "", "A", "2" );								//	割り込み保留なら解除する
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DEC", "", "A", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_interval_mode]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_sprite ) {
+		asm_line.set( "LD", "",  "DE",  "_on_sprite_return_address" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RST", "",  "0x20" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		s_label = this->info.get_auto_label();
+		asm_line.set( "JR", "NZ",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "XOR", "",  "A",  "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "",  "[svarb_on_sprite_running]",  "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_stop ) {
+		asm_line.set( "LD", "",  "DE",  "_on_stop_return_address" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "RST", "",  "0x20" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		s_label = this->info.get_auto_label();
+		asm_line.set( "JR", "NZ",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "XOR", "",  "A",  "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "",  "[svarb_on_stop_running]",  "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "",  s_label );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	//	割り込みから戻る RETURN だった場合は、割り込み処理ルーチン呼び出しのスタックも廃棄する
+	asm_line.set( "POP", "",  "HL",  "" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "",  "DE",  "" );	//	割り込み呼び出し前のスタック 1段
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "",  "DE",  "" );	//	割り込み呼び出し前のスタック 2段
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "",  "DE",  "" );	//	割り込み呼び出し前のスタック 3段
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "",  "DE",  "" );	//	interrupt_process からの戻りアドレス
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "HL" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 void CCOMPILER::exec_sub_h_timi( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -929,6 +1078,52 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		asm_line.set( "LD", "", "[svarb_on_sprite_exec]", "A" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LABEL", "", "_end_of_sprite", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	if( this->info.use_on_stop ) {
+		//	H.TIMI処理ルーチン ( ON STOP 処理 )
+		asm_line.set( "LD", "", "A", "[svarb_on_stop_mode]" );	//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_end_of_stop", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	-- CTRL+STOP が押されているか？
+		asm_line.set( "IN", "", "A", "[0xAA]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "0xF0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "6" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "C", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OUT", "", "[0xAA]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "IN", "", "A", "[0xA9]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "0xFD" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "B", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "C" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OUT", "", "[0xAA]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "IN", "", "A", "[0xA9]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "0xEF" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "AND", "", "A", "B" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CP", "", "A", "0xED" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_end_of_stop", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_on_stop_exec]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_end_of_stop", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
@@ -1256,6 +1451,7 @@ void CCOMPILER::exec_subroutines( void ) {
 
 	this->exec_sub_run();
 	this->exec_sub_interrupt_process();
+	this->sub_return_line_num();
 	this->exec_sub_h_timi();
 	this->exec_sub_restore_h_timi();
 	this->exec_sub_on_error();
@@ -1344,6 +1540,12 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
 		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_running", CVARIABLE_TYPE::UNSIGNED_BYTE );
 		this->info.variable_manager.put_special_variable( &(this->info), "on_sprite_line", CVARIABLE_TYPE::INTEGER );
+	}
+	if( this->info.use_on_stop ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_running", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_line", CVARIABLE_TYPE::INTEGER );
 	}
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );

@@ -40,6 +40,8 @@ private:
 	void optimize_push_pop( void );
 	void optimize_remove_interrupt_process( void );
 
+	void sub_return_line_num( void );
+
 public:
 	CCOMPILE_INFO info;
 

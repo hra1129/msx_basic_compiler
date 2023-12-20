@@ -22,17 +22,17 @@ void CONSPRITE::sprite( CCOMPILE_INFO *p_info ) {
 	}
 
 	if( p_info->list.p_position->s_word == "OFF" || p_info->list.p_position->s_word == "STOP" ) {
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0" );
+		asm_line.set( "XOR", "", "A", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svarb_on_sprite_mode]", COPERAND_TYPE::REGISTER, "A" );
+		asm_line.set( "LD", "", "[svarb_on_sprite_mode]",  "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 		p_info->use_on_sprite = true;
 	}
 	else if( p_info->list.p_position->s_word == "ON" ) {
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
+		asm_line.set( "LD", "", "A", "1" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svarb_on_sprite_mode]", COPERAND_TYPE::REGISTER, "A" );
+		asm_line.set( "LD", "", "[svarb_on_sprite_mode]",  "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 		p_info->use_on_sprite = true;
@@ -86,13 +86,13 @@ bool CONSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
 		if( p_info->list.p_position->s_word[0] == '*' ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "label_" + p_info->list.p_position->s_word.substr(1) );
+			asm_line.set( "LD", "", "HL", "label_" + p_info->list.p_position->s_word.substr(1) );
 		}
 		else {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "line_" + p_info->list.p_position->s_word );
+			asm_line.set( "LD", "", "HL", "line_" + p_info->list.p_position->s_word );
 		}
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[svari_on_sprite_line]", COPERAND_TYPE::REGISTER, "HL" );
+		asm_line.set( "LD", "", "[svari_on_sprite_line]",  "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		p_info->list.p_position++;
 		p_info->use_on_sprite = true;
