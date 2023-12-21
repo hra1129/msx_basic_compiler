@@ -39,6 +39,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/on_interval.cpp \
 	collections/on_key.cpp \
 	collections/on_sprite.cpp \
+	collections/on_stop.cpp \
 	collections/on_strig.cpp \
 	collections/out.cpp \
 	collections/play.cpp \
@@ -98,6 +99,7 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_mkd.cpp \
 	expressions/expression_mki.cpp \
 	expressions/expression_mks.cpp \
+	expressions/expression_msxver.cpp \
 	expressions/expression_oct.cpp \
 	expressions/expression_operator_add.cpp \
 	expressions/expression_operator_and.cpp \
