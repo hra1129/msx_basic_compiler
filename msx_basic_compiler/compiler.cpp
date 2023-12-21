@@ -12,6 +12,7 @@
 #include "collections/clear.h"
 #include "collections/cls.h"
 #include "collections/color.h"
+#include "collections/color_sprite.h"
 #include "collections/comment.h"
 #include "collections/data.h"
 #include "collections/defdbl.h"
@@ -78,6 +79,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CCLS );
 	this->collection.push_back( new CCLEAR );
 	this->collection.push_back( new CCOMMENT );
+	this->collection.push_back( new CCOLOR_SPRITE );	//	COLOR ‚æ‚è‚àã‚É‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
 	this->collection.push_back( new CCOLOR );
 	this->collection.push_back( new CDATA );
 	this->collection.push_back( new CDEFDBL );
@@ -1637,7 +1639,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	LD HL, xxx
 	//	PUSH HL
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
-		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && (p->operand2.type == COPERAND_TYPE::CONSTANT || p->operand2.type == COPERAND_TYPE::CONSTANT)) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
 			p_next = p + 1;
 			if( p_next == this->info.assembler_list.body.end() ) break;
 			if( p_next->type != CMNEMONIC_TYPE::PUSH || p_next->operand1.s_value != "HL" ) continue;

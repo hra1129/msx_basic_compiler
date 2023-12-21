@@ -157,6 +157,7 @@
     <ClCompile Include="collections\clear.cpp" />
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
+    <ClCompile Include="collections\color_sprite.cpp" />
     <ClCompile Include="collections\comment.cpp" />
     <ClCompile Include="collections\data.cpp" />
     <ClCompile Include="collections\defdbl.cpp" />
@@ -311,6 +312,7 @@
     <ClInclude Include="collections\clear.h" />
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />
+    <ClInclude Include="collections\color_sprite.h" />
     <ClInclude Include="collections\comment.h" />
     <ClInclude Include="collections\data.h" />
     <ClInclude Include="collections\defdbl.h" />

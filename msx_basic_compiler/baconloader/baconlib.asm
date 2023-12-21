@@ -13,16 +13,20 @@ calslt		:= 0x001C
 enaslt		:= 0x0024
 romver		:= 0x002D
 wrtvdp		:= 0x0047
+wrtvrm		:= 0x004D
 setrd		:= 0x0050
 setwrt		:= 0x0053
+filvrm		:= 0x0056
+ldirmv		:= 0x0059
+ldirvm		:= 0x005C
+chgmod		:= 0x005F
 calpat		:= 0x0084
 calatr		:= 0x0087
 chget		:= 0x009F
-ldirmv		:= 0x0059
-ldirvm		:= 0x005C
 rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
+bigfil		:= 0x016B
 nsetrd		:= 0x016E
 nstwrt		:= 0x0171
 fout		:= 0x3425
@@ -283,6 +287,10 @@ blib_entries::
 			jp		sub_kill
 	blib_name:
 			jp		sub_name
+	blib_colorsprite:
+			jp		sub_colorsprite
+	blib_colorsprite_str:
+			jp		sub_colorsprite_str
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1392,6 +1400,110 @@ sub_putsprite::
 			out		[vdpport0], a		; 色
 			djnz	_loop1
 	_skip_col2:
+			ret
+			endscope
+
+; =============================================================================
+;	COLOR SPRITE (A)=L
+;	input:
+;		A ..... スプライト番号
+;		L ..... 色
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		MSX-BASIC 1.0 ではサポートしていないが、このルーチンは MSX1 でも利用可能
+; =============================================================================
+			scope	sub_colorsprite
+sub_colorsprite::
+			ld		b, a
+			ld		c, l
+			ld		a, [scrmod]
+			cp		a, 4
+			jr		nc, _sprite_mode2
+	_sprite_mode1:
+			ld		a, b
+			call	calatr				; スプライトアトリビュートのアドレスを HL に取得
+			ld		a, c				; A = 色
+			inc		hl
+			inc		hl
+			inc		hl
+			call	wrtvrm				; VRAMへ書き込み
+			ret
+	_sprite_mode2:
+			xor		a, a
+			call	calatr				; スプライトアトリビュートの先頭アドレスを HL に取得
+			dec		h
+			dec		h					; スプライトカラーテーブルのアドレスに変換
+			ld		a, b				; スプライトプレーン番号
+			rlca
+			rlca
+			rlca
+			rlca
+			ld		l, a
+			adc		a, h
+			ld		h, a				; HL = カラーテーブルのアドレス
+			ld		a, c				; A = 色
+			ld		bc, 16
+			jp		bigfil
+			endscope
+
+; =============================================================================
+;	COLOR SPRITE$ (A)=HL
+;	input:
+;		A ..... スプライト番号
+;		HL .... 色文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		スプライトモード2の画面モードでのみ有効
+; =============================================================================
+			scope	sub_colorsprite_str
+sub_colorsprite_str::
+			ld		b, a
+			ld		a, [scrmod]
+			cp		a, 4
+			ret		c
+			push	hl
+			xor		a, a
+			call	calatr				; スプライトアトリビュートの先頭アドレスを HL に取得
+			dec		h
+			dec		h					; スプライトカラーテーブルのアドレスに変換
+			ld		a, b				; スプライトプレーン番号
+			rlca
+			rlca
+			rlca
+			rlca
+			ld		l, a
+			adc		a, h
+			ld		h, a				; HL = カラーテーブルのアドレス
+			call	nstwrt
+			; 長さを調べる
+			pop		hl
+			ld		c, [hl]
+			ld		b, 16
+			inc		c
+			dec		c
+			jr		z, _fill2
+	_loop1:
+			inc		hl
+			ld		a, [hl]
+			out		[vdpport0], a
+			dec		c
+			jr		z, _fill
+			djnz	_loop1
+			ret
+	_fill:
+			dec		b
+			ret		z
+	_fill2:
+			xor		a, a
+	_loop2:
+			out		[vdpport0], a
+			djnz	_loop2
 			ret
 			endscope
 
