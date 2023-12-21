@@ -59,30 +59,12 @@ PROGRAM_START:
 LINE_100:
 LINE_110:
 LINE_120:
-        LD          HL, VARI_I
-        PUSH        HL
         LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_I_FOR_END
-        PUSH        HL
+        LD          [VARI_I], HL
         LD          HL, 3
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, svari_I_FOR_STEP
-        PUSH        HL
+        LD          [svari_I_FOR_END], HL
         LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
+        LD          [svari_I_FOR_STEP], HL
         LD          HL, _pt1
         LD          [svari_I_LABEL], HL
         JR          _pt0
