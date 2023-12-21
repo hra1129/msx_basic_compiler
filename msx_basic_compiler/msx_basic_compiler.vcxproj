@@ -248,6 +248,7 @@
     <ClCompile Include="expressions\expression_mkd.cpp" />
     <ClCompile Include="expressions\expression_mki.cpp" />
     <ClCompile Include="expressions\expression_mks.cpp" />
+    <ClCompile Include="expressions\expression_msxver.cpp" />
     <ClCompile Include="expressions\expression_oct.cpp" />
     <ClCompile Include="expressions\expression_operator_add.cpp" />
     <ClCompile Include="expressions\expression_operator_and.cpp" />
@@ -403,6 +404,7 @@
     <ClInclude Include="expressions\expression_mkd.h" />
     <ClInclude Include="expressions\expression_mki.h" />
     <ClInclude Include="expressions\expression_mks.h" />
+    <ClInclude Include="expressions\expression_msxver.h" />
     <ClInclude Include="expressions\expression_oct.h" />
     <ClInclude Include="expressions\expression_operator_add.h" />
     <ClInclude Include="expressions\expression_operator_and.h" />
