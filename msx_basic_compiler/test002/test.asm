@@ -12,18 +12,11 @@ bios_enaslt                     = 0x0024
 work_mainrom                    = 0xFCC1
 work_blibslot                   = 0xF3D3
 signature                       = 0x4010
-bios_chgclr                     = 0x00062
-work_forclr                     = 0x0F3E9
-work_bakclr                     = 0x0F3EA
-work_bdrclr                     = 0x0F3EB
-work_romver                     = 0x0002D
-bios_chgmod                     = 0x0005F
-bios_chgmodp                    = 0x001B5
-bios_extrom                     = 0x0015F
-work_prtflg                     = 0x0f416
-bios_newstt                     = 0x04601
 bios_errhand                    = 0x0406F
-bios_gttrig                     = 0x00D8
+bios_umult                      = 0x0314a
+work_prtflg                     = 0x0f416
+work_romver                     = 0x002D
+bios_newstt                     = 0x04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
         DEFW        START_ADDRESS
@@ -64,72 +57,8 @@ JP_HL:
         JP          HL
 PROGRAM_START:
 LINE_100:
-        CALL        INTERRUPT_PROCESS
-        LD          A, 15
-        LD          [WORK_FORCLR], A
-        LD          A, 4
-        LD          [WORK_BAKCLR], A
-        LD          A, 7
-        LD          [WORK_BDRCLR], A
-        CALL        BIOS_CHGCLR
-        CALL        INTERRUPT_PROCESS
-        LD          HL, 1
-        LD          A, [work_romver]
-        OR          A, A
-        LD          A, L
-        JR          NZ, _pt0
-        CALL        bios_chgmod
-        JR          _pt1
-_pt0:
-        LD          IX, bios_chgmodp
-        CALL        bios_extrom
-        EI          
-_pt1:
 LINE_110:
-        CALL        INTERRUPT_PROCESS
-        DI          
-        LD          HL, 15
-        LD          [svari_on_interval_value], HL
-        LD          [svari_on_interval_counter], HL
-        LD          HL, line_1000
-        LD          [svari_on_interval_line], HL
-        EI          
-        CALL        INTERRUPT_PROCESS
-        LD          A, 1
-        LD          [svarb_on_interval_mode], A
 LINE_120:
-        CALL        INTERRUPT_PROCESS
-        LD          HL, LINE_1100
-        LD          [SVARI_ON_STOP_LINE], HL
-        CALL        INTERRUPT_PROCESS
-        LD          A, 1
-        LD          [SVARB_ON_STOP_MODE], A
-LINE_130:
-        CALL        INTERRUPT_PROCESS
-        DI          
-        LD          HL, line_1200
-        LD          [svari_on_strig0_line], HL
-        EI          
-        CALL        INTERRUPT_PROCESS
-        XOR         A, A
-        AND         A, 7
-        ADD         A, A
-        ADD         A, A
-        LD          L, A
-        LD          H, 0
-        LD          DE, svarf_on_strig0_mode
-        ADD         HL, DE
-        LD          [HL], 1
-LINE_140:
-        CALL        INTERRUPT_PROCESS
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_1
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        INTERRUPT_PROCESS
         LD          HL, VARI_I
         PUSH        HL
         LD          HL, 0
@@ -140,7 +69,7 @@ LINE_140:
         LD          [HL], D
         LD          HL, svari_I_FOR_END
         PUSH        HL
-        LD          HL, 100
+        LD          HL, 3
         POP         DE
         EX          DE, HL
         LD          [HL], E
@@ -154,10 +83,10 @@ LINE_140:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, _pt3
+        LD          HL, _pt1
         LD          [svari_I_LABEL], HL
-        JR          _pt2
-_pt3:
+        JR          _pt0
+_pt1:
         LD          HL, [vari_I]
         LD          DE, [svari_I_FOR_STEP]
         ADD         HL, DE
@@ -165,50 +94,40 @@ _pt3:
         LD          A, D
         LD          DE, [svari_I_FOR_END]
         RLCA        
-        JR          C, _pt4
+        JR          C, _pt2
         RST         0x20
-        JR          C, _pt5
-        JR          Z, _pt5
+        JR          C, _pt3
+        JR          Z, _pt3
         RET         NC
-_pt4:
+_pt2:
         RST         0x20
         RET         C
-_pt5:
+_pt3:
         POP         HL
-_pt2:
-        CALL        INTERRUPT_PROCESS
+_pt0:
+        LD          HL, varsa_V
+        LD          D, 1
+        LD          BC, 27
+        CALL        check_sarray
+        CALL        calc_array_top
+        LD          HL, [vari_I]
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        EX          DE, HL
+        LD          HL, [data_ptr]
+        LD          C, [HL]
+        INC         HL
+        LD          B, [HL]
+        INC         HL
+        LD          [data_ptr], HL
+        EX          DE, HL
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
         LD          HL, [svari_I_LABEL]
         CALL        jp_hl
-        CALL        INTERRUPT_PROCESS
-        JP          line_140
-LINE_1000:
-        CALL        INTERRUPT_PROCESS
-        LD          A, 2
-        LD          [svarb_on_interval_mode], A
-        CALL        INTERRUPT_PROCESS
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_3
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        INTERRUPT_PROCESS
-        LD          BC, LINE_120
-        JP          _RETURN_LINE_NUM
-LINE_1100:
-        CALL        INTERRUPT_PROCESS
-        XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_4
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        CALL        INTERRUPT_PROCESS
-        RET         
-LINE_1200:
-        CALL        INTERRUPT_PROCESS
+LINE_130:
         XOR         A, A
         LD          [work_prtflg], A
         LD          HL, str_5
@@ -216,8 +135,28 @@ LINE_1200:
         CALL        puts
         POP         HL
         CALL        free_string
-        CALL        INTERRUPT_PROCESS
-        RET         
+        LD          HL, varsa_V
+        LD          D, 1
+        LD          BC, 27
+        CALL        check_sarray
+        CALL        calc_array_top
+        LD          A, [work_romver]
+        LD          L, A
+        LD          H, 0
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        CALL        copy_string
+        PUSH        HL
+        CALL        puts
+        POP         HL
+        CALL        free_string
+        LD          HL, str_6
+        CALL        puts
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -230,7 +169,6 @@ ERR_RETURN_WITHOUT_GOSUB:
         LD          E, 3
         JP          BIOS_ERRHAND
         DI          
-        LD          [SVARI_ON_INTERVAL_LINE], HL
         CALL        SETUP_H_ERRO
         EI          
 CHECK_BLIB:
@@ -260,6 +198,107 @@ CALL_BLIB:
         LD          IY, [WORK_BLIBSLOT - 1]
         CALL        BIOS_CALSLT
         EI          
+        RET         
+allocate_heap:
+        LD          HL, [heap_next]
+        PUSH        HL
+        ADD         HL, BC
+        JR          C, _allocate_heap_error
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_heap_error
+        LD          [heap_next], HL
+        POP         HL
+        PUSH        HL
+        DEC         BC
+        LD          E, L
+        LD          D, H
+        INC         DE
+        LD          [HL], 0
+        LDIR        
+        POP         HL
+        RET         
+_allocate_heap_error:
+        LD          E, 7
+        JP          bios_errhand
+check_sarray:
+        LD          A, [HL]
+        INC         HL
+        OR          A, [HL]
+        DEC         HL
+        RET         NZ
+        PUSH        DE
+        PUSH        HL
+        PUSH        BC
+        CALL        allocate_heap
+        POP         BC
+        POP         DE
+        POP         AF
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        EX          DE, HL
+        DEC         BC
+        DEC         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        LD          [HL], A
+        INC         HL
+        OR          A, A
+        RR          B
+        RR          C
+        LD          DE, 11
+_check_sarray_loop:
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        DEC         BC
+        DEC         A
+        JR          NZ, _check_sarray_loop
+        LD          DE, str_0
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        LD          E, L
+        LD          D, H
+        DEC         HL
+        DEC         HL
+        DEC         BC
+        LDIR        
+        POP         HL
+        RET         
+calc_array_top:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        INC         HL
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, 0
+        ADD         HL, DE
+        ADD         HL, DE
+        LD          A, E
+        POP         DE
+        PUSH        HL
+        JR          _calc_array_top_l2
+_calc_array_top_l1:
+        DEC         HL
+        LD          B, [HL]
+        DEC         HL
+        LD          C, [HL]
+        PUSH        BC
+_calc_array_top_l2:
+        DEC         A
+        JR          NZ, _calc_array_top_l1
+        PUSH        DE
         RET         
 puts:
         LD          B, [HL]
@@ -383,6 +422,37 @@ _free_heap_loop2_next:
         JR          NZ, _free_heap_sarray_elements
         POP         HL
         JR          _free_heap_loop2
+allocate_string:
+        LD          HL, [heap_next]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [heap_end]
+        RST         0x20
+        JR          NC, _allocate_string_error
+        LD          [heap_next], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_allocate_string_error:
+        LD          E, 7
+        JP          bios_errhand
+copy_string:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        allocate_string
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -401,182 +471,8 @@ PROGRAM_RUN:
         LD          [HL], 0
         LDIR        
         RET         
-INTERRUPT_PROCESS:
-        LD          A, [SVARB_ON_STOP_EXEC]
-        OR          A, A
-        JR          Z, _SKIP_ON_STOP
-        XOR         A, A
-        LD          [SVARB_ON_STOP_EXEC], A
-        LD          HL, [SVARI_ON_STOP_LINE]
-        CALL        JP_HL
-_ON_STOP_RETURN_ADDRESS:
-_SKIP_ON_STOP:
-        LD          A, [SVARB_ON_INTERVAL_EXEC]
-        DEC         A
-        JR          NZ, _SKIP_ON_INTERVAL
-        LD          [SVARB_ON_INTERVAL_EXEC], A
-        LD          HL, [SVARI_ON_INTERVAL_LINE]
-        CALL        JP_HL
-_ON_INTERVAL_RETURN_ADDRESS:
-        LD          A, [SVARB_ON_INTERVAL_MODE]
-        CP          A, 2
-        JR          NZ, _SKIP_ON_INTERVAL
-        DEC         A
-        LD          [SVARB_ON_INTERVAL_MODE], A
-_SKIP_ON_INTERVAL:
-        LD          HL, SVARF_ON_STRIG0_MODE
-        LD          DE, SVARI_ON_STRIG0_LINE
-        LD          B, 5
-_ON_STRIG_LOOP1:
-        LD          A, [HL]
-        INC         HL
-        DEC         A
-        JR          NZ, _SKIP_STRIG1
-        OR          A, [HL]
-        JR          Z, _SKIP_STRIG1
-        INC         HL
-        INC         A
-        OR          A, [HL]
-        DEC         HL
-        JR          NZ, _SKIP_STRIG1
-        DEC         A
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        DEC         HL
-        PUSH        HL
-        EX          DE, HL
-        PUSH        BC
-        CALL        JP_HL
-        POP         BC
-        POP         DE
-        POP         HL
-_SKIP_STRIG1:
-        INC         DE
-        INC         DE
-        INC         HL
-        INC         HL
-        INC         HL
-        DJNZ        _ON_STRIG_LOOP1
-        RET         
-INTERRUPT_PROCESS_END:
-_RETURN_LINE_NUM:
-        POP         HL
-        PUSH        BC
-        LD          DE, INTERRUPT_PROCESS
-        RST         0X20
-        RET         C
-        LD          DE, INTERRUPT_PROCESS_END
-        RST         0X20
-        RET         NC
-        LD          DE, _ON_INTERVAL_RETURN_ADDRESS
-        RST         0X20
-        JR          NZ, _RETURN_LINE_NUM_ON_INTERVAL_SKIP
-        LD          A, [SVARB_ON_INTERVAL_MODE]
-        CP          A, 2
-        JR          NZ, _RETURN_LINE_NUM_ON_INTERVAL_RETURN
-        DEC         A
-        LD          [SVARB_ON_INTERVAL_MODE], A
-_RETURN_LINE_NUM_ON_INTERVAL_RETURN:
-        POP         HL
-        POP         BC
-        JP          HL
-_RETURN_LINE_NUM_ON_INTERVAL_SKIP:
-        LD          DE, _ON_STOP_RETURN_ADDRESS
-        RST         0X20
-        JR          NZ, _RETURN_LINE_NUM_ON_STOP_SKIP
-        POP         HL
-        POP         BC
-        JP          HL
-_RETURN_LINE_NUM_ON_STOP_SKIP:
-        POP         HL
-        POP         DE
-        POP         DE
-        POP         DE
-        POP         DE
-        JP          HL
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
-        PUSH        AF
-; ON STOP PROCESS -------------------
-        LD          A, [SVARB_ON_STOP_MODE]
-        OR          A, A
-        JR          Z, _END_OF_STOP
-        LD          A, [SVARB_ON_STOP_LAST]
-        LD          D, A
-        IN          A, [0XAA]
-        AND         A, 0XF0
-        OR          A, 6
-        LD          C, A
-        OUT         [0XAA], A
-        IN          A, [0XA9]
-        OR          A, 0XFD
-        LD          B, A
-        LD          A, C
-        INC         A
-        OUT         [0XAA], A
-        IN          A, [0XA9]
-        OR          A, 0XEF
-        AND         A, B
-        LD          [SVARB_ON_STOP_LAST], A
-        CP          A, 0XED
-        JR          NZ, _END_OF_STOP
-        LD          A, D
-        CP          A, 0XED
-        JR          Z, _END_OF_STOP
-        LD          A, 0XED
-        LD          [SVARB_ON_STOP_EXEC], A
-_END_OF_STOP:
-; ON INTERVAL PROCESS ---------------
-        LD          A, [SVARB_ON_INTERVAL_MODE]
-        OR          A, A
-        JR          Z, _END_OF_INTERVAL
-        LD          HL, [SVARI_ON_INTERVAL_COUNTER]
-        LD          A, L
-        OR          A, H
-        JR          Z, _HAPPNED_INTERVAL
-        DEC         HL
-        LD          [SVARI_ON_INTERVAL_COUNTER], HL
-        JR          _END_OF_INTERVAL
-_HAPPNED_INTERVAL:
-        LD          A, [SVARB_ON_INTERVAL_MODE]
-        DEC         A
-        JR          NZ, _END_OF_INTERVAL
-        INC         A
-        LD          [SVARB_ON_INTERVAL_EXEC], A
-        LD          HL, [SVARI_ON_INTERVAL_VALUE]
-        LD          [SVARI_ON_INTERVAL_COUNTER], HL
-_END_OF_INTERVAL:
-; ON STRIG PROCESS -----------------
-        LD          HL, SVARF_ON_STRIG0_MODE
-        LD          BC, 0X0500
-_ON_STRIG_LOOP2:
-        LD          A, [HL]
-        INC         HL
-        OR          A, A
-        JR          Z, _SKIP_STRIG2
-        LD          A, [HL]
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        LD          A, C
-        PUSH        BC
-        CALL        BIOS_GTTRIG
-        POP         BC
-        LD          [HL], A
-_SKIP_STRIG2:
-        INC         HL
-        INC         HL
-        INC         HL
-        INC         C
-        DJNZ        _ON_STRIG_LOOP2
-_END_OF_STRIG:
-        POP         AF
         JP          H_TIMI_BACKUP
 RESTORE_H_TIMI:
         DI          
@@ -601,18 +497,25 @@ H_ERRO_HANDLER:
         CALL        RESTORE_H_ERRO
         POP         DE
         JP          WORK_H_ERRO
+data_110:
+        DEFW        STR_1
+        DEFW        STR_2
+        DEFW        STR_3
+        DEFW        STR_4
 str_0:
         DEFB        0x00
 str_1:
-        DEFB        0x03, 0x41, 0x42, 0x43
+        DEFB        0x03, 0x4D, 0x53, 0x58
 str_2:
-        DEFB        0x02, 0x0D, 0x0A
+        DEFB        0x04, 0x4D, 0x53, 0x58, 0x32
 str_3:
-        DEFB        0x0C, 0x20, 0x20, 0x49, 0x4E, 0x54, 0x45, 0x52, 0x56, 0x41, 0x4C, 0x20, 0x20
+        DEFB        0x05, 0x4D, 0x53, 0x58, 0x32, 0x2B
 str_4:
-        DEFB        0x16, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3C, 0x3C, 0x53, 0x54, 0x4F, 0x50, 0x3E, 0x3E, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+        DEFB        0x09, 0x4D, 0x53, 0x58, 0x74, 0x75, 0x72, 0x62, 0x6F, 0x52
 str_5:
-        DEFB        0x16, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3C, 0x3C, 0x53, 0x54, 0x52, 0x47, 0x3E, 0x3E, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+        DEFB        0x08, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20
+str_6:
+        DEFB        0x02, 0x0D, 0x0A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -621,56 +524,14 @@ HEAP_MOVE_SIZE:
         DEFW        0
 HEAP_REMAP_ADDRESS:
         DEFW        0
+DATA_PTR:
+        DEFW        DATA_110
 var_area_start:
-svarb_on_interval_exec:
-        DEFB        0
-svarb_on_interval_mode:
-        DEFB        0
-svarb_on_stop_exec:
-        DEFB        0
-svarb_on_stop_last:
-        DEFB        0
-svarb_on_stop_mode:
-        DEFB        0
-svarf_on_strig0_mode:
-        DEFW        0, 0
-svarf_on_strig1_mode:
-        DEFW        0, 0
-svarf_on_strig2_mode:
-        DEFW        0, 0
-svarf_on_strig3_mode:
-        DEFW        0, 0
-svarf_on_strig4_mode:
-        DEFW        0, 0
-svarf_on_strig5_mode_dummy:
-        DEFW        0, 0
-svarf_on_strig6_mode_dummy:
-        DEFW        0, 0
-svarf_on_strig7_mode_dummy:
-        DEFW        0, 0
 svari_I_FOR_END:
         DEFW        0
 svari_I_FOR_STEP:
         DEFW        0
 svari_I_LABEL:
-        DEFW        0
-svari_on_interval_counter:
-        DEFW        0
-svari_on_interval_line:
-        DEFW        0
-svari_on_interval_value:
-        DEFW        0
-svari_on_stop_line:
-        DEFW        0
-svari_on_strig0_line:
-        DEFW        0
-svari_on_strig1_line:
-        DEFW        0
-svari_on_strig2_line:
-        DEFW        0
-svari_on_strig3_line:
-        DEFW        0
-svari_on_strig4_line:
         DEFW        0
 vari_I:
         DEFW        0
@@ -680,6 +541,8 @@ vars_area_end:
 vara_area_start:
 vara_area_end:
 varsa_area_start:
+varsa_V:
+        DEFW        0
 varsa_area_end:
 H_TIMI_BACKUP:
         DEFB        0, 0, 0, 0, 0

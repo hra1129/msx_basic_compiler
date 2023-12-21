@@ -62,6 +62,7 @@
 #include "expression_mkd.h"
 #include "expression_mki.h"
 #include "expression_mks.h"
+#include "expression_msxver.h"
 #include "expression_oct.h"
 #include "expression_pad.h"
 #include "expression_peek.h"
@@ -833,6 +834,19 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "MSXVER" ) {
+		CEXPRESSION_MSXVER *p_term = new CEXPRESSION_MSXVER;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		if( !this->check_word( p_info, ")", SYNTAX_ERROR ) ) {
+			return p_result;
+		}
+		return p_result;
+		}
 	else if( s_operator == "OCT$" ) {
 		CEXPRESSION_OCT *p_term = new CEXPRESSION_OCT;
 		p_result = p_term;
