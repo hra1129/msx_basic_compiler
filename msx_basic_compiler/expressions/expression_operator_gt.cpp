@@ -53,6 +53,7 @@ void CEXPRESSION_OPERATOR_GT::compile( CCOMPILE_INFO *p_info ) {
 	}
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING ) {
 		//	•¶Žš—ñ‚Ìê‡
+		p_info->assembler_list.activate_free_string();
 		s_label = p_info->get_auto_label();
 		p_info->assembler_list.add_label( "blib_strcmp", "0x04027" );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );

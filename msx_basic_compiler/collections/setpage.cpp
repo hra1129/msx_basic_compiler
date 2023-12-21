@@ -53,6 +53,10 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 	}
+	else {
+		p_info->list.p_position++;
+	}
+
 	if( exp.compile( p_info ) ) {
 		//	•`‰æƒy[ƒW
 		exp.release();
