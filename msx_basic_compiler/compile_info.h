@@ -89,7 +89,7 @@ public:
 	bool use_return_line_no = false;
 
 	bool is_interrupt_use( void ) const {
-		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_key || this->use_on_stop );
+		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_stop || this->use_on_key );
 	}
 };
 
