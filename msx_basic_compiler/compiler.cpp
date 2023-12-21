@@ -1612,6 +1612,7 @@ void CCOMPILER::optimize_interrupt_process( void ) {
 //	過剰に出し過ぎた push/pop を削減する
 void CCOMPILER::optimize_push_pop( void ) {
 	std::vector< CASSEMBLER_LINE >::iterator p, p_next, p_back;
+	std::string s_word;
 
 	//	push rp; pop rp を削除する
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -1691,6 +1692,87 @@ void CCOMPILER::optimize_push_pop( void ) {
 				}
 				p->operand1.s_value = "A";
 			}
+		}
+	}
+
+	//	LD HL, constant1
+	//	PUSH HL
+	//  LD HL, constant2
+	//  POP  DE
+	//  EX   DE, HL
+	//	↓
+	//  LD HL, constant1
+	//	LD DE, constant2
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::PUSH || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" || p_next->operand2.type != COPERAND_TYPE::CONSTANT ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::POP || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "DE" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::EX || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "DE" ) {
+				continue;
+			}
+			//	マッチしたので置換
+			p_next = p + 1;
+			this->info.assembler_list.body.erase( p_next );	//	PUSH HL
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	POP DE
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	EX DE, HL
+			p_next = p + 1;
+			p_next->operand1.s_value = "DE";
+		}
+	}
+
+	//	LD HL, constant1
+	//	LD DE, constant2
+	//	LD [HL], E
+	//	INC HL
+	//	LD [HL], D
+	//	↓
+	//	LD HL, constant2
+	//	LD [constant1], HL
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "DE" || p_next->operand2.type != COPERAND_TYPE::CONSTANT  ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand1.s_value != "[HL]" || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != "E" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::INC || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand1.s_value != "[HL]" || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != "D" ) {
+				continue;
+			}
+			//	マッチしたので置換
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	LD [HL], E
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	INC HL
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	LD [HL], D
+			p_next = p + 1;
+			s_word = "[" + p->operand2.s_value + "]";
+			p->operand2.s_value = p_next->operand2.s_value;
+			p_next->operand1.type = COPERAND_TYPE::MEMORY;
+			p_next->operand1.s_value = s_word;
+			p_next->operand2.type = COPERAND_TYPE::REGISTER;
+			p_next->operand2.s_value = "HL";
 		}
 	}
 }
