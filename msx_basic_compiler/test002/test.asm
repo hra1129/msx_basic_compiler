@@ -37,7 +37,6 @@ BIOS_FRCINT                     = 0X02F8A
 BLIB_PUTSPRITE                  = 0X04045
 BLIB_COLORSPRITE_STR            = 0X040A8
 BIOS_ERRHAND                    = 0X0406F
-WORK_BUF                        = 0X0F55E
 BLIB_INKEY                      = 0X0402A
 BLIB_STRCMP                     = 0X04027
 BIOS_NEWSTT                     = 0X04601
@@ -325,179 +324,7 @@ LINE_190:
 LINE_200:
         LD          HL, 0
         PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 10
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 15
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 10
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 15
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 10
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 15
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 10
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 15
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          A, 11
-        POP         HL
-        INC         HL
-        LD          [HL], A
-        DEC         HL
-        POP         DE
-        CALL        STR_ADD
+        LD          HL, STR_5
         POP         DE
         LD          A, E
         PUSH        HL
@@ -618,24 +445,6 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-ALLOCATE_STRING:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [HEAP_END]
-        RST         0X20
-        JR          NC, _ALLOCATE_STRING_ERROR
-        LD          [HEAP_NEXT], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_ALLOCATE_STRING_ERROR:
-        LD          E, 7
-        JP          BIOS_ERRHAND
 FREE_STRING:
         LD          DE, HEAP_START
         RST         0X20
@@ -747,50 +556,23 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
-STR_ADD:
-        PUSH        DE
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
         PUSH        HL
-        LD          C, [HL]
-        LD          A, [DE]
-        ADD         A, C
-        JR          C, _STR_ADD_ERROR
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
         INC         HL
-        LD          DE, WORK_BUF+1
-        LD          B, 0
-        INC         C
-        DEC         C
-        JR          Z, _STR_ADD_S1
-        LDIR        
-_STR_ADD_S1:
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
         POP         HL
-        LD          C, [HL]
-        INC         HL
-        INC         C
-        DEC         C
-        JR          Z, _STR_ADD_S2
-        LDIR        
-_STR_ADD_S2:
-        LD          [WORK_BUF], A
-        POP         HL
-        CALL        FREE_STRING
-        POP         HL
-        CALL        FREE_STRING
-        LD          A, [WORK_BUF]
-        CALL        ALLOCATE_STRING
-        PUSH        HL
-        LD          DE, WORK_BUF
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
+        LD          [HL], C
         RET         
-_STR_ADD_ERROR:
-        LD          E, 15
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
         JP          BIOS_ERRHAND
 COPY_STRING:
         LD          A, [HL]
@@ -854,6 +636,8 @@ STR_3:
         DEFB        0X20, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32
 STR_4:
         DEFB        0X20, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33
+STR_5:
+        DEFB        0X10, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
