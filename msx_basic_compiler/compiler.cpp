@@ -1775,6 +1775,43 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p_next->operand2.s_value = "HL";
 		}
 	}
+
+	//	LD   HL, constant1
+	//	PUSH HL
+	//	CALL subroutine
+	//	POP  HL
+	//	call free_string
+	//	↓
+	//	LD   HL, constant1
+	//	CALL subroutine
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::PUSH || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::CALL || p_next->condition != CCONDITION::NONE ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::POP || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::CALL || p_next->operand1.type != COPERAND_TYPE::CONSTANT || p_next->operand1.s_value != "FREE_STRING" ) {
+				continue;
+			}
+			//	マッチしたので置換
+			p_next = p + 1;
+			this->info.assembler_list.body.erase( p_next );	//	PUSH HL
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	POP  HL
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	CALL FREE_STRING
+			p_next = p + 1;
+		}
+	}
 }
 
 // --------------------------------------------------------------------

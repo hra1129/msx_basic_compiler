@@ -2,21 +2,21 @@
 ; COMPILED BY MSX-BACON FROM TEST.ASC
 ; ------------------------------------------------------------------------
 ; 
-work_h_timi                     = 0x0fd9f
-work_h_erro                     = 0x0ffb1
-work_himem                      = 0x0FC4A
-blib_init_ncalbas               = 0x0404e
-bios_syntax_error               = 0x4055
-bios_calslt                     = 0x001C
-bios_enaslt                     = 0x0024
-work_mainrom                    = 0xFCC1
-work_blibslot                   = 0xF3D3
-signature                       = 0x4010
-bios_errhand                    = 0x0406F
-bios_umult                      = 0x0314a
-work_prtflg                     = 0x0f416
-work_romver                     = 0x002D
-bios_newstt                     = 0x04601
+WORK_H_TIMI                     = 0X0FD9F
+WORK_H_ERRO                     = 0X0FFB1
+WORK_HIMEM                      = 0X0FC4A
+BLIB_INIT_NCALBAS               = 0X0404E
+BIOS_SYNTAX_ERROR               = 0X4055
+BIOS_CALSLT                     = 0X001C
+BIOS_ENASLT                     = 0X0024
+WORK_MAINROM                    = 0XFCC1
+WORK_BLIBSLOT                   = 0XF3D3
+SIGNATURE                       = 0X4010
+BIOS_ERRHAND                    = 0X0406F
+BIOS_UMULT                      = 0X0314A
+WORK_PRTFLG                     = 0X0F416
+WORK_ROMVER                     = 0X002D
+BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
         DEFW        START_ADDRESS
@@ -62,67 +62,64 @@ LINE_120:
         LD          HL, 0
         LD          [VARI_I], HL
         LD          HL, 3
-        LD          [svari_I_FOR_END], HL
+        LD          [SVARI_I_FOR_END], HL
         LD          HL, 1
-        LD          [svari_I_FOR_STEP], HL
-        LD          HL, _pt1
-        LD          [svari_I_LABEL], HL
-        JR          _pt0
-_pt1:
-        LD          HL, [vari_I]
-        LD          DE, [svari_I_FOR_STEP]
+        LD          [SVARI_I_FOR_STEP], HL
+        LD          HL, _PT1
+        LD          [SVARI_I_LABEL], HL
+        JR          _PT0
+_PT1:
+        LD          HL, [VARI_I]
+        LD          DE, [SVARI_I_FOR_STEP]
         ADD         HL, DE
-        LD          [vari_I], HL
+        LD          [VARI_I], HL
         LD          A, D
-        LD          DE, [svari_I_FOR_END]
+        LD          DE, [SVARI_I_FOR_END]
         RLCA        
-        JR          C, _pt2
-        RST         0x20
-        JR          C, _pt3
-        JR          Z, _pt3
+        JR          C, _PT2
+        RST         0X20
+        JR          C, _PT3
+        JR          Z, _PT3
         RET         NC
-_pt2:
-        RST         0x20
+_PT2:
+        RST         0X20
         RET         C
-_pt3:
+_PT3:
         POP         HL
-_pt0:
-        LD          HL, varsa_V
+_PT0:
+        LD          HL, VARSA_V
         LD          D, 1
         LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          HL, [vari_I]
+        CALL        CHECK_SARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          HL, [VARI_I]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
         EX          DE, HL
-        LD          HL, [data_ptr]
+        LD          HL, [DATA_PTR]
         LD          C, [HL]
         INC         HL
         LD          B, [HL]
         INC         HL
-        LD          [data_ptr], HL
+        LD          [DATA_PTR], HL
         EX          DE, HL
         LD          [HL], C
         INC         HL
         LD          [HL], B
-        LD          HL, [svari_I_LABEL]
-        CALL        jp_hl
+        LD          HL, [SVARI_I_LABEL]
+        CALL        JP_HL
 LINE_130:
         XOR         A, A
-        LD          [work_prtflg], A
-        LD          HL, str_5
-        PUSH        HL
-        CALL        puts
-        POP         HL
-        CALL        free_string
-        LD          HL, varsa_V
+        LD          [WORK_PRTFLG], A
+        LD          HL, STR_5
+        CALL        PUTS
+        LD          HL, VARSA_V
         LD          D, 1
         LD          BC, 27
-        CALL        check_sarray
-        CALL        calc_array_top
-        LD          A, [work_romver]
+        CALL        CHECK_SARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          A, [WORK_ROMVER]
         LD          L, A
         LD          H, 0
         ADD         HL, HL
@@ -132,13 +129,13 @@ LINE_130:
         INC         HL
         LD          D, [HL]
         EX          DE, HL
-        CALL        copy_string
+        CALL        COPY_STRING
         PUSH        HL
-        CALL        puts
+        CALL        PUTS
         POP         HL
-        CALL        free_string
-        LD          HL, str_6
-        CALL        puts
+        CALL        FREE_STRING
+        LD          HL, STR_6
+        CALL        PUTS
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -181,15 +178,15 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-allocate_heap:
-        LD          HL, [heap_next]
+ALLOCATE_HEAP:
+        LD          HL, [HEAP_NEXT]
         PUSH        HL
         ADD         HL, BC
-        JR          C, _allocate_heap_error
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_heap_error
-        LD          [heap_next], HL
+        JR          C, _ALLOCATE_HEAP_ERROR
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_HEAP_ERROR
+        LD          [HEAP_NEXT], HL
         POP         HL
         PUSH        HL
         DEC         BC
@@ -200,10 +197,10 @@ allocate_heap:
         LDIR        
         POP         HL
         RET         
-_allocate_heap_error:
+_ALLOCATE_HEAP_ERROR:
         LD          E, 7
-        JP          bios_errhand
-check_sarray:
+        JP          BIOS_ERRHAND
+CHECK_SARRAY:
         LD          A, [HL]
         INC         HL
         OR          A, [HL]
@@ -212,7 +209,7 @@ check_sarray:
         PUSH        DE
         PUSH        HL
         PUSH        BC
-        CALL        allocate_heap
+        CALL        ALLOCATE_HEAP
         POP         BC
         POP         DE
         POP         AF
@@ -234,15 +231,15 @@ check_sarray:
         RR          B
         RR          C
         LD          DE, 11
-_check_sarray_loop:
+_CHECK_SARRAY_LOOP:
         LD          [HL], E
         INC         HL
         LD          [HL], D
         INC         HL
         DEC         BC
         DEC         A
-        JR          NZ, _check_sarray_loop
-        LD          DE, str_0
+        JR          NZ, _CHECK_SARRAY_LOOP
+        LD          DE, STR_0
         LD          [HL], E
         INC         HL
         LD          [HL], D
@@ -255,7 +252,7 @@ _check_sarray_loop:
         LDIR        
         POP         HL
         RET         
-calc_array_top:
+CALC_ARRAY_TOP:
         LD          E, [HL]
         INC         HL
         LD          D, [HL]
@@ -270,47 +267,47 @@ calc_array_top:
         LD          A, E
         POP         DE
         PUSH        HL
-        JR          _calc_array_top_l2
-_calc_array_top_l1:
+        JR          _CALC_ARRAY_TOP_L2
+_CALC_ARRAY_TOP_L1:
         DEC         HL
         LD          B, [HL]
         DEC         HL
         LD          C, [HL]
         PUSH        BC
-_calc_array_top_l2:
+_CALC_ARRAY_TOP_L2:
         DEC         A
-        JR          NZ, _calc_array_top_l1
+        JR          NZ, _CALC_ARRAY_TOP_L1
         PUSH        DE
         RET         
-puts:
+PUTS:
         LD          B, [HL]
         INC         B
         DEC         B
         RET         Z
-_puts_loop:
+_PUTS_LOOP:
         INC         HL
         LD          A, [HL]
-        RST         0x18
-        DJNZ        _puts_loop
+        RST         0X18
+        DJNZ        _PUTS_LOOP
         RET         
-free_string:
-        LD          DE, heap_start
-        RST         0x20
+FREE_STRING:
+        LD          DE, HEAP_START
+        RST         0X20
         RET         C
-        LD          DE, [heap_next]
-        RST         0x20
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
         RET         NC
         LD          C, [HL]
         LD          B, 0
         INC         BC
-        JP          free_heap
-free_heap:
+        JP          FREE_HEAP
+FREE_HEAP:
         PUSH        HL
         ADD         HL, BC
-        LD          [heap_move_size], BC
-        LD          [heap_remap_address], HL
+        LD          [HEAP_MOVE_SIZE], BC
+        LD          [HEAP_REMAP_ADDRESS], HL
         EX          DE, HL
-        LD          HL, [heap_next]
+        LD          HL, [HEAP_NEXT]
         SBC         HL, DE
         LD          C, L
         LD          B, H
@@ -318,24 +315,24 @@ free_heap:
         EX          DE, HL
         LD          A, C
         OR          A, B
-        JR          Z, _free_heap_loop0
+        JR          Z, _FREE_HEAP_LOOP0
         LDIR        
-_free_heap_loop0:
-        LD          [heap_next], DE
-        LD          HL, vars_area_start
-_free_heap_loop1:
-        LD          DE, varsa_area_end
-        RST         0x20
-        JR          NC, _free_heap_loop1_end
+_FREE_HEAP_LOOP0:
+        LD          [HEAP_NEXT], DE
+        LD          HL, VARS_AREA_START
+_FREE_HEAP_LOOP1:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
+        JR          NC, _FREE_HEAP_LOOP1_END
         LD          E, [HL]
         INC         HL
         LD          D, [HL]
         PUSH        HL
-        LD          HL, [heap_remap_address]
+        LD          HL, [HEAP_REMAP_ADDRESS]
         EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop1_next
-        LD          DE, [heap_move_size]
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP1_NEXT
+        LD          DE, [HEAP_MOVE_SIZE]
         SBC         HL, DE
         POP         DE
         EX          DE, HL
@@ -344,15 +341,15 @@ _free_heap_loop1:
         INC         HL
         LD          [HL], D
         PUSH        HL
-_free_heap_loop1_next:
+_FREE_HEAP_LOOP1_NEXT:
         POP         HL
         INC         HL
-        JR          _free_heap_loop1
-_free_heap_loop1_end:
-        LD          HL, varsa_area_start
-_free_heap_loop2:
-        LD          DE, varsa_area_end
-        RST         0x20
+        JR          _FREE_HEAP_LOOP1
+_FREE_HEAP_LOOP1_END:
+        LD          HL, VARSA_AREA_START
+_FREE_HEAP_LOOP2:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
         RET         NC
         LD          E, [HL]
         INC         HL
@@ -377,16 +374,16 @@ _free_heap_loop2:
         LD          C, L
         LD          B, H
         EX          DE, HL
-_free_heap_sarray_elements:
+_FREE_HEAP_SARRAY_ELEMENTS:
         LD          E, [HL]
         INC         HL
         LD          D, [HL]
         PUSH        HL
-        LD          HL, [heap_remap_address]
+        LD          HL, [HEAP_REMAP_ADDRESS]
         EX          DE, HL
-        RST         0x20
-        JR          C, _free_heap_loop2_next
-        LD          HL, [heap_move_size]
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP2_NEXT
+        LD          HL, [HEAP_MOVE_SIZE]
         SBC         HL, DE
         POP         DE
         EX          DE, HL
@@ -395,37 +392,37 @@ _free_heap_sarray_elements:
         INC         HL
         LD          [HL], D
         PUSH        HL
-_free_heap_loop2_next:
+_FREE_HEAP_LOOP2_NEXT:
         POP         HL
         INC         HL
         DEC         BC
         LD          A, C
         OR          A, B
-        JR          NZ, _free_heap_sarray_elements
+        JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
-        JR          _free_heap_loop2
-allocate_string:
-        LD          HL, [heap_next]
+        JR          _FREE_HEAP_LOOP2
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
         PUSH        HL
         LD          E, A
         LD          C, A
         LD          D, 0
         ADD         HL, DE
         INC         HL
-        LD          DE, [heap_end]
-        RST         0x20
-        JR          NC, _allocate_string_error
-        LD          [heap_next], HL
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
         POP         HL
         LD          [HL], C
         RET         
-_allocate_string_error:
+_ALLOCATE_STRING_ERROR:
         LD          E, 7
-        JP          bios_errhand
-copy_string:
+        JP          BIOS_ERRHAND
+COPY_STRING:
         LD          A, [HL]
         PUSH        HL
-        CALL        allocate_string
+        CALL        ALLOCATE_STRING
         POP         DE
         PUSH        HL
         EX          DE, HL
@@ -479,25 +476,25 @@ H_ERRO_HANDLER:
         CALL        RESTORE_H_ERRO
         POP         DE
         JP          WORK_H_ERRO
-data_110:
+DATA_110:
         DEFW        STR_1
         DEFW        STR_2
         DEFW        STR_3
         DEFW        STR_4
-str_0:
-        DEFB        0x00
-str_1:
-        DEFB        0x03, 0x4D, 0x53, 0x58
-str_2:
-        DEFB        0x04, 0x4D, 0x53, 0x58, 0x32
-str_3:
-        DEFB        0x05, 0x4D, 0x53, 0x58, 0x32, 0x2B
-str_4:
-        DEFB        0x09, 0x4D, 0x53, 0x58, 0x74, 0x75, 0x72, 0x62, 0x6F, 0x52
-str_5:
-        DEFB        0x08, 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20
-str_6:
-        DEFB        0x02, 0x0D, 0x0A
+STR_0:
+        DEFB        0X00
+STR_1:
+        DEFB        0X03, 0X4D, 0X53, 0X58
+STR_2:
+        DEFB        0X04, 0X4D, 0X53, 0X58, 0X32
+STR_3:
+        DEFB        0X05, 0X4D, 0X53, 0X58, 0X32, 0X2B
+STR_4:
+        DEFB        0X09, 0X4D, 0X53, 0X58, 0X74, 0X75, 0X72, 0X62, 0X6F, 0X52
+STR_5:
+        DEFB        0X08, 0X54, 0X68, 0X69, 0X73, 0X20, 0X69, 0X73, 0X20
+STR_6:
+        DEFB        0X02, 0X0D, 0X0A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -508,24 +505,24 @@ HEAP_REMAP_ADDRESS:
         DEFW        0
 DATA_PTR:
         DEFW        DATA_110
-var_area_start:
-svari_I_FOR_END:
+VAR_AREA_START:
+SVARI_I_FOR_END:
         DEFW        0
-svari_I_FOR_STEP:
+SVARI_I_FOR_STEP:
         DEFW        0
-svari_I_LABEL:
+SVARI_I_LABEL:
         DEFW        0
-vari_I:
+VARI_I:
         DEFW        0
-var_area_end:
-vars_area_start:
-vars_area_end:
-vara_area_start:
-vara_area_end:
-varsa_area_start:
-varsa_V:
+VAR_AREA_END:
+VARS_AREA_START:
+VARS_AREA_END:
+VARA_AREA_START:
+VARA_AREA_END:
+VARSA_AREA_START:
+VARSA_V:
         DEFW        0
-varsa_area_end:
+VARSA_AREA_END:
 H_TIMI_BACKUP:
         DEFB        0, 0, 0, 0, 0
 H_ERRO_BACKUP:
