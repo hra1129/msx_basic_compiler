@@ -181,10 +181,29 @@ std::map< std::string, CCONDITION > condition_name_list = {
 void CASSEMBLER_LINE::set( const CMNEMONIC_TYPE &t, const CCONDITION &cond, const COPERAND_TYPE &o1t, const std::string &s_o1, const COPERAND_TYPE &o2t, const std::string &s_o2 ) {
 	this->type = t;
 	this->condition = cond;
-	this->operand1.type = o1t;
+	this->operand1.type = this->detect_operand_type( s_o1 );
 	this->operand1.s_value = s_o1;
-	this->operand2.type = o2t;
+	this->operand2.type = this->detect_operand_type( s_o2 );
 	this->operand2.s_value = s_o2;
+
+	std::transform( this->operand1.s_value.begin(), this->operand1.s_value.end(), this->operand1.s_value.begin(), ::toupper );
+	std::transform( this->operand2.s_value.begin(), this->operand2.s_value.end(), this->operand2.s_value.begin(), ::toupper );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LINE::set( std::string s_mnemonic, std::string s_cond, std::string s_operand1, std::string s_operand2 ) {
+
+	std::transform( s_mnemonic.begin(), s_mnemonic.end(), s_mnemonic.begin(), ::toupper );
+	std::transform( s_cond.begin(),     s_cond.end(),     s_cond.begin(),     ::toupper );
+	std::transform( s_operand1.begin(), s_operand1.end(), s_operand1.begin(), ::toupper );
+	std::transform( s_operand2.begin(), s_operand2.end(), s_operand2.begin(), ::toupper );
+
+	this->type = command_name_list[ s_mnemonic ];
+	this->condition = condition_name_list[ s_cond ];
+	this->operand1.type = this->detect_operand_type( s_operand1 );
+	this->operand1.s_value = s_operand1;
+	this->operand2.type = this->detect_operand_type( s_operand2 );
+	this->operand2.s_value = s_operand2;
 }
 
 // --------------------------------------------------------------------
@@ -203,22 +222,6 @@ COPERAND_TYPE CASSEMBLER_LINE::detect_operand_type( const std::string s_operand 
 		return COPERAND_TYPE::REGISTER;
 	}
 	return COPERAND_TYPE::CONSTANT;
-}
-
-// --------------------------------------------------------------------
-void CASSEMBLER_LINE::set( std::string s_mnemonic, std::string s_cond, std::string s_operand1, std::string s_operand2 ) {
-
-	std::transform( s_mnemonic.begin(), s_mnemonic.end(), s_mnemonic.begin(), ::toupper );
-	std::transform( s_cond.begin(),     s_cond.end(),     s_cond.begin(),     ::toupper );
-	std::transform( s_operand1.begin(), s_operand1.end(), s_operand1.begin(), ::toupper );
-	std::transform( s_operand2.begin(), s_operand2.end(), s_operand2.begin(), ::toupper );
-
-	this->type = command_name_list[ s_mnemonic ];
-	this->condition = condition_name_list[ s_cond ];
-	this->operand1.type = this->detect_operand_type( s_operand1 );
-	this->operand1.s_value = s_operand1;
-	this->operand2.type = this->detect_operand_type( s_operand2 );
-	this->operand2.s_value = s_operand2;
 }
 
 // --------------------------------------------------------------------

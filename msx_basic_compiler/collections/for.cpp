@@ -35,7 +35,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
+	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	戻り位置、終端値、増分値の保持用
 	variable_loopl.s_name = variable_loop.s_name + "_LABEL";
@@ -75,9 +75,9 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loope.s_label );
+	asm_line.set( "LD", "", "HL", variable_loope.s_label );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
+	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( exp.compile( p_info, exp_type ) ) {
 		p_info->p_compiler->write_variable_value( variable_loope );
@@ -88,9 +88,9 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	//	「STEP 式」の処理
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loops.s_label );
+	asm_line.set( "LD", "", "HL", variable_loops.s_label );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
+	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word != "STEP" ) {
@@ -114,7 +114,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		default:
 		case CVARIABLE_TYPE::INTEGER:
 			{
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "1" );
+				asm_line.set( "LD", "", "HL", "1" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			break;
@@ -124,7 +124,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 				value.set( "1" );
 				s_label = p_info->constants.add( value );
 
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
+				asm_line.set( "LD", "", "HL", s_label );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			break;
@@ -134,7 +134,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 				value.set( "1" );
 				s_label = p_info->constants.add( value );
 
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label );
+				asm_line.set( "LD", "", "HL", s_label );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			break;
@@ -145,58 +145,58 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	s_body = p_info->get_auto_label();
 	s_next = p_info->get_auto_label();
 	//	戻りアドレスの設定
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_next );
+	asm_line.set( "LD", "", "HL", s_next );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[" + variable_loopl.s_label + "]", COPERAND_TYPE::REGISTER, "HL" );
+	asm_line.set( "LD", "", "[" + variable_loopl.s_label + "]", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	BODYへジャンプ
-	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_body, COPERAND_TYPE::NONE, "" );
+	asm_line.set( "JR", "", s_body, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	NEXTの処理
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_next, COPERAND_TYPE::NONE, "" );
+	asm_line.set( "LABEL", "", s_next );
 	p_info->assembler_list.body.push_back( asm_line );
 	switch( variable_loop.type ) {
 		default:
 		case CVARIABLE_TYPE::INTEGER:
 			//	<変数> = <変数> + <STEP>
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[" + variable_loop.s_label + "]" );
+			asm_line.set( "LD", "", "HL", "[" + variable_loop.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[" + variable_loops.s_label + "]" );
+			asm_line.set( "LD", "", "DE", "[" + variable_loops.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
+			asm_line.set( "ADD", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[" + variable_loop.s_label + "]", COPERAND_TYPE::REGISTER, "HL" );
+			asm_line.set( "LD", "", "[" + variable_loop.s_label + "]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<変数> と <終値> を比較
 			s_skip_label = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "D" );
+			asm_line.set( "LD", "", "A", "D" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[" + variable_loope.s_label + "]" );
+			asm_line.set( "LD", "", "DE", "[" + variable_loope.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RLCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RLCA", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が正の場合
 			s_pop = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x20", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RST", "", "0x20", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "C", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "Z", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NC, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "NC", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が負の場合
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0x20", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RST", "", "0x20", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::C, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "C", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "POP", "", "HL", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			break;
 		case CVARIABLE_TYPE::SINGLE_REAL:
@@ -207,62 +207,62 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.add_label( "bios_fcomp", "0x02f21" );
 			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 			p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "4" );
+			asm_line.set( "LD", "", "A", "4" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			asm_line.set( "LD", "", "[work_valtyp]", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loop.s_label );
+			asm_line.set( "LD", "", "HL", variable_loop.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_vmovfm", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_vmovfm", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loops.s_label );
+			asm_line.set( "LD", "", "HL", variable_loops.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_vmovam", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_vmovam", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_decadd", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_decadd", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
+			asm_line.set( "LD", "", "HL", "work_dac" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, variable_loop.s_label );
+			asm_line.set( "LD", "", "DE", variable_loop.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "4" );
+			asm_line.set( "LD", "", "BC", "4" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LDIR", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<変数> と <終値> を比較
 			s_skip_label = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::MEMORY, "[" + variable_loope.s_label + "]" );
+			asm_line.set( "LD", "", "BC", "[" + variable_loope.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[" + variable_loope.s_label + " + 2]" );
+			asm_line.set( "LD", "", "DE", "[" + variable_loope.s_label + " + 2]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[" + variable_loops.s_label + "]" );
+			asm_line.set( "LD", "", "A", "[" + variable_loops.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RLCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RLCA", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が正の場合
 			s_pop = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_fcomp", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_fcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "DEC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が負の場合
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_fcomp", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_fcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "INC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::Z, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "POP", "", "HL", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			break;
 		case CVARIABLE_TYPE::DOUBLE_REAL:
@@ -273,68 +273,68 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.add_label( "bios_xdcomp", "0x02f5c" );
 			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 			p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "8" );
+			asm_line.set( "LD", "", "A", "8" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
+			asm_line.set( "LD", "", "[work_valtyp]", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loop.s_label );
+			asm_line.set( "LD", "", "HL", variable_loop.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_vmovfm", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_vmovfm", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loops.s_label );
+			asm_line.set( "LD", "", "HL", variable_loops.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_vmovam", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_vmovam", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_decadd", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_decadd", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
+			asm_line.set( "LD", "", "HL", "work_dac" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, variable_loop.s_label );
+			asm_line.set( "LD", "", "DE", variable_loop.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::CONSTANT, "8" );
+			asm_line.set( "LD", "", "BC", "8" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LDIR", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<変数> と <終値> を比較
 			s_skip_label = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable_loope.s_label );
+			asm_line.set( "LD", "", "HL", variable_loope.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_vmovam", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_vmovam", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[" + variable_loops.s_label + "]" );
+			asm_line.set( "LD", "", "A", "[" + variable_loops.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RLCA, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RLCA", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が正の場合
 			s_pop = p_info->get_auto_label();
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_xdcomp", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_xdcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "DEC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "JR", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> が負の場合
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_skip_label, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_xdcomp", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "CALL", "", "bios_xdcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "INC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::Z, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_pop, COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "POP", "", "HL", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			break;
 	}
 
 	//	BODYのラベル
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_body, COPERAND_TYPE::NONE, "" );
+	asm_line.set( "LABEL", "", s_body, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	FOR文のループ変数を積んでおく
 	p_info->for_variable_array.push_back( variable_loop );
