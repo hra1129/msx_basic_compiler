@@ -207,6 +207,7 @@ int CVARIABLE_MANAGER::evaluate_dimensions( CCOMPILE_INFO *p_info ) {
 	return dimension;
 }
 
+// --------------------------------------------------------------------
 //	Œ»İ‚ÌQÆˆÊ’u‚Ì”z—ñ•Ï”‚Ìî•ñ‚ğ•Ô‚·
 CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	std::string s_name;
@@ -221,7 +222,7 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
-	if( s_name.size() > 2 ) {
+	if( s_name.size() > 2 && p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
 		//	•Ï”–¼Å‘å 2•¶š§ŒÀ
 		s_name.resize( 2 );
 	}
@@ -380,6 +381,11 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 	}
 	else {
 		variable = p_info->variables.dictionary[ s_label ];
+		if( variable.dimension == 0 ) {
+			//	‰¼“o˜^‚Ìê‡A¡‰ñ‚ÌŒŸoŒ‹‰Ê‚Åã‘‚«
+			p_info->variables.dictionary[ s_label ].dimension = dimension;
+			variable.dimension = dimension;
+		}
 		if( variable.dimension != dimension ) {
 			p_info->errors.add( SUBSCRIPT_OUT_OF_RANGE, p_info->list.get_line_no() );
 		}

@@ -71,7 +71,9 @@ public:
 
 	// --------------------------------------------------------------------
 	//	汎用のコンパイル処理
-	void put_logical_operation( void );
+	//	is_lop = false : 結果を work_logopr (0x0fB02) に格納する。通常はこちら。
+	//	is_lop = true  : 結果を work_lop (0xf570) に格納する。ビットブロックトランスファはこちら。
+	void put_logical_operation( bool is_lop = false );
 };
 
 #endif

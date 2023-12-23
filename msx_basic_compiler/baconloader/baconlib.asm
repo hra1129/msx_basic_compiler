@@ -291,6 +291,8 @@ blib_entries::
 			jp		sub_colorsprite
 	blib_colorsprite_str:
 			jp		sub_colorsprite_str
+	blib_copy_file_to_file:
+			jp		sub_copy_file_to_file
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2272,6 +2274,15 @@ sub_fopen::
 			dec		a
 			inc		hl
 			ld		[hl], a
+			ld		de, 33-15
+			add		hl, de
+			ld		[hl], a
+			inc		hl
+			ld		[hl], a
+			inc		hl
+			ld		[hl], a
+			inc		hl
+			ld		[hl], a
 			pop		af
 			ret
 			endscope
@@ -2303,6 +2314,15 @@ sub_fcreate::
 			ld		a, 1
 			ld		[hl], a
 			dec		a
+			inc		hl
+			ld		[hl], a
+			ld		de, 33-15
+			add		hl, de
+			ld		[hl], a
+			inc		hl
+			ld		[hl], a
+			inc		hl
+			ld		[hl], a
 			inc		hl
 			ld		[hl], a
 			pop		af
@@ -3281,8 +3301,8 @@ sub_chrhex::
 ;		DiskBASIC1.x の FILES 相当。DiskBASIC2.x の FILES,L には非対応。
 ; =============================================================================
 			scope	sub_files
-find_file_name		= buf + 37
-find_file_name_fcb	= find_file_name
+find_file_name		= buf
+find_file_name_fcb	= find_file_name + 37
 
 sub_files::
 			ei
@@ -3293,7 +3313,7 @@ sub_files::
 			ld		hl, wildcard_all
 		skip:
 			; FCB生成
-			ld		de, buf
+			ld		de, find_file_name
 			call	sub_setup_fcb
 
 			; 転送元アドレスの指定 (見つけたファイルの FCB が格納される)
@@ -3361,7 +3381,7 @@ sub_files::
 			; ファイル名 8文字
 		put_name:
 			ld		a, 8
-			ld		hl, find_file_name
+			ld		hl, find_file_name_fcb
 			ld		[hl], a
 			call	sub_puts
 			; 拡張子が空っぽか調べる
@@ -3457,6 +3477,179 @@ sub_name::
 			; ファイルを変更する
 			ld		de, buf
 			ld		c, _FREN
+			call	bdos
+			ret
+			endscope
+
+; =============================================================================
+;	COPY <ワイルドカード1> TO <ワイルドカード2>
+;	input:
+;		HL .... ワイルドカード1文字列
+;		DE .... ワイルドカード2文字列
+;		buffer_start .... 作業用バッファの先頭アドレス
+;		buffer_end ...... 作業用バッファの終了アドレス (ここは含まない)
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイルをコピーする。
+;		buffer_start, buffer_end に 0xC000, 0xE000 を指定すると、0xC000～0xDFFF
+;		が作業用に使われる。
+; =============================================================================
+			scope	sub_copy_file_to_file
+buffer_start		= buf
+buffer_end			= buffer_start + 2
+buffer_size			= buffer_end + 2
+remain_file_size	= buffer_size + 2
+find_file_name		= remain_file_size + 4
+find_file_name_fcb	= find_file_name + 37
+copy_file_name_fcb	= find_file_name_fcb + 37
+replace_name		= copy_file_name_fcb + 37
+
+sub_copy_file_to_file::
+			ei
+			push	hl
+			; 先に転送先を変換する
+			ex		de, hl
+			ld		de, replace_name
+			call	sub_setup_fcb
+			; 次に転送元を変換する
+			pop		hl
+			ld		de, find_file_name
+			call	sub_setup_fcb
+			; 転送元アドレスの指定 (見つけたファイルの FCB が格納される)
+			ld		de, find_file_name_fcb
+			ld		c, _SETDTA
+			call	bdos
+			; ワークのサイズを求める
+			ld		hl, [buffer_end]
+			ld		de, [buffer_start]
+			or		a, a
+			sbc		hl, de
+			ld		[buffer_size], hl
+
+			; 最初の検索
+			ld		de, find_file_name
+			ld		c, _SFIRST
+			call	bdos
+			or		a, a
+			jr		nz, end_files			; 失敗した場合 (1つもヒットしない場合)、何もしない。
+
+		loop:
+			; 見つけたファイルをコピーする
+			call	copy_one_file
+			; 次のファイルを検索
+			ld		c, _SNEXT
+			call	bdos
+			or		a, a
+			jr		z, loop
+
+		end_files:
+			ret
+
+			; ファイルを一つコピーする
+		copy_one_file:
+			; FCBをコピーする
+			ld		hl, find_file_name_fcb
+			ld		de, copy_file_name_fcb
+			ld		bc, 37
+			ldir
+			; copy_file_name_fcb の方を replace_name のルールで書き替える
+			ld		b, 1 + 11					; ドライブ番号もここでコピーしてしまう。ドライブ番号は '?' に一致しないのでコピーされる。
+			ld		hl, replace_name
+			ld		de, copy_file_name_fcb
+		replace_loop:
+			ld		a, [hl]
+			cp		a, '?'
+			jr		z, not_replace
+			ld		[de], a
+		not_replace:
+			inc		hl
+			inc		de
+			djnz	replace_loop
+			; DTA を指定のワークに更新する
+			ld		de, [buffer_start]
+			ld		c, _SETDTA
+			call	bdos
+			; 転送元をオープン
+			ld		de, find_file_name_fcb
+			ld		c, _FOPEN
+			call	bdos
+			; 転送先をオープン
+			ld		de, copy_file_name_fcb
+			ld		c, _FMAKE
+			call	bdos
+			; レコード長を 1 にする
+			ld		hl, 1
+			ld		[find_file_name_fcb + 14], hl
+			ld		[copy_file_name_fcb + 14], hl
+			; ランダムレコードの設定
+			dec		hl
+			ld		[find_file_name_fcb + 33], hl
+			ld		[copy_file_name_fcb + 33], hl
+			ld		[find_file_name_fcb + 35], hl
+			ld		[copy_file_name_fcb + 35], hl
+			; 転送元のサイズ(32bit)を取得
+			ld		hl, [find_file_name_fcb + 16]
+			ld		[remain_file_size + 0], hl
+			ld		hl, [find_file_name_fcb + 18]
+			ld		[remain_file_size + 2], hl
+			; 転送ループ
+		loop2:
+			ld		de, [buffer_size]
+			ld		hl, remain_file_size + 3
+			ld		a, [hl]
+			dec		hl
+			or		a, [hl]
+			jr		nz, do_read						; 残りサイズの bit31～bit16 が 非0 なら buffer_size 目一杯読み込む。
+			dec		hl
+			ld		a, [hl]
+			dec		hl
+			ld		l, [hl]
+			ld		h, a
+			sbc		hl, de
+			jr		nc, do_read
+			add		hl, de
+			ex		de, hl
+		do_read:
+			; 読み込み
+			ex		de, hl
+			ld		de, find_file_name_fcb
+			ld		c, _RDBLK
+			call	bdos
+			push	hl
+			; 書き込み
+			ld		de, copy_file_name_fcb
+			ld		c, _WRBLK
+			call	bdos
+			pop		hl
+			or		a, a
+			jp		nz, err_device_io
+			; 残り容量を計算する
+			ex		de, hl
+			ld		hl, [remain_file_size]
+			sbc		hl, de
+			ld		[remain_file_size], hl
+			ld		a, l
+			or		a, h
+			ld		de, 0
+			ld		hl, [remain_file_size + 2]
+			sbc		hl, de
+			ld		[remain_file_size + 2], hl
+			or		a, l
+			or		a, h
+			jr		nz, loop2
+			; ファイルを閉じる
+			ld		de, find_file_name_fcb
+			ld		c, _FCLOSE
+			call	bdos
+			ld		de, copy_file_name_fcb
+			ld		c, _FCLOSE
+			call	bdos
+			; DTA を find_file_name_fcb へ戻してから戻る
+			ld		de, find_file_name_fcb
+			ld		c, _SETDTA
 			call	bdos
 			ret
 			endscope
