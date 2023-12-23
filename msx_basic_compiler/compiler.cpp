@@ -13,6 +13,7 @@
 #include "collections/cls.h"
 #include "collections/color.h"
 #include "collections/color_sprite.h"
+#include "collections/copy.h"
 #include "collections/comment.h"
 #include "collections/data.h"
 #include "collections/defdbl.h"
@@ -81,6 +82,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CCOMMENT );
 	this->collection.push_back( new CCOLOR_SPRITE );	//	COLOR ‚æ‚è‚àã‚É‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
 	this->collection.push_back( new CCOLOR );
+	this->collection.push_back( new CCOPY );
 	this->collection.push_back( new CDATA );
 	this->collection.push_back( new CDEFDBL );
 	this->collection.push_back( new CDEFINT );
@@ -1834,7 +1836,7 @@ void CCOMPILER::optimize_remove_interrupt_process( void ) {
 }
 
 // --------------------------------------------------------------------
-void CCOMPILER::put_logical_operation( void ) {
+void CCOMPILER::put_logical_operation( bool is_lop ) {
 	CASSEMBLER_LINE asm_line;
 	const char* s_rop[] = {
 		"AND", "OR", "XOR", "PSET", "PRESET", "TAND", "TOR", "TXOR", "TPSET", "TPRESET"
@@ -1870,14 +1872,28 @@ void CCOMPILER::put_logical_operation( void ) {
 		}
 	}
 
-	this->info.assembler_list.add_label( "work_logopr", "0x0fB02" );
-	if( rop == 0 ) {
-		asm_line.set( "XOR", "", "A", "A" );
+	if( is_lop ) {
+		this->info.assembler_list.add_label( "work_lop", "0xf570" );
+		if( rop == 0 ) {
+			asm_line.set( "XOR", "", "A", "A" );
+		}
+		else {
+			asm_line.set( "LD", "", "A", std::to_string( rop ) );
+		}
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_lop]", "A" );
+		this->info.assembler_list.body.push_back( asm_line );
 	}
 	else {
-		asm_line.set( "LD", "", "A", std::to_string( rop ) );
+		this->info.assembler_list.add_label( "work_logopr", "0x0fB02" );
+		if( rop == 0 ) {
+			asm_line.set( "XOR", "", "A", "A" );
+		}
+		else {
+			asm_line.set( "LD", "", "A", std::to_string( rop ) );
+		}
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_logopr]", "A" );
+		this->info.assembler_list.body.push_back( asm_line );
 	}
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_logopr]", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
 }

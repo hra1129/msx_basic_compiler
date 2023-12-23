@@ -20,26 +20,11 @@ WORK_ROMVER                     = 0X0002D
 BIOS_CHGMOD                     = 0X0005F
 BIOS_CHGMODP                    = 0X001B5
 BIOS_EXTROM                     = 0X0015F
-WORK_RG1SV                      = 0X0F3E0
-BIOS_WRTVDP                     = 0X00047
-WORK_CLIKSW                     = 0X0F3DB
-SUBROM_SETPAG                   = 0X013D
-WORK_DPPAGE                     = 0X0FAF5
-WORK_ACPAGE                     = 0X0FAF6
-BIOS_CLS                        = 0X000C3
-BLIB_SETSPRITE                  = 0X04042
-WORK_VALTYP                     = 0X0F663
-WORK_DAC                        = 0X0F7F6
-BIOS_VMOVFM                     = 0X02F08
-BIOS_NEG                        = 0X02E8D
-BIOS_FRCSNG                     = 0X0303A
-BIOS_FRCINT                     = 0X02F8A
-BLIB_PUTSPRITE                  = 0X04045
-BLIB_COLORSPRITE_STR            = 0X040A8
-BIOS_ERRHAND                    = 0X0406F
-BLIB_INKEY                      = 0X0402A
-BLIB_STRCMP                     = 0X04027
+WORK_BUF                        = 0X0F55E
+BLIB_BSAVE                      = 0X0406F
+BLIB_COPY_FILE_TO_FILE          = 0X040AB
 BIOS_NEWSTT                     = 0X04601
+BIOS_ERRHAND                    = 0X0406F
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
         DEFW        START_ADDRESS
@@ -87,7 +72,7 @@ LINE_100:
         LD          A, 7
         LD          [WORK_BDRCLR], A
         CALL        BIOS_CHGCLR
-        LD          HL, 5
+        LD          HL, 1
         LD          A, [WORK_ROMVER]
         OR          A, A
         LD          A, L
@@ -99,310 +84,73 @@ _PT0:
         CALL        BIOS_EXTROM
         EI          
 _PT1:
-        LD          A, 2
-        AND         A, 3
-        LD          L, A
-        LD          A, [WORK_RG1SV]
-        AND         A, 0XFC
-        OR          A, L
-        LD          B, A
-        LD          C, 1
-        CALL        BIOS_WRTVDP
-        XOR         A, A
-        LD          [work_cliksw], A
-LINE_120:
-        XOR         A, A
-        LD          [WORK_DPPAGE], A
-        XOR         A, A
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        BIOS_CLS
-        LD          HL, 0
-        PUSH        HL
+LINE_110:
         LD          HL, STR_1
-        POP         DE
-        LD          IX, BLIB_SETSPRITE
+        PUSH        HL
+        LD          HL, 32768
+        LD          [WORK_BUF + 50], HL
+        LD          HL, 36864
+        LD          [WORK_BUF + 52], HL
+        LD          HL, [WORK_BUF + 50]
+        LD          [WORK_BUF + 54], HL
+        POP         HL
+        LD          DE, WORK_BUF + 50
+        LD          IX, BLIB_BSAVE
+        CALL        CALL_BLIB
+LINE_120:
+        LD          HL, STR_2
+        PUSH        HL
+        LD          HL, 32768
+        LD          [WORK_BUF + 50], HL
+        LD          HL, 36864
+        LD          [WORK_BUF + 52], HL
+        LD          HL, [WORK_BUF + 50]
+        LD          [WORK_BUF + 54], HL
+        POP         HL
+        LD          DE, WORK_BUF + 50
+        LD          IX, BLIB_BSAVE
         CALL        CALL_BLIB
 LINE_130:
-        LD          HL, 0
+        LD          HL, STR_3
         PUSH        HL
-        PUSH        HL
-        LD          HL, 1
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          [WORK_DAC + 2], HL
-        CALL        BIOS_FRCSNG
-        CALL        BIOS_NEG
-        LD          HL, WORK_DAC
-        LD          DE, WORK_DAC
-        LD          BC, 4
-        LDIR        
-        LD          [WORK_DAC+4], BC
-        LD          [WORK_DAC+6], BC
-        LD          A, 8
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        PUSH        HL
-        LD          HL, 15
-        PUSH        HL
-        LD          HL, 0
-        LD          E, L
-        LD          D, H
+        LD          HL, 32768
+        LD          [WORK_BUF + 50], HL
+        LD          HL, 36864
+        LD          [WORK_BUF + 52], HL
+        LD          HL, [WORK_BUF + 50]
+        LD          [WORK_BUF + 54], HL
         POP         HL
-        LD          D, L
-        POP         HL
-        POP         BC
-        LD          B, C
-        LD          C, L
-        POP         HL
-        LD          A, L
-        LD          L, 7
-        LD          IX, BLIB_PUTSPRITE
+        LD          DE, WORK_BUF + 50
+        LD          IX, BLIB_BSAVE
         CALL        CALL_BLIB
 LINE_140:
-        XOR         A, A
-        LD          [WORK_DPPAGE], A
-        LD          A, 1
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        BIOS_CLS
-        LD          HL, 0
+        LD          HL, STR_4
         PUSH        HL
-        LD          HL, STR_2
-        POP         DE
-        LD          IX, BLIB_SETSPRITE
+        LD          HL, 32768
+        LD          [WORK_BUF + 50], HL
+        LD          HL, 36864
+        LD          [WORK_BUF + 52], HL
+        LD          HL, [WORK_BUF + 50]
+        LD          [WORK_BUF + 54], HL
+        POP         HL
+        LD          DE, WORK_BUF + 50
+        LD          IX, BLIB_BSAVE
         CALL        CALL_BLIB
 LINE_150:
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, 8
-        PUSH        HL
-        LD          HL, 1
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          [WORK_DAC + 2], HL
-        CALL        BIOS_FRCSNG
-        CALL        BIOS_NEG
-        LD          HL, WORK_DAC
-        LD          DE, WORK_DAC
-        LD          BC, 4
-        LDIR        
-        LD          [WORK_DAC+4], BC
-        LD          [WORK_DAC+6], BC
-        LD          A, 8
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        PUSH        HL
-        LD          HL, 12
-        PUSH        HL
-        LD          HL, 0
-        LD          E, L
-        LD          D, H
-        POP         HL
-        LD          D, L
-        POP         HL
-        POP         BC
-        LD          B, C
-        LD          C, L
-        POP         HL
-        LD          A, L
-        LD          L, 7
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
-LINE_160:
-        XOR         A, A
-        LD          [WORK_DPPAGE], A
-        LD          A, 2
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        BIOS_CLS
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, STR_3
-        POP         DE
-        LD          IX, BLIB_SETSPRITE
-        CALL        CALL_BLIB
-LINE_170:
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, 16
-        PUSH        HL
-        LD          HL, 1
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          [WORK_DAC + 2], HL
-        CALL        BIOS_FRCSNG
-        CALL        BIOS_NEG
-        LD          HL, WORK_DAC
-        LD          DE, WORK_DAC
-        LD          BC, 4
-        LDIR        
-        LD          [WORK_DAC+4], BC
-        LD          [WORK_DAC+6], BC
-        LD          A, 8
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        PUSH        HL
-        LD          HL, 13
-        PUSH        HL
-        LD          HL, 0
-        LD          E, L
-        LD          D, H
-        POP         HL
-        LD          D, L
-        POP         HL
-        POP         BC
-        LD          B, C
-        LD          C, L
-        POP         HL
-        LD          A, L
-        LD          L, 7
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
-LINE_180:
-        XOR         A, A
-        LD          [WORK_DPPAGE], A
-        LD          A, 3
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        BIOS_CLS
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, STR_4
-        POP         DE
-        LD          IX, BLIB_SETSPRITE
-        CALL        CALL_BLIB
-LINE_190:
-        LD          HL, 0
-        PUSH        HL
-        LD          HL, 24
-        PUSH        HL
-        LD          HL, 1
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          [WORK_DAC + 2], HL
-        CALL        BIOS_FRCSNG
-        CALL        BIOS_NEG
-        LD          HL, WORK_DAC
-        LD          DE, WORK_DAC
-        LD          BC, 4
-        LDIR        
-        LD          [WORK_DAC+4], BC
-        LD          [WORK_DAC+6], BC
-        LD          A, 8
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        PUSH        HL
-        LD          HL, 7
-        PUSH        HL
-        LD          HL, 0
-        LD          E, L
-        LD          D, H
-        POP         HL
-        LD          D, L
-        POP         HL
-        POP         BC
-        LD          B, C
-        LD          C, L
-        POP         HL
-        LD          A, L
-        LD          L, 7
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
-LINE_200:
-        LD          HL, 0
-        PUSH        HL
         LD          HL, STR_5
-        POP         DE
-        LD          A, E
-        PUSH        HL
-        LD          IX, BLIB_COLORSPRITE_STR
-        CALL        CALL_BLIB
-        POP         HL
-        CALL        FREE_STRING
-LINE_210:
-; 
-LINE_220:
-        XOR         A, A
-        LD          [WORK_DPPAGE], A
-        XOR         A, A
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        LINE_1000
-LINE_230:
-        LD          A, 1
-        LD          [WORK_DPPAGE], A
-        XOR         A, A
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        LINE_1000
-LINE_240:
-        LD          A, 2
-        LD          [WORK_DPPAGE], A
-        XOR         A, A
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        LINE_1000
-LINE_250:
-        LD          A, 3
-        LD          [WORK_DPPAGE], A
-        XOR         A, A
-        LD          [WORK_ACPAGE], A
-        LD          IX, SUBROM_SETPAG
-        CALL        BIOS_EXTROM
-        EI          
-        CALL        LINE_1000
-        JP          LINE_220
-LINE_1000:
-        LD          IX, BLIB_INKEY
-        CALL        CALL_BLIB
-        CALL        COPY_STRING
-        PUSH        HL
-        LD          HL, STR_0
-        POP         DE
-        EX          DE, HL
+        LD          DE, STR_6
         PUSH        HL
         PUSH        DE
-        LD          IX, BLIB_STRCMP
+        LD          BC, [HEAP_NEXT]
+        LD          [WORK_BUF + 0], BC
+        LD          BC, [HEAP_END]
+        LD          [WORK_BUF + 2], BC
+        LD          IX, BLIB_COPY_FILE_TO_FILE
         CALL        CALL_BLIB
         POP         HL
-        PUSH        AF
         CALL        FREE_STRING
-        POP         AF
         POP         HL
-        PUSH        AF
         CALL        FREE_STRING
-        POP         AF
-        LD          HL, 0
-        JR          NZ, _PT4
-        DEC         HL
-_PT4:
-        LD          A, L
-        OR          A, H
-        JP          Z, _PT3
-        JP          LINE_1000
-_PT3:
-_PT2:
-LINE_1010:
-        RET         
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -556,37 +304,6 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
-ALLOCATE_STRING:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [HEAP_END]
-        RST         0X20
-        JR          NC, _ALLOCATE_STRING_ERROR
-        LD          [HEAP_NEXT], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_ALLOCATE_STRING_ERROR:
-        LD          E, 7
-        JP          BIOS_ERRHAND
-COPY_STRING:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        ALLOCATE_STRING
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -629,15 +346,17 @@ H_ERRO_HANDLER:
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X20, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38
+        DEFB        0X0B, 0X44, 0X4D, 0X59, 0X30, 0X30, 0X30, 0X31, 0X2E, 0X42, 0X49, 0X4E
 STR_2:
-        DEFB        0X20, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31
+        DEFB        0X0B, 0X44, 0X4D, 0X59, 0X30, 0X30, 0X30, 0X32, 0X2E, 0X42, 0X49, 0X4E
 STR_3:
-        DEFB        0X20, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32
+        DEFB        0X0B, 0X44, 0X4D, 0X59, 0X30, 0X30, 0X30, 0X33, 0X2E, 0X42, 0X49, 0X4E
 STR_4:
-        DEFB        0X20, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X31, 0X32, 0X33
+        DEFB        0X0B, 0X44, 0X4D, 0X59, 0X30, 0X30, 0X30, 0X34, 0X2E, 0X42, 0X49, 0X4E
 STR_5:
-        DEFB        0X10, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B, 0X0A, 0X0B, 0X0F, 0X0B
+        DEFB        0X06, 0X44, 0X4D, 0X59, 0X2A, 0X2E, 0X2A
+STR_6:
+        DEFB        0X06, 0X48, 0X4F, 0X47, 0X2A, 0X2E, 0X2A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
