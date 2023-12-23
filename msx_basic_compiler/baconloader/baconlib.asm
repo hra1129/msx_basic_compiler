@@ -293,6 +293,8 @@ blib_entries::
 			jp		sub_colorsprite_str
 	blib_copy_file_to_file:
 			jp		sub_copy_file_to_file
+	blib_copy_array_to_file:
+			jp		sub_copy_array_to_file
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -2158,6 +2160,11 @@ sub_setup_fcb::
 			inc		hl
 			inc		de
 			djnz	copy_file_name_loop
+			; ピッタリ8文字の名前が指定されている場合に . があるかチェック
+			ld		a, [hl]
+			cp		a, '.'
+			jr		nz, copy_ext_name
+			inc		hl
 			jr		copy_ext_name
 			; ファイル名の残りをワイルドカードで埋める
 		copy_ext_name_skip_wildcard:
@@ -3652,6 +3659,74 @@ sub_copy_file_to_file::
 			ld		c, _SETDTA
 			call	bdos
 			ret
+			endscope
+
+; =============================================================================
+;	COPY <配列変数名> TO <ファイル名>
+;	input:
+;		HL .... 配列変数のアドレス
+;		DE .... ファイル名
+;		buffer_start .... 作業用バッファの先頭アドレス
+;		buffer_end ...... 作業用バッファの終了アドレス (ここは含まない)
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		配列変数の内容をファイルへ書き出す。
+;		配列変数のサイズ・次元数・要素数のフィールドは書き出さない。
+;		変数の値が格納されている領域のみ保存する。
+;		[HL] --> [size:2][次元数:1][要素数1:2][要素数2:2]...[実体]
+;		※ [フィールド名:バイト数]
+; =============================================================================
+			scope	sub_copy_array_to_file
+file_size		= buf
+array_data		= file_size + 2
+fcb				= array_data + 2
+
+sub_copy_array_to_file::
+			ei
+			push	de
+			; 配列変数のサイズフィールドのアドレスを得る
+			ld		a, [hl]
+			inc		hl
+			ld		h, [hl]
+			ld		l, a
+			; サイズ情報を得る
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			inc		hl
+			; 次元数を得る
+			ld		c, [hl]
+			inc		hl
+			ld		b, 0
+			; 要素数フィールドを読み飛ばす
+			add		hl, bc
+			add		hl, bc
+			; サイズも計算
+			ex		de, hl
+			dec		hl			; 次元数フィールド 1 の分
+			or		a, a
+			sbc		hl, bc
+			sbc		hl, bc
+			ld		[file_size], hl
+			ld		[array_data], de
+			; ファイルを開く
+			pop		hl			; ファイル名
+			ld		de, fcb
+			call	sub_fcreate
+			or		a, a
+			jp		nz, err_device_io
+			; ファイルへ書き出す
+			ld		bc, [file_size]
+			ld		de, [array_data]
+			ld		hl, fcb
+			call	sub_fwrite
+			; ファイルを閉じる
+			ld		de, fcb
+			ld		c, _FCLOSE
+			jp		bdos
 			endscope
 
 ; =============================================================================

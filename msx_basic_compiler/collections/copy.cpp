@@ -235,7 +235,23 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 				//	•ûŒü‚ÌŽw’è‚Í–³Ž‹‚·‚é
 				exp_direction.release();
+				p_info->assembler_list.activate_free_string();
+				p_info->assembler_list.add_label( "blib_copy_array_to_file", "0x040ae" );
 
+				asm_line.set( "EX", "", "DE", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "HL", variable.s_label );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "PUSH", "", "DE" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "IX", "blib_copy_array_to_file" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "call_blib" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "free_string" );
+				p_info->assembler_list.body.push_back( asm_line );
 			}
 			else {
 				p_info->errors.add( SYNTAX_ERROR, line_no );
