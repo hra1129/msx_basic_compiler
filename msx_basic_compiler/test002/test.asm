@@ -16,6 +16,13 @@ BIOS_ERRHAND_REDIM              = 0X0405E
 BIOS_UMULT                      = 0X0314A
 BIOS_ERRHAND                    = 0X0406F
 BLIB_COPY_ARRAY_TO_FILE         = 0X040AE
+BLIB_COPY_FILE_TO_ARRAY         = 0X040B1
+WORK_PRTFLG                     = 0X0F416
+BIOS_FOUT                       = 0X03425
+WORK_DAC                        = 0X0F7F6
+WORK_VALTYP                     = 0X0F663
+WORK_CSRX                       = 0X0F3DD
+WORK_LINLEN                     = 0X0F3B0
 BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
@@ -72,6 +79,35 @@ LINE_100:
         LD          B, H
         CALL        ALLOCATE_HEAP
         LD          [VARIA_A], HL
+        POP         BC
+        DEC         BC
+        DEC         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        LD          A, 1
+        LD          [HL], A
+        INC         HL
+        POP         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        LD          HL, [VARIA_B]
+        LD          A, L
+        OR          A, H
+        JP          NZ, BIOS_ERRHAND_REDIM
+        LD          HL, 127
+        INC         HL
+        PUSH        HL
+        ADD         HL, HL
+        LD          DE, 5
+        ADD         HL, DE
+        PUSH        HL
+        LD          C, L
+        LD          B, H
+        CALL        ALLOCATE_HEAP
+        LD          [VARIA_B], HL
         POP         BC
         DEC         BC
         DEC         BC
@@ -146,6 +182,81 @@ LINE_120:
         CALL        CALL_BLIB
         POP         HL
         CALL        FREE_STRING
+LINE_130:
+        LD          HL, STR_1
+        LD          DE, VARIA_B
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, BLIB_COPY_FILE_TO_ARRAY
+        CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
+LINE_140:
+        LD          HL, 0
+        LD          [VARI_I], HL
+        LD          HL, 127
+        LD          [SVARI_I_FOR_END], HL
+        LD          HL, 1
+        LD          [SVARI_I_FOR_STEP], HL
+        LD          HL, _PT5
+        LD          [SVARI_I_LABEL], HL
+        JR          _PT4
+_PT5:
+        LD          HL, [VARI_I]
+        LD          DE, [SVARI_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [VARI_I], HL
+        LD          A, D
+        LD          DE, [SVARI_I_FOR_END]
+        RLCA        
+        JR          C, _PT6
+        RST         0X20
+        JR          C, _PT7
+        JR          Z, _PT7
+        RET         NC
+_PT6:
+        RST         0X20
+        RET         C
+_PT7:
+        POP         HL
+_PT4:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, VARIA_B
+        LD          D, 1
+        LD          BC, 27
+        CALL        CHECK_ARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          HL, [VARI_I]
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        LD          [WORK_DAC + 2], HL
+        LD          A, 2
+        LD          [WORK_VALTYP], A
+        CALL        STR
+        LD          A, [WORK_LINLEN]
+        INC         A
+        INC         A
+        LD          B, A
+        LD          A, [WORK_CSRX]
+        ADD         A, [HL]
+        CP          A, B
+        JR          C, _PT8
+        PUSH        HL
+        LD          HL, STR_2
+        CALL        PUTS
+        POP         HL
+_PT8:
+        CALL        PUTS
+        LD          A, 32
+        RST         0X18
+        LD          HL, [SVARI_I_LABEL]
+        CALL        JP_HL
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -385,6 +496,34 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
+STR:
+        CALL        BIOS_FOUT
+FOUT_ADJUST:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_STR_LOOP:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _STR_LOOP_EXIT
+        INC         B
+        JR          _STR_LOOP
+_STR_LOOP_EXIT:
+        POP         HL
+        LD          [HL], B
+        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -433,6 +572,8 @@ STR_0:
         DEFB        0X00
 STR_1:
         DEFB        0X0C, 0X41, 0X52, 0X52, 0X41, 0X59, 0X31, 0X32, 0X38, 0X2E, 0X42, 0X49, 0X4E
+STR_2:
+        DEFB        0X02, 0X0D, 0X0A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -455,6 +596,8 @@ VARS_AREA_START:
 VARS_AREA_END:
 VARA_AREA_START:
 VARIA_A:
+        DEFW        0
+VARIA_B:
         DEFW        0
 VARA_AREA_END:
 VARSA_AREA_START:

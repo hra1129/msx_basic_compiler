@@ -155,12 +155,13 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			}
 			//	(3) COPY <ファイル名>[,<方向>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			//	★T.B.D.
+			return true;
 		}
-		else {
-			//	(1) COPY <ファイル名> TO <ファイル名>
-			p_info->assembler_list.add_label( "work_buf", "0x0F55E" );
-
+		//	TO 配列変数？
+		variable = p_info->variable_manager.get_array_info( p_info );
+		if( variable.s_name == "" ) {
 			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+				//	(1) COPY <ファイル名> TO <ファイル名>
 				p_info->assembler_list.activate_free_string();
 				//	方向の指定は無視する
 				exp_direction.release();
@@ -199,6 +200,30 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				p_info->errors.add( SYNTAX_ERROR, line_no );
 				return true;
 			}
+		}
+		else {
+			//	(2) COPY <ファイル名> TO <配列変数名>
+			p_info->assembler_list.activate_free_string();
+			//	方向の指定は無視する
+			exp_direction.release();
+			p_info->assembler_list.add_label( "blib_copy_file_to_array", "0x040b1" );
+
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", variable.s_label );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "EX", "", "DE", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "IX", "blib_copy_file_to_array" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "free_string" );
+			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
 	else {
