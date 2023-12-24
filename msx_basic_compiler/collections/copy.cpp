@@ -8,6 +8,150 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------t
+bool CCOPY::get_x1_y1_x2_y2( CCOMPILE_INFO *p_info ) {
+	CASSEMBLER_LINE asm_line;
+	CEXPRESSION exp;
+	int line_no = p_info->list.get_line_no();
+	bool is_step = false;
+
+	p_info->assembler_list.add_label( "work_sx", "0xf562" );
+	p_info->assembler_list.add_label( "work_sy", "0xf564" );
+	p_info->assembler_list.add_label( "work_nx", "0xf56A" );
+	p_info->assembler_list.add_label( "work_ny", "0xf56C" );
+	p_info->assembler_list.add_label( "work_acpage", "0x0faf6" );
+
+	//	(
+	p_info->list.p_position++;
+
+	//	X1
+	if( exp.compile( p_info ) ) {
+		asm_line.set( "LD", "", "[work_sx]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+	}
+	//	,
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	Y1
+	if( exp.compile( p_info ) ) {
+		asm_line.set( "LD", "", "[work_sy]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+	}
+	//	)
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")" ){
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	-
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "-" ){
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	STEP
+	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "STEP" ){
+		p_info->list.p_position++;
+		is_step = true;
+	}
+
+	//	(
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ){
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	X2
+	if( exp.compile( p_info ) ) {
+		if( !is_step ) {
+			asm_line.set( "LD", "", "DE", "[work_sx]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "OR", "", "A", "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "SBC", "", "HL", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "INC", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		asm_line.set( "LD", "", "[work_nx]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+	}
+	//	,
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	Y2
+	if( exp.compile( p_info ) ) {
+		if( !is_step ) {
+			asm_line.set( "LD", "", "DE", "[work_sy]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "OR", "", "A", "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "SBC", "", "HL", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "INC", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		asm_line.set( "LD", "", "[work_ny]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+	}
+	//	)
+	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")" ){
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	p_info->list.p_position++;
+
+	//	,
+	if( p_info->list.is_command_end() ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	if( p_info->list.p_position->s_word == "TO" ) {
+		//	ページの指定が省略されている場合
+		asm_line.set( "LD", "", "A", "[work_acpage]" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_sy + 1]", "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		p_info->list.p_position++;
+		return true;
+	}
+	if( p_info->list.p_position->s_word != "," ) {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return false;
+	}
+	if( exp.compile( p_info ) ) {
+		asm_line.set( "LD", "", "A", "L" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_sy + 1]", "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "TO" ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return false;
+		}
+		p_info->list.p_position++;
+		return true;
+	}
+	p_info->errors.add( SYNTAX_ERROR, line_no );
+	return false;
+}
+
+// --------------------------------------------------------------------t
 bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -32,6 +176,7 @@ bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
+	p_info->list.p_position++;
 
 	//	Y3
 	if( exp.compile( p_info ) ) {
@@ -44,6 +189,7 @@ bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
+	p_info->list.p_position++;
 
 	if( p_info->list.is_command_end() ) {
 		//	転送先：描画ページ
@@ -111,7 +257,35 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "(" ) {
 		//	( X1, Y1 )-[STEP]( X2, Y2 ), [ページ] だった場合
-		//	★T.B.D.
+		if( !this->get_x1_y1_x2_y2( p_info ) ) {
+			return true;
+		}
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( p_info->list.p_position->s_word == "(" ){
+			//	(6) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+			if( !this->get_x3_y3( p_info ) ) {
+				//	エラーが発生したので何もせずに戻る
+				return true;
+			}
+			p_info->assembler_list.add_label( "blib_copy_pos_to_pos", "0x040b4" );
+			asm_line.set( "LD", "", "IX", "blib_copy_pos_to_pos" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
+			return true;
+		}
+		variable = p_info->variable_manager.get_array_info( p_info );
+		if( variable.s_name == "" ) {
+			//	(7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ファイル名>
+			//	★T.B.D.
+		}
+		else {
+			//	(8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <配列変数名>
+			//	★T.B.D.
+		}
 		return true;
 	}
 
@@ -149,11 +323,11 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( p_info->list.p_position->s_word == "(" ) {
+			//	(3) COPY <ファイル名>[,<方向>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			if( !this->get_x3_y3( p_info ) ) {
 				//	エラーが発生したので何もせずに戻る
 				return true;
 			}
-			//	(3) COPY <ファイル名>[,<方向>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			//	★T.B.D.
 			return true;
 		}
@@ -254,6 +428,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			//	(5) COPY <配列変数名>[,<方向>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+			//	★T.B.D.
 		}
 		else {
 			//	(4) COPY <配列変数名> TO <ファイル名>
