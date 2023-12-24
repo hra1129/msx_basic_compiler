@@ -309,6 +309,12 @@ blib_entries::
 			jp		sub_copy_file_to_array
 	blib_copy_pos_to_pos:
 			jp		sub_copy_pos_to_pos
+	blib_copy_pos_to_array:
+			jp		sub_copy_pos_to_array
+	blib_copy_array_to_pos:
+			jp		sub_copy_array_to_pos
+	blib_umul:
+			jp		sub_umul
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -3742,29 +3748,15 @@ sub_copy_array_to_file::
 			endscope
 
 ; =============================================================================
-;	COPY <ファイル名> TO <配列変数名>
+;	配列変数の実体のアドレスとサイズを計算
 ;	input:
 ;		HL .... 配列変数のアドレス
-;		DE .... ファイル名
 ;	output:
-;		none
-;	break:
-;		all
-;	comment:
-;		ファイルを読み出して配列変数へ読み出す。
-;		配列変数のサイズ・次元数・要素数のフィールドは変更しない。
-;		配列変数より大きなファイルが指定されても、配列変数のサイズ分しか読まない。
-;		[HL] --> [size:2][次元数:1][要素数1:2][要素数2:2]...[実体]
-;		※ [フィールド名:バイト数]
+;		HL .... 実体のサイズ
+;		DE .... 実体のアドレス
 ; =============================================================================
-			scope	sub_copy_file_to_array
-file_size		= buf
-array_data		= file_size + 2
-fcb				= array_data + 2
-
-sub_copy_file_to_array::
-			ei
-			push	de
+			scope	sub_calc_array
+sub_calc_array::
 			; 配列変数のサイズフィールドのアドレスを得る
 			ld		a, [hl]
 			inc		hl
@@ -3788,6 +3780,34 @@ sub_copy_file_to_array::
 			or		a, a
 			sbc		hl, bc
 			sbc		hl, bc
+			ret
+			endscope
+
+; =============================================================================
+;	COPY <ファイル名> TO <配列変数名>
+;	input:
+;		HL .... 配列変数のアドレス
+;		DE .... ファイル名
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイルを読み出して配列変数へ読み出す。
+;		配列変数のサイズ・次元数・要素数のフィールドは変更しない。
+;		配列変数より大きなファイルが指定されても、配列変数のサイズ分しか読まない。
+;		[HL] --> [size:2][次元数:1][要素数1:2][要素数2:2]...[実体]
+;		※ [フィールド名:バイト数]
+; =============================================================================
+			scope	sub_copy_file_to_array
+file_size		= buf
+array_data		= file_size + 2
+fcb				= array_data + 2
+
+sub_copy_file_to_array::
+			ei
+			push	de
+			call	sub_calc_array
 			ld		[file_size], hl
 			ld		[array_data], de
 			; ファイルを開く
@@ -3974,6 +3994,230 @@ sub_copy_pos_to_pos::
 			ld			hl, BBT_SX
 			otir
 			ei
+			ret
+			endscope
+
+; =============================================================================
+;	COPY (X1,Y1)-STEP(X2,Y2),SPAGE TO ARRAY
+;	input:
+;		HL ................ 配列変数のアドレス
+;		SX(0xF562:2) ...... X1
+;		SY(0xF564:2) ...... Y1, SPAGE
+;		DX(0xF566:2) ...... X3
+;		DY(0xF568:2) ...... Y3, DPAGE
+;		NX(0xF56A:2) ...... X2
+;		NY(0xF56C:2) ...... Y2
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ARG は、NX, NY の符号から自動設定される
+; =============================================================================
+			scope	sub_copy_pos_to_array
+array_address	= BBT_LOGOP + 1
+array_size		= array_address + 2
+pixel_size		= array_size + 2
+sub_copy_pos_to_array::
+			; 配列のアドレス・サイズを計算
+			call		sub_calc_array
+			ld			[array_size], hl
+			ld			[array_address], de
+			; ARGを計算 (NX, NY の符号の処理)
+			call		sub_set_arg
+			; サイズを計算 (pixel count)
+			ld			bc, [BBT_NX]
+			ld			de, [BBT_NY]
+			call		sub_umul
+			ld			[pixel_size], hl
+			; サイズを比較
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _adjust_end
+			ccf
+			inc			hl						; 小数部繰り上げ
+			rr			h
+			rr			l
+			rrca
+			jr			c, _adjust_end
+			inc			hl						; 小数部繰り上げ
+			or			a, a
+			rr			h
+			rr			l
+		_adjust_end:
+			ld			de, [array_size]
+			ex			de, hl
+			or			a, a
+			ld			bc, 4
+			sbc			hl, bc					; サイズ情報分
+			jp			c, err_illegal_function_call		; 4byteに満たない場合エラー
+			rst			0x20					; CP HL, DE  : 配列サイズ, 画素数(byte換算)
+			jp			c, err_illegal_function_call		; 配列のサイズの方が小さい場合はエラー
+			push		de						; 画素数(byte換算) を保存
+			; VDP Command をセット
+			ld			a, 0b10100000			; LMCM
+			ld			[BBT_LOGOP], a
+			call		sub_wait_vdp_command
+			; R#17 = 32
+			ld			a, 32
+			di
+			out			[vdpport1], a
+			ld			a, 0x80 | 17
+			out			[vdpport1], a
+			ld			b, 46 - 32 + 1
+			inc			c
+			inc			c
+			ld			hl, BBT_SX
+			otir
+			ei
+			; サイズ情報を記録
+			ld			hl, [array_address]
+			ld			de, [BBT_NX]
+			ld			[hl], e
+			inc			hl
+			ld			[hl], d
+			inc			hl
+			ld			de, [BBT_NX]
+			ld			[hl], e
+			inc			hl
+			ld			[hl], d
+			inc			hl
+			; 画面モードで分岐
+			pop			de					; 画素数(byte換算) を復帰
+			ld			c, vdpport1
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _screen8over
+			rrca
+			jr			nc, _screen6
+		_screen5or7:
+			push		hl
+			call		_get_one
+			add			a, a
+			add			a, a
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		_get_one
+			or			a, l
+			pop			hl
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen5or7
+			jr			_finish
+		_screen8over:
+			call		_get_one
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen8over
+			jr			_finish
+		_screen6:
+			push		hl
+			call		_get_one
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		_get_one
+			or			a, l
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		_get_one
+			or			a, l
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		_get_one
+			or			a, l
+			add			a, a
+			add			a, a
+			pop			hl
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen6
+		_finish:
+			ld			a, 0
+			di
+			out			[c], a
+			ld			a, 0x80 | 46
+			out			[c], a
+			ei
+			ret
+			; TRビットや CEビットのチェックは行わない。VDPの方が速い。
+		_get_one:
+			ld			a, 7
+			di
+			out			[c], a
+			ld			a, 0x8F
+			out			[c], a
+			in			b, [c]
+			xor			a, a
+			out			[c], a
+			ld			a, 0x8F
+			out			[c], a
+			ei
+			ld			a, b
+			ret
+			endscope
+
+; =============================================================================
+;	COPY ARRAY,DIR TO (X3,Y3), DPAGE,LOP
+;	input:
+;		HL ................ 配列変数のアドレス
+;		DX(0xF566:2) ...... X3
+;		DY(0xF568:2) ...... Y3, DPAGE
+;		ARG(0xF56F,1) ..... DIR
+;		LOGOP(0xF570:1) ... LOP
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope		sub_copy_array_to_pos
+sub_copy_array_to_pos::
+			ret
+			endscope
+
+; =============================================================================
+;	UMUL  HL = BC * DE
+;	input:
+;		BC ..... 掛けられる数
+;		DE ..... 掛ける数
+;	output:
+;		HL ..... BC * DE
+;	break:
+;		all
+;	comment:
+;		桁あふれは起こらない値が設定されている前提
+; =============================================================================
+			scope	sub_umul
+sub_umul::
+			xor		a, a
+			ld		l, a
+			ld		h, a
+		loop:
+			rr		d
+			rr		e
+			jr		nc, skip_add
+			add		hl, bc
+			or		a, a
+		skip_add:
+			rl		c
+			rl		b
+			ld		a, d
+			or		e
+			jr		nz, loop
 			ret
 			endscope
 
