@@ -109,6 +109,16 @@ rg25sav		:= 0xFFFA
 rg26sav		:= 0xFFFB
 rg27sav		:= 0xFFFC
 
+BBT_SX		:= 0xF562
+BBT_SY		:= 0xF564
+BBT_DX		:= 0xF566
+BBT_DY		:= 0xF568
+BBT_NX		:= 0xF56A
+BBT_NY		:= 0xF56C
+BBT_CLR		:= 0xF56E
+BBT_ARG		:= 0xF56F
+BBT_LOGOP	:= 0xF570
+
 ; BDOS function call
 _TERM0		:= 0x00
 _CONIN		:= 0x01
@@ -297,6 +307,8 @@ blib_entries::
 			jp		sub_copy_array_to_file
 	blib_copy_file_to_array:
 			jp		sub_copy_file_to_array
+	blib_copy_pos_to_pos:
+			jp		sub_copy_pos_to_pos
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -3793,6 +3805,176 @@ sub_copy_file_to_array::
 			ld		de, fcb
 			ld		c, _FCLOSE
 			jp		bdos
+			endscope
+
+; =============================================================================
+;	ARGの計算
+;	input:
+;		NX(0xF56A:2) ...... X2
+;		NY(0xF56C:2) ...... Y2
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_set_arg
+sub_set_arg::
+			ld		b, 0
+			; NY の方向判定
+			ld		hl, [BBT_NY]
+			ld		a, h
+			rlca
+			jr		nc, skip1
+			inc		b
+			inc		b
+			xor		a, a
+			ld		e, a
+			ld		d, a
+			ex		de, hl
+			sbc		hl, de
+			ld		[BBT_NY], hl
+		skip1:
+			; NX の方向判定
+			ld		hl, [BBT_NX]
+			ld		a, h
+			rlca
+			jr		nc, skip2
+			inc		b
+			xor		a, a
+			ld		e, a
+			ld		d, a
+			ex		de, hl
+			sbc		hl, de
+			ld		[BBT_NX], hl
+		skip2:
+			ld		a, b
+			rlca
+			rlca
+			ld		[BBT_ARG], a
+			ret
+			endscope
+
+; =============================================================================
+;	VDP COMMANDの選択
+;	input:
+;		SX(0xF562:2) ...... X1
+;		NX(0xF56A:2) ...... X2
+;		DX(0xF566:2) ...... X3
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_set_command
+sub_set_command::
+			ld			a, [BBT_LOGOP]
+			or			a, a
+			jr			z, _set_command
+			; TPSET ではないので、常に論理転送(LMMM)
+	_lmmm:
+			ld			a, 0x90
+			ld			[BBT_LOGOP], a
+			ret
+	_set_command:
+			; SCREEN5, 7 は 0b00000001		0101 0111
+			; SCREEN6 は    0b00000011		0110
+			; SCREEN8 は    0b00000000		1000
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _hmmm			; SCREEN8以上は HMMM
+			rrca
+			ld			a, 3				; SCREEN6
+			jr			nc, _skip
+			rrca
+	_skip:
+			ld			b, a
+			ld			hl, BBT_SX
+			ld			a, [hl]
+			inc			hl
+			inc			hl
+			or			a, [hl]
+			inc			hl
+			inc			hl
+			or			a, [hl]
+			and			a, b
+			jr			nz, _lmmm
+	_hmmm:
+			ld			a, 0xD0
+			ld			[BBT_LOGOP], a
+			ret
+			endscope
+
+; =============================================================================
+;	Wait VDP Command
+;	input:
+;		none
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		VDPコマンドが終わるまで待つ
+; =============================================================================
+			scope	sub_wait_vdp_command
+sub_wait_vdp_command::
+			ld			bc, 0x8F00 | vdpport1
+			; R#15 = 2
+	_loop:
+			ld			a, 2
+			di
+			out			[c], a
+			out			[c], b
+			in			a, [c]
+			ld			d, a
+			; R#15 = 0
+			xor			a, a
+			out			[c], a
+			out			[c], b
+			ei
+			rrc			d
+			ret			nc
+			jr			_loop
+			endscope
+
+; =============================================================================
+;	COPY (X1,Y1)-STEP(X2,Y2),SPAGE TO (X3,Y3),DPAGE,LOP
+;	input:
+;		SX(0xF562:2) ...... X1
+;		SY(0xF564:2) ...... Y1, SPAGE
+;		DX(0xF566:2) ...... X3
+;		DY(0xF568:2) ...... Y3, DPAGE
+;		NX(0xF56A:2) ...... X2
+;		NY(0xF56C:2) ...... Y2
+;		LOGOP(0xF570:1) ... LOP
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ARG は、NX, NY の符号から自動設定される
+; =============================================================================
+			scope	sub_copy_pos_to_pos
+sub_copy_pos_to_pos::
+			call		sub_set_arg
+			call		sub_set_command
+			call		sub_wait_vdp_command
+			; R#17 = 32
+			ld			a, 32
+			di
+			out			[vdpport1], a
+			ld			a, 0x80 | 17
+			out			[vdpport1], a
+			ld			b, 46 - 32 + 1
+			inc			c
+			inc			c
+			ld			hl, BBT_SX
+			otir
+			ei
+			ret
 			endscope
 
 ; =============================================================================

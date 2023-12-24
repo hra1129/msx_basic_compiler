@@ -10,6 +10,7 @@
 
 class CCOPY: public CCOMPILER_CONTAINER {
 private:
+	bool get_x1_y1_x2_y2( CCOMPILE_INFO *p_info );
 	bool get_x3_y3( CCOMPILE_INFO *p_info );
 public:
 	bool exec( CCOMPILE_INFO *p_info );
