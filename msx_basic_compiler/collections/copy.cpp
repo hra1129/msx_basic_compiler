@@ -284,7 +284,14 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		}
 		else {
 			//	(8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <”z—ñ•Ï”–¼>
-			//	šT.B.D.
+			asm_line.set( "LD", "", "HL", variable.s_label );
+			p_info->assembler_list.body.push_back( asm_line );
+			p_info->assembler_list.add_label( "blib_copy_pos_to_array", "0x040b7" );
+			asm_line.set( "LD", "", "IX", "blib_copy_pos_to_array" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
+			return true;
 		}
 		return true;
 	}
