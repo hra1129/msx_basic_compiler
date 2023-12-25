@@ -35,6 +35,11 @@ WORK_NX                         = 0XF56A
 WORK_NY                         = 0XF56C
 WORK_ACPAGE                     = 0X0FAF6
 BLIB_COPY_POS_TO_ARRAY          = 0X040B7
+WORK_DX                         = 0XF566
+WORK_DY                         = 0XF568
+WORK_LOP                        = 0XF570
+BLIB_COPY_ARRAY_TO_POS          = 0X040BA
+BLIB_INPUT                      = 0X0407E
 BLIB_WIDTH                      = 0X0403C
 WORK_PRTFLG                     = 0X0F416
 BIOS_FOUT                       = 0X03425
@@ -193,6 +198,122 @@ LINE_130:
         LD          IX, BLIB_COPY_POS_TO_ARRAY
         CALL        CALL_BLIB
 LINE_140:
+        LD          HL, 32
+        LD          [WORK_DX], HL
+        LD          HL, 0
+        LD          [WORK_DY], HL
+        LD          A, [WORK_ACPAGE]
+        LD          [WORK_DY + 1], A
+        XOR         A, A
+        LD          [WORK_LOP], A
+        LD          A, 4
+        LD          HL, VARIA_CH
+        LD          IX, BLIB_COPY_ARRAY_TO_POS
+        CALL        CALL_BLIB
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+LINE_150:
+        LD          HL, 32
+        LD          [WORK_DX], HL
+        LD          HL, 0
+        LD          [WORK_DY], HL
+        LD          A, [WORK_ACPAGE]
+        LD          [WORK_DY + 1], A
+        XOR         A, A
+        LD          [WORK_LOP], A
+        LD          A, 5
+        LD          HL, VARIA_CH
+        LD          IX, BLIB_COPY_ARRAY_TO_POS
+        CALL        CALL_BLIB
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+LINE_160:
+        LD          HL, 32
+        LD          [WORK_DX], HL
+        LD          HL, 0
+        LD          [WORK_DY], HL
+        LD          A, [WORK_ACPAGE]
+        LD          [WORK_DY + 1], A
+        XOR         A, A
+        LD          [WORK_LOP], A
+        LD          A, 6
+        LD          HL, VARIA_CH
+        LD          IX, BLIB_COPY_ARRAY_TO_POS
+        CALL        CALL_BLIB
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+LINE_170:
+        LD          HL, 32
+        LD          [WORK_DX], HL
+        LD          HL, 0
+        LD          [WORK_DY], HL
+        LD          A, [WORK_ACPAGE]
+        LD          [WORK_DY + 1], A
+        XOR         A, A
+        LD          [WORK_LOP], A
+        LD          A, 7
+        LD          HL, VARIA_CH
+        LD          IX, BLIB_COPY_ARRAY_TO_POS
+        CALL        CALL_BLIB
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+LINE_180:
         LD          HL, 0
         LD          A, [WORK_ROMVER]
         OR          A, A
@@ -208,7 +329,7 @@ _PT3:
         LD          HL, 80
         LD          IX, BLIB_WIDTH
         CALL        CALL_BLIB
-LINE_150:
+LINE_290:
         LD          HL, 2
         LD          [VARI_I], HL
         LD          HL, SVARI_I_FOR_END
@@ -334,98 +455,6 @@ ALLOCATE_HEAP:
 _ALLOCATE_HEAP_ERROR:
         LD          E, 7
         JP          BIOS_ERRHAND
-PUTS:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_PUTS_LOOP:
-        INC         HL
-        LD          A, [HL]
-        RST         0X18
-        DJNZ        _PUTS_LOOP
-        RET         
-CHECK_ARRAY:
-        LD          A, [HL]
-        INC         HL
-        OR          A, [HL]
-        DEC         HL
-        RET         NZ
-        PUSH        DE
-        PUSH        HL
-        PUSH        BC
-        CALL        ALLOCATE_HEAP
-        POP         BC
-        POP         DE
-        POP         AF
-        EX          DE, HL
-        PUSH        HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        EX          DE, HL
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          [HL], A
-        INC         HL
-        LD          B, A
-        LD          DE, 11
-_CHECK_ARRAY_LOOP:
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
-        DJNZ        _CHECK_ARRAY_LOOP
-        POP         HL
-        RET         
-CALC_ARRAY_TOP:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        INC         HL
-        INC         HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, 0
-        ADD         HL, DE
-        ADD         HL, DE
-        LD          A, E
-        POP         DE
-        PUSH        HL
-        JR          _CALC_ARRAY_TOP_L2
-_CALC_ARRAY_TOP_L1:
-        DEC         HL
-        LD          B, [HL]
-        DEC         HL
-        LD          C, [HL]
-        PUSH        BC
-_CALC_ARRAY_TOP_L2:
-        DEC         A
-        JR          NZ, _CALC_ARRAY_TOP_L1
-        PUSH        DE
-        RET         
-STR:
-        CALL        BIOS_FOUT
-FOUT_ADJUST:
-        DEC         HL
-        PUSH        HL
-        XOR         A, A
-        LD          B, A
-_STR_LOOP:
-        INC         HL
-        CP          A, [HL]
-        JR          Z, _STR_LOOP_EXIT
-        INC         B
-        JR          _STR_LOOP
-_STR_LOOP_EXIT:
-        POP         HL
-        LD          [HL], B
-        RET         
 ALLOCATE_STRING:
         LD          HL, [HEAP_NEXT]
         PUSH        HL
@@ -444,19 +473,6 @@ ALLOCATE_STRING:
 _ALLOCATE_STRING_ERROR:
         LD          E, 7
         JP          BIOS_ERRHAND
-COPY_STRING:
-        LD          A, [HL]
-        PUSH        HL
-        CALL        ALLOCATE_STRING
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        LDIR        
-        POP         HL
-        RET         
 FREE_STRING:
         LD          DE, HEAP_START
         RST         0X20
@@ -568,6 +584,111 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
+CHECK_ARRAY:
+        LD          A, [HL]
+        INC         HL
+        OR          A, [HL]
+        DEC         HL
+        RET         NZ
+        PUSH        DE
+        PUSH        HL
+        PUSH        BC
+        CALL        ALLOCATE_HEAP
+        POP         BC
+        POP         DE
+        POP         AF
+        EX          DE, HL
+        PUSH        HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        EX          DE, HL
+        DEC         BC
+        DEC         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        LD          [HL], A
+        INC         HL
+        LD          B, A
+        LD          DE, 11
+_CHECK_ARRAY_LOOP:
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        DJNZ        _CHECK_ARRAY_LOOP
+        POP         HL
+        RET         
+CALC_ARRAY_TOP:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        INC         HL
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, 0
+        ADD         HL, DE
+        ADD         HL, DE
+        LD          A, E
+        POP         DE
+        PUSH        HL
+        JR          _CALC_ARRAY_TOP_L2
+_CALC_ARRAY_TOP_L1:
+        DEC         HL
+        LD          B, [HL]
+        DEC         HL
+        LD          C, [HL]
+        PUSH        BC
+_CALC_ARRAY_TOP_L2:
+        DEC         A
+        JR          NZ, _CALC_ARRAY_TOP_L1
+        PUSH        DE
+        RET         
+STR:
+        CALL        BIOS_FOUT
+FOUT_ADJUST:
+        DEC         HL
+        PUSH        HL
+        XOR         A, A
+        LD          B, A
+_STR_LOOP:
+        INC         HL
+        CP          A, [HL]
+        JR          Z, _STR_LOOP_EXIT
+        INC         B
+        JR          _STR_LOOP
+_STR_LOOP_EXIT:
+        POP         HL
+        LD          [HL], B
+        RET         
+COPY_STRING:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        ALLOCATE_STRING
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -585,6 +706,8 @@ PROGRAM_RUN:
         LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
         LDIR        
+        LD          HL, STR_0
+        LD          [VARS_AREA_START], HL
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -637,6 +760,8 @@ VARI_S:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
+VARS_I:
+        DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 VARIA_CH:

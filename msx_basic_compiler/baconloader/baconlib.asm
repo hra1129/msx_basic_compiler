@@ -4173,19 +4173,251 @@ sub_copy_pos_to_array::
 ;	COPY ARRAY,DIR TO (X3,Y3), DPAGE,LOP
 ;	input:
 ;		HL ................ 配列変数のアドレス
+;		A ................. DIR
 ;		DX(0xF566:2) ...... X3
 ;		DY(0xF568:2) ...... Y3, DPAGE
-;		ARG(0xF56F,1) ..... DIR
 ;		LOGOP(0xF570:1) ... LOP
 ;	output:
 ;		none
 ;	break:
 ;		all
 ;	comment:
-;		none
+;		DIR
+;			0: 始点(DX, DY)
+;			1: 始点(DX, DY) 左右反転
+;			2: 始点(DX, DY) 上下反転
+;			3: 始点(DX, DY) 上下左右反転
+;			4: 始点(DX, DY)
+;			5: 始点(DX+NX-1,DY) 左右反転
+;			6: 始点(DX,DY+NY-1) 上下反転
+;			7: 始点(DX+NX-1,DY+NY-1) 上下左右反転
 ; =============================================================================
 			scope		sub_copy_array_to_pos
+array_size		= BBT_LOGOP + 1
+array_address	= array_size + 2
+
 sub_copy_array_to_pos::
+			; 配列のアドレス・サイズを計算
+			ld			[BBT_ARG], a
+			call		sub_calc_array
+			ld			[array_size], hl
+			ld			[array_address], de
+			; NX, NY を設定
+			ex			de, hl
+			ld			c, [hl]
+			inc			hl
+			ld			b, [hl]
+			inc			hl
+			ld			[BBT_NX], bc
+			ld			e, [hl]
+			inc			hl
+			ld			d, [hl]
+			inc			hl
+			ld			[BBT_NY], de
+			push		hl
+			call		sub_umul
+			ld			c, l
+			ld			b, h				; BC = 画素数
+			ld			a, [BBT_ARG]
+			call		sub_adjust_dir
+			pop			hl
+			; コマンド設定
+			ld			a, [BBT_LOGOP]
+			or			a, 0b1011_0000		; LMMC
+			ld			[BBT_LOGOP], a
+			; BPP
+			dec			bc
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _screen8over
+			rrca
+			jr			c, _screen5or7
+		_screen6:
+			ld			d, [hl]
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			ld			[BBT_CLR], a
+			call		_run_command
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			jr			_screen6_start
+		_screen6_loop:
+			ld			d, [hl]
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+		_screen6_start:
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen6_loop
+			jr			_finish
+
+		_screen5or7:
+			ld			a, [hl]
+			rlca
+			rlca
+			rlca
+			rlca
+			ld			[BBT_CLR], a
+			call		_run_command
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			jr			_screen5or7_start
+		_screen5or7_loop:
+			ld			a, [hl]
+			rlca
+			rlca
+			rlca
+			rlca
+			out			[vdpport3], a
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+		_screen5or7_start:
+			ld			a, [hl]
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen5or7_loop
+		_finish:
+			ld			a, 0
+			di
+			out			[c], a
+			ld			a, 0x80 | 46
+			out			[c], a
+			ei
+			ret
+
+		_screen8over:
+			ld			a, [hl]
+			inc			hl
+			ld			[BBT_CLR], a
+			call		_run_command
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+		_screen8_loop:
+			ld			a, [hl]
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen8_loop
+			jr			_finish
+
+		_run_command:
+			; R#17 = 36 (オートインクリメント)
+			push		hl
+			push		bc
+			ld			a, 36
+			di
+			out			[vdpport1], a
+			ld			a, 0x80 | 17
+			out			[vdpport1], a
+			ld			b, 46 - 36 + 1
+			ld			c, vdpport3
+			ld			hl, BBT_DX
+			otir
+			; R#17 = 44 (非オートインクリメント)
+			ld			a, 0x80 | 44
+			out			[vdpport1], a
+			ld			a, 0x80 | 17
+			out			[vdpport1], a
+			ei
+			pop			bc
+			pop			hl
+			ret
+			endscope
+
+; =============================================================================
+;	DIR に対応した ARG の設定と、DX, DY の位置調整
+;	input:
+;		A ................. DIR
+;		DX(0xF566:2) ...... X3
+;		DY(0xF568:2) ...... Y3, DPAGE
+;		NX(0xF56A:2) ...... X2
+;		NY(0xF56C:2) ...... Y2
+;	output:
+;		none
+;	break:
+;		AF, DE, HL
+;	comment:
+;		DIR
+;			0: 始点(DX, DY)
+;			1: 始点(DX, DY) 左右反転
+;			2: 始点(DX, DY) 上下反転
+;			3: 始点(DX, DY) 上下左右反転
+;			4: 始点(DX, DY)
+;			5: 始点(DX+NX-1,DY) 左右反転
+;			6: 始点(DX,DY+NY-1) 上下反転
+;			7: 始点(DX+NX-1,DY+NY-1) 上下左右反転
+; =============================================================================
+			scope		sub_adjust_dir
+sub_adjust_dir::
+			; DIR に応じて微調整
+			bit			2, a
+			jr			z, _skip_adjust
+			; 水平方向の微調整
+		_adjust_x:
+			bit			0, a
+			jr			z, _adjust_y
+			ld			hl, [BBT_DX]
+			ld			de, [BBT_NX]
+			add			hl, de
+			dec			hl
+			ld			[BBT_DX], hl
+		_adjust_y:
+			bit			1, a
+			jr			z, _skip_adjust
+			ld			hl, [BBT_DY]
+			ld			de, [BBT_NY]
+			add			hl, de
+			dec			hl
+			ld			[BBT_DY], hl
+		_skip_adjust:
+			rlca
+			rlca
+			and			a, 0b0000_1100
+			ld			[BBT_ARG], a
 			ret
 			endscope
 
@@ -4203,17 +4435,14 @@ sub_copy_array_to_pos::
 ; =============================================================================
 			scope	sub_umul
 sub_umul::
-			xor		a, a
-			ld		l, a
-			ld		h, a
+			ld		hl, 0
 		loop:
-			rr		d
+			srl		d
 			rr		e
 			jr		nc, skip_add
 			add		hl, bc
-			or		a, a
 		skip_add:
-			rl		c
+			sla		c
 			rl		b
 			ld		a, d
 			or		e

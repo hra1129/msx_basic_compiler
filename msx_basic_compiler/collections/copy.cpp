@@ -435,7 +435,16 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			//	(5) COPY <配列変数名>[,<方向>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
-			//	★T.B.D.
+			p_info->assembler_list.add_label( "blib_copy_array_to_pos", "0x040ba" );
+			exp_direction.compile( p_info, CEXPRESSION_TYPE::INTEGER );
+			asm_line.set( "LD", "", "A", "L" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", variable.s_label );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "IX", "blib_copy_array_to_pos" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
 			//	(4) COPY <配列変数名> TO <ファイル名>
