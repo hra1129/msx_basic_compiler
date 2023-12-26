@@ -1816,6 +1816,38 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p_next = p + 1;
 		}
 	}
+
+	//	LD   HL, constant1
+	//	LD   [memory1], HL
+	//	LD   HL, constant1
+	//	LD   [memory2], HL
+	//	↓
+	//	LD   HL, constant1
+	//	LD   [memory1], HL
+	//	LD   [memory2], HL
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			std::string s_reg = p->operand1.s_value;
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() || 
+				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != s_reg ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || 
+				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != s_reg || p_next->operand2.type != COPERAND_TYPE::CONSTANT || p_next->operand2.s_value != p->operand2.s_value ) {
+				continue;
+			}
+			p_next = p_next + 1;
+			if( p_next == this->info.assembler_list.body.end() || 
+				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != s_reg ) {
+				continue;
+			}
+			//	マッチしたので置換
+			p_next = p + 2;
+			this->info.assembler_list.body.erase( p_next );	//	LD   HL, constant1
+		}
+	}
 }
 
 // --------------------------------------------------------------------

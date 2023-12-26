@@ -178,7 +178,6 @@ LINE_120:
 LINE_130:
         LD          HL, 0
         LD          [WORK_SX], HL
-        LD          HL, 0
         LD          [WORK_SY], HL
         LD          HL, 31
         LD          DE, [WORK_SX]
