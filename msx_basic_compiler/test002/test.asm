@@ -37,8 +37,9 @@ WORK_ARG                        = 0X0F847
 BIOS_DECMUL                     = 0X027E6
 BIOS_FRCINT                     = 0X02F8A
 WORK_LOGOPR                     = 0X0FB02
-BIOS_NEWSTT                     = 0X04601
 BIOS_ERRHAND                    = 0X0406F
+BLIB_INPUT                      = 0X0407E
+BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
         DEFW        START_ADDRESS
@@ -277,21 +278,25 @@ LINE_80:
         LD          HL, [SVARD_I_LABEL]
         CALL        JP_HL
 LINE_90:
-        JP          LINE_90
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
-        DI          
-        LD          HL, [HEAP_END]
-        LD          DE, HEAP_START
-        OR          A, A
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        LD          HL, HEAP_START
-        LD          DE, HEAP_START + 1
-        LD          [HL], 0
-        LDIR        
         LD          SP, [WORK_HIMEM]
         LD          HL, _BASIC_END
         CALL        BIOS_NEWSTT
@@ -340,6 +345,135 @@ LD_ARG_DOUBLE_REAL:
         LD          BC, 8
         LDIR        
         RET         
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
+FREE_STRING:
+        LD          DE, HEAP_START
+        RST         0X20
+        RET         C
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          FREE_HEAP
+FREE_HEAP:
+        PUSH        HL
+        ADD         HL, BC
+        LD          [HEAP_MOVE_SIZE], BC
+        LD          [HEAP_REMAP_ADDRESS], HL
+        EX          DE, HL
+        LD          HL, [HEAP_NEXT]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _FREE_HEAP_LOOP0
+        LDIR        
+_FREE_HEAP_LOOP0:
+        LD          [HEAP_NEXT], DE
+        LD          HL, VARS_AREA_START
+_FREE_HEAP_LOOP1:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
+        JR          NC, _FREE_HEAP_LOOP1_END
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [HEAP_REMAP_ADDRESS]
+        EX          DE, HL
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP1_NEXT
+        LD          DE, [HEAP_MOVE_SIZE]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_FREE_HEAP_LOOP1_NEXT:
+        POP         HL
+        INC         HL
+        JR          _FREE_HEAP_LOOP1
+_FREE_HEAP_LOOP1_END:
+        LD          HL, VARSA_AREA_START
+_FREE_HEAP_LOOP2:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
+        RET         NC
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
+        EX          DE, HL
+        SBC         HL, BC
+        SBC         HL, BC
+        RR          H
+        RR          L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_FREE_HEAP_SARRAY_ELEMENTS:
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [HEAP_REMAP_ADDRESS]
+        EX          DE, HL
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP2_NEXT
+        LD          HL, [HEAP_MOVE_SIZE]
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_FREE_HEAP_LOOP2_NEXT:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
+        POP         HL
+        JR          _FREE_HEAP_LOOP2
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -357,6 +491,8 @@ PROGRAM_RUN:
         LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
         LDIR        
+        LD          HL, STR_0
+        LD          [VARS_AREA_START], HL
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -407,6 +543,8 @@ VARD_I:
         DEFW        0, 0, 0, 0
 VAR_AREA_END:
 VARS_AREA_START:
+VARS_I:
+        DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 VARA_AREA_END:
