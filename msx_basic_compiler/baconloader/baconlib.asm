@@ -313,6 +313,8 @@ blib_entries::
 			jp		sub_copy_pos_to_array
 	blib_copy_array_to_pos:
 			jp		sub_copy_array_to_pos
+	blib_copy_pos_to_file:
+			jp		sub_copy_pos_to_file
 	blib_umul:
 			jp		sub_umul
 
@@ -4017,7 +4019,6 @@ sub_copy_pos_to_pos::
 			scope	sub_copy_pos_to_array
 array_address	= BBT_LOGOP + 1
 array_size		= array_address + 2
-pixel_size		= array_size + 2
 sub_copy_pos_to_array::
 			; 配列のアドレス・サイズを計算
 			call		sub_calc_array
@@ -4026,25 +4027,7 @@ sub_copy_pos_to_array::
 			; ARGを計算 (NX, NY の符号の処理)
 			call		sub_set_arg
 			; サイズを計算 (pixel count)
-			ld			bc, [BBT_NX]
-			ld			de, [BBT_NY]
-			call		sub_umul
-			ld			[pixel_size], hl
-			; サイズを比較
-			ld			a, [scrmod]
-			cp			a, 8
-			jr			nc, _adjust_end
-			ccf
-			inc			hl						; 小数部繰り上げ
-			rr			h
-			rr			l
-			rrca
-			jr			c, _adjust_end
-			inc			hl						; 小数部繰り上げ
-			or			a, a
-			rr			h
-			rr			l
-		_adjust_end:
+			call		sub_get_byte_size
 			ld			de, [array_size]
 			ex			de, hl
 			or			a, a
@@ -4092,13 +4075,13 @@ sub_copy_pos_to_array::
 			jr			nc, _screen6
 		_screen5or7:
 			push		hl
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			add			a, a
 			add			a, a
 			add			a, a
 			add			a, a
 			ld			l, a
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			or			a, l
 			pop			hl
 			ld			[hl], a
@@ -4109,7 +4092,7 @@ sub_copy_pos_to_array::
 			jr			nz, _screen5or7
 			jr			_finish
 		_screen8over:
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			ld			[hl], a
 			inc			hl
 			dec			de
@@ -4119,21 +4102,21 @@ sub_copy_pos_to_array::
 			jr			_finish
 		_screen6:
 			push		hl
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			add			a, a
 			add			a, a
 			ld			l, a
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			or			a, l
 			add			a, a
 			add			a, a
 			ld			l, a
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			or			a, l
 			add			a, a
 			add			a, a
 			ld			l, a
-			call		_get_one
+			call		sub_vdpcmd_get_one_pixel
 			or			a, l
 			add			a, a
 			add			a, a
@@ -4153,7 +4136,8 @@ sub_copy_pos_to_array::
 			ei
 			ret
 			; TRビットや CEビットのチェックは行わない。VDPの方が速い。
-		_get_one:
+			; C = vdpport1, B = 破壊, A = ゲットした値
+sub_vdpcmd_get_one_pixel::
 			ld			a, 7
 			di
 			out			[c], a
@@ -4166,6 +4150,27 @@ sub_copy_pos_to_array::
 			out			[c], a
 			ei
 			ld			a, b
+			ret
+
+sub_get_byte_size::
+			ld			bc, [BBT_NX]
+			ld			de, [BBT_NY]
+			call		sub_umul
+			; サイズを比較
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _adjust_end
+			ccf
+			inc			hl						; 小数部繰り上げ
+			rr			h
+			rr			l
+			rrca
+			jr			c, _adjust_end
+			inc			hl						; 小数部繰り上げ
+			or			a, a
+			rr			h
+			rr			l
+		_adjust_end:
 			ret
 			endscope
 
@@ -4365,6 +4370,205 @@ sub_copy_array_to_pos::
 			ei
 			pop			bc
 			pop			hl
+			ret
+			endscope
+
+; =============================================================================
+;	COPY (X1,Y1)-STEP(X2,Y2),SPAGE TO FILE
+;	input:
+;		HL ....................... ファイル名のアドレス
+;		buffer_start(0xF55E:2) ... バッファーの先頭アドレス（このアドレスは含む）
+;		buffer_end(0xF560:2) ..... バッファーの終了アドレス（このアドレスは含まない）
+;		SX(0xF562:2) ............. X1
+;		SY(0xF564:2) ............. Y1, SPAGE
+;		DX(0xF566:2) ............. X3
+;		DY(0xF568:2) ............. Y3, DPAGE
+;		NX(0xF56A:2) ............. X2
+;		NY(0xF56C:2) ............. Y2
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ARG は、NX, NY の符号から自動設定される
+;		buffer_start以上、buffer_end未満の範囲をファイル書き込み用のバッファとして
+;		使用する。
+; =============================================================================
+			scope	sub_copy_pos_to_file
+buffer_start	= buf					; F55E
+buffer_end		= buffer_start + 2		; F560
+buffer_size		= BBT_LOGOP + 2
+remain_size		= buffer_size + 2		; 書き込むべき残り byte数
+transfer_size	= remain_size + 2
+fcb				= transfer_size + 2
+sub_copy_pos_to_file::
+			; バッファーサイズを計算
+			push		hl
+			ld			hl, [buffer_end]
+			ld			de, [buffer_start]
+			or			a, a
+			sbc			hl, de
+			ld			[buffer_size], hl
+			; ARGを計算 (NX, NY の符号の処理)
+			call		sub_set_arg
+			; ファイルを開く
+			pop			hl
+			ld			de, fcb
+			call		sub_fcreate
+			or			a, a
+			jp			nz, err_device_io
+			; サイズ情報を書き出す
+			ld			hl, fcb
+			ld			de, BBT_NX
+			ld			bc, 4
+			call		sub_fwrite
+			; サイズを計算 (pixel count)
+			call		sub_get_byte_size
+			ld			[remain_size], hl
+			; VDP Command をセット
+			ld			a, 0b10100000			; LMCM
+			ld			[BBT_LOGOP], a
+			call		sub_wait_vdp_command
+			; R#17 = 32
+			ld			a, 32
+			di
+			out			[vdpport1], a
+			ld			a, 0x80 | 17
+			out			[vdpport1], a
+			ld			b, 46 - 32 + 1
+			inc			c
+			inc			c
+			ld			hl, BBT_SX
+			otir
+			ei
+			; 画面モードで分岐
+			ld			c, vdpport1
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _screen8over
+			rrca
+			jr			nc, _screen6
+		_screen5or7:
+			call		_calc_transfer_size
+		_screen5or7_loop:
+			push		hl
+			call		sub_vdpcmd_get_one_pixel		; Aにゲットした値, Cに vdpport1 をセットして呼ぶ。Bは破壊
+			add			a, a
+			add			a, a
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		sub_vdpcmd_get_one_pixel
+			or			a, l
+			pop			hl
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen5or7_loop
+			; ファイルに書き出す
+			ld			hl, fcb
+			ld			de, [buffer_start]
+			ld			bc, [transfer_size]
+			call		sub_fwrite
+			; 残りがあるかチェック
+			ld			de, [remain_size]
+			ld			a, e
+			or			a, d
+			jr			nz, _screen5or7
+			jr			_finish
+		_screen8over:
+			call		_calc_transfer_size
+		_screen8over_loop:
+			call		sub_vdpcmd_get_one_pixel
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen8over_loop
+			; ファイルに書き出す
+			ld			hl, fcb
+			ld			de, [buffer_start]
+			ld			bc, [transfer_size]
+			call		sub_fwrite
+			; 残りがあるかチェック
+			ld			de, [remain_size]
+			ld			a, e
+			or			a, d
+			jr			nz, _screen8over
+			jr			_finish
+		_screen6:
+			call		_calc_transfer_size
+		_screen6_loop:
+			push		hl
+			call		sub_vdpcmd_get_one_pixel
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		sub_vdpcmd_get_one_pixel
+			or			a, l
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		sub_vdpcmd_get_one_pixel
+			or			a, l
+			add			a, a
+			add			a, a
+			ld			l, a
+			call		sub_vdpcmd_get_one_pixel
+			or			a, l
+			add			a, a
+			add			a, a
+			pop			hl
+			ld			[hl], a
+			inc			hl
+			dec			de
+			ld			a, e
+			or			a, d
+			jr			nz, _screen6_loop
+			; ファイルに書き出す
+			ld			hl, fcb
+			ld			de, [buffer_start]
+			ld			bc, [transfer_size]
+			call		sub_fwrite
+			; 残りがあるかチェック
+			ld			de, [remain_size]
+			ld			a, e
+			or			a, d
+			jr			nz, _screen6
+		_finish:
+			ld			a, 0
+			di
+			out			[c], a
+			ld			a, 0x80 | 46
+			out			[c], a
+			ei
+			ld			hl, fcb
+			call		sub_fclose
+			ret
+			; 転送サイズを計算する
+	_calc_transfer_size:
+			ld			hl, [buffer_size]
+			ld			de, [remain_size]
+			rst			0x20
+			jr			nc, _small_remain_size		; buffer_size ≧ remain_size なら _small_remain_size へ
+			; buffer_size < remain_size の場合
+			ld			[transfer_size], hl			; 転送サイズ = buffer_size
+			ccf
+			ex			de, hl
+			sbc			hl, de
+			ld			[remain_size], hl			; remain_size から buffer_size を削減 (transfer_size へ移動)
+			ld			de, [transfer_size]
+			ld			hl, [buffer_start]
+			ret
+	_small_remain_size:
+			ld			[transfer_size], de			; 転送サイズ = remain_size
+			ld			hl, 0
+			ld			[remain_size], hl			; remain_size を 0 にする (transfer_size へ全て移動)
+			ld			de, [transfer_size]
+			ld			hl, [buffer_start]
 			ret
 			endscope
 

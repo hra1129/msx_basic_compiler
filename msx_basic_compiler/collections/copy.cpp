@@ -133,6 +133,8 @@ bool CCOPY::get_x1_y1_x2_y2( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return false;
 	}
+	p_info->list.p_position++;
+
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "LD", "", "A", "L" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -280,7 +282,27 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		variable = p_info->variable_manager.get_array_info( p_info );
 		if( variable.s_name == "" ) {
 			//	(7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ファイル名>
-			//	★T.B.D.
+			p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
+			asm_line.set( "LD", "", "HL", "[heap_next]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[work_buf + 0]", "hl" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", "[heap_end]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[work_buf + 2]", "hl" );
+			p_info->assembler_list.body.push_back( asm_line );
+			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+				exp.release();
+				p_info->assembler_list.add_label( "blib_copy_pos_to_file", "0x040bd" );
+				asm_line.set( "LD", "", "IX", "blib_copy_pos_to_file" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "call_blib" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				p_info->errors.add( SYNTAX_ERROR, line_no );
+				return true;
+			}
 		}
 		else {
 			//	(8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <配列変数名>
