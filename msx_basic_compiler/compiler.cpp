@@ -316,11 +316,12 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
 
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
+	this->info.assembler_list.add_label( "work_filtab", "0x0F860" );
 
 	//	初期化処理 (BACONLIB存在確認)
 	asm_line.set( "LABEL", "", "start_address", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
+	asm_line.set( "LD", "", "SP", "[work_filtab]" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "check_blib", "" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -344,12 +345,6 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	asm_line.set( "DI" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "setup_h_timi", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	MSX-BASICの MAXFILES を 0 にする
-	this->info.assembler_list.add_label( "work_maxfil", "0xF85F" );
-	asm_line.set( "XOR", "", "A", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_maxfil]", "A" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	初期化処理 (プログラム起動)
 	asm_line.set( "LD", "", "DE", "program_start" );
@@ -505,6 +500,7 @@ void CCOMPILER::exec_terminator( void ) {
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
 	this->info.assembler_list.add_label( "bios_errhand", "0x0406F" );
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
+	this->info.assembler_list.add_label( "work_filtab", "0x0F860" );
 
 	//	プログラムの終了処理
 	asm_line.set( "LABEL", "", "program_termination", "" );
@@ -516,7 +512,7 @@ void CCOMPILER::exec_terminator( void ) {
 	asm_line.set( "CALL", "", "restore_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	プログラムの終了処理 (スタック復元)
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
+	asm_line.set( "LD", "", "SP", "[work_filtab]" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "_basic_end" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -567,7 +563,7 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_next]", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
+	asm_line.set( "LD", "", "SP", "[work_filtab]" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "err_return_without_gosub" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -579,7 +575,7 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "XOR", "", "A", "A" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[work_himem]" );
+	asm_line.set( "LD", "", "HL", "[work_filtab]" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "SBC", "", "HL", "DE" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
