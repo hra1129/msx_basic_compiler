@@ -1,74 +1,7 @@
-﻿  beep.cpp
-  bload.cpp
-  bsave.cpp
-  call.cpp
-  clear.cpp
-  cls.cpp
-  color.cpp
-  color_sprite.cpp
-  comment.cpp
-  copy.cpp
-  data.cpp
-  defdbl.cpp
-  defint.cpp
-  defsng.cpp
-  defstr.cpp
-  defusr.cpp
-  dim.cpp
-  end.cpp
-  erase.cpp
-  error.cpp
-  コンパイル中...
-  files.cpp
-  for.cpp
-  gosub.cpp
-  goto.cpp
-  if.cpp
-  input.cpp
-  irandomize.cpp
-  key.cpp
-  kill.cpp
-  let.cpp
-  line.cpp
-  locate.cpp
-  lset.cpp
-  mid.cpp
-  name.cpp
-  next.cpp
-  on_goto.cpp
-  on_interval.cpp
-  on_key.cpp
-  on_sprite.cpp
-  コンパイル中...
-  on_stop.cpp
-  on_strig.cpp
-  out.cpp
-  play.cpp
-  poke.cpp
-  pokes.cpp
-  pokew.cpp
-  print.cpp
-  pset.cpp
-  put_sprite.cpp
-  read.cpp
-  restore.cpp
-  return.cpp
-  run.cpp
-  screen.cpp
-  setpage.cpp
-  setscroll.cpp
-  sound.cpp
-  swap.cpp
-  vpoke.cpp
-  コンパイル中...
-  vpokes.cpp
-  width.cpp
-  compiler.cpp
-  expression_varptr.cpp
-  msx_basic_compiler.cpp
+﻿  compiler.cpp
   コード生成しています。
-  97 of 2383 functions ( 4.1%) were compiled, the rest were copied from previous compilation.
-    5 functions were new in current compilation
-    177 functions had inline decision re-evaluated but remain unchanged
+  2 of 2383 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    89 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

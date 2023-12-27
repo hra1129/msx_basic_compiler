@@ -515,29 +515,6 @@ void CCOMPILER::exec_terminator( void ) {
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( "CALL", "", "restore_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	メモリをクリア (暴走防止)
-	asm_line.set( "DI" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[heap_end]" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "heap_start" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "OR", "", "A", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "SBC", "", "HL", "DE" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "C", "L" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "H" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "heap_start" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "heap_start + 1" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "0" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LDIR" );
-	this->info.assembler_list.body.push_back( asm_line );
 	//	プログラムの終了処理 (スタック復元)
 	asm_line.set( "LD", "", "SP", "[work_himem]" );
 	this->info.assembler_list.body.push_back( asm_line );
