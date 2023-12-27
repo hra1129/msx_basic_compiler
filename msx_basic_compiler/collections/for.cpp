@@ -239,7 +239,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RLCA", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "JR", "", s_skip_label, "" );
+			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> ‚ª³‚Ìê‡
 			s_pop = p_info->get_auto_label();
@@ -247,7 +247,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "DEC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "JR", "", s_pop, "" );
+			asm_line.set( "JR", "NZ", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -258,7 +258,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "INC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "RET", "", "", "" );
+			asm_line.set( "RET", "Z", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -305,7 +305,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RLCA", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "JR", "", s_skip_label, "" );
+			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> ‚ª³‚Ìê‡
 			s_pop = p_info->get_auto_label();
@@ -313,7 +313,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "DEC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "JR", "", s_pop, "" );
+			asm_line.set( "JR", "NZ", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -324,7 +324,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "INC", "", "A", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "RET", "", "", "" );
+			asm_line.set( "RET", "Z", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );

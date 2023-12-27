@@ -39,8 +39,28 @@ private:
 	void optimize_interrupt_process( void );
 	void optimize_push_pop( void );
 	void optimize_remove_interrupt_process( void );
+	void optimize_ldir( void );
 
 	void sub_return_line_num( void );
+
+	int check_16bit_register( const std::string s ) const {
+		if( s == "HL" ) {
+			return 0;
+		}
+		if( s == "DE" ) {
+			return 1;
+		}
+		if( s == "BC" ) {
+			return 2;
+		}
+		if( s == "AF" ) {
+			return 3;
+		}
+		if( s == "SP" ) {
+			return 4;
+		}
+		return 999;
+	}
 
 public:
 	CCOMPILE_INFO info;

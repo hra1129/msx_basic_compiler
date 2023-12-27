@@ -1,0 +1,106 @@
+4601h : END命令を実行する処理
+	80F1: 3A 81 00
+
+	4601:	CALL		FF3Eh			; 何かフック。ret ですぐ戻ってくる。
+	4604:	LD			(F6B1h),SP		; SAVSTK
+	4608:	CALL		00BAh			; BIOSエントリ？
+
+	00BA:	JP			04F0h
+	04F0:	LD			A,(FBB1h)		; 0 : BASROM 0ならRAM, 0以外ならROMにBASICコードがある
+	04F3:	AND			A
+	04F4:	RET			NZ
+	04F5:	PUSH		HL				; コードの位置保存
+	04F6:	LD			HL,FC9Bh		; INTFLG (STOPキー判定結果)
+	04F9:	DI
+	04FA:	LD			A,(HL)			; 0
+	04FB:	EI
+	04FC:	LD			(HL),0
+	04FE:	POP			HL				; コードの位置復帰
+	04FF:	AND			A
+	0500:	RET			Z				; ここで戻る
+
+	460B:	LD			A,(FBD8h)		; ONGSBF 待機中のイベントが発生したか？
+	460E:	OR			A				; 0
+	460F:	CALL		NZ, 6389		; スルー
+	4612:	EI
+	4613:	LD			(F6AFh),HL		; SAVTXT コードの位置を保存
+	4616:	LD			A,(HL)			; 3A
+	4617:	CP			3Ah
+	4619:	JR			Z,4640h			; 飛ぶ
+
+	4640:	RST			10h				; 次の文字: A = 81h (END)
+	4641:	LD			DE, 4601h		; 戻りアドレス？
+	4644:	PUSH		DE
+	4645:	RET			Z				; スルー
+	4646:	CALL		FF43h			; 何かフック。ret ですぐ戻ってくる。
+	4649:	CP			5Fh
+	464B:	JP			Z, 55A7h		; スルー
+	464E:	SUB			81h				; ここで A=0
+	4650:	JP			C,4880h			; スルー
+	4653:	CP			58h
+	4655:	JP			NC,51ADh		; スルー
+
+	4658:	RLCA
+	4659:	LD			C, A
+	465A:	LD			B, 0
+	465C:	EX			DE, HL
+	465D:	LD			HL, 392Eh		; ジャンプテーブル
+	4660:	ADD			HL, BC
+	4661:	LD			C,(HL)
+	4662:	INC			HL
+	4663:	LD			B,(HL)
+	4664:	PUSH		BC
+
+	4665:	EX			DE, HL
+	4666:	CALL		FF48h			; 何かフック。ret ですぐ戻ってくる。
+	4669:	INC			HL
+	466A:	LD			A,(HL)			; 端末コード 00h
+	466B:	CP			3Ah
+	466D:	RET			NC
+	466E:	CP			20h
+	4670:	JR			Z, 4666h		; スルー：ホワイトスペース読み飛ばし
+
+	4672:	JR			NC, 46E0h		; スルー
+	4674:	OR			A
+	4675:	RET			Z				; ここでジャンプテーブルの値 63EAh へジャンプ
+
+	63EA:	RET			NZ
+	63EB:	XOR			A
+	63EC:	LD			(F6BBh),A		; ONEFLGエラールーチン実行中フラグをクリアする
+	63EF:	PUSH		AF
+	63F0:	CALL		Z, 6C1Ch
+
+	6C1C:	LD			A,(F87Ch)		; NLONLY プログラムロード中は 0以外。当然 0
+	6C1F:	OR			A
+	6C20:	RET			M
+	6C21:	LD			BC, 6B24h
+	6C24:	XOR			A
+	6C25:	LD			A, (F85Fh)		; MAXFIL : MAXFILES の値 1
+	6C28:	JR			6BE7h
+	6BE7:	JR			NZ, 6C02h
+	6BE9:	PUSH		HL
+	6BEA:	PUSH		BC
+	6BEB:	PUSH		AF
+	6BEC:	LD			DE, 6BF3h
+	6BEF:	PUSH		DE
+	6BF0:	PUSH		BC
+	6BF1:	OR			A
+	6BF2:	RET							; 6B24h へ飛ぶ。
+
+	6B24:	PUSH		HL
+	6B25:	OR			A				; A=1
+	6B26:	JR			NZ, 6B30h		; ジャンプ
+	6B30:	CALL		6A6Dh
+
+	6A6D:	LD			L,A
+	6A6E:	LD			A, (F85Fh)
+	6A71:	CP			L
+	6A72:	JP			C, 6E7Dh
+	6A75:	LD			H, 00h
+	6A77:	ADD			HL, HL
+	6A78:	EX			DE, HL
+	6A79:	LD			HL, (F860h)		; FILTAB ファイルデータエリアの先頭番地 E392h
+	6A7C:	ADD			HL, DE
+	6A7D:	LD			A, (HL)			; 
+
+HIMEM が  E5A8h なときに、FILTAB が E392h なので、E392h をベーコンが破壊している。

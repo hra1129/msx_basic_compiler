@@ -345,6 +345,12 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "setup_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
+	//	MSX-BASICの MAXFILES を 0 にする
+	this->info.assembler_list.add_label( "work_maxfil", "0xF85F" );
+	asm_line.set( "XOR", "", "A", "A" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_maxfil]", "A" );
+	this->info.assembler_list.body.push_back( asm_line );
 	//	初期化処理 (プログラム起動)
 	asm_line.set( "LD", "", "DE", "program_start" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -389,7 +395,6 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "JP", "", "HL", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-
 	asm_line.set( "LABEL", "", "program_start", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 
@@ -509,6 +514,29 @@ void CCOMPILER::exec_terminator( void ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( "CALL", "", "restore_h_timi", "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	//	メモリをクリア (暴走防止)
+	asm_line.set( "DI" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[heap_end]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "heap_start" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "SBC", "", "HL", "DE" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "L" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "H" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "heap_start" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "heap_start + 1" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "0" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LDIR" );
 	this->info.assembler_list.body.push_back( asm_line );
 	//	プログラムの終了処理 (スタック復元)
 	asm_line.set( "LD", "", "SP", "[work_himem]" );
@@ -1573,6 +1601,7 @@ void CCOMPILER::optimize( void ) {
 
 	this->optimize_interrupt_process();
 	this->optimize_push_pop();
+	this->optimize_ldir();
 }
 
 // --------------------------------------------------------------------
@@ -1846,6 +1875,79 @@ void CCOMPILER::optimize_push_pop( void ) {
 			//	マッチしたので置換
 			p_next = p + 2;
 			this->info.assembler_list.body.erase( p_next );	//	LD   HL, constant1
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+//	過剰に出し過ぎた ldir を削減する
+void CCOMPILER::optimize_ldir( void ) {
+	std::vector< CASSEMBLER_LINE >::iterator p, p_next[4];
+	std::string s_reg[3];
+	int i;
+	int n_hl, n_de, n_bc, n;
+
+	//	LD   HL, constant1
+	//	LD   DE, constant1
+	//	LD   BC, constant2
+	//	LDIR
+	//	↓
+	//	remove
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next[0] = p;
+			p_next[1] = p + 1;
+			p_next[2] = p + 2;
+			p_next[3] = p + 3;
+			s_reg[0] = p_next[0]->operand1.s_value;
+			s_reg[1] = p_next[1]->operand1.s_value;
+			s_reg[2] = p_next[2]->operand1.s_value;
+			if( p_next[1] == this->info.assembler_list.body.end() || 
+				p_next[1]->type != CMNEMONIC_TYPE::LD || p_next[1]->operand1.type != COPERAND_TYPE::REGISTER || p_next[1]->operand2.type != COPERAND_TYPE::CONSTANT ) {
+				continue;
+			}
+			if( p_next[2] == this->info.assembler_list.body.end() || 
+				p_next[2]->type != CMNEMONIC_TYPE::LD || p_next[2]->operand1.type != COPERAND_TYPE::REGISTER || p_next[2]->operand2.type != COPERAND_TYPE::CONSTANT ) {
+				continue;
+			}
+			if( p_next[3] == this->info.assembler_list.body.end() || 
+				p_next[3]->type != CMNEMONIC_TYPE::LDIR ) {
+				continue;
+			}
+			//	レジスタ名チェック
+			if( s_reg[0] == s_reg[1] || s_reg[0] == s_reg[2] || s_reg[1] == s_reg[2] ) {
+				//	3つのレジスタに同じものがあれば非該当
+				continue;
+			}
+			for( i = 0; i < 3; i++ ) {
+				n = this->check_16bit_register( s_reg[i] );
+				if( n == 0 ) {
+					n_hl = i;
+				}
+				else if( n == 1 ) {
+					n_de = i;
+				}
+				else if( n == 2 ) {
+					n_bc = i;
+				}
+				else {
+					break;
+				}
+			}
+			if( i != 3 ) {
+				//	16bitレジスタでないか、非対象の 16bit レジスタの場合は非該当
+				continue;
+			}
+			if( p_next[ n_hl ]->operand2.s_value != p_next[ n_de ]->operand2.s_value ) {
+				//	HL != DE なら非該当
+				continue;
+			}
+			//	マッチしたので置換
+			p--;
+			this->info.assembler_list.body.erase( p_next[3] );
+			this->info.assembler_list.body.erase( p_next[2] );
+			this->info.assembler_list.body.erase( p_next[1] );
+			this->info.assembler_list.body.erase( p_next[0] );
 		}
 	}
 }
