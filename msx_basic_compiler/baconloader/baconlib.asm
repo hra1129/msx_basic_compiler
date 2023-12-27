@@ -4442,7 +4442,6 @@ sub_copy_pos_to_file::
 			otir
 			ei
 			; 画面モードで分岐
-			ld			c, vdpport1
 			ld			a, [scrmod]
 			cp			a, 8
 			jr			nc, _screen8over
@@ -4541,15 +4540,16 @@ sub_copy_pos_to_file::
 		_finish:
 			ld			a, 0
 			di
-			out			[c], a
+			out			[vdpport1], a
 			ld			a, 0x80 | 46
-			out			[c], a
+			out			[vdpport1], a
 			ei
 			ld			hl, fcb
 			call		sub_fclose
 			ret
 			; 転送サイズを計算する
 	_calc_transfer_size:
+			ld			c, vdpport1
 			ld			hl, [buffer_size]
 			ld			de, [remain_size]
 			rst			0x20
