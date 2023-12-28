@@ -362,7 +362,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "[work_buf + 0]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "", "HL", "[heap_next]" );
+			asm_line.set( "LD", "", "HL", "[heap_end]" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "[work_buf + 2]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
