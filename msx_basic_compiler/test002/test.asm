@@ -101,7 +101,7 @@ LINE_110:
         LD          [WORK_LOP], A
         LD          HL, [HEAP_NEXT]
         LD          [WORK_BUF + 0], HL
-        LD          HL, [HEAP_NEXT]
+        LD          HL, [HEAP_END]
         LD          [WORK_BUF + 2], HL
         XOR         A, A
         POP         HL
@@ -138,7 +138,7 @@ LINE_120:
         LD          [WORK_LOP], A
         LD          HL, [HEAP_NEXT]
         LD          [WORK_BUF + 0], HL
-        LD          HL, [HEAP_NEXT]
+        LD          HL, [HEAP_END]
         LD          [WORK_BUF + 2], HL
         LD          A, 5
         POP         HL
@@ -175,7 +175,7 @@ LINE_130:
         LD          [WORK_LOP], A
         LD          HL, [HEAP_NEXT]
         LD          [WORK_BUF + 0], HL
-        LD          HL, [HEAP_NEXT]
+        LD          HL, [HEAP_END]
         LD          [WORK_BUF + 2], HL
         LD          A, 6
         POP         HL
@@ -212,7 +212,7 @@ LINE_140:
         LD          [WORK_LOP], A
         LD          HL, [HEAP_NEXT]
         LD          [WORK_BUF + 0], HL
-        LD          HL, [HEAP_NEXT]
+        LD          HL, [HEAP_END]
         LD          [WORK_BUF + 2], HL
         LD          A, 7
         POP         HL
