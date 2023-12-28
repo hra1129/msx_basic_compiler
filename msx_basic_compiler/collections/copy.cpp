@@ -244,7 +244,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 	CVARIABLE variable;
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp, exp_direction;
-	bool has_direction;
+	bool has_direction = false;
 	int line_no = p_info->list.get_line_no();
 
 	if( p_info->list.p_position->s_word != "COPY" ) {
@@ -252,6 +252,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
+	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
 	if( p_info->list.is_command_end() ) {
 		//	COPY だけで終わってる場合はエラー
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -357,7 +358,45 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				//	エラーが発生したので何もせずに戻る
 				return true;
 			}
-			//	★T.B.D.
+			asm_line.set( "LD", "", "HL", "[heap_next]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[work_buf + 0]", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", "[heap_next]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[work_buf + 2]", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			//	方向
+			if( has_direction ) {
+				if( exp_direction.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+					exp_direction.release();
+					asm_line.set( "LD", "", "A", "L" );
+					p_info->assembler_list.body.push_back( asm_line );
+					asm_line.set( "POP", "", "HL" );
+					p_info->assembler_list.body.push_back( asm_line );
+				}
+				else {
+					p_info->errors.add( SYNTAX_ERROR, line_no );
+					return true;
+				}
+			}
+			else {
+				asm_line.set( "XOR", "", "A", "A" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			p_info->assembler_list.add_label( "blib_copy_file_to_pos", "0x051f5" );
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "IX", "blib_copy_file_to_pos" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "free_string" );
+			p_info->assembler_list.body.push_back( asm_line );
 			return true;
 		}
 		//	TO 配列変数？
