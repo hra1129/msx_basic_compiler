@@ -1,7 +1,7 @@
-﻿  compiler.cpp
+﻿  copy.cpp
   コード生成しています。
-  4 of 2383 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  1 of 2383 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    161 functions had inline decision re-evaluated but remain unchanged
+    89 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe

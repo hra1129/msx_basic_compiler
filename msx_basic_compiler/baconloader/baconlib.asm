@@ -315,6 +315,8 @@ blib_entries::
 			jp		sub_copy_array_to_pos
 	blib_copy_pos_to_file:
 			jp		sub_copy_pos_to_file
+	blib_copy_file_to_pos:
+			jp		sub_copy_file_to_pos
 	blib_umul:
 			jp		sub_umul
 
@@ -4128,7 +4130,7 @@ sub_copy_pos_to_array::
 			or			a, d
 			jr			nz, _screen6
 		_finish:
-			ld			a, 0
+			xor			a, a
 			di
 			out			[c], a
 			ld			a, 0x80 | 46
@@ -4244,7 +4246,7 @@ sub_copy_array_to_pos::
 			rlc			d
 			rlca
 			ld			[BBT_CLR], a
-			call		_run_command
+			call		sub_run_vdp_command36
 			ld			a, c
 			or			a, b
 			jr			z, _finish
@@ -4298,7 +4300,7 @@ sub_copy_array_to_pos::
 			rlca
 			rlca
 			ld			[BBT_CLR], a
-			call		_run_command
+			call		sub_run_vdp_command36
 			ld			a, c
 			or			a, b
 			jr			z, _finish
@@ -4323,7 +4325,7 @@ sub_copy_array_to_pos::
 			or			a, b
 			jr			nz, _screen5or7_loop
 		_finish:
-			ld			a, 0
+			xor			a, a
 			di
 			out			[c], a
 			ld			a, 0x80 | 46
@@ -4335,7 +4337,7 @@ sub_copy_array_to_pos::
 			ld			a, [hl]
 			inc			hl
 			ld			[BBT_CLR], a
-			call		_run_command
+			call		sub_run_vdp_command36
 			ld			a, c
 			or			a, b
 			jr			z, _finish
@@ -4349,7 +4351,7 @@ sub_copy_array_to_pos::
 			jr			nz, _screen8_loop
 			jr			_finish
 
-		_run_command:
+sub_run_vdp_command36::
 			; R#17 = 36 (オートインクリメント)
 			push		hl
 			push		bc
@@ -4448,7 +4450,7 @@ sub_copy_pos_to_file::
 			rrca
 			jr			nc, _screen6
 		_screen5or7:
-			call		_calc_transfer_size
+			call		sub_calc_transfer_size
 		_screen5or7_loop:
 			push		hl
 			call		sub_vdpcmd_get_one_pixel		; Aにゲットした値, Cに vdpport1 をセットして呼ぶ。Bは破壊
@@ -4478,7 +4480,7 @@ sub_copy_pos_to_file::
 			jr			nz, _screen5or7
 			jr			_finish
 		_screen8over:
-			call		_calc_transfer_size
+			call		sub_calc_transfer_size
 		_screen8over_loop:
 			call		sub_vdpcmd_get_one_pixel
 			ld			[hl], a
@@ -4499,7 +4501,7 @@ sub_copy_pos_to_file::
 			jr			nz, _screen8over
 			jr			_finish
 		_screen6:
-			call		_calc_transfer_size
+			call		sub_calc_transfer_size
 		_screen6_loop:
 			push		hl
 			call		sub_vdpcmd_get_one_pixel
@@ -4538,7 +4540,7 @@ sub_copy_pos_to_file::
 			or			a, d
 			jr			nz, _screen6
 		_finish:
-			ld			a, 0
+			xor			a, a
 			di
 			out			[vdpport1], a
 			ld			a, 0x80 | 46
@@ -4548,7 +4550,7 @@ sub_copy_pos_to_file::
 			call		sub_fclose
 			ret
 			; 転送サイズを計算する
-	_calc_transfer_size:
+sub_calc_transfer_size::
 			ld			c, vdpport1
 			ld			hl, [buffer_size]
 			ld			de, [remain_size]
@@ -4569,6 +4571,201 @@ sub_copy_pos_to_file::
 			ld			[remain_size], hl			; remain_size を 0 にする (transfer_size へ全て移動)
 			ld			de, [transfer_size]
 			ld			hl, [buffer_start]
+			ret
+			endscope
+
+; =============================================================================
+;	COPY <ファイル名> TO (X3,Y3),DPAGE,LOP
+;	input:
+;		HL ................ ファイル名
+;		A ................. DIR
+;		DX(0xF566:2) ...... X3
+;		DY(0xF568:2) ...... Y3, DPAGE
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイルを読み出して画面へ描画する。
+; =============================================================================
+			scope	sub_copy_file_to_pos
+buffer_start	= buf					; F55E
+buffer_end		= buffer_start + 2		; F560
+buffer_size		= BBT_LOGOP + 2
+remain_size		= buffer_size + 2		; 書き込むべき残り byte数
+transfer_size	= remain_size + 2
+fcb				= transfer_size + 2
+
+sub_copy_file_to_pos::
+			ei
+			ld		[BBT_ARG], a
+			; ファイルを開く
+			ld		de, fcb
+			call	sub_fopen
+			or		a, a
+			jp		nz, err_device_io
+			; バッファーサイズを計算
+			ld			hl, [buffer_end]
+			ld			de, [buffer_start]
+			or			a, a
+			sbc			hl, de
+			ld			[buffer_size], hl
+			; ファイルからサイズ情報を読み出す
+			ld		bc, 4
+			ld		de, BBT_NX
+			ld		hl, fcb
+			call	sub_fread
+			; サイズを計算 (pixel count)
+			call		sub_get_byte_size
+			ld			[remain_size], hl
+			; ARG, DX, DY の調整
+			ld		a, [BBT_ARG]
+			call	sub_adjust_dir			; BC保存
+			; コマンド設定
+			ld			a, [BBT_LOGOP]
+			or			a, 0b1011_0000		; LMMC
+			ld			[BBT_LOGOP], a
+			; BPP
+			dec			bc
+			ld			a, [scrmod]
+			cp			a, 8
+			jr			nc, _screen8over
+			rrca
+			jr			c, _screen5or7
+		_screen6:
+			call		_calc_transfer_size
+			ld			d, [hl]
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			ld			[BBT_CLR], a
+			call		sub_run_vdp_command36
+			jr			_screen6_start
+		_screen6_loop:
+			ld			d, [hl]
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+		_screen6_start:
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			rlc			d
+			rlca
+			rlc			d
+			rlca
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen6_loop
+			; transfer_size の転送が終わった、残りはあるか？
+			ld			bc, [remain_size]
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			; 残りがあるので読み込んで続ける
+			call		_calc_transfer_size
+			jr			_screen6_loop
+
+		_screen5or7:
+			call		_calc_transfer_size
+			ld			a, [hl]
+			rlca
+			rlca
+			rlca
+			rlca
+			ld			[BBT_CLR], a
+			call		sub_run_vdp_command36
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			jr			_screen5or7_start
+		_screen5or7_loop:
+			ld			a, [hl]
+			rlca
+			rlca
+			rlca
+			rlca
+			out			[vdpport3], a
+		_screen5or7_start:
+			ld			a, [hl]
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen5or7_loop
+			; transfer_size の転送が終わった、残りはあるか？
+			ld			bc, [remain_size]
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			; 残りがあるので読み込んで続ける
+			call		_calc_transfer_size
+			jr			_screen5or7_loop
+
+		_screen8over:
+			call		_calc_transfer_size
+			ld			a, [hl]
+			inc			hl
+			ld			[BBT_CLR], a
+			call		sub_run_vdp_command36
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+		_screen8_loop:
+			ld			a, [hl]
+			out			[vdpport3], a
+			inc			hl
+			dec			bc
+			ld			a, c
+			or			a, b
+			jr			nz, _screen8_loop
+			; transfer_size の転送が終わった、残りはあるか？
+			ld			bc, [remain_size]
+			ld			a, c
+			or			a, b
+			jr			z, _finish
+			; 残りがあるので読み込んで続ける
+			call		_calc_transfer_size
+			jr			_screen8_loop
+
+		_finish:
+			xor			a, a
+			di
+			out			[vdpport1], a
+			ld			a, 0x80 | 46
+			out			[vdpport1], a
+			ei
+			; ファイルを閉じる
+			ld		de, fcb
+			ld		c, _FCLOSE
+			jp		bdos
+			ret
+
+		_calc_transfer_size:
+			call		sub_calc_transfer_size
+			; ファイルを読む
+			ld			hl, fcb
+			ld			de, [buffer_start]
+			ld			bc, [transfer_size]
+			push		de
+			push		bc
+			call		sub_fread
+			pop			bc
+			pop			hl
 			ret
 			endscope
 
