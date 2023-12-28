@@ -76,6 +76,7 @@ public:
 	void activate_sub_input( void );
 	void activate_bload_r( void );
 	void activate_bload( void );
+	void activate_paint( void );
 };
 
 #endif

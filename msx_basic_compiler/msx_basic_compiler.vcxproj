@@ -201,6 +201,7 @@
     <ClCompile Include="collections\on_stop.cpp" />
     <ClCompile Include="collections\on_strig.cpp" />
     <ClCompile Include="collections\out.cpp" />
+    <ClCompile Include="collections\paint.cpp" />
     <ClCompile Include="collections\play.cpp" />
     <ClCompile Include="collections\poke.cpp" />
     <ClCompile Include="collections\pokes.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="collections\on_stop.h" />
     <ClInclude Include="collections\on_strig.h" />
     <ClInclude Include="collections\out.h" />
+    <ClInclude Include="collections\paint.h" />
     <ClInclude Include="collections\play.h" />
     <ClInclude Include="collections\poke.h" />
     <ClInclude Include="collections\pokes.h" />
