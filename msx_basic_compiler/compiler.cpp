@@ -48,6 +48,7 @@
 #include "collections/on_strig.h"
 #include "collections/on_stop.h"
 #include "collections/out.h"
+#include "collections/paint.h"
 #include "collections/play.h"
 #include "collections/poke.h"
 #include "collections/pokew.h"
@@ -116,6 +117,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CONSTOP );
 	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB ‚ÍAON`GOSUB ‚æ‚èŒã
 	this->collection.push_back( new COUT );
+	this->collection.push_back( new CPAINT );
 	this->collection.push_back( new CPLAY );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPOKEW );
