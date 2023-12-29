@@ -327,6 +327,8 @@ blib_entries::
 			jp		sub_get_date
 	blib_get_time:
 			jp		sub_get_time
+	blib_set_adjust:
+			jp		sub_set_adjust
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5103,6 +5105,66 @@ sub_get_time::
 			or		a, 0x30
 			ld		[hl], a
 			inc		hl
+			ret
+			endscope
+
+; =============================================================================
+;	SET ADJUST ( DE, HL )
+;	input:
+;		DE .... X方向
+;		HL .... Y方向
+;		B ..... 0: RTCへ設定しない, 1: RTCへ設定する
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_set_adjust
+sub_set_adjust::
+			; VDPへ調整情報を設定
+			ld		a, l
+			ld		h, l
+			and		a, 0x0F
+			rlca
+			rlca
+			rlca
+			rlca
+			ld		l, a
+			ld		a, d
+			and		a, 0x0F
+			or		a, l
+			di
+			out		[vdpport1], a
+			ld		a, 0x80 | 18
+			out		[vdpport1], a
+			ei
+			; RTCへ設定値を記憶
+			dec		b
+			ret		nz
+
+			di
+			ld		c, rtc_data
+			ld		a, 13
+			out		[rtc_reg], a
+			in		e, [c]
+			ld		a, e
+			and		a, 0b11111100
+			or		a, 2				; Block 2
+			out		[c], a
+
+			ld		a, 1
+			out		[rtc_reg], a
+			out		[c], d
+			inc		a
+			out		[rtc_reg], a
+			out		[c], h
+
+			ld		a, 13
+			out		[rtc_reg], a
+			out		[c], e
+			ei
 			ret
 			endscope
 
