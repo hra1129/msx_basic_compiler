@@ -9,8 +9,12 @@ vdpport0	:= 0x98
 vdpport1	:= 0x99
 vdpport2	:= 0x9A
 vdpport3	:= 0x9B
+rtc_reg		:= 0xB4
+rtc_data	:= 0xB5
 calslt		:= 0x001C
 enaslt		:= 0x0024
+id_byte0	:= 0x002B
+id_byte1	:= 0x002C
 romver		:= 0x002D
 wrtvdp		:= 0x0047
 wrtvrm		:= 0x004D
@@ -319,6 +323,10 @@ blib_entries::
 			jp		sub_copy_file_to_pos
 	blib_umul:
 			jp		sub_umul
+	blib_get_date:
+			jp		sub_get_date
+	blib_get_time:
+			jp		sub_get_time
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -4848,6 +4856,253 @@ sub_umul::
 			ld		a, d
 			or		e
 			jr		nz, loop
+			ret
+			endscope
+
+; =============================================================================
+;	GET DATE HL, A
+;	input:
+;		A ..... 0: 現在の日付, 1: アラームの日付
+;	output:
+;		HL .... 文字列
+;	break:
+;		all
+;	comment:
+;		MAIN-ROM の 002Bh (bit6,5,4) を見てフォーマットを変える。
+;			0: 年/月/日
+;			1: 月/日/年
+;			2: 日/月/年
+;		MSX1 では、常に 00年01月01日を返す。
+;
+;		読み出している途中でカウントアップしないように、RP-5C01 の R#13 TimerEN=0
+;		にする。TimerEN=0 は 1秒以内であれば、時計は遅延しないことが保証されるため
+;		割り込み禁止にして一気に読んでしまう。
+; =============================================================================
+			scope	sub_get_date
+date_save	= buf + 9
+date_day1	= date_save + 0
+date_day10	= date_save + 1
+date_mon1	= date_save + 2
+date_mon10	= date_save + 3
+date_year1	= date_save + 4
+date_year10	= date_save + 5
+sub_get_date::
+			di
+			; TimerEN = 0
+			and		a, 1
+			ld		d, a
+			ld		c, rtc_reg
+			ld		a, 13
+			out		[c], a
+			in		a, [rtc_data]
+			ld		b, a
+			and		a, 0b0000_0100		; TimerEN=0, Mode00 or Mode01
+			or		a, d
+			out		[rtc_data], a
+			; Data
+			ld		hl, date_save
+			ld		d, 7
+			out		[c], d				; R#7 1-day counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#8 10-day counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#9 1-month counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#10 10-month counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#11 1-year counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#12 10-year counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			ld		d, 13
+			out		[c], d
+			ld		a, b
+			out		[rtc_data], a
+			ei
+			; 文字列を作る
+			ld		a, 8
+			ld		hl, buf
+			ld		[hl], a
+			push	hl
+			inc		hl
+			ld		a, [id_byte0]
+			and		a, 0b0111_0000
+			cp		a, 1 << 4
+			jr		z, _mon_day_year
+			jr		nc, _day_mon_year
+		_year_mon_day:
+			ld		de, date_year10
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			call	_put_one
+			call	_put_one
+			pop		hl
+			ret
+		_mon_day_year:
+			ld		de, date_mon10
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			ld		de, date_year10
+			call	_put_one
+			call	_put_one
+			pop		hl
+			ret
+		_day_mon_year:
+			ld		de, date_day10
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			ld		de, date_mon10
+			call	_put_one
+			call	_put_one
+			ld		[hl], '/'
+			inc		hl
+			ld		de, date_year10
+			call	_put_one
+			call	_put_one
+			pop		hl
+			ret
+			; 1文字変換
+		_put_one:
+			ld		a, [de]
+			dec		de
+			and		a, 0x0F
+			or		a, 0x30
+			ld		[hl], a
+			inc		hl
+			ret
+			endscope
+
+; =============================================================================
+;	GET TIME HL, A
+;	input:
+;		A ..... 0: 現在の時刻, 1: アラームの時刻
+;	output:
+;		HL .... 文字列
+;	break:
+;		all
+;	comment:
+;		MSX1 では、常に 00:00:00 を返す。
+;
+;		読み出している途中でカウントアップしないように、RP-5C01 の R#13 TimerEN=0
+;		にする。TimerEN=0 は 1秒以内であれば、時計は遅延しないことが保証されるため
+;		割り込み禁止にして一気に読んでしまう。
+; =============================================================================
+			scope	sub_get_time
+time_save	= buf + 9
+time_sec1	= time_save + 0
+time_sec10	= time_save + 1
+time_min1	= time_save + 2
+time_min10	= time_save + 3
+time_hur1	= time_save + 4
+time_hur10	= time_save + 5
+sub_get_time::
+			di
+			; TimerEN = 0
+			and		a, 1
+			ld		d, a
+			ld		c, rtc_reg
+			ld		a, 13
+			out		[c], a
+			in		a, [rtc_data]
+			ld		b, a
+			and		a, 0b0000_0100		; TimerEN=0, Mode0 or Mode1
+			or		a, d
+			out		[rtc_data], a
+			; Data
+			ld		hl, time_save
+			ld		d, 0
+			out		[c], d				; R#0 1-second counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#1 10-second counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#2 1-minute counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#3 10-minute counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#4 1-hour counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			inc		d
+			out		[c], d				; R#5 10-hour counter
+			in		a, [rtc_data]
+			ld		[hl], a
+			inc		hl
+			ld		d, 13
+			out		[c], d
+			ld		a, b
+			out		[rtc_data], a
+			ei
+			; 文字列を作る
+			ld		a, 8
+			ld		hl, buf
+			push	hl
+			ld		[hl], a
+			inc		hl
+			ld		de, time_hur10
+			call	_put_one
+			call	_put_one
+			ld		[hl], ':'
+			inc		hl
+			call	_put_one
+			call	_put_one
+			ld		[hl], ':'
+			inc		hl
+			call	_put_one
+			call	_put_one
+			pop		hl
+			ret
+			; 1文字
+	_put_one:
+			ld		a, [de]
+			dec		de
+			and		a, 0x0F
+			or		a, 0x30
+			ld		[hl], a
+			inc		hl
 			ret
 			endscope
 

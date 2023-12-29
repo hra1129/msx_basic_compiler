@@ -8,7 +8,9 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/clear.cpp \
 	collections/cls.cpp \
 	collections/color.cpp \
+	collections/color_sprite.cpp \
 	collections/comment.cpp \
+	collections/copy.cpp \
 	collections/data.cpp \
 	collections/defdbl.cpp \
 	collections/defint.cpp \
@@ -42,6 +44,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/on_stop.cpp \
 	collections/on_strig.cpp \
 	collections/out.cpp \
+	collections/paint.cpp \
 	collections/play.cpp \
 	collections/poke.cpp \
 	collections/pokes.cpp \

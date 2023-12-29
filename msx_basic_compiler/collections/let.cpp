@@ -151,7 +151,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	//	•Ï”‚ð¶¬‚·‚é
 	CVARIABLE variable = p_info->p_compiler->get_variable_address();
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
+	asm_line.set( "PUSH", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	‘ã“üˆ—
 	if( !p_info->list.check_word( &(p_info->errors), "=", SYNTAX_ERROR ) ) {
