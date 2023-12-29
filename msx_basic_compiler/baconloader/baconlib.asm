@@ -327,8 +327,8 @@ blib_entries::
 			jp		sub_get_date
 	blib_get_time:
 			jp		sub_get_time
-	blib_set_adjust:
-			jp		sub_set_adjust
+	blib_setadjust:
+			jp		sub_setadjust
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5110,6 +5110,7 @@ sub_get_time::
 
 ; =============================================================================
 ;	SET ADJUST ( DE, HL )
+;	SET ADJUSTS ( DE, HL )
 ;	input:
 ;		DE .... X方向
 ;		HL .... Y方向
@@ -5121,9 +5122,9 @@ sub_get_time::
 ;	comment:
 ;		none
 ; =============================================================================
-			scope	sub_set_adjust
-sub_set_adjust::
-			; VDPへ調整情報を設定
+			scope	sub_setadjust
+sub_setadjust::
+			; VDPへの調整情報 (Y)
 			ld		a, l
 			ld		h, l
 			and		a, 0x0F
@@ -5132,7 +5133,8 @@ sub_set_adjust::
 			rlca
 			rlca
 			ld		l, a
-			ld		a, d
+			; VDPへの調整情報 (X)
+			ld		a, e
 			and		a, 0x0F
 			or		a, l
 			di
@@ -5148,22 +5150,22 @@ sub_set_adjust::
 			ld		c, rtc_data
 			ld		a, 13
 			out		[rtc_reg], a
-			in		e, [c]
-			ld		a, e
+			in		d, [c]				; R#13 のバックアップ
+			ld		a, d
 			and		a, 0b11111100
 			or		a, 2				; Block 2
 			out		[c], a
 
-			ld		a, 1
+			ld		a, 1				; X
 			out		[rtc_reg], a
-			out		[c], d
-			inc		a
+			out		[c], e
+			inc		a					; Y
 			out		[rtc_reg], a
 			out		[c], h
 
 			ld		a, 13
 			out		[rtc_reg], a
-			out		[c], e
+			out		[c], d				; R#13 を復元
 			ei
 			ret
 			endscope
