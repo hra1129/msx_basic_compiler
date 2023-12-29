@@ -27,6 +27,7 @@
 #include "collections/error.h"
 #include "collections/files.h"
 #include "collections/for.h"
+#include "collections/get.h"
 #include "collections/goto.h"
 #include "collections/gosub.h"
 #include "collections/if.h"
@@ -96,6 +97,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );
 	this->collection.push_back( new CFILES );
+	this->collection.push_back( new CGET );
 	this->collection.push_back( new CGOTO );
 	this->collection.push_back( new CGOSUB );
 	this->collection.push_back( new CIF );
@@ -1923,6 +1925,26 @@ void CCOMPILER::optimize_ldir( void ) {
 			this->info.assembler_list.body.erase( p_next[2] );
 			this->info.assembler_list.body.erase( p_next[1] );
 			this->info.assembler_list.body.erase( p_next[0] );
+		}
+	}
+
+	//	XOR  A, A
+	//	INC  A
+	//	↓
+	//	LD   A, 1
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::XOR && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "A" && p->operand2.type == COPERAND_TYPE::REGISTER && p->operand2.s_value == "A"  ) {
+			p_next[0] = p;
+			p_next[1] = p + 1;
+			if( p_next[1] == this->info.assembler_list.body.end() || 
+				p_next[1]->type != CMNEMONIC_TYPE::INC || p_next[1]->operand1.type != COPERAND_TYPE::REGISTER || p_next[1]->operand1.s_value != "A" ) {
+				continue;
+			}
+			//	マッチしたので置換
+			this->info.assembler_list.body.erase( p_next[1] );
+			p->type				= CMNEMONIC_TYPE::LD;
+			p->operand2.type	= COPERAND_TYPE::CONSTANT;
+			p->operand2.s_value	= "1";
 		}
 	}
 }
