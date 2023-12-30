@@ -63,6 +63,7 @@
 #include "collections/run.h"
 #include "collections/screen.h"
 #include "collections/setadjust.h"
+#include "collections/setbeep.h"
 #include "collections/setpage.h"
 #include "collections/setscroll.h"
 #include "collections/sound.h"
@@ -134,6 +135,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CRUN );
 	this->collection.push_back( new CSCREEN );
 	this->collection.push_back( new CSETADJUST );
+	this->collection.push_back( new CSETBEEP );
 	this->collection.push_back( new CSETPAGE );
 	this->collection.push_back( new CSETSCROLL );
 	this->collection.push_back( new CSOUND );

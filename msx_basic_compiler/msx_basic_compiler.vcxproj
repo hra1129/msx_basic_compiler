@@ -216,6 +216,7 @@
     <ClCompile Include="collections\run.cpp" />
     <ClCompile Include="collections\screen.cpp" />
     <ClCompile Include="collections\setadjust.cpp" />
+    <ClCompile Include="collections\setbeep.cpp" />
     <ClCompile Include="collections\setpage.cpp" />
     <ClCompile Include="collections\setscroll.cpp" />
     <ClCompile Include="collections\sound.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="collections\run.h" />
     <ClInclude Include="collections\screen.h" />
     <ClInclude Include="collections\setadjust.h" />
+    <ClInclude Include="collections\setbeep.h" />
     <ClInclude Include="collections\setpage.h" />
     <ClInclude Include="collections\setscroll.h" />
     <ClInclude Include="collections\sound.h" />
