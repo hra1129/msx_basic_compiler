@@ -2316,6 +2316,233 @@ void CASSEMBLER_LIST::activate_paint( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_read_string(void) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_read_string" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_read_string" );
+
+	asm_line.set( "COMMENT", "", "Read data for string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_read_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[data_ptr]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[data_ptr]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_val(void) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_val" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_val" );
+
+	this->add_label( "bios_fin", "0x3299" );
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "work_buf", "0x0f55e" );
+
+	asm_line.set( "COMMENT", "", "Val function" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_val" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "work_buf" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LDIR" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "XOR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[DE]", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_buf" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_fin", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_read_integer(void) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_read_integer" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_read_integer" );
+
+	this->activate_val();
+	this->add_label( "bios_frcint", "0x2f8a" );
+	this->add_label( "work_dac", "0x0f7f6" );
+
+	asm_line.set( "COMMENT", "", "Read data for integer" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_read_integer" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[data_ptr]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[data_ptr]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_val", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_frcint", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "[work_dac + 2]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_read_single(void) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_read_single" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_read_single" );
+
+	this->activate_val();
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "bios_frcsng", "0x2fb2" );
+	this->activate_ld_de_single_real();
+
+	asm_line.set( "COMMENT", "", "Read data for single-real value" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_read_single" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[data_ptr]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[data_ptr]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_val", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_frcsng", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_dac" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "ld_de_single_real", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_read_double(void) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_read_double" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_read_double" );
+
+	this->activate_val();
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "bios_frcdbl", "0x303a" );
+	this->activate_ld_de_double_real();
+
+	asm_line.set( "COMMENT", "", "Read data for double-real value" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_read_double" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[data_ptr]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[data_ptr]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_val", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_frcdbl", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_dac" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "ld_de_double_real", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
