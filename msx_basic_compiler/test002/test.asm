@@ -13,14 +13,9 @@ BIOS_ENASLT                     = 0X0024
 WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
-BLIB_SETBEEP                    = 0X040CF
-WORK_PRTFLG                     = 0X0F416
-BIOS_FOUT                       = 0X03425
-WORK_DAC                        = 0X0F7F6
-WORK_VALTYP                     = 0X0F663
-WORK_CSRX                       = 0X0F3DD
-WORK_LINLEN                     = 0X0F3B0
-BIOS_BEEP                       = 0X00C0
+BLIB_SETSCREEN                  = 0X040D8
+BLIB_SETTITLE                   = 0X040D5
+BLIB_SETPROMPT                  = 0X040D2
 BIOS_NEWSTT                     = 0X04601
 BIOS_ERRHAND                    = 0X0406F
 ; BSAVE HEADER -----------------------------------------------------------
@@ -63,131 +58,19 @@ JP_HL:
         JP          HL
 PROGRAM_START:
 LINE_100:
+        LD          IX, BLIB_SETSCREEN
+        CALL        CALL_BLIB
 LINE_110:
-        LD          HL, 1
-        LD          [VARI_I], HL
-        LD          HL, 4
-        LD          [SVARI_I_FOR_END], HL
-        LD          HL, 1
-        LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT1
-        LD          [SVARI_I_LABEL], HL
-        JR          _PT0
-_PT1:
-        LD          HL, [VARI_I]
-        LD          DE, [SVARI_I_FOR_STEP]
-        ADD         HL, DE
-        LD          [VARI_I], HL
-        LD          A, D
-        LD          DE, [SVARI_I_FOR_END]
-        RLCA        
-        JR          C, _PT2
-        RST         0X20
-        JR          C, _PT3
-        JR          Z, _PT3
-        RET         NC
-_PT2:
-        RST         0X20
-        RET         C
-_PT3:
-        POP         HL
-_PT0:
-        LD          HL, 1
-        LD          [VARI_J], HL
-        LD          HL, 4
-        LD          [SVARI_J_FOR_END], HL
-        LD          HL, 1
-        LD          [SVARI_J_FOR_STEP], HL
-        LD          HL, _PT5
-        LD          [SVARI_J_LABEL], HL
-        JR          _PT4
-_PT5:
-        LD          HL, [VARI_J]
-        LD          DE, [SVARI_J_FOR_STEP]
-        ADD         HL, DE
-        LD          [VARI_J], HL
-        LD          A, D
-        LD          DE, [SVARI_J_FOR_END]
-        RLCA        
-        JR          C, _PT6
-        RST         0X20
-        JR          C, _PT7
-        JR          Z, _PT7
-        RET         NC
-_PT6:
-        RST         0X20
-        RET         C
-_PT7:
-        POP         HL
-_PT4:
-        LD          HL, [VARI_I]
-        PUSH        HL
-        LD          HL, [VARI_J]
-        POP         DE
-        LD          IX, BLIB_SETBEEP
-        CALL        CALL_BLIB
-        XOR         A, A
-        LD          [WORK_PRTFLG], A
         LD          HL, STR_1
-        CALL        PUTS
-        LD          HL, [VARI_I]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        STR
-        LD          A, [WORK_LINLEN]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [WORK_CSRX]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _PT8
-        PUSH        HL
-        LD          HL, STR_2
-        CALL        PUTS
-        POP         HL
-_PT8:
-        CALL        PUTS
-        LD          A, 32
-        RST         0X18
-        LD          HL, STR_3
-        CALL        PUTS
-        LD          HL, [VARI_J]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        STR
-        LD          A, [WORK_LINLEN]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [WORK_CSRX]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _PT9
-        PUSH        HL
-        LD          HL, STR_2
-        CALL        PUTS
-        POP         HL
-_PT9:
-        CALL        PUTS
-        LD          A, 32
-        RST         0X18
-        LD          HL, STR_2
-        CALL        PUTS
-        CALL        BIOS_BEEP
-        LD          HL, [SVARI_J_LABEL]
-        CALL        JP_HL
-        LD          HL, [SVARI_I_LABEL]
-        CALL        JP_HL
-LINE_120:
-        LD          HL, 1
-        PUSH        HL
-        LD          HL, 2
-        POP         DE
-        LD          IX, BLIB_SETBEEP
+        LD          DE, 2
+        LD          IX, BLIB_SETTITLE
         CALL        CALL_BLIB
+        CALL        FREE_STRING
+LINE_120:
+        LD          HL, STR_2
+        LD          IX, BLIB_SETPROMPT
+        CALL        CALL_BLIB
+        CALL        FREE_STRING
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -229,17 +112,6 @@ CALL_BLIB:
         LD          IY, [WORK_BLIBSLOT - 1]
         CALL        BIOS_CALSLT
         EI          
-        RET         
-PUTS:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_PUTS_LOOP:
-        INC         HL
-        LD          A, [HL]
-        RST         0X18
-        DJNZ        _PUTS_LOOP
         RET         
 FREE_STRING:
         LD          DE, HEAP_START
@@ -352,23 +224,6 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
-STR:
-        CALL        BIOS_FOUT
-FOUT_ADJUST:
-        DEC         HL
-        PUSH        HL
-        XOR         A, A
-        LD          B, A
-_STR_LOOP:
-        INC         HL
-        CP          A, [HL]
-        JR          Z, _STR_LOOP_EXIT
-        INC         B
-        JR          _STR_LOOP
-_STR_LOOP_EXIT:
-        POP         HL
-        LD          [HL], B
-        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -381,11 +236,6 @@ PROGRAM_RUN:
         LD          HL, [WORK_FILTAB]
         SBC         HL, DE
         LD          [HEAP_END], HL
-        LD          HL, VAR_AREA_START
-        LD          DE, VAR_AREA_START + 1
-        LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
-        LD          [HL], 0
-        LDIR        
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -416,11 +266,9 @@ H_ERRO_HANDLER:
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X09, 0X53, 0X45, 0X54, 0X20, 0X42, 0X45, 0X45, 0X50, 0X20
+        DEFB        0X04, 0X48, 0X4F, 0X47, 0X45
 STR_2:
-        DEFB        0X02, 0X0D, 0X0A
-STR_3:
-        DEFB        0X01, 0X2C
+        DEFB        0X06, 0X52, 0X65, 0X61, 0X64, 0X79, 0X21
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -430,22 +278,6 @@ HEAP_MOVE_SIZE:
 HEAP_REMAP_ADDRESS:
         DEFW        0
 VAR_AREA_START:
-SVARI_I_FOR_END:
-        DEFW        0
-SVARI_I_FOR_STEP:
-        DEFW        0
-SVARI_I_LABEL:
-        DEFW        0
-SVARI_J_FOR_END:
-        DEFW        0
-SVARI_J_FOR_STEP:
-        DEFW        0
-SVARI_J_LABEL:
-        DEFW        0
-VARI_I:
-        DEFW        0
-VARI_J:
-        DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
 VARS_AREA_END:
