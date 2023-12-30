@@ -329,6 +329,12 @@ blib_entries::
 			jp		sub_get_time
 	blib_setadjust:
 			jp		sub_setadjust
+	blib_setbeep:
+			jp		sub_setbeep
+	blib_setprompt:
+			jp		sub_setprompt
+	blib_settitle:
+			jp		sub_settitle
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5162,6 +5168,137 @@ sub_setadjust::
 			inc		a					; Y
 			out		[rtc_reg], a
 			out		[c], h
+
+			ld		a, 13
+			out		[rtc_reg], a
+			out		[c], d				; R#13 を復元
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	SET BEEP DE, HL
+;	input:
+;		DE .... 音色 (0～4)
+;		HL .... 音量 (0～4)
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		音色、音量ともに 0 を指定すると「無変更」
+;		1～4 にすると値を変更。
+; =============================================================================
+			scope	sub_setbeep
+sub_setbeep::
+			; 無変更をチェックしてマスクパターンを作成して Bレジスタに格納する
+			dec		de					; FFFF, 0000, 0001, 0002, 0003
+			dec		hl					; FFFF, 0000, 0001, 0002, 0003
+			ld		a, d
+			and		a, 0b0000_1100		; 音色は bit[3:2]
+			ld		d, a
+			ld		a, h
+			and		a, 0b0000_0011		; 音量は bit[1:0]
+			or		a, d
+			ld		b, a
+			; 更新側のマスク情報に変換
+			cpl
+			push	af
+			; 音色情報・音量情報を RTC の SRAM のフォーマットに変換
+			ld		a, e				; 音色 FF, 00, 01, 02, 03
+			and		a, 3				;      0011, 0000, 0001, 0010, 0011
+			rlca						;      0110, 0000, 0010, 0100, 0110
+			rlca						;      1100, 0000, 0100, 1000, 1100
+			ld		e, a
+			ld		a, l				; 音量 FF, 00, 01, 02, 03
+			and		a, 3				;      0011, 0000, 0001, 0010, 0011
+			or		a, e
+			ld		e, a
+			; 更新側のマスク情報を適用して、余計なビットを下ろす
+			pop		af					; A= 1111, 1100, 0011, 0000 のどれか
+			and		a, e
+			ld		e, a
+
+			di
+			ld		c, rtc_data
+			ld		a, 13
+			out		[rtc_reg], a
+			in		d, [c]				; R#13 のバックアップ
+			ld		a, d
+			and		a, 0b11111100
+			or		a, 2				; Block 2
+			out		[c], a
+
+			ld		a, 10				; BEEP 
+			out		[rtc_reg], a
+			in		a, [c]
+			and		a, b
+			or		a, e
+			out		[c], a
+
+			ld		a, 13
+			out		[rtc_reg], a
+			out		[c], d				; R#13 を復元
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	SET PROMPT HL
+;	input:
+;		HL .... プロンプト文字列
+;	output:
+;		HL .... プロンプト文字列 (入力された値をそのまま返す)
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_setprompt
+sub_setprompt::
+
+			di
+			ld		c, rtc_data
+			ld		a, 13
+			out		[rtc_reg], a
+			in		d, [c]				; R#13 のバックアップ
+			ld		a, d
+			and		a, 0b11111100
+			or		a, 3				; Block 3
+			out		[c], a
+
+
+			ld		a, 13
+			out		[rtc_reg], a
+			out		[c], d				; R#13 を復元
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	SET PROMPT HL
+;	input:
+;		HL .... プロンプト文字列
+;	output:
+;		HL .... プロンプト文字列 (入力された値をそのまま返す)
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_settitle
+sub_settitle::
+
+			di
+			ld		c, rtc_data
+			ld		a, 13
+			out		[rtc_reg], a
+			in		d, [c]				; R#13 のバックアップ
+			ld		a, d
+			and		a, 0b11111100
+			or		a, 3				; Block 3
+			out		[c], a
+
 
 			ld		a, 13
 			out		[rtc_reg], a

@@ -230,7 +230,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			has_semicolon = false;
 			exp.release();
 		}
-		else if( p_info->list.p_position->s_word == "," ) {
+		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SYMBOL && p_info->list.p_position->s_word == "," ) {
 			//	, �̏ꍇ
 			p_info->list.p_position++;
 			p_info->assembler_list.activate_comma();
@@ -255,7 +255,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				has_semicolon = false;
 			}
 		}
-		else if( p_info->list.p_position->s_word == ";" ) {
+		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SYMBOL && p_info->list.p_position->s_word == ";" ) {
 			//	; �̏ꍇ
 			p_info->list.p_position++;
 			has_semicolon = true;
