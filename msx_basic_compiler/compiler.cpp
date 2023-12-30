@@ -65,7 +65,10 @@
 #include "collections/setadjust.h"
 #include "collections/setbeep.h"
 #include "collections/setpage.h"
+#include "collections/setprompt.h"
+#include "collections/setscreen.h"
 #include "collections/setscroll.h"
+#include "collections/settitle.h"
 #include "collections/sound.h"
 #include "collections/swap.h"
 #include "collections/vpoke.h"
@@ -137,7 +140,10 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CSETADJUST );
 	this->collection.push_back( new CSETBEEP );
 	this->collection.push_back( new CSETPAGE );
+	this->collection.push_back( new CSETPROMPT );
 	this->collection.push_back( new CSETSCROLL );
+	this->collection.push_back( new CSETSCREEN );
+	this->collection.push_back( new CSETTITLE );
 	this->collection.push_back( new CSOUND );
 	this->collection.push_back( new CSWAP );
 	this->collection.push_back( new CVPOKE );

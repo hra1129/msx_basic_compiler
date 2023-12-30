@@ -76,8 +76,15 @@ rg5sav		:= 0xF3E4
 rg6sav		:= 0xF3E5
 rg7sav		:= 0xF3E6
 statfl		:= 0xF3E7
+forclr		:= 0xF3E9
+bakclr		:= 0xF3EA
+bdrclr		:= 0xF3EB
 putpnt		:= 0xF3F8
 getpnt		:= 0xF3FA
+cs120		:= 0xF3FC
+low			:= 0xF406
+high		:= 0xF408
+ntmsxp		:= 0xF417
 buf			:= 0xF55E
 valtyp		:= 0xF663
 parm2		:= 0xF750
@@ -335,6 +342,8 @@ blib_entries::
 			jp		sub_setprompt
 	blib_settitle:
 			jp		sub_settitle
+	blib_setscreen:
+			jp		sub_setscreen
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5256,31 +5265,72 @@ sub_setbeep::
 ; =============================================================================
 			scope	sub_setprompt
 sub_setprompt::
-
 			di
 			ld		c, rtc_data
 			ld		a, 13
 			out		[rtc_reg], a
-			in		d, [c]				; R#13 のバックアップ
-			ld		a, d
+			in		a, [c]				; R#13 のバックアップ
+			push	af
 			and		a, 0b11111100
 			or		a, 3				; Block 3
 			out		[c], a
-
-
+			; PROMPTモードに変更
+			xor		a, a
+			out		[rtc_reg], a
+			inc		a
+			inc		a
+			out		[c], a
+			; 6文字
+			dec		c					; C = rtc_reg
+			ld		d, 1
+			ld		b, 6
+			ld		e, [hl]
+			inc		e
+			; プロンプト文字列をセット
+		_prompt_fill:
+			dec		e
+			jr		z, _zero_fill
+			inc		hl
+			ld		a, [hl]
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			rrca
+			rrca
+			rrca
+			rrca
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			djnz	_prompt_fill
+		_prompt_fill_exit:
+			pop		de
 			ld		a, 13
 			out		[rtc_reg], a
 			out		[c], d				; R#13 を復元
 			ei
 			ret
+
+		_zero_fill:
+			xor		a, a
+		_zero_fill_loop:
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			djnz	_zero_fill_loop
+			jr		_prompt_fill_exit
 			endscope
 
 ; =============================================================================
-;	SET PROMPT HL
+;	SET TITLE タイトル, 色
 ;	input:
-;		HL .... プロンプト文字列
+;		HL .... タイトル文字列
+;		DE .... 色 (0～4: 0 は無変更)
 ;	output:
-;		HL .... プロンプト文字列 (入力された値をそのまま返す)
+;		HL .... タイトル文字列 (入力された値をそのまま返す)
 ;	break:
 ;		all
 ;	comment:
@@ -5288,7 +5338,102 @@ sub_setprompt::
 ; =============================================================================
 			scope	sub_settitle
 sub_settitle::
+			push	hl
+			push	de
 
+			di
+			ld		c, rtc_data
+			ld		a, 13
+			out		[rtc_reg], a
+			in		a, [c]				; R#13 のバックアップ
+			push	af
+			and		a, 0b11111100
+			or		a, 3				; Block 3
+			out		[c], a
+			; TITLEモードに変更
+			xor		a, a
+			out		[rtc_reg], a
+			out		[c], a
+			; 6文字
+			dec		c					; C = rtc_reg
+			ld		d, 1
+			ld		b, 6
+			ld		e, [hl]
+			inc		e
+			; タイトル文字列をセット
+		_title_fill:
+			dec		e
+			jr		z, _zero_fill
+			inc		hl
+			ld		a, [hl]
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			rrca
+			rrca
+			rrca
+			rrca
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			djnz	_title_fill
+		_title_fill_exit:
+			; タイトルの色設定があるか？
+			pop		de
+			pop		bc
+			ld		a, c
+			or		a, a
+			jr		z, _skip_title_color
+			; タイトルの色を設定
+			dec		a
+			and		a, 3
+			ld		b, a
+			ld		a, 13
+			out		[rtc_reg], a
+			in		a, [rtc_data]
+			and		a, 0b0000_1100
+			or		a, 2
+			out		[rtc_data], a
+
+			ld		a, 11
+			out		[rtc_reg], a
+			ld		a, b
+			out		[rtc_data], a
+
+		_skip_title_color:
+			ld		a, 13
+			out		[rtc_reg], a
+			out		[c], d				; R#13 を復元
+			ei
+			pop		hl
+			ret
+
+		_zero_fill:
+			xor		a, a
+		_zero_fill_loop:
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			out		[c], d
+			out		[rtc_data], a
+			inc		d
+			djnz	_zero_fill_loop
+			jr		_title_fill_exit
+			endscope
+
+; =============================================================================
+;	SET SCREEN
+;	input:
+;		none
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		none
+; =============================================================================
+			scope	sub_setscreen
+sub_setscreen::
 			di
 			ld		c, rtc_data
 			ld		a, 13
@@ -5296,12 +5441,75 @@ sub_settitle::
 			in		d, [c]				; R#13 のバックアップ
 			ld		a, d
 			and		a, 0b11111100
-			or		a, 3				; Block 3
+			or		a, 2				; Block 2
 			out		[c], a
 
+			; RTC R#3 Interlacing, SCREEN 0 / 1
+			ld		b, 3
+			dec		c
+			ld		a, [oldscr]
+			ld		e, a
+			ld		a, [rg9sav]
+			and		a, 0x08				; インターレースモード
+			rrca
+			rrca
+			or		e
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #4 Least significant 4 bits of WIDTH value
+			ld		a, [linlen]
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #5 Most significant 3 bits of WIDTH value
+			rrca
+			rrca
+			rrca
+			rrca
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #6 Initial text color
+			ld		a, [forclr]
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #7 Initial background color
+			ld		a, [bakclr]
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #8 Initial border color
+			ld		a, [bdrclr]
+			out		[c], b
+			out		[rtc_data], a
+			inc		b
+			; RTC #9 Transfer speed, Printer-type, Keyclick, KEY OFF/ON
+			ld		a, [cnsdfg]
+			and		a, 1
+			ld		c, a
+			ld		a, [cliksw]
+			and		a, 2
+			or		a, c
+			ld		c, a
+			ld		a, [ntmsxp]
+			and		a, 4
+			or		a, c
+			ld		c, a
+			ld		a, [cs120]
+			ld		e, a
+			ld		a, [low]
+			cp		a, e
+			ld		a, c
+			jr		z, _skip
+			or		a, 8
+		_skip:
+			out		[c], b
+			out		[rtc_data], a
 
-			ld		a, 13
-			out		[rtc_reg], a
+			ld		b, 13
+			out		[c], b
 			out		[c], d				; R#13 を復元
 			ei
 			ret
