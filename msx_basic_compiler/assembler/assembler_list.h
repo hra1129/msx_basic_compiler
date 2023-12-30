@@ -77,6 +77,11 @@ public:
 	void activate_bload_r( void );
 	void activate_bload( void );
 	void activate_paint( void );
+	void activate_read_string( void );
+	void activate_read_integer( void );
+	void activate_read_single( void );
+	void activate_read_double( void );
+	void activate_val( void );
 };
 
 #endif

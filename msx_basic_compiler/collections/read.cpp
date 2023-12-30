@@ -14,7 +14,6 @@ bool CREAD::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 	bool has_let = false;
 	CEXPRESSION exp;
-	CEXPRESSION_TYPE exp_type;
 	CASSEMBLER_LINE asm_line;
 
 	if( p_info->list.p_position->s_word != "READ" ) {
@@ -30,110 +29,33 @@ bool CREAD::exec( CCOMPILE_INFO *p_info ) {
 		}
 		//	•Ï”‚ð¶¬‚·‚é
 		CVARIABLE variable = p_info->p_compiler->get_variable_address();
-		if( variable.type == CVARIABLE_TYPE::STRING ) {
-			//	•¶Žš—ñ‚Ìê‡A‚»‚Ì‚Ü‚ÜŠi”[
-			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		switch( variable.type ) {
+		case CVARIABLE_TYPE::STRING:		
+			p_info->assembler_list.activate_read_string();
+			asm_line.set( "CALL", "", "sub_read_string" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[data_ptr]" );
+			break;
+		default:
+		case CVARIABLE_TYPE::INTEGER:		
+			p_info->assembler_list.activate_read_integer();
+			asm_line.set( "CALL", "", "sub_read_integer" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::MEMORY, "[HL]" );
+			break;
+		case CVARIABLE_TYPE::SINGLE_REAL:	
+			p_info->assembler_list.activate_read_single();
+			asm_line.set( "CALL", "", "sub_read_single" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			break;
+		case CVARIABLE_TYPE::DOUBLE_REAL:	
+			p_info->assembler_list.activate_read_double();
+			asm_line.set( "CALL", "", "sub_read_double" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::MEMORY, "[HL]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[data_ptr]", COPERAND_TYPE::REGISTER, "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "C" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "B" );
-			p_info->assembler_list.body.push_back( asm_line );
-		}
-		else {
-			//	”’l•Ï”‚Ìê‡
-			p_info->assembler_list.add_label( "bios_fin", "0x3299" );
-			p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
-			p_info->assembler_list.activate_free_string();
-
-			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[data_ptr]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[data_ptr]", COPERAND_TYPE::REGISTER, "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_fin", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-
-			switch( variable.type ) {
-			default:
-			case CVARIABLE_TYPE::INTEGER:		
-				exp_type = CEXPRESSION_TYPE::INTEGER;		
-				p_info->assembler_list.add_label( "bios_frcint", "0x2f8a" );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcint", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_dac + 2]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "E" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "D" );
-				p_info->assembler_list.body.push_back( asm_line );
-				break;
-			case CVARIABLE_TYPE::SINGLE_REAL:	
-				p_info->assembler_list.activate_ld_de_single_real();
-				exp_type = CEXPRESSION_TYPE::SINGLE_REAL;	
-				p_info->assembler_list.add_label( "bios_frcsng", "0x2fb2" );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcsng", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				break;
-			case CVARIABLE_TYPE::DOUBLE_REAL:	
-				p_info->assembler_list.activate_ld_de_double_real();
-				exp_type = CEXPRESSION_TYPE::DOUBLE_REAL;	
-				p_info->assembler_list.add_label( "bios_frcdbl", "0x303a" );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				break;
-			}
+			break;
 		}
 		if( p_info->list.is_command_end() ) {
 			break;
 		}
-		if( p_info->list.p_position->s_word != "," ) {
+		if(p_info->list.p_position->type != CBASIC_WORD_TYPE::SYMBOL || p_info->list.p_position->s_word != ",") {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			break;
 		}

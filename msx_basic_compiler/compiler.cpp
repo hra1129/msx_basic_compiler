@@ -1957,6 +1957,39 @@ void CCOMPILER::optimize_ldir( void ) {
 			p->operand2.s_value	= "1";
 		}
 	}
+
+	//	CALL BIOS_FRCDBL
+	//	LD   A, 8
+	//  LD   [WORK_VALTYP], A
+	//  CALL BIOS_FRCINT/BIOS_FRCSNG
+	//	↓
+	//  CALL BIOS_FRCINT/BIOS_FRCSNG
+	//
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::CALL && p->condition == CCONDITION::NONE && p->operand1.type == COPERAND_TYPE::CONSTANT && p->operand1.s_value == "BIOS_FRCDBL"  ) {
+			p_next[0] = p;
+			p_next[1] = p + 1;
+			p_next[2] = p + 2;
+			p_next[3] = p + 3;
+			if( p_next[1] == this->info.assembler_list.body.end() || 
+				p_next[1]->type != CMNEMONIC_TYPE::LD || p_next[1]->operand1.type != COPERAND_TYPE::REGISTER || p_next[1]->operand1.s_value != "A" || p_next[1]->operand2.type != COPERAND_TYPE::CONSTANT || p_next[1]->operand2.s_value != "8" ) {
+				continue;
+			}
+			if( p_next[2] == this->info.assembler_list.body.end() || 
+				p_next[2]->type != CMNEMONIC_TYPE::LD || p_next[2]->operand1.type != COPERAND_TYPE::MEMORY || p_next[2]->operand1.s_value != "[WORK_VALTYP]" || p_next[2]->operand2.type != COPERAND_TYPE::REGISTER || p_next[2]->operand2.s_value != "A" ) {
+				continue;
+			}
+			if( p_next[3] == this->info.assembler_list.body.end() || 
+				p_next[3]->type != CMNEMONIC_TYPE::CALL || p_next[3]->condition != CCONDITION::NONE || p_next[3]->operand1.type != COPERAND_TYPE::CONSTANT || (p_next[3]->operand1.s_value != "BIOS_FRCINT" && p_next[3]->operand1.s_value != "BIOS_FRCSNG") ) {
+				continue;
+			}
+			//	マッチしたので置換
+			p--;
+			this->info.assembler_list.body.erase( p_next[2] );
+			this->info.assembler_list.body.erase( p_next[1] );
+			this->info.assembler_list.body.erase( p_next[0] );
+		}
+	}
 }
 
 // --------------------------------------------------------------------
