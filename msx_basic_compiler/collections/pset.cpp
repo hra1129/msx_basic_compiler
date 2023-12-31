@@ -34,7 +34,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "subrom_setc", "0x009D" );
 	p_info->assembler_list.add_label( "work_cloc", "0xF92A" );
 	p_info->assembler_list.add_label( "work_cmask", "0xF92C" );
-	p_info->assembler_list.add_label( "work_romver", "0x002D" );
+	p_info->assembler_list.add_label( "work_scrmod", "0xFCAF" );
 	p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 	s_label1 = p_info->get_auto_label();
 	s_label2 = p_info->get_auto_label();
@@ -93,13 +93,13 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "BC", "[work_cloc]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[work_romver]" );
+		asm_line.set( "LD", "", "A", "[work_scrmod]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "A" );
+		asm_line.set( "CP", "", "A", "5" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "JR", "NZ", s_label1 );
+		asm_line.set( "JR", "NC", s_label1 );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_pset" );		//	MSX1
+		asm_line.set( "CALL", "", "bios_pset" );		//	SCREEN2,3,4
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "JR", "", s_label2 );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -107,7 +107,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_extrom" );		//	MSX2 or over
+		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5`
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EI" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -151,13 +151,13 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "BC", "[work_cloc]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[work_romver]" );
+		asm_line.set( "LD", "", "A", "[work_scrmod]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "A" );
+		asm_line.set( "CP", "", "A", "5" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "JR", "NZ", s_label1 );
+		asm_line.set( "JR", "NC", s_label1 );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_pset" );		//	MSX1
+		asm_line.set( "CALL", "", "bios_pset" );		//	SCREEN2,3,4
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "JR", "", s_label2 );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -165,7 +165,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_extrom" );		//	MSX2 or over
+		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5`
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EI" );
 		p_info->assembler_list.body.push_back( asm_line );
