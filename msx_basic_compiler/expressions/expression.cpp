@@ -68,6 +68,7 @@
 #include "expression_peek.h"
 #include "expression_peekw.h"
 #include "expression_peeks.h"
+#include "expression_point.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
 #include "expression_sgn.h"
@@ -905,6 +906,25 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "PEEKS$" ) {
 		CEXPRESSION_PEEKS *p_term = new CEXPRESSION_PEEKS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand1 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ",", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "POINT" ) {
+		CEXPRESSION_POINT *p_term = new CEXPRESSION_POINT;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {

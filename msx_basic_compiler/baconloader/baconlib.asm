@@ -17,6 +17,7 @@ id_byte0	:= 0x002B
 id_byte1	:= 0x002C
 romver		:= 0x002D
 wrtvdp		:= 0x0047
+rdvrm		:= 0x004A
 wrtvrm		:= 0x004D
 setrd		:= 0x0050
 setwrt		:= 0x0053
@@ -27,6 +28,7 @@ chgmod		:= 0x005F
 calpat		:= 0x0084
 calatr		:= 0x0087
 chget		:= 0x009F
+readc		:= 0x011D
 rslreg		:= 0x0138
 calbas		:= 0x0159
 extrom		:= 0x015F
@@ -93,6 +95,8 @@ deccnt		:= 0xF7F4
 dac			:= 0xF7F6
 rndx		:= 0xF857
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
+cloc		:= 0xF92A
+cmask		:= 0xF92C
 dfpage		:= 0xFAF5
 acpage		:= 0xFAF6
 linwrk		:= 0xFC18
@@ -344,6 +348,8 @@ blib_entries::
 			jp		sub_settitle
 	blib_setscreen:
 			jp		sub_setscreen
+	blib_point:
+			jp		sub_point
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5512,6 +5518,178 @@ sub_setscreen::
 			out		[c], b
 			out		[c], d				; R#13 を復元
 			ei
+			ret
+			endscope
+
+; =============================================================================
+;	POINT( X, Y )
+;	input:
+;		DE .... X
+;		HL .... Y
+;	output:
+;		HL .... 読んだ値
+;	break:
+;		all
+;	comment:
+;		SCREEN0, SCREEN1 では、ネームテーブルの値を返す
+; =============================================================================
+			scope	sub_point
+sub_point::
+			ld		[cloc], de
+			ld		[cmask], hl
+			ld		a, [scrmod]
+			cp		a, 5
+			jp		nc, _screen5
+			cp		a, 2
+			jr		z, _screen2
+			jp		c, _screen0or1
+		_screen3or4:
+			rrca
+			jr		c, _screen3
+
+			; SCREEN2 または SCREEN4 の場合
+		_screen4:
+		_screen2:
+			; マスク値を計算する
+			ld		a, e
+			and		a, 0b0000_0111			; X[2:0] が 1byte内のビット位置。0 が MSB, 7 が LSB
+			ld		b, a
+			inc		b
+			ld		a, 0x01
+		_shift_loop:
+			rrca
+			djnz	_shift_loop
+			ld		[cmask], a
+			; アドレスを計算する
+			ld		a, e
+			and		a, 0b1111_1000
+			ld		e, a
+			ld		a, l
+			and		a, 0b0000_0111
+			or		a, e
+			ld		h, l
+			ld		l, a
+			srl		h
+			srl		h
+			srl		h
+			ld		[cloc], hl
+			; パターンジェネレーターテーブルを読む
+			call	rdvrm
+			ld		e, a
+			ld		a, [cmask]
+			and		a, e
+			ld		[cmask], a			; 指定の位置のドットが 0 か 1 か、
+			; カラーテーブルを読む
+			ld		bc, 0x2000
+			add		hl, bc
+			call	rdvrm
+			ld		e, a
+			ld		a, [cmask]
+			or		a, a
+			ld		a, e
+			jr		z, _skip_screen2_shift
+			rrca
+			rrca
+			rrca
+			rrca
+		_skip_screen2_shift:
+			and		a, 0x0F
+			ld		l, a
+			ld		h, 0
+			ret
+
+			; SCREEN3 の場合
+		_screen3:
+			; X座標
+			ld		a, e
+			srl		a					; 要らないビットを捨てる
+			srl		a					; 要らないビットを捨てる
+			srl		a					; 奇数座標なら Cf = 1, 偶数なら Cf = 0
+			ld		a, 0xF0
+			jr		nc, _screen3_mask
+			ld		a, 0x0F
+		_screen3_mask:
+			ld		[cmask], a			; マスク値設定
+
+			ld		a, e
+			and		a, 0b1111_1000
+			ld		e, a
+			; Y座標
+			ld		a, l
+			srl		a					; 要らないビットを捨てる
+			srl		a					; 要らないビットを捨てる
+			ld		h, a
+			and		a, 0b0000_0111
+			or		a, e
+			ld		l, a
+			srl		h
+			srl		h
+			srl		h
+			call	rdvrm
+			ld		l, a
+			ld		a, [cmask]
+			ld		b, a
+			and		a, l
+			rrc		b
+			jr		c, _skip_screen3_shift
+			rrca
+			rrca
+			rrca
+			rrca
+		_skip_screen3_shift:
+			ld		l, a
+			ld		h, 0
+			ret
+
+		_screen0or1:
+			rrca
+			jr		c, _screen1
+			; SCREEN0 の場合
+		_screen0:
+			ld		bc, 80
+			ld		a, [linlen]
+			cp		a, 41
+			jr		nc, _screen0_80
+		_screen0_40:
+			ld		c, 40
+		_screen0_80:
+			push	de
+			ex		de, hl
+			call	sub_umul
+			pop		de
+			add		hl, de				; HL = Y * (80 または 40) + X
+			call	rdvrm
+			ld		l, a
+			ld		h, 0
+			ret
+			; SCREEN1 の場合
+		_screen1:
+			ld		a, e
+			and		a, 0b00011111
+			ld		e, a
+			ld		a, l
+			rrca
+			rrca
+			rrca
+			ld		h, a
+			and		a, 0b11100000
+			or		a, e
+			ld		l, a
+			ld		a, h
+			and		a, 0b00011111
+			ld		h, a
+			ld		a, 0x18				; Top of Name Table is 0x1800
+			add		a, h
+			ld		h, a
+			call	rdvrm
+			ld		l, a
+			ld		h, 0
+			ret
+			; SCREEN5 の場合
+		_screen5:
+			call	readc
+			ld		l, a
+			ld		h, 0
 			ret
 			endscope
 

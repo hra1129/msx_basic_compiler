@@ -291,6 +291,7 @@
     <ClCompile Include="expressions\expression_peek.cpp" />
     <ClCompile Include="expressions\expression_peeks.cpp" />
     <ClCompile Include="expressions\expression_peekw.cpp" />
+    <ClCompile Include="expressions\expression_point.cpp" />
     <ClCompile Include="expressions\expression_right.cpp" />
     <ClCompile Include="expressions\expression_rnd.cpp" />
     <ClCompile Include="expressions\expression_sgn.cpp" />
@@ -456,6 +457,7 @@
     <ClInclude Include="expressions\expression_peek.h" />
     <ClInclude Include="expressions\expression_peeks.h" />
     <ClInclude Include="expressions\expression_peekw.h" />
+    <ClInclude Include="expressions\expression_point.h" />
     <ClInclude Include="expressions\expression_right.h" />
     <ClInclude Include="expressions\expression_rnd.h" />
     <ClInclude Include="expressions\expression_sgn.h" />
