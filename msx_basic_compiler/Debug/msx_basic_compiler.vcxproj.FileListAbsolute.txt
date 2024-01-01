@@ -1,2 +1,3 @@
 C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
 D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
+C:\Users\TAKAYUKI Hara\Documents\GitHub\my_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
