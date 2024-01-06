@@ -162,6 +162,7 @@
     <ClCompile Include="collections\bload.cpp" />
     <ClCompile Include="collections\bsave.cpp" />
     <ClCompile Include="collections\call.cpp" />
+    <ClCompile Include="collections\circle.cpp" />
     <ClCompile Include="collections\clear.cpp" />
     <ClCompile Include="collections\cls.cpp" />
     <ClCompile Include="collections\color.cpp" />
@@ -326,6 +327,7 @@
     <ClInclude Include="collections\bload.h" />
     <ClInclude Include="collections\bsave.h" />
     <ClInclude Include="collections\call.h" />
+    <ClInclude Include="collections\circle.h" />
     <ClInclude Include="collections\clear.h" />
     <ClInclude Include="collections\cls.h" />
     <ClInclude Include="collections\color.h" />

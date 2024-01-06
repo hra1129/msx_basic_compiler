@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\TAKAYUKI Hara\Documents\GitHub\my_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe</FullPath>
+      <FullPath>D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Release\msx_bacon.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

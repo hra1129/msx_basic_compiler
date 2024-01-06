@@ -2543,6 +2543,136 @@ void CASSEMBLER_LIST::activate_read_double(void) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_circle( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_circle" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_circle" );
+	this->activate_ld_arg_single_real();
+
+	this->add_label( "work_aspct1", "0x0f40b" );
+	this->add_label( "work_aspct2", "0x0f40d" );
+	this->add_label( "work_valtyp", "0x0f663" );
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "blib_get_sin_table", "0x40de" );
+	this->add_label( "bios_decmul", "0x027e6" );
+	this->add_label( "bios_int", "0x030cf" );
+	this->add_label( "work_buf", "0x0f55e" );
+	this->add_label( "work_scrmod", "0x0fcaf" );
+
+	asm_line.set( "COMMENT", "", "Circle routine" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_circle" );
+	this->subroutines.push_back( asm_line );
+	//	‚’¼”¼Œa‚ðŒvŽZ‚·‚é
+	asm_line.set( "LD", "", "HL", "[work_cxoff]" );		//	…•½”¼Œa
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_dac + 2]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "2" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_valtyp]", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "work_aspect" );		//	”ä—¦
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "ld_arg_single_real" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_decmul" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_int" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[work_dac + 2]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[work_aspct2]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RLCA" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NC", "_sub_circle_skip1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "SRL", "", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RR", "", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_sub_circle_skip1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_cyoff]", "HL" );
+	this->subroutines.push_back( asm_line );
+	//	SCREEN6 or 7 ‚È‚ç [bug+64] = 1, ‚»‚êˆÈŠO‚Í 0
+	asm_line.set( "LD", "", "A", "[work_aspct1 + 1]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RRCA" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_buf + 64]", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "A" );
+	this->subroutines.push_back( asm_line );
+	//	’†S“_‚ÌˆÊ’u‚É‚æ‚èA‰~‚Ì4ÛŒÀ‚Ì•`‰æ‘ÎÛŠO‚ð”»’è buf+65 = [0] ... buf+68 = [3] (0‚È‚ç‘ÎÛA0ˆÈŠO‚È‚ç‘ÎÛŠO)
+	asm_line.set( "LD", "", "A", "[work_gxpos + 1]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "AND", "", "A", "0x80" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_buf + 66]", "A" );		//	[1]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_buf + 67]", "A" );		//	[2]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_sub_circle_skip1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RRCA" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_sub_circle_skip1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "AND", "", "A", "0x7F" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_buf + 65]", "A" );		//	[0]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_buf + 68]", "A" );		//	[3]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[work_gypos + 1]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_buf + 65" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "AND", "", "A", "0x80" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "A" );					//	[0]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "A" );					//	[1]
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "AND", "", "A", "0x7F" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+
+
+
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
