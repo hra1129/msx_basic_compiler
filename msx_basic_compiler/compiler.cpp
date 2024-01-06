@@ -192,7 +192,12 @@ void CCOMPILER::line_compile( bool is_top ) {
 			//	何も処理されなかった場合、Syntax error にしてそのステートメントを読み飛ばす
 			this->info.list.update_current_line_no();
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
-			this->info.list.skip_statement();
+			if( !this->info.list.is_line_end() && this->info.list.p_position->s_word == "ELSE" ) {
+				this->info.list.p_position++;
+			}
+			else {
+				this->info.list.skip_statement();
+			}
 		}
 	}
 }
