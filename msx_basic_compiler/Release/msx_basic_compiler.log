@@ -1,4 +1,6 @@
-﻿  assembler_list.cpp
+﻿  assembler_line.cpp
+  assembler_list.cpp
+  basic_list.cpp
   beep.cpp
   bload.cpp
   bsave.cpp
@@ -16,9 +18,9 @@
   defsng.cpp
   defstr.cpp
   defusr.cpp
+  コンパイル中...
   dim.cpp
   end.cpp
-  コンパイル中...
   erase.cpp
   error.cpp
   files.cpp
@@ -37,9 +39,9 @@
   lset.cpp
   mid.cpp
   name.cpp
+  コンパイル中...
   next.cpp
   on_goto.cpp
-  コンパイル中...
   on_interval.cpp
   on_key.cpp
   on_sprite.cpp
@@ -58,9 +60,9 @@
   restore.cpp
   return.cpp
   run.cpp
+  コンパイル中...
   screen.cpp
   setadjust.cpp
-  コンパイル中...
   setbeep.cpp
   setpage.cpp
   setprompt.cpp
@@ -79,9 +81,9 @@
   expression_atn.cpp
   expression_base.cpp
   expression_bin.cpp
+  コンパイル中...
   expression_cdbl.cpp
   expression_chr.cpp
-  コンパイル中...
   expression_chrhex.cpp
   expression_cint.cpp
   expression_cos.cpp
@@ -100,9 +102,9 @@
   expression_inp.cpp
   expression_input.cpp
   expression_instr.cpp
+  コンパイル中...
   expression_int.cpp
   expression_irnd.cpp
-  コンパイル中...
   expression_left.cpp
   expression_len.cpp
   expression_log.cpp
@@ -121,9 +123,9 @@
   expression_operator_gt.cpp
   expression_operator_imp.cpp
   expression_operator_intdiv.cpp
+  コンパイル中...
   expression_operator_le.cpp
   expression_operator_lt.cpp
-  コンパイル中...
   expression_operator_minus.cpp
   expression_operator_mod.cpp
   expression_operator_mul.cpp
@@ -142,9 +144,9 @@
   expression_rnd.cpp
   expression_sgn.cpp
   expression_sin.cpp
+  コンパイル中...
   expression_space.cpp
   expression_sqr.cpp
-  コンパイル中...
   expression_stick.cpp
   expression_str.cpp
   expression_strig.cpp
@@ -162,8 +164,8 @@
   msx_basic_compiler.cpp
   variable_manager.cpp
   コード生成しています。
-  257 of 2410 functions (10.7%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    57 functions had inline decision re-evaluated but remain unchanged
+  254 of 2411 functions (10.5%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    51 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

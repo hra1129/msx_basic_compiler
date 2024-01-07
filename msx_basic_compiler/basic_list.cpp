@@ -508,24 +508,31 @@ CBASIC_WORD CBASIC_LIST::get_decimal( const std::string s, const std::string s_t
 			d = d * pow( 10., sign * exp );
 		}
 		decimal = int( d );
+		s_word.s_word = std::to_string( decimal );
 		if( s.size() < 5 || (s.size() == 5 && decimal < 32768) ) {
 			//	®”Šm’è
-			s_word.s_word = std::to_string( decimal );
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
+		s_word.type = CBASIC_WORD_TYPE::BIG_INTEGER;
+		return s_word;
 	}
 	//	ŽÀ”•\Œ»‚¾‚Á‚½ê‡
-	CDOUBLE_REAL v;
-	v.set( s );
 	s_word.s_word = s;
+	this->convert_big_integer( s_word );
+	return s_word;
+}
+
+// --------------------------------------------------------------------
+void CBASIC_LIST::convert_big_integer( CBASIC_WORD& s_word ) {
+	CDOUBLE_REAL v;
+	v.set( s_word.s_word );
 	if( v.image[4] == 0 && v.image[5] == 0 && v.image[6] == 0 && v.image[7] == 0 ) {
 		s_word.type = CBASIC_WORD_TYPE::SINGLE_REAL;
 	}
 	else {
 		s_word.type = CBASIC_WORD_TYPE::DOUBLE_REAL;
 	}
-	return s_word;
 }
 
 // --------------------------------------------------------------------
@@ -838,7 +845,7 @@ bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 				}
 				s_word.line_no = line_no;
 				if( is_last_jump ) {
-					if( s_word.type == CBASIC_WORD_TYPE::INTEGER ) {
+					if( s_word.type == CBASIC_WORD_TYPE::INTEGER || s_word.type == CBASIC_WORD_TYPE::BIG_INTEGER ) {
 						s_word.type = CBASIC_WORD_TYPE::LINE_NO;
 						this->jump_target_line_no.push_back( std::stoi( s_word.s_word ) );
 					}
@@ -856,6 +863,9 @@ bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 					}
 				}
 				else {
+					if( s_word.type == CBASIC_WORD_TYPE::BIG_INTEGER ) {
+						this->convert_big_integer( s_word );
+					}
 					if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "RESTORE" || s_word.s_word == "RUN" || s_word.s_word == "GOTO" || s_word.s_word == "GOSUB" || s_word.s_word == "RETURN" || s_word.s_word == "THEN" || s_word.s_word == "ELSE") ) {
 						is_last_jump = true;
 					}

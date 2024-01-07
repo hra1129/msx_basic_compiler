@@ -29,6 +29,7 @@ enum class CBASIC_WORD_TYPE {
 	RESERVED_WORD,			//	7:予約語
 	LINE_NO,				//	8:行番号
 	COMMENT,				//	9:コメント
+	BIG_INTEGER,			//	10:一時的な巨大な整数
 };
 
 // --------------------------------------------------------------------

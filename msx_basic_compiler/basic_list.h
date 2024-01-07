@@ -60,6 +60,7 @@ private:
 
 	bool load_binary( CERROR_LIST &errors );
 	bool load_ascii( CERROR_LIST &errors );
+	void convert_big_integer( CBASIC_WORD& s_word );
 
 public:
 	std::string s_source_type;
