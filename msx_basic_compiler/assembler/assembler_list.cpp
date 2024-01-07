@@ -2561,6 +2561,7 @@ void CASSEMBLER_LIST::activate_circle( void ) {
 	this->add_label( "bios_int", "0x030cf" );
 	this->add_label( "work_buf", "0x0f55e" );
 	this->add_label( "work_scrmod", "0x0fcaf" );
+	this->add_label( "blib_get_sin_table", "0x040de" );
 
 	asm_line.set( "COMMENT", "", "Circle routine" );
 	this->subroutines.push_back( asm_line );
@@ -2599,25 +2600,25 @@ void CASSEMBLER_LIST::activate_circle( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_cyoff]", "HL" );
 	this->subroutines.push_back( asm_line );
-	//	SCREEN6 or 7 なら [bug+64] = 1, それ以外は 0
+	//	SCREEN6 or 7 なら [bug+65] = 1, それ以外は 0
 	asm_line.set( "LD", "", "A", "[work_aspct1 + 1]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RRCA" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_buf + 64]", "A" );
+	asm_line.set( "LD", "", "[work_buf + 65]", "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "C", "A" );
 	this->subroutines.push_back( asm_line );
-	//	中心点の位置により、円の4象限の描画対象外を判定 buf+65 = [0] ... buf+68 = [3] (0なら対象、0以外なら対象外)
+	//	中心点の位置により、円の4象限の描画対象外を判定 buf+66 = [0] ... buf+69 = [3] (0なら対象、0以外なら対象外)
 	asm_line.set( "LD", "", "A", "[work_gxpos + 1]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "B", "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "AND", "", "A", "0x80" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_buf + 66]", "A" );		//	[1]
+	asm_line.set( "LD", "", "[work_buf + 67]", "A" );		//	[1]
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_buf + 67]", "A" );		//	[2]
+	asm_line.set( "LD", "", "[work_buf + 68]", "A" );		//	[2]
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "B" );
 	this->subroutines.push_back( asm_line );
@@ -2633,15 +2634,15 @@ void CASSEMBLER_LIST::activate_circle( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "AND", "", "A", "0x7F" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_buf + 65]", "A" );		//	[0]
+	asm_line.set( "LD", "", "[work_buf + 66]", "A" );		//	[0]
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_buf + 68]", "A" );		//	[3]
+	asm_line.set( "LD", "", "[work_buf + 69]", "A" );		//	[3]
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[work_gypos + 1]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "B", "A" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "work_buf + 65" );
+	asm_line.set( "LD", "", "HL", "work_buf + 66" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "AND", "", "A", "0x80" );
 	this->subroutines.push_back( asm_line );
@@ -2666,6 +2667,25 @@ void CASSEMBLER_LIST::activate_circle( void ) {
 	asm_line.set( "AND", "", "A", "0x7F" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "OR", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+
+
+
+
+	//	sinテーブルをゲットする
+	asm_line.set( "LD", "", "IX", "blib_get_sin_table" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+	//	θ = 45°→0°
+	asm_line.set( "LD", "", "B", "32" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_sub_circle_theta_loop" );
+	this->subroutines.push_back( asm_line );
+	//		VX = cosθ = sin(90° -θ), VY = sinθ
+	asm_line.set( "LD", "", "A", "work_buf & 0x0FF" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD", "", "A", "B" );
 	this->subroutines.push_back( asm_line );
 
 
