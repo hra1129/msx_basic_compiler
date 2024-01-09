@@ -2626,11 +2626,11 @@ void CASSEMBLER_LIST::activate_circle( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "DEC", "", "C" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "JR", "Z", "_sub_circle_skip1" );
+	asm_line.set( "JR", "Z", "_sub_circle_skip2" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RRCA" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_sub_circle_skip1" );
+	asm_line.set( "LABEL", "", "_sub_circle_skip2" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "AND", "", "A", "0x7F" );
 	this->subroutines.push_back( asm_line );
