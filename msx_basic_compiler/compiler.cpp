@@ -9,6 +9,7 @@
 #include "collections/bload.h"
 #include "collections/bsave.h"
 #include "collections/call.h"
+#include "collections/circle.h"
 #include "collections/clear.h"
 #include "collections/cls.h"
 #include "collections/color.h"
@@ -85,6 +86,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CBSAVE );
 	this->collection.push_back( new CCALL );
 	this->collection.push_back( new CCLS );
+	this->collection.push_back( new CCIRCLE );
 	this->collection.push_back( new CCLEAR );
 	this->collection.push_back( new CCOMMENT );
 	this->collection.push_back( new CCOLOR_SPRITE );	//	COLOR ÇÊÇËÇ‡è„Ç…Ç»ÇØÇÍÇŒÇ»ÇÁÇ»Ç¢
