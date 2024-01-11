@@ -110,6 +110,8 @@ test_001_sin_cos::
 			push		de
 			push		af
 			call		_sub_circle_cos
+			ld			de, 100
+			call		_sub_circle_mul
 			pop			af
 			pop			de
 			ex			de, hl
@@ -122,6 +124,8 @@ test_001_sin_cos::
 			push		de
 			push		af
 			call		_sub_circle_sin
+			ld			de, 100
+			call		_sub_circle_mul
 			pop			af
 			pop			de
 			ex			de, hl
@@ -242,31 +246,38 @@ sub_circle::
 	;		éüÇÃäpìx
 	
 
-	;	HL = HL * DE >> 8
+	;	HL = HL * DE >> 8  Å¶HL=ïÑçÜïtÇ´, DE=ïÑçÜñ≥Çµ
+	;	   = (HL * E >> 8) + HL * D
 	_sub_circle_mul:
-			LD		C, L
-			LD		B, H
+			LD		C, E
+			LD		B, D
+			EX		DE, HL
 			LD		HL, 0
 			LD		A, 8
 	_sub_circle_mul_1st8bit:
-			SRL		B
-			RR		C
+			SLA		L
+			RL		H
+			SLA		C
 			JR		NC, _sub_circle_mul_1st8bit_skip1
 			ADD		HL, DE
 	_sub_circle_mul_1st8bit_skip1:
 			DEC		A
 			JR		NZ, _sub_circle_mul_1st8bit
 			LD		L, H
+			LD		A, H
 			LD		H, 0
+			ADD		A, A
+			JR		NC, _sub_circle_mul_2nd8bit
+			DEC		H
 	_sub_circle_mul_2nd8bit:
 			SRL		B
-			RR		C
 			JR		NC, _sub_circle_mul_2nd8bit_skip1
 			ADD		HL, DE
 	_sub_circle_mul_2nd8bit_skip1:
-			LD		A, C
-			OR		A, B
-			JR		NZ, _sub_circle_mul_2nd8bit
+			SLA		E
+			RL		D
+			INC		B
+			DJNZ	_sub_circle_mul_2nd8bit
 			RET
 	;	cosÉ∆Çï‘Ç∑: A = É∆ (0:0ÅãÅ`255:359Åã) Å® A = cosÉ∆
 	_sub_circle_cos:
