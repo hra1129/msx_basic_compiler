@@ -40,7 +40,7 @@ bios_setatr				:= 0x0011A
 			DEFW		END_ADDRESS
 			DEFW		START_ADDRESS
 
-			ORG			0X8010
+			ORG			0xA000
 START_ADDRESS::
 			; SCREEN 5
 			ld			a, 5
@@ -98,6 +98,46 @@ ld_arg_single_real:
 			LD			A, 8
 			LD			[WORK_VALTYP], A
 			RET
+; -----------------------------------------------------------------------------
+			scope		test_001_sin_cos
+test_001_sin_cos::
+	;	sinテーブルをゲットする
+			LD			IX, blib_get_sin_table
+			CALL		call_blib
+			xor			a, a
+			ld			de, result_table
+	loop:
+			push		de
+			push		af
+			call		_sub_circle_cos
+			pop			af
+			pop			de
+			ex			de, hl
+			ld			[hl], e
+			inc			hl
+			ld			[hl], d
+			inc			hl
+			ex			de, hl
+
+			push		de
+			push		af
+			call		_sub_circle_sin
+			pop			af
+			pop			de
+			ex			de, hl
+			ld			[hl], e
+			inc			hl
+			ld			[hl], d
+			inc			hl
+			ex			de, hl
+
+			inc			a
+			jr			nz, loop
+			ret
+
+result_table:
+			space		256*2*2
+			endscope
 
 ; Circle routine --------------------------------------------------------------
 sub_circle::
@@ -193,7 +233,7 @@ sub_circle::
 	;		Y1 = sinθ* 垂直半径 + 中心Y座標
 			POP		AF
 			PUSH	AF
-			CALL	_sub_circle_cos			; HL = sinθ
+			CALL	_sub_circle_sin			; HL = sinθ
 			LD		DE, [work_circle_radiusy]
 			CALL	_sub_circle_mul
 			LD		DE, [work_circle_centery]
@@ -230,10 +270,13 @@ sub_circle::
 			RET
 	;	cosθを返す: A = θ (0:0°～255:359°) → A = cosθ
 	_sub_circle_cos:
-			ADD		A, 64
+			SUB		A, 64
 	;	sinθを返す: A = θ (0:0°～255:359°) → A = sinθ
 	_sub_circle_sin:
 			LD		B, A
+			AND		A, 0x3F
+			LD		A, B
+			JR		Z, _sub_circle_sin_special
 			BIT		6, A
 			JR		Z, _sub_circle_sin_skip1
 			NEG
@@ -246,10 +289,20 @@ sub_circle::
 			LD		H, 0
 			LD		L, A
 			RL		B
-			RET		NC
+			RET		C
 			CPL
 			DEC		H
 			LD		L, A
 			INC		HL
 			ret
+	_sub_circle_sin_special:
+			LD		HL, 0
+			BIT		6, A
+			RET		Z
+			INC		H
+			RLA
+			RET		C
+			DEC		H
+			DEC		H
+			RET
 END_ADDRESS:
