@@ -5707,11 +5707,97 @@ sub_point::
 ;		[0°, 90°) の sin値を 64分解能で返す
 ; =============================================================================
 			scope	sub_get_sin_table
+aspct1				:= 0x0f40b
+gxpos				:= 0x0fcb3
+circle_x_shift		:= buf + 65
+circle_quadrant0	:= buf + 66
+circle_quadrant1	:= buf + 67
+circle_quadrant2	:= buf + 68
+circle_quadrant3	:= buf + 69
+circle_centerx		:= buf + 70			;	中心座標X
+circle_centery		:= buf + 72			;	中心座標Y
+circle_radiusx		:= buf + 74			;	水平半径
+circle_radiusy		:= buf + 76			;	垂直半径
+cxoff				:= 0x0f945			;	水平オフセット
+cyoff				:= 0x0f947			;	垂直オフセット
+csclxy				:= 0x0F941
+
 sub_get_sin_table::
 			ld		hl, _sin_table
 			ld		de, buf
 			ld		bc, 64
 			ldir
+
+			;	screen6 or 7 なら [buf+65] = 1, それ以外は 0
+			ld		a, [aspct1 + 1]
+			rrca
+			ld		[circle_x_shift], a
+			ld		c, a
+			;	中心点の位置により、円の4象限の描画対象外を判定 buf+66 = [0] ... buf+69 = [3] (0なら対象、0以外なら対象外)
+			ld		a, [circle_centerx + 1]
+			ld		b, a
+			and		a, 0x80
+			ld		hl, circle_quadrant1
+			ld		[hl], a		;	[1]
+			inc		hl
+			ld		[hl], a		;	[2]
+			inc		hl
+			ld		a, b
+			inc		c
+			dec		c
+			jr		z, _sub_circle_skip2
+			rrca
+	_sub_circle_skip2:
+			and		a, 0x7f
+			ld		[circle_quadrant0], a			;	[0]
+			ld		[hl], a							;	[3]
+
+			ld		a, [circle_centery + 1]
+			ld		b, a
+			ld		hl, circle_quadrant0
+			and		a, 0x80
+			ld		c, a
+			or		a, [hl]
+			ld		[hl], a					;	[0]
+			inc		hl
+			ld		a, c
+			or		a, [hl]
+			ld		[hl], a					;	[1]
+			inc		hl
+
+			ld		a, b
+			and		a, 0x7f
+			ld		c, a
+			or		a, [hl]
+			ld		[hl], a					;	[2]
+			inc		hl
+			ld		a, c
+			or		a, [hl]
+			ld		[hl], a					;	[3]
+			inc		hl
+
+	;	大きい方の半径を見て円の分解能を決める
+	_sub_circle_calc_resolution::
+			ld		hl, [circle_radiusx]
+			ld		de, [circle_radiusy]
+			rst		0x20					; CP HL, DE
+			jr		nc, _sub_circle_bigger_hl
+			ex		de, hl
+	_sub_circle_bigger_hl:
+			ld		hl, csclxy
+			inc		d
+			dec		d
+			ld		c, 1
+			ld		[hl], c					; 256以上なら分解能 256
+			ret		nz
+			ld		a, e
+			ld		b, 5
+	_sub_circle_resolution:
+			add		a, a
+			ret		c
+			rl		c
+			ld		[hl], c
+			djnz	_sub_circle_resolution
 			ret
 	_sin_table:
 			db		0, 6, 12, 18, 25, 31, 37, 43, 49, 56, 62, 68, 74, 80, 86, 92
