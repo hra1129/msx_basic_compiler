@@ -1,9 +1,11 @@
 BIOS_CALSLT         	:= 0x0001C
+bios_frcsng				:= 0x02FB2
 bios_decmul				:= 0x027e6
-bios_int				:= 0x030cf
+bios_frcint				:= 0x02f8a
 blib_get_sin_table		:= 0x040de
 bios_line				:= 0x058FC
 WORK_BLIBSLOT			:= 0x0F3D3
+work_rg9sav				:= 0x0FFE8
 work_aspct1				:= 0x0f40b
 work_aspct2				:= 0x0f40d
 work_buf				:= 0x0f55e
@@ -69,11 +71,30 @@ START_ADDRESS::
 			ld			de, work_crcsum
 			call		ld_de_hl_for_single
 			; 比率
-			ld			hl, single_1
+			ld			hl, single_0p5
 			ld			de, work_aspect
+			call		ld_de_hl_for_single
 			; 色
 			ld			a, 15
 			call		bios_setatr
+			; 描画
+			call		sub_circle
+
+			; 半径
+			ld			hl, 50
+			ld			[work_circle_radiusx], hl
+			; 描画
+			call		sub_circle
+
+			; 半径
+			ld			hl, 25
+			ld			[work_circle_radiusx], hl
+			; 描画
+			call		sub_circle
+
+			; 半径
+			ld			hl, 150
+			ld			[work_circle_radiusx], hl
 			; 描画
 			call		sub_circle
 			RET
@@ -81,6 +102,8 @@ single_0:
 			defb		0x00, 0x00, 0x00, 0x00
 single_1:
 			defb		0x41, 0x10, 0x00, 0x00
+single_0p5:
+			defb		0x40, 0x50, 0x00, 0x00
 
 ; -----------------------------------------------------------------------------
 ld_de_hl_for_single:
@@ -103,62 +126,19 @@ ld_arg_single_real:
 			LD			A, 8
 			LD			[WORK_VALTYP], A
 			RET
-; -----------------------------------------------------------------------------
-			scope		test_001_sin_cos
-test_001_sin_cos::
-	;	sinテーブルをゲットする
-			LD			IX, blib_get_sin_table
-			CALL		call_blib
-			xor			a, a
-			ld			de, result_table
-	loop:
-			push		de
-			push		af
-			call		_sub_circle_cos
-			ld			de, 100
-			call		_sub_circle_mul
-			pop			af
-			pop			de
-			ex			de, hl
-			ld			[hl], e
-			inc			hl
-			ld			[hl], d
-			inc			hl
-			ex			de, hl
-
-			push		de
-			push		af
-			call		_sub_circle_sin
-			ld			de, 100
-			call		_sub_circle_mul
-			pop			af
-			pop			de
-			ex			de, hl
-			ld			[hl], e
-			inc			hl
-			ld			[hl], d
-			inc			hl
-			ex			de, hl
-
-			inc			a
-			jr			nz, loop
-			ret
-
-result_table:
-			space		256*2*2
-			endscope
 
 ; Circle routine --------------------------------------------------------------
 sub_circle::
 	;	垂直半径を計算する
+			LD		HL, work_aspect					;	比率
+			CALL	ld_arg_single_real
 			LD		HL, [work_circle_radiusx]		;	水平半径
 			LD		[work_dac + 2], HL
 			LD		A, 2
 			LD		[work_valtyp], A
-			LD		DE, work_aspect		;	比率
-			CALL	ld_arg_single_real
+			CALL	bios_frcsng
 			CALL	bios_decmul
-			CALL	bios_int
+			CALL	bios_frcint
 			LD		HL, [work_dac + 2]
 			LD		A, [work_aspct2]
 			RLCA
@@ -173,12 +153,14 @@ sub_circle::
 	;	半径初期値
 			LD		HL, [work_circle_radiusx]
 			LD		[work_circle_cxoff1], HL
+			LD		HL, [work_circle_radiusy]
 			LD		[work_circle_cyoff2], HL
 			LD		HL, 0
 			LD		[work_circle_cxoff2], HL
 			LD		[work_circle_cyoff1], HL
 	;	θ = 0°→45°
-			LD		B, L					; B = 1
+			LD		A, [work_csclxy]
+			LD		B, A
 			INC		B
 			PUSH	BC
 	_sub_circle_theta_loop:
@@ -191,11 +173,11 @@ sub_circle::
 	;		X1 = cosθ * 水平半径, Y2 = cosθ * 垂直半径
 			CALL	_sub_circle_cos			; HL = cosθ
 			PUSH	HL
-			LD		DE, [work_circle_radiusx]
+			LD		BC, [work_circle_radiusx]
 			CALL	_sub_circle_mul
 			LD		[work_circle_cxoff1], HL
 			POP		HL
-			LD		DE, [work_circle_radiusy]
+			LD		BC, [work_circle_radiusy]
 			CALL	_sub_circle_mul
 			LD		[work_circle_cyoff2], HL
 	;		Y1 = sinθ* 垂直半径, X2 = sinθ * 水平半径
@@ -203,11 +185,11 @@ sub_circle::
 			PUSH	AF
 			CALL	_sub_circle_sin			; HL = sinθ
 			PUSH	HL
-			LD		DE, [work_circle_radiusy]
+			LD		BC, [work_circle_radiusy]
 			CALL	_sub_circle_mul
 			LD		[work_circle_cyoff1], HL
 			POP		HL
-			LD		DE, [work_circle_radiusx]
+			LD		BC, [work_circle_radiusx]
 			CALL	_sub_circle_mul
 			LD		[work_circle_cxoff2], HL
 	;		第0象限 (0～90°)
@@ -256,12 +238,12 @@ sub_circle::
 
 	_sub_circle_quadrant_end:
 			POP		BC
-			INC		B
 			BIT		5, B
 			JP		NZ, _sub_circle_line_process
+			LD		A, [work_csclxy]
+			ADD		A, B
+			LD		B, A
 			PUSH	BC
-
-
 			JP		_sub_circle_theta_loop
 
 	; A の bit0 が 0 なら X符号反転、bit1 が 0 なら Y符号反転
@@ -323,7 +305,7 @@ sub_circle::
 	_sub_circle_quadrant_process_set_pcy1:
 			EX		DE, HL
 
-			CALL	bios_line
+			CALL	_sub_circle_draw_line
 			POP		AF
 
 			PUSH	AF
@@ -382,18 +364,123 @@ sub_circle::
 	_sub_circle_quadrant_process_set_pcy2:
 			EX		DE, HL
 
-			CALL	bios_line
+			CALL	_sub_circle_draw_line
 			POP		AF
 			RET
+
+	_sub_circle_draw_line:
+			LD		HL, [work_gxpos]
+			CALL	_sub_circle_x_clip
+			LD		[work_gxpos], HL
+			LD		L, C
+			LD		H, B
+			JR		C, _sub_circle_x_reject_check
+			CALL	_sub_circle_x_clip
+			LD		C, L
+			LD		B, H
+			JR		_sub_circle_draw_line_y
+	_sub_circle_x_reject_check:
+			CALL	_sub_circle_x_clip
+			LD		C, L
+			LD		B, H
+			JR		NC, _sub_circle_draw_line_y
+			LD		A, [work_gxpos+1]
+			XOR		A, B
+			RET		Z								; X1 も X2 もクリッピングして、かつ同じ値なら描画不要
+	_sub_circle_draw_line_y:
+			LD		HL, [work_gypos]
+			CALL	_sub_circle_y_clip
+			LD		[work_gypos], HL
+			LD		L, E
+			LD		H, D
+			JR		C, _sub_circle_y_reject_check
+			CALL	_sub_circle_y_clip
+			LD		E, L
+			LD		D, H
+			JP		bios_line
+	_sub_circle_y_reject_check:
+			CALL	_sub_circle_y_clip
+			LD		E, L
+			LD		D, H
+			JP		NC, bios_line
+			LD		A, [work_gypos+1]
+			XOR		A, B
+			JP		NZ, bios_line
+			RET
+
+	; HL に入っている X座標をクリップ
+	; クリッピングした場合、Cy=1 で戻る
+	_sub_circle_x_clip:
+			LD		A, H
+			RLA
+			JR		NC, _sub_circle_x_clip_skip1
+			LD		HL, 0
+			RET									; 負数を 0 にクリップした場合。Cy=1 で戻る
+	_sub_circle_x_clip_skip1:
+			LD		A, [work_aspct1 + 1]
+			DEC		A
+			CP		A, H
+			RET		NC							; 0～255 (511) の範囲を超えていない場合は Cy=0 で戻る
+			LD		HL, [work_aspct1]
+			DEC		HL
+			SCF
+			RET									; 255 (511) に置換して Cy=1 で戻る
+
+	; HL に入っている Y座標をクリップ
+	; クリッピングした場合、Cy=1 で戻る
+	_sub_circle_y_clip:
+			LD		A, H
+			RLA
+			JR		NC, _sub_circle_y_clip_skip1
+			LD		HL, 0
+			RET									; 負数を 0 にクリップした場合。Cy=1 で戻る
+	_sub_circle_y_clip_skip1:
+			LD		A, H
+			OR		A, A
+			JR		Z, _sub_circle_y_clip_skip2
+			LD		HL, 211
+			LD		A, [work_rg9sav]
+			RLA
+			RET		C							; 211にクリップした場合。Cy=1 で戻る
+			LD		L, 191
+			CCF
+			RET									; 191にクリップした場合。Cy=1 で戻る
+	_sub_circle_y_clip_skip2:
+			LD		A, L
+			CP		A, 192
+			CCF
+			RET		NC							; クリップの必要が無い場合。Cy=0 で戻る。
+			LD		A, [work_rg9sav]
+			RLA
+			JR		NC, _sub_circle_y_clip_192
+			LD		A, L
+			CP		A, 212
+			CCF
+			RET		NC							; クリップの必要が無い場合。Cy=0 で戻る。
+			LD		L, 211
+			RET									; 211にクリップした場合。Cy=1 で戻る。
+	_sub_circle_y_clip_192:
+			LD		L, 191
+			SCF
+			RET									; 191にクリップした場合。Cy=1 で戻る。
 
 	_sub_circle_line_process:
 			RET
 
-	;	HL = HL * DE >> 8  ※HL=符号付き, DE=符号無し
-	;	   = (HL * E >> 8) + HL * D
+	;	HL = HL * BC >> 8  ※HL=符号付き, BC=符号無し
+	;	   = (HL * C >> 8) + HL * B
 	_sub_circle_mul:
-			LD		C, E
-			LD		B, D
+			LD		A, H
+			OR		A, A
+			PUSH	AF								; 負数なら S=1
+			JP		P, _sub_circle_skip_abs
+			CPL
+			LD		H, A
+			LD		A, L
+			CPL
+			LD		L, A
+			INC		HL
+	_sub_circle_skip_abs:
 			EX		DE, HL
 			LD		HL, 0
 			LD		A, 8
@@ -406,12 +493,11 @@ sub_circle::
 	_sub_circle_mul_1st8bit_skip1:
 			DEC		A
 			JR		NZ, _sub_circle_mul_1st8bit
+			RL		L
 			LD		L, H
-			LD		A, H
 			LD		H, 0
-			ADD		A, A
 			JR		NC, _sub_circle_mul_2nd8bit
-			DEC		H
+			INC		HL
 	_sub_circle_mul_2nd8bit:
 			SRL		B
 			JR		NC, _sub_circle_mul_2nd8bit_skip1
@@ -421,6 +507,15 @@ sub_circle::
 			RL		D
 			INC		B
 			DJNZ	_sub_circle_mul_2nd8bit
+			POP		AF
+			RET		P
+			LD		A, H
+			CPL
+			LD		H, A
+			LD		A, L
+			CPL
+			LD		L, A
+			INC		HL
 			RET
 	;	cosθを返す: A = θ (0:0°～255:359°) → A = cosθ
 	_sub_circle_cos:
