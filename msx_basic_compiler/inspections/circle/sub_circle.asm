@@ -40,6 +40,8 @@ work_aspect				:= 0x0F931			;	比率 single real
 work_cpcnt				:= 0x0F939			;	開始点 single real
 work_crcsum				:= 0x0F93D			;	終了点 single real
 work_csclxy				:= 0x0F941			;	円弧の分解能
+work_savea				:= 0x0F942			;	未使用
+work_savem				:= 0x0F944			;	0: 開始角 > 終了角、1: 開始角 < 終了角
 work_cxoff				:= 0x0F945			;	水平半径
 work_cyoff				:= 0x0F947			;	垂直半径
 bios_setatr				:= 0x0011A
@@ -59,17 +61,6 @@ START_ADDRESS::
 			ld			[work_circle_centerx], hl
 			ld			hl, 106
 			ld			[work_circle_centery], hl
-			; 半径
-			ld			hl, 100
-			ld			[work_circle_radiusx], hl
-			; 開始点
-			ld			hl, single_0
-			ld			de, work_cpcnt
-			call		ld_de_hl_for_single
-			; 終了点
-			ld			hl, single_0
-			ld			de, work_crcsum
-			call		ld_de_hl_for_single
 			; 比率
 			ld			hl, single_0p5
 			ld			de, work_aspect
@@ -77,24 +68,60 @@ START_ADDRESS::
 			; 色
 			ld			a, 15
 			call		bios_setatr
+
+			; 半径
+			ld			hl, 25
+			ld			[work_circle_radiusx], hl
+			; 開始点
+			ld			hl, single_0
+			ld			de, work_cpcnt
+			call		ld_de_hl_for_single
+			; 終了点
+			ld			hl, single_1
+			ld			de, work_crcsum
+			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
 			; 半径
 			ld			hl, 50
 			ld			[work_circle_radiusx], hl
+			; 開始点
+			ld			hl, single_1
+			ld			de, work_cpcnt
+			call		ld_de_hl_for_single
+			; 終了点
+			ld			hl, single_2
+			ld			de, work_crcsum
+			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
 			; 半径
-			ld			hl, 25
+			ld			hl, 100
 			ld			[work_circle_radiusx], hl
+			; 開始点
+			ld			hl, single_1
+			ld			de, work_cpcnt
+			call		ld_de_hl_for_single
+			; 終了点
+			ld			hl, single_0
+			ld			de, work_crcsum
+			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
 			; 半径
 			ld			hl, 150
 			ld			[work_circle_radiusx], hl
+			; 開始点
+			ld			hl, single_2
+			ld			de, work_cpcnt
+			call		ld_de_hl_for_single
+			; 終了点
+			ld			hl, single_1
+			ld			de, work_crcsum
+			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 			RET
@@ -102,8 +129,12 @@ single_0:
 			defb		0x00, 0x00, 0x00, 0x00
 single_1:
 			defb		0x41, 0x10, 0x00, 0x00
+single_2:
+			defb		0x41, 0x20, 0x00, 0x00
 single_0p5:
 			defb		0x40, 0x50, 0x00, 0x00
+single_407437:
+			defb		0x42, 0x40, 0x74, 0x37
 
 ; -----------------------------------------------------------------------------
 ld_de_hl_for_single:
@@ -123,6 +154,17 @@ ld_arg_single_real:
 			LDIR
 			LD			[WORK_ARG+4], BC
 			LD			[WORK_ARG+6], BC
+			LD			A, 8
+			LD			[WORK_VALTYP], A
+			RET
+
+; -----------------------------------------------------------------------------
+ld_dac_single_real:
+			LD			DE, WORK_DAC
+			LD			BC, 4
+			LDIR
+			LD			[WORK_DAC+4], BC
+			LD			[WORK_DAC+6], BC
 			LD			A, 8
 			LD			[WORK_VALTYP], A
 			RET
@@ -147,6 +189,35 @@ sub_circle::
 			RR		L
 	_sub_circle_skip1:
 			LD		[work_circle_radiusy], HL
+	;	開始角を 0～255 に変換する
+			LD		HL, work_cpcnt
+			CALL	ld_arg_single_real
+			LD		HL, single_407437
+			CALL	ld_dac_single_real
+			LD		A, 4
+			LD		[work_valtyp], A
+			CALL	bios_decmul
+			CALL	bios_frcint
+			LD		A, [work_dac + 2]
+			LD		[work_cpcnt], A
+	;	終了角を 0～255 に変換する
+			LD		HL, work_crcsum
+			CALL	ld_arg_single_real
+			LD		HL, single_407437
+			CALL	ld_dac_single_real
+			LD		A, 4
+			LD		[work_valtyp], A
+			CALL	bios_decmul
+			CALL	bios_frcint
+			LD		A, [work_dac + 2]
+			LD		[work_crcsum], A
+	;	開始角と終了角の大小判定
+			LD		B, A					; B = 終了角
+			LD		A, [work_cpcnt]			; A = 開始角
+			CP		A, B
+			LD		A, 0
+			RLA
+			LD		[work_savem], A
 	;	sinテーブルをゲットする
 			LD		IX, blib_get_sin_table
 			CALL	call_blib
@@ -161,7 +232,6 @@ sub_circle::
 	;	θ = 0°→45°
 			LD		A, [work_csclxy]
 			LD		B, A
-			INC		B
 			PUSH	BC
 	_sub_circle_theta_loop:
 			LD		A, B
@@ -222,7 +292,7 @@ sub_circle::
 			PUSH	AF
 			ADD		A, 128
 			LD		B, A
-			LD		A, 1
+			XOR		A, A
 			CALL	_sub_circle_quadrant_process
 	;		第3象限 (270～360°)
 	_sub_circle_quadrant3_process:
@@ -233,7 +303,7 @@ sub_circle::
 			PUSH	AF
 			NEG
 			LD		B, A
-			XOR		A, A
+			LD		A, 1
 			CALL	_sub_circle_quadrant_process
 
 	_sub_circle_quadrant_end:
@@ -246,14 +316,52 @@ sub_circle::
 			PUSH	BC
 			JP		_sub_circle_theta_loop
 
+	; B が描画対象かどうか調べる
+	; Cy = 0: 対象, 1: 非対象
+	_sub_circle_check_angle:
+			; 開始点と終了点の大小関係は？
+			LD		A, [work_savem]
+			OR		A, A
+			JR		Z, _sub_circle_check_angle_cond_or
+	_sub_circle_check_angle_cond_and:
+			; 開始点より大きいか？
+			LD		A, [work_cpcnt]
+			OR		A, A								; 0の場合は対象候補
+			JR		Z, _sub_circle_check_angle_left1
+			CP		A, B
+			CCF
+			RET		C									; 着目点 ＜ 開始点 なら非対象
+	_sub_circle_check_angle_left1:
+			; 開始点よりも大きい。では、終了点より小さいか？
+			LD		A, [work_crcsum]
+			OR		A, A								; 0の場合は無条件で対象
+			RET		Z
+			CP		A, B
+			RET											; 着目点 ＞ 終了点 なら非対象
+	_sub_circle_check_angle_cond_or:
+			; 開始点より大きいか？
+			LD		A, [work_cpcnt]
+			CP		A, B
+			CCF
+			RET		NC									; 着目点 ＞ 開始点 なら対象
+			; 開始点よりも小さい。では、終了点より小さいか？
+			LD		A, [work_crcsum]
+			CP		A, B
+			RET											; 着目点 ＞ 終了点 なら非対象
+
 	; A の bit0 が 0 なら X符号反転、bit1 が 0 なら Y符号反転
 	; B に角度 0～31 (0°～45°)
 	_sub_circle_quadrant_process:
+			PUSH	BC
 			PUSH	AF
+			LD		C, A
+			CALL	_sub_circle_check_angle
+			JR		C, _sub_circle_quadrant_line1_skip
+			LD		A, C
 			; 始点X1
 			LD		HL, [work_circle_centerx]
 			LD		DE, [work_circle_cxoff1]
-			RRCA
+			RRCA										; A の bit0 を Cy へ
 			JR		C, _sub_circle_quadrant_process_add_cx1
 	_sub_circle_quadrant_process_sub_cx1:
 			SBC		HL, DE
@@ -266,7 +374,7 @@ sub_circle::
 			; 始点Y1
 			LD		HL, [work_circle_centery]
 			LD		DE, [work_circle_cyoff1]
-			RRCA
+			RRCA										; A の bit1 を Cy へ
 			JR		C, _sub_circle_quadrant_process_add_cy1
 	_sub_circle_quadrant_process_sub_cy1:
 			SBC		HL, DE
@@ -281,7 +389,7 @@ sub_circle::
 			; 終点X1
 			LD		HL, [work_circle_centerx]
 			LD		DE, [work_circle_prev_cxoff1]
-			RRCA
+			RRCA										; A の bit0 を Cy へ
 			JR		C, _sub_circle_quadrant_process_add_pcx1
 	_sub_circle_quadrant_process_sub_pcx1:
 			SBC		HL, DE
@@ -295,7 +403,7 @@ sub_circle::
 			; 終点Y1
 			LD		HL, [work_circle_centery]
 			LD		DE, [work_circle_prev_cyoff1]
-			RRCA
+			RRCA										; A の bit1 を Cy へ
 			JR		C, _sub_circle_quadrant_process_add_pcy1
 	_sub_circle_quadrant_process_sub_pcy1:
 			SBC		HL, DE
@@ -306,14 +414,23 @@ sub_circle::
 			EX		DE, HL
 
 			CALL	_sub_circle_draw_line
+	_sub_circle_quadrant_line1_skip:
 			POP		AF
+			POP		BC
 
 			PUSH	AF
+			LD		C, A
+			LD		A, B
+			XOR		A, 63
+			LD		B, A
+			CALL	_sub_circle_check_angle
+			JR		C, _sub_circle_quadrant_line2_skip
+			LD		A, C
 			; 始点X2
 			LD		HL, [work_circle_centerx]
 			LD		DE, [work_circle_cxoff2]
-			RRCA
-			JR		C, _sub_circle_quadrant_process_add_cx2
+			RRCA										; A の bit0 を Cy へ
+			JR		NC, _sub_circle_quadrant_process_add_cx2
 	_sub_circle_quadrant_process_sub_cx2:
 			SBC		HL, DE
 			JR		_sub_circle_quadrant_process_set_cx2
@@ -325,8 +442,8 @@ sub_circle::
 			; 始点Y2
 			LD		HL, [work_circle_centery]
 			LD		DE, [work_circle_cyoff2]
-			RRCA
-			JR		C, _sub_circle_quadrant_process_add_cy2
+			RRCA										; A の bit1 を Cy へ
+			JR		NC, _sub_circle_quadrant_process_add_cy2
 	_sub_circle_quadrant_process_sub_cy2:
 			SBC		HL, DE
 			JR		_sub_circle_quadrant_process_set_cy2
@@ -340,8 +457,8 @@ sub_circle::
 			; 終点X2
 			LD		HL, [work_circle_centerx]
 			LD		DE, [work_circle_prev_cxoff2]
-			RRCA
-			JR		C, _sub_circle_quadrant_process_add_pcx2
+			RRCA										; A の bit0 を Cy へ
+			JR		NC, _sub_circle_quadrant_process_add_pcx2
 	_sub_circle_quadrant_process_sub_pcx2:
 			SBC		HL, DE
 			JR		_sub_circle_quadrant_process_set_pcx2
@@ -354,8 +471,8 @@ sub_circle::
 			; 終点Y2
 			LD		HL, [work_circle_centery]
 			LD		DE, [work_circle_prev_cyoff2]
-			RRCA
-			JR		C, _sub_circle_quadrant_process_add_pcy2
+			RRCA										; A の bit1 を Cy へ
+			JR		NC, _sub_circle_quadrant_process_add_pcy2
 	_sub_circle_quadrant_process_sub_pcy2:
 			SBC		HL, DE
 			JR		_sub_circle_quadrant_process_set_pcy2
@@ -365,6 +482,7 @@ sub_circle::
 			EX		DE, HL
 
 			CALL	_sub_circle_draw_line
+	_sub_circle_quadrant_line2_skip:
 			POP		AF
 			RET
 
