@@ -65,24 +65,27 @@ START_ADDRESS::
 			ld			hl, single_0p5
 			ld			de, work_aspect
 			call		ld_de_hl_for_single
+
 			; 色
 			ld			a, 15
 			call		bios_setatr
-
 			; 半径
 			ld			hl, 25
 			ld			[work_circle_radiusx], hl
 			; 開始点
-			ld			hl, single_0
+			ld			hl, single_m1
 			ld			de, work_cpcnt
 			call		ld_de_hl_for_single
 			; 終了点
-			ld			hl, single_1
+			ld			hl, single_m2
 			ld			de, work_crcsum
 			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
+			; 色
+			ld			a, 2
+			call		bios_setatr
 			; 半径
 			ld			hl, 50
 			ld			[work_circle_radiusx], hl
@@ -91,26 +94,32 @@ START_ADDRESS::
 			ld			de, work_cpcnt
 			call		ld_de_hl_for_single
 			; 終了点
-			ld			hl, single_2
+			ld			hl, single_m2
 			ld			de, work_crcsum
 			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
+			; 色
+			ld			a, 7
+			call		bios_setatr
 			; 半径
 			ld			hl, 100
 			ld			[work_circle_radiusx], hl
 			; 開始点
-			ld			hl, single_1
+			ld			hl, single_m1
 			ld			de, work_cpcnt
 			call		ld_de_hl_for_single
 			; 終了点
-			ld			hl, single_0
+			ld			hl, single_m2
 			ld			de, work_crcsum
 			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
+			; 色
+			ld			a, 6
+			call		bios_setatr
 			; 半径
 			ld			hl, 150
 			ld			[work_circle_radiusx], hl
@@ -131,6 +140,12 @@ single_1:
 			defb		0x41, 0x10, 0x00, 0x00
 single_2:
 			defb		0x41, 0x20, 0x00, 0x00
+single_m0:
+			defb		0x80, 0x00, 0x00, 0x00
+single_m1:
+			defb		0xC1, 0x10, 0x00, 0x00
+single_m2:
+			defb		0xC1, 0x20, 0x00, 0x00
 single_0p5:
 			defb		0x40, 0x50, 0x00, 0x00
 single_407437:
@@ -196,10 +211,17 @@ sub_circle::
 			CALL	ld_dac_single_real
 			LD		A, 4
 			LD		[work_valtyp], A
+			LD		A, [work_cpcnt]
+			PUSH	AF
+			AND		A, 0x7F						; 正数にする
+			LD		[work_arg], A
 			CALL	bios_decmul
 			CALL	bios_frcint
 			LD		A, [work_dac + 2]
 			LD		[work_cpcnt], A
+			POP		AF
+			AND		A, 0x80						; 符号を切り出す
+			LD		[work_cpcnt + 1], A			; 線で結ぶ場合は 0x80 になる
 	;	終了角を 0～255 に変換する
 			LD		HL, work_crcsum
 			CALL	ld_arg_single_real
@@ -207,13 +229,20 @@ sub_circle::
 			CALL	ld_dac_single_real
 			LD		A, 4
 			LD		[work_valtyp], A
+			LD		A, [work_crcsum]
+			PUSH	AF
+			AND		A, 0x7F						; 正数にする
+			LD		[work_arg], A
 			CALL	bios_decmul
 			CALL	bios_frcint
 			LD		A, [work_dac + 2]
 			LD		[work_crcsum], A
+			LD		B, A						; B = 終了角
+			POP		AF
+			AND		A, 0x80						; 符号を切り出す
+			LD		[work_crcsum + 1], A		; 線で結ぶ場合は 0x80 になる
 	;	開始角と終了角の大小判定
-			LD		B, A					; B = 終了角
-			LD		A, [work_cpcnt]			; A = 開始角
+			LD		A, [work_cpcnt]				; A = 開始角
 			CP		A, B
 			LD		A, 0
 			RLA
@@ -583,6 +612,68 @@ sub_circle::
 			RET									; 191にクリップした場合。Cy=1 で戻る。
 
 	_sub_circle_line_process:
+			; 終了点を線分で結ぶか？
+			LD		HL, [work_crcsum]
+			LD		A, H
+			OR		A, A
+			CALL	NZ, _sub_circle_draw_radius
+
+	_sub_circle_end_line:
+			; 開始点を線分で結ぶか？
+			LD		HL, [work_cpcnt]
+			LD		A, H
+			OR		A, A
+			RET		Z
+			; 8象限の位置によって時計回り・反時計回りにずれる問題の補正
+			RRCA
+			XOR		A, L
+			BIT		5, A
+			LD		A, L
+			JR		Z, _sub_circle_draw_radius
+			LD		A, [work_csclxy]
+			ADD		A, L
+			LD		L, A
+	_sub_circle_draw_radius:					; 中心点と角度 L を線で結ぶ
+			; 分解能に合わせて角度を補正
+			LD		A, [work_csclxy]
+			LD		H, A
+			DEC		A
+			CPL
+			AND		A, L
+			LD		L, A
+			; 8象限の位置によって時計回り・反時計回りにずれる問題の補正
+			RRCA
+			XOR		A, L
+			BIT		5, A
+			LD		A, L
+			JR		NZ, _sub_circle_draw_radius_skip1
+			ADD		A, H
+	_sub_circle_draw_radius_skip1:
+			PUSH	AF
+			CALL	_sub_circle_cos			; HL = cosθ
+			LD		BC, [work_circle_radiusx]
+			CALL	_sub_circle_mul
+			LD		[work_circle_cxoff1], HL
+			POP		AF
+			CALL	_sub_circle_sin			; HL = sinθ
+			LD		BC, [work_circle_radiusy]
+			CALL	_sub_circle_mul
+			LD		[work_circle_cyoff1], HL
+			; 始点X1
+			LD		HL, [work_circle_centerx]
+			LD		DE, [work_circle_cxoff1]
+			ADD		HL, DE
+			LD		[work_gxpos], HL
+			; 始点Y1
+			LD		HL, [work_circle_centery]
+			LD		DE, [work_circle_cyoff1]
+			ADD		HL, DE
+			LD		[work_gypos], HL
+			; 終点X1
+			LD		BC, [work_circle_centerx]
+			; 終点Y1
+			LD		DE, [work_circle_centery]
+			JP		_sub_circle_draw_line
 			RET
 
 	;	HL = HL * BC >> 8  ※HL=符号付き, BC=符号無し
