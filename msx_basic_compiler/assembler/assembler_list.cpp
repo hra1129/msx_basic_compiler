@@ -2649,7 +2649,7 @@ void CASSEMBLER_LIST::activate_circle( class CCOMPILE_INFO *p_info ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "ld_arg_single_real" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "single_407437" );
+	asm_line.set( "LD", "", "HL", "CONST_42407437" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "ld_dac_single_real" );
 	this->subroutines.push_back( asm_line );
@@ -2685,7 +2685,7 @@ void CASSEMBLER_LIST::activate_circle( class CCOMPILE_INFO *p_info ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "ld_arg_single_real" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "single_407437" );
+	asm_line.set( "LD", "", "HL", "CONST_42407437" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "ld_dac_single_real" );
 	this->subroutines.push_back( asm_line );
