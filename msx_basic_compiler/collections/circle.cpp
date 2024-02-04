@@ -55,7 +55,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( "ADD", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		asm_line.set( "LD", "", "[work_gxpos]", "HL" );
+		asm_line.set( "LD", "", "[work_circle_centerx]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
@@ -76,7 +76,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "ADD", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "", "[work_gypos]", "HL" );
+			asm_line.set( "LD", "", "[work_circle_centery]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
@@ -99,7 +99,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	//	”¼Œa
 	if( exp.compile( p_info ) ) {
 		exp.release();
-		asm_line.set( "LD", "", "[work_cxoff]", "HL" );
+		asm_line.set( "LD", "", "[work_circle_radiusx]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
