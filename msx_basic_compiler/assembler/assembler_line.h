@@ -68,6 +68,8 @@ enum class CMNEMONIC_TYPE: int {
 	DEFB,
 	DEFW,
 	RST,
+	RLA,
+	RRA,
 	RLCA,
 	RRCA,
 	DI,

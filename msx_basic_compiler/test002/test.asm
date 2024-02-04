@@ -117,7 +117,7 @@ LINE_110:
         LD          HL, 128
         LD          [WORK_CIRCLE_CENTERX], HL
         LD          HL, 100
-        LD          HL, 100
+        LD          [WORK_CIRCLE_CENTERY], HL
         LD          [WORK_CIRCLE_RADIUSX], HL
         LD          A, 15
         CALL        BIOS_SETATR
@@ -135,7 +135,7 @@ LINE_110:
 LINE_120:
         LD          HL, 10
         LD          [WORK_CIRCLE_CENTERX], HL
-        LD          HL, 10
+        LD          [WORK_CIRCLE_CENTERY], HL
         LD          HL, 120
         LD          [WORK_CIRCLE_RADIUSX], HL
         LD          A, 12
@@ -155,6 +155,7 @@ LINE_130:
         LD          HL, 200
         LD          [WORK_CIRCLE_CENTERX], HL
         LD          HL, 190
+        LD          [WORK_CIRCLE_CENTERY], HL
         LD          HL, 50
         LD          [WORK_CIRCLE_RADIUSX], HL
         LD          A, 8
@@ -312,7 +313,7 @@ _SUB_CIRCLE_SKIP1:
         LD          A, [WORK_CPCNT]
         CP          A, B
         LD          A, 0
-; 
+        RLA         
         LD          [WORK_SAVEM], A
 ; 	GET SIN TABLE
         LD          IX, BLIB_GET_SIN_TABLE
@@ -343,6 +344,7 @@ _SUB_CIRCLE_THETA_LOOP:
         CALL        _SUB_CIRCLE_MUL
         LD          [WORK_CIRCLE_CXOFF1], HL
         POP         HL
+        LD          BC, [WORK_CIRCLE_RADIUSY]
         CALL        _SUB_CIRCLE_MUL
         LD          [WORK_CIRCLE_CYOFF2], HL
 ; 		Y1 = SIN(THETA) * HORIZONTAL RADIUS, X2 = SIN(THETA) * VERTICAL RADIUS
@@ -625,7 +627,7 @@ _SUB_CIRCLE_Y_REJECT_CHECK:
 ;  IF CLIPPING, RETURN WITH CY=1
 _SUB_CIRCLE_X_CLIP:
         LD          A, H
-; 
+        RLA         
         JR          NC, _SUB_CIRCLE_X_CLIP_SKIP1
         LD          HL, 0
         RET         
@@ -643,7 +645,7 @@ _SUB_CIRCLE_X_CLIP_SKIP1:
 ;  IF CLIPPING, RETURN WITH CY=1
 _SUB_CIRCLE_Y_CLIP:
         LD          A, H
-; 
+        RLA         
         JR          NC, _SUB_CIRCLE_Y_CLIP_SKIP1
         LD          HL, 0
         RET         
@@ -653,7 +655,7 @@ _SUB_CIRCLE_Y_CLIP_SKIP1:
         JR          Z, _SUB_CIRCLE_Y_CLIP_SKIP2
         LD          HL, 211
         LD          A, [WORK_RG9SAV]
-; 
+        RLA         
         RET         C
         LD          L, 191
         CCF         
@@ -664,7 +666,7 @@ _SUB_CIRCLE_Y_CLIP_SKIP2:
         CCF         
         RET         NC
         LD          A, [WORK_RG9SAV]
-; 
+        RLA         
         JR          NC, _SUB_CIRCLE_Y_CLIP_192
         LD          A, L
         CP          A, 212
@@ -824,7 +826,7 @@ _SUB_CIRCLE_SIN_SPECIAL:
         BIT         6, A
         RET         Z
         INC         H
-; 
+        RLA         
         RET         C
         DEC         H
         DEC         H

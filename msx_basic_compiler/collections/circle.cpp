@@ -76,9 +76,9 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "ADD", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "", "[work_circle_centery]", "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
 		}
+		asm_line.set( "LD", "", "[work_circle_centery]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );

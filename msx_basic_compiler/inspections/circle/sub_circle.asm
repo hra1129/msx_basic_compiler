@@ -59,10 +59,10 @@ START_ADDRESS::
 			; 中心座標
 			ld			hl, 128
 			ld			[work_circle_centerx], hl
-			ld			hl, 106
+			ld			hl, 100
 			ld			[work_circle_centery], hl
 			; 比率
-			ld			hl, single_0p5
+			ld			hl, single_1
 			ld			de, work_aspect
 			call		ld_de_hl_for_single
 
@@ -70,69 +70,69 @@ START_ADDRESS::
 			ld			a, 15
 			call		bios_setatr
 			; 半径
-			ld			hl, 25
-			ld			[work_circle_radiusx], hl
-			; 開始点
-			ld			hl, single_m1
-			ld			de, work_cpcnt
-			call		ld_de_hl_for_single
-			; 終了点
-			ld			hl, single_m2
-			ld			de, work_crcsum
-			call		ld_de_hl_for_single
-			; 描画
-			call		sub_circle
-
-			; 色
-			ld			a, 2
-			call		bios_setatr
-			; 半径
-			ld			hl, 50
-			ld			[work_circle_radiusx], hl
-			; 開始点
-			ld			hl, single_1
-			ld			de, work_cpcnt
-			call		ld_de_hl_for_single
-			; 終了点
-			ld			hl, single_m2
-			ld			de, work_crcsum
-			call		ld_de_hl_for_single
-			; 描画
-			call		sub_circle
-
-			; 色
-			ld			a, 7
-			call		bios_setatr
-			; 半径
 			ld			hl, 100
 			ld			[work_circle_radiusx], hl
 			; 開始点
-			ld			hl, single_m1
+			ld			hl, single_0
 			ld			de, work_cpcnt
 			call		ld_de_hl_for_single
 			; 終了点
-			ld			hl, single_m2
+			ld			hl, single_0
 			ld			de, work_crcsum
 			call		ld_de_hl_for_single
 			; 描画
 			call		sub_circle
 
-			; 色
-			ld			a, 6
-			call		bios_setatr
-			; 半径
-			ld			hl, 150
-			ld			[work_circle_radiusx], hl
-			; 開始点
-			ld			hl, single_2
-			ld			de, work_cpcnt
-			call		ld_de_hl_for_single
-			; 終了点
-			ld			hl, single_1
-			ld			de, work_crcsum
-			call		ld_de_hl_for_single
-			; 描画
-			call		sub_circle
+;			; 色
+;			ld			a, 2
+;			call		bios_setatr
+;			; 半径
+;			ld			hl, 50
+;			ld			[work_circle_radiusx], hl
+;			; 開始点
+;			ld			hl, single_1
+;			ld			de, work_cpcnt
+;			call		ld_de_hl_for_single
+;			; 終了点
+;			ld			hl, single_m2
+;			ld			de, work_crcsum
+;			call		ld_de_hl_for_single
+;			; 描画
+;			call		sub_circle
+;
+;			; 色
+;			ld			a, 7
+;			call		bios_setatr
+;			; 半径
+;			ld			hl, 100
+;			ld			[work_circle_radiusx], hl
+;			; 開始点
+;			ld			hl, single_m1
+;			ld			de, work_cpcnt
+;			call		ld_de_hl_for_single
+;			; 終了点
+;			ld			hl, single_m2
+;			ld			de, work_crcsum
+;			call		ld_de_hl_for_single
+;			; 描画
+;			call		sub_circle
+;
+;			; 色
+;			ld			a, 6
+;			call		bios_setatr
+;			; 半径
+;			ld			hl, 150
+;			ld			[work_circle_radiusx], hl
+;			; 開始点
+;			ld			hl, single_2
+;			ld			de, work_cpcnt
+;			call		ld_de_hl_for_single
+;			; 終了点
+;			ld			hl, single_1
+;			ld			de, work_crcsum
+;			call		ld_de_hl_for_single
+;			; 描画
+;			call		sub_circle
 			RET
 single_0:
 			defb		0x00, 0x00, 0x00, 0x00

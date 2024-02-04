@@ -2788,6 +2788,7 @@ void CASSEMBLER_LIST::activate_circle( class CCOMPILE_INFO *p_info ) {
 	asm_line.set( "POP", "", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "BC", "[work_circle_radiusy]" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "_sub_circle_mul" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_circle_cyoff2]", "HL" );
