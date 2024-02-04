@@ -82,7 +82,7 @@ public:
 	void activate_read_single( void );
 	void activate_read_double( void );
 	void activate_val( void );
-	void activate_circle( void );
+	void activate_circle( class CCOMPILE_INFO *p_info );
 };
 
 #endif
