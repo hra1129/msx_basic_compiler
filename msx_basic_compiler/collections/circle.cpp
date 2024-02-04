@@ -213,7 +213,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.set( "LD", "", "[work_aspect + 2]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	p_info->assembler_list.activate_circle();
+	p_info->assembler_list.activate_circle( p_info );
 	asm_line.set( "CALL", "", "sub_circle" );
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
