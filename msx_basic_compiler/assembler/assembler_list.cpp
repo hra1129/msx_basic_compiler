@@ -1051,11 +1051,17 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "E", "[HL]" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "E" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "INC", "", "HL", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "D", "[HL]" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "D" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "INC", "", "HL", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_free_heap_loop2" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL", "" );
 	this->subroutines.push_back( asm_line );

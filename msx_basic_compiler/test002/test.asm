@@ -17,49 +17,19 @@ WORK_ROMVER                     = 0X0002D
 BIOS_CHGMOD                     = 0X0005F
 BIOS_CHGMODP                    = 0X001B5
 BIOS_EXTROM                     = 0X0015F
-WORK_GXPOS                      = 0X0FCB3
-WORK_GYPOS                      = 0X0FCB5
-WORK_ASPECT                     = 0X0F931
-WORK_CXOFF                      = 0X0F945
-WORK_CYOFF                      = 0X0F947
-WORK_CPCNT                      = 0X0F939
-WORK_CRCSUM                     = 0X0F93D
-BIOS_SETATR                     = 0X0011A
-BIOS_FRCSNG                     = 0X02FB2
-BIOS_DECMUL                     = 0X027E6
-BIOS_FRCINT                     = 0X02F8A
-BLIB_GET_SIN_TABLE              = 0X040DE
-BIOS_LINE                       = 0X058FC
-WORK_RG9SAV                     = 0X0FFE8
-WORK_ASPCT1                     = 0X0F40B
-WORK_ASPCT2                     = 0X0F40D
-WORK_BUF                        = 0X0F55E
-WORK_VALTYP                     = 0X0F663
-WORK_DAC                        = 0X0F7F6
-WORK_SCRMOD                     = 0X0FCAF
-WORK_CIRCLE_X_SHIFT             = WORK_BUF + 65
-WORK_CIRCLE_QUADRANT0           = WORK_BUF + 66
-WORK_CIRCLE_QUADRANT1           = WORK_BUF + 67
-WORK_CIRCLE_QUADRANT2           = WORK_BUF + 68
-WORK_CIRCLE_QUADRANT3           = WORK_BUF + 69
-WORK_CIRCLE_CENTERX             = WORK_BUF + 70
-WORK_CIRCLE_CENTERY             = WORK_BUF + 72
-WORK_CIRCLE_RADIUSX             = WORK_BUF + 74
-WORK_CIRCLE_RADIUSY             = WORK_BUF + 76
-WORK_CIRCLE_PREV_CXOFF1         = WORK_BUF + 78
-WORK_CIRCLE_PREV_CYOFF1         = WORK_BUF + 80
-WORK_CIRCLE_PREV_CXOFF2         = WORK_BUF + 82
-WORK_CIRCLE_PREV_CYOFF2         = WORK_BUF + 84
-WORK_CIRCLE_CXOFF1              = WORK_BUF + 86
-WORK_CIRCLE_CYOFF1              = WORK_BUF + 88
-WORK_CIRCLE_CXOFF2              = WORK_BUF + 90
-WORK_CIRCLE_CYOFF2              = WORK_BUF + 92
-WORK_ARG                        = 0X0F847
-WORK_CSCLXY                     = 0X0F941
-WORK_SAVEA                      = 0X0F942
-WORK_SAVEM                      = 0X0F944
+WORK_RG1SV                      = 0X0F3E0
+BIOS_WRTVDP                     = 0X00047
+WORK_CLIKSW                     = 0X0F3DB
+BIOS_CHGCLR                     = 0X00062
+WORK_FORCLR                     = 0X0F3E9
+WORK_BAKCLR                     = 0X0F3EA
+WORK_BDRCLR                     = 0X0F3EB
+BLIB_WIDTH                      = 0X0403C
+BIOS_ERAFNK                     = 0X000CC
+WORK_PRTFLG                     = 0X0F416
 BIOS_ERRHAND                    = 0X0406F
-BLIB_INPUT                      = 0X0407E
+BIOS_ERRHAND_REDIM              = 0X0405E
+BIOS_UMULT                      = 0X0314A
 BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
@@ -101,7 +71,7 @@ JP_HL:
         JP          HL
 PROGRAM_START:
 LINE_100:
-        LD          HL, 5
+        LD          HL, 1
         LD          A, [WORK_ROMVER]
         OR          A, A
         LD          A, L
@@ -113,73 +83,36 @@ _PT0:
         CALL        BIOS_EXTROM
         EI          
 _PT1:
-LINE_110:
-        LD          HL, 128
-        LD          [WORK_CIRCLE_CENTERX], HL
-        LD          HL, 100
-        LD          [WORK_CIRCLE_CENTERY], HL
-        LD          [WORK_CIRCLE_RADIUSX], HL
+        XOR         A, A
+        AND         A, 3
+        LD          L, A
+        LD          A, [WORK_RG1SV]
+        AND         A, 0XFC
+        OR          A, L
+        LD          B, A
+        LD          C, 1
+        CALL        BIOS_WRTVDP
+        XOR         A, A
+        LD          [work_cliksw], A
         LD          A, 15
-        CALL        BIOS_SETATR
-        LD          HL, 0
-        LD          [WORK_CPCNT + 0], HL
-        LD          [WORK_CPCNT + 2], HL
-        LD          HL, 0
-        LD          [WORK_CRCSUM + 0], HL
-        LD          [WORK_CRCSUM + 2], HL
-        LD          HL, 0X1041
-        LD          [WORK_ASPECT + 0], HL
-        LD          HL, 0
-        LD          [WORK_ASPECT + 2], HL
-        CALL        SUB_CIRCLE
-LINE_120:
-        LD          HL, 10
-        LD          [WORK_CIRCLE_CENTERX], HL
-        LD          [WORK_CIRCLE_CENTERY], HL
-        LD          HL, 120
-        LD          [WORK_CIRCLE_RADIUSX], HL
-        LD          A, 12
-        CALL        BIOS_SETATR
-        LD          HL, 0
-        LD          [WORK_CPCNT + 0], HL
-        LD          [WORK_CPCNT + 2], HL
-        LD          HL, 0
-        LD          [WORK_CRCSUM + 0], HL
-        LD          [WORK_CRCSUM + 2], HL
-        LD          HL, 0X1041
-        LD          [WORK_ASPECT + 0], HL
-        LD          HL, 0
-        LD          [WORK_ASPECT + 2], HL
-        CALL        SUB_CIRCLE
-LINE_130:
-        LD          HL, 200
-        LD          [WORK_CIRCLE_CENTERX], HL
-        LD          HL, 190
-        LD          [WORK_CIRCLE_CENTERY], HL
-        LD          HL, 50
-        LD          [WORK_CIRCLE_RADIUSX], HL
-        LD          A, 8
-        CALL        BIOS_SETATR
-        LD          HL, 0
-        LD          [WORK_CPCNT + 0], HL
-        LD          [WORK_CPCNT + 2], HL
-        LD          HL, 0
-        LD          [WORK_CRCSUM + 0], HL
-        LD          [WORK_CRCSUM + 2], HL
-        LD          HL, 0X1041
-        LD          [WORK_ASPECT + 0], HL
-        LD          HL, 0
-        LD          [WORK_ASPECT + 2], HL
-        CALL        SUB_CIRCLE
-LINE_140:
-        LD          HL, VARS_I
-        PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        LD          IX, BLIB_INPUT
+        LD          [WORK_FORCLR], A
+        XOR         A, A
+        LD          [WORK_BAKCLR], A
+        XOR         A, A
+        LD          [WORK_BDRCLR], A
+        CALL        BIOS_CHGCLR
+        LD          HL, 32
+        LD          IX, BLIB_WIDTH
         CALL        CALL_BLIB
-        POP         DE
-        EX          DE, HL
+        CALL        BIOS_ERAFNK
+LINE_110:
+        LD          HL, 0
+        LD          [VARI_IO], HL
+LINE_120:
+; # READ SPRITE
+LINE_130:
+        LD          HL, VARS_SD
+        LD          DE, STR_0
         LD          C, [HL]
         LD          [HL], E
         INC         HL
@@ -188,6 +121,91 @@ LINE_140:
         LD          L, C
         LD          H, B
         CALL        FREE_STRING
+LINE_140:
+        LD          HL, 0
+        LD          [VARI_I], HL
+        LD          HL, 7
+        LD          [SVARI_I_FOR_END], HL
+        LD          HL, 1
+        LD          [SVARI_I_FOR_STEP], HL
+        LD          HL, _PT3
+        LD          [SVARI_I_LABEL], HL
+        JR          _PT2
+_PT3:
+        LD          HL, [VARI_I]
+        LD          DE, [SVARI_I_FOR_STEP]
+        ADD         HL, DE
+        LD          [VARI_I], HL
+        LD          A, D
+        LD          DE, [SVARI_I_FOR_END]
+        RLCA        
+        JR          C, _PT4
+        RST         0X20
+        JR          C, _PT5
+        JR          Z, _PT5
+        RET         NC
+_PT4:
+        RST         0X20
+        RET         C
+_PT5:
+        POP         HL
+_PT2:
+LINE_150:
+        LD          HL, VARS_R
+        CALL        SUB_READ_STRING
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, [VARS_R]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_1
+        CALL        PUTS
+LINE_170:
+        LD          HL, [SVARI_I_LABEL]
+        CALL        JP_HL
+LINE_180:
+        JP          program_termination
+LINE_210:
+        LD          HL, [VARSA_DS]
+        LD          A, L
+        OR          A, H
+        JP          NZ, BIOS_ERRHAND_REDIM
+        LD          HL, [VARI_IO]
+        INC         HL
+        PUSH        HL
+        ADD         HL, HL
+        LD          DE, 5
+        ADD         HL, DE
+        PUSH        HL
+        LD          C, L
+        LD          B, H
+        CALL        ALLOCATE_HEAP
+        LD          [VARSA_DS], HL
+        POP         BC
+        DEC         BC
+        DEC         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        LD          E, C
+        LD          D, B
+        DEC         DE
+        LD          A, 1
+        LD          [HL], A
+        INC         HL
+        POP         BC
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        DEC         DE
+        DEC         DE
+        CALL        INIT_STRING_ARRAY
+LINE_240:
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -230,625 +248,6 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-LD_ARG_SINGLE_REAL:
-        LD          DE, WORK_ARG
-        LD          BC, 4
-        LDIR        
-        LD          [WORK_ARG+4], BC
-        LD          [WORK_ARG+6], BC
-        LD          A, 8
-        LD          [WORK_VALTYP], A
-        RET         
-LD_DAC_SINGLE_REAL:
-        LD          DE, WORK_DAC
-        LD          BC, 4
-        LD          A, C
-        LD          [WORK_VALTYP], A
-        LDIR        
-        LD          [WORK_DAC+4], BC
-        LD          [WORK_DAC+6], BC
-        RET         
-LD_DE_SINGLE_REAL:
-        LD          BC, 4
-        LDIR        
-        RET         
-;  CIRCLE ROUTINE --------------------------------------------------------------
-SUB_CIRCLE:
-; 	CALCLATE VERTICAL RADIUS
-        LD          HL, WORK_ASPECT
-        CALL        LD_ARG_SINGLE_REAL
-        LD          HL, [WORK_CIRCLE_RADIUSX]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCSNG
-        CALL        BIOS_DECMUL
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        LD          A, [WORK_ASPCT2]
-        RLCA        
-        JR          NC, _SUB_CIRCLE_SKIP1
-        SRL         H
-        RR          L
-_SUB_CIRCLE_SKIP1:
-        LD          [WORK_CIRCLE_RADIUSY], HL
-; 	CONVERT START ANGLE TO 0...255.
-        LD          HL, WORK_CPCNT
-        CALL        LD_ARG_SINGLE_REAL
-        LD          HL, CONST_42407437
-        CALL        LD_DAC_SINGLE_REAL
-        LD          A, 4
-        LD          [WORK_VALTYP], A
-        LD          A, [WORK_CPCNT]
-        PUSH        AF
-        AND         A, 0X7F
-        LD          [WORK_ARG], A
-        CALL        BIOS_DECMUL
-        CALL        BIOS_FRCINT
-        LD          A, [WORK_DAC + 2]
-        LD          [WORK_CPCNT], A
-        POP         AF
-        AND         A, 0X80
-        LD          [WORK_CPCNT + 1], A
-; 	CONVERT END ANGLE TO 0`255.
-        LD          HL, WORK_CRCSUM
-        CALL        LD_ARG_SINGLE_REAL
-        LD          HL, CONST_42407437
-        CALL        LD_DAC_SINGLE_REAL
-        LD          A, 4
-        LD          [WORK_VALTYP], A
-        LD          A, [WORK_CRCSUM]
-        PUSH        AF
-        AND         A, 0X7F
-        LD          [WORK_ARG], A
-        CALL        BIOS_DECMUL
-        CALL        BIOS_FRCINT
-        LD          A, [WORK_DAC + 2]
-        LD          [WORK_CRCSUM], A
-        LD          B, A
-        POP         AF
-        AND         A, 0X80
-        LD          [WORK_CRCSUM + 1], A
-; 	COMPARE START AND END ANGLE
-        LD          A, [WORK_CPCNT]
-        CP          A, B
-        LD          A, 0
-        RLA         
-        LD          [WORK_SAVEM], A
-; 	GET SIN TABLE
-        LD          IX, BLIB_GET_SIN_TABLE
-        CALL        CALL_BLIB
-; 	INITIAL VALUE OF HORIZONTAL RADIUS.
-        LD          HL, [WORK_CIRCLE_RADIUSX]
-        LD          [WORK_CIRCLE_CXOFF1], HL
-        LD          HL, [WORK_CIRCLE_RADIUSY]
-        LD          [WORK_CIRCLE_CYOFF2], HL
-        LD          HL, 0
-        LD          [WORK_CIRCLE_CXOFF2], HL
-        LD          [WORK_CIRCLE_CYOFF1], HL
-; 	ƒÆ = 0[DEG]¨45[DEG]
-        LD          A, [WORK_CSCLXY]
-        LD          B, A
-        PUSH        BC
-_SUB_CIRCLE_THETA_LOOP:
-        LD          A, B
-; 		MOVE PREVIOUS VALUE TO PREV SECTION.
-        LD          HL, WORK_CIRCLE_CXOFF1
-        LD          DE, WORK_CIRCLE_PREV_CXOFF1
-        LD          BC, 8
-        LDIR        
-; 		X1 = COS(THETA) * HORIZONTAL RADIUS, Y2 = COS(THETA) * VERTICAL RADIUS
-        CALL        _SUB_CIRCLE_COS
-        PUSH        HL
-        LD          BC, [WORK_CIRCLE_RADIUSX]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CXOFF1], HL
-        POP         HL
-        LD          BC, [WORK_CIRCLE_RADIUSY]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CYOFF2], HL
-; 		Y1 = SIN(THETA) * HORIZONTAL RADIUS, X2 = SIN(THETA) * VERTICAL RADIUS
-        POP         AF
-        PUSH        AF
-        CALL        _SUB_CIRCLE_SIN
-        PUSH        HL
-        LD          BC, [WORK_CIRCLE_RADIUSY]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CYOFF1], HL
-        POP         HL
-        LD          BC, [WORK_CIRCLE_RADIUSX]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CXOFF2], HL
-; 		QUADRANT 0 (0[DEG]...90[DEG])
-_SUB_CIRCLE_QUADRANT0_PROCESS:
-        LD          A, [WORK_CIRCLE_QUADRANT0]
-        OR          A, A
-        JR          NZ, _SUB_CIRCLE_QUADRANT1_PROCESS
-        POP         BC
-        PUSH        BC
-        LD          A, 3
-        CALL        _SUB_CIRCLE_QUADRANT_PROCESS
-; 		QUADRANT 1 (90[DEG]...180[DEG])
-_SUB_CIRCLE_QUADRANT1_PROCESS:
-        LD          A, [WORK_CIRCLE_QUADRANT1]
-        OR          A, A
-        JR          NZ, _SUB_CIRCLE_QUADRANT2_PROCESS
-        POP         BC
-        PUSH        BC
-        LD          A, 128
-        SUB         A, B
-        LD          B, A
-        LD          A, 2
-        CALL        _SUB_CIRCLE_QUADRANT_PROCESS
-; 		QUADRANT 2 (180[DEG]...270[DEG])
-_SUB_CIRCLE_QUADRANT2_PROCESS:
-        LD          A, [WORK_CIRCLE_QUADRANT2]
-        OR          A, A
-        JR          NZ, _SUB_CIRCLE_QUADRANT3_PROCESS
-        POP         AF
-        PUSH        AF
-        ADD         A, 128
-        LD          B, A
-        XOR         A, A
-        CALL        _SUB_CIRCLE_QUADRANT_PROCESS
-; 		QUADRANT 3 (270[DEG]`360[DEG])
-_SUB_CIRCLE_QUADRANT3_PROCESS:
-        LD          A, [WORK_CIRCLE_QUADRANT3]
-        OR          A, A
-        JR          NZ, _SUB_CIRCLE_QUADRANT_END
-        POP         AF
-        PUSH        AF
-        NEG         
-        LD          B, A
-        LD          A, 1
-        CALL        _SUB_CIRCLE_QUADRANT_PROCESS
-; 
-_SUB_CIRCLE_QUADRANT_END:
-        POP         BC
-        BIT         5, B
-        JP          NZ, _SUB_CIRCLE_LINE_PROCESS
-        LD          A, [WORK_CSCLXY]
-        ADD         A, B
-        LD          B, A
-        PUSH        BC
-        JP          _SUB_CIRCLE_THETA_LOOP
-; 
-;  IS ANGLE B A DRAWING TARGET?
-;  CY = 0: TARGET, 1: NOT TARGET
-_SUB_CIRCLE_CHECK_ANGLE:
-;  WHICH IS LARGER, THE START OR END ANGLE?
-        LD          A, [WORK_SAVEM]
-        OR          A, A
-        JR          Z, _SUB_CIRCLE_CHECK_ANGLE_COND_OR
-_SUB_CIRCLE_CHECK_ANGLE_COND_AND:
-;  IS THE TARGET ANGLE GREATER THAN THE STARTING ANGLE?
-        LD          A, [WORK_CPCNT]
-        OR          A, A
-        JR          Z, _SUB_CIRCLE_CHECK_ANGLE_LEFT1
-        CP          A, B
-        CCF         
-        RET         C
-_SUB_CIRCLE_CHECK_ANGLE_LEFT1:
-;  THE TARGET ANGLE IS GREATER THAN THE START ANGLE. THEN, IS THE ANGLE OF TARGET SMALLER THAN THE END ANGLE?
-        LD          A, [WORK_CRCSUM]
-        OR          A, A
-        RET         Z
-        CP          A, B
-        RET         
-_SUB_CIRCLE_CHECK_ANGLE_COND_OR:
-;  IS THE TARGET ANGLE GREATER THAN THE START ANGLE?
-        LD          A, [WORK_CPCNT]
-        CP          A, B
-        CCF         
-        RET         NC
-;  THE TARGET ANGLE IS SMALLER THAN THE START ANGLE. SO IS THE TARGET ANGLE SMALLER THAN THE END ANGLE?
-        LD          A, [WORK_CRCSUM]
-        CP          A, B
-        RET         
-; 
-;  IF BIT0 OF A IS 0, X SIGN IS INVERTED; IF BIT1 IS 0, Y SIGN IS INVERTED.
-;  ANGLE 0 TO 31 (0[DEG] TO 45[DEG]) ON B
-_SUB_CIRCLE_QUADRANT_PROCESS:
-        PUSH        BC
-        PUSH        AF
-        LD          C, A
-        CALL        _SUB_CIRCLE_CHECK_ANGLE
-        JR          C, _SUB_CIRCLE_QUADRANT_LINE1_SKIP
-        LD          A, C
-;  START POINT X1
-        LD          HL, [WORK_CIRCLE_CENTERX]
-        LD          DE, [WORK_CIRCLE_CXOFF1]
-        RRCA        
-        JR          C, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_CX1
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_CX1:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_CX1
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_CX1:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_CX1:
-        LD          [WORK_GXPOS], HL
-; 
-;  START POINT Y1
-        LD          HL, [WORK_CIRCLE_CENTERY]
-        LD          DE, [WORK_CIRCLE_CYOFF1]
-        RRCA        
-        JR          C, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_CY1
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_CY1:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_CY1
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_CY1:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_CY1:
-        LD          [WORK_GYPOS], HL
-        POP         AF
-; 
-        PUSH        AF
-;  END POINT X1
-        LD          HL, [WORK_CIRCLE_CENTERX]
-        LD          DE, [WORK_CIRCLE_PREV_CXOFF1]
-        RRCA        
-        JR          C, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCX1
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_PCX1:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_PCX1
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCX1:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_PCX1:
-        LD          C, L
-        LD          B, H
-; 
-;  END POINT Y1
-        LD          HL, [WORK_CIRCLE_CENTERY]
-        LD          DE, [WORK_CIRCLE_PREV_CYOFF1]
-        RRCA        
-        JR          C, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCY1
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_PCY1:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_PCY1
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCY1:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_PCY1:
-        EX          DE, HL
-; 
-        CALL        _SUB_CIRCLE_DRAW_LINE
-_SUB_CIRCLE_QUADRANT_LINE1_SKIP:
-        POP         AF
-        POP         BC
-; 
-        PUSH        AF
-        LD          C, A
-        LD          A, B
-        XOR         A, 63
-        LD          B, A
-        CALL        _SUB_CIRCLE_CHECK_ANGLE
-        JR          C, _SUB_CIRCLE_QUADRANT_LINE2_SKIP
-        LD          A, C
-;  START POINT X2
-        LD          HL, [WORK_CIRCLE_CENTERX]
-        LD          DE, [WORK_CIRCLE_CXOFF2]
-        RRCA        
-        JR          NC, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_CX2
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_CX2:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_CX2
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_CX2:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_CX2:
-        LD          [WORK_GXPOS], HL
-; 
-;  START POINT Y2
-        LD          HL, [WORK_CIRCLE_CENTERY]
-        LD          DE, [WORK_CIRCLE_CYOFF2]
-        RRCA        
-        JR          NC, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_CY2
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_CY2:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_CY2
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_CY2:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_CY2:
-        LD          [WORK_GYPOS], HL
-        POP         AF
-; 
-        PUSH        AF
-;  END POINT X2
-        LD          HL, [WORK_CIRCLE_CENTERX]
-        LD          DE, [WORK_CIRCLE_PREV_CXOFF2]
-        RRCA        
-        JR          NC, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCX2
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_PCX2:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_PCX2
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCX2:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_PCX2:
-        LD          C, L
-        LD          B, H
-; 
-;  END POINT Y2
-        LD          HL, [WORK_CIRCLE_CENTERY]
-        LD          DE, [WORK_CIRCLE_PREV_CYOFF2]
-        RRCA        
-        JR          NC, _SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCY2
-_SUB_CIRCLE_QUADRANT_PROCESS_SUB_PCY2:
-        SBC         HL, DE
-        JR          _SUB_CIRCLE_QUADRANT_PROCESS_SET_PCY2
-_SUB_CIRCLE_QUADRANT_PROCESS_ADD_PCY2:
-        ADD         HL, DE
-_SUB_CIRCLE_QUADRANT_PROCESS_SET_PCY2:
-        EX          DE, HL
-; 
-        CALL        _SUB_CIRCLE_DRAW_LINE
-_SUB_CIRCLE_QUADRANT_LINE2_SKIP:
-        POP         AF
-        RET         
-; 
-_SUB_CIRCLE_DRAW_LINE:
-        LD          HL, [WORK_GXPOS]
-        CALL        _SUB_CIRCLE_X_CLIP
-        LD          [WORK_GXPOS], HL
-        LD          L, C
-        LD          H, B
-        JR          C, _SUB_CIRCLE_X_REJECT_CHECK
-        CALL        _SUB_CIRCLE_X_CLIP
-        LD          C, L
-        LD          B, H
-        JR          _SUB_CIRCLE_DRAW_LINE_Y
-_SUB_CIRCLE_X_REJECT_CHECK:
-        CALL        _SUB_CIRCLE_X_CLIP
-        LD          C, L
-        LD          B, H
-        JR          NC, _SUB_CIRCLE_DRAW_LINE_Y
-        LD          A, [WORK_GXPOS+1]
-        XOR         A, B
-        RET         Z
-_SUB_CIRCLE_DRAW_LINE_Y:
-        LD          HL, [WORK_GYPOS]
-        CALL        _SUB_CIRCLE_Y_CLIP
-        LD          [WORK_GYPOS], HL
-        LD          L, E
-        LD          H, D
-        JR          C, _SUB_CIRCLE_Y_REJECT_CHECK
-        CALL        _SUB_CIRCLE_Y_CLIP
-        LD          E, L
-        LD          D, H
-        JP          BIOS_LINE
-_SUB_CIRCLE_Y_REJECT_CHECK:
-        CALL        _SUB_CIRCLE_Y_CLIP
-        LD          E, L
-        LD          D, H
-        JP          NC, BIOS_LINE
-        LD          A, [WORK_GYPOS+1]
-        XOR         A, B
-        JP          NZ, BIOS_LINE
-        RET         
-; 
-;  CLIPPING X-COORDINATES IN HL
-;  IF CLIPPING, RETURN WITH CY=1
-_SUB_CIRCLE_X_CLIP:
-        LD          A, H
-        RLA         
-        JR          NC, _SUB_CIRCLE_X_CLIP_SKIP1
-        LD          HL, 0
-        RET         
-_SUB_CIRCLE_X_CLIP_SKIP1:
-        LD          A, [WORK_ASPCT1 + 1]
-        DEC         A
-        CP          A, H
-        RET         NC
-        LD          HL, [WORK_ASPCT1]
-        DEC         HL
-        SCF         
-        RET         
-; 
-;  CLIPPING Y-COORDINATES IN HL
-;  IF CLIPPING, RETURN WITH CY=1
-_SUB_CIRCLE_Y_CLIP:
-        LD          A, H
-        RLA         
-        JR          NC, _SUB_CIRCLE_Y_CLIP_SKIP1
-        LD          HL, 0
-        RET         
-_SUB_CIRCLE_Y_CLIP_SKIP1:
-        LD          A, H
-        OR          A, A
-        JR          Z, _SUB_CIRCLE_Y_CLIP_SKIP2
-        LD          HL, 211
-        LD          A, [WORK_RG9SAV]
-        RLA         
-        RET         C
-        LD          L, 191
-        CCF         
-        RET         
-_SUB_CIRCLE_Y_CLIP_SKIP2:
-        LD          A, L
-        CP          A, 192
-        CCF         
-        RET         NC
-        LD          A, [WORK_RG9SAV]
-        RLA         
-        JR          NC, _SUB_CIRCLE_Y_CLIP_192
-        LD          A, L
-        CP          A, 212
-        CCF         
-        RET         NC
-        LD          L, 211
-        RET         
-_SUB_CIRCLE_Y_CLIP_192:
-        LD          L, 191
-        SCF         
-        RET         
-; 
-_SUB_CIRCLE_LINE_PROCESS:
-;  CONNECT THE CENTER POINT AND THE END ANGLE WITH A LINE SEGMENT?
-        LD          HL, [WORK_CRCSUM]
-        LD          A, H
-        OR          A, A
-        CALL        NZ, _SUB_CIRCLE_DRAW_RADIUS
-; 
-_SUB_CIRCLE_END_LINE:
-;  CONNECT THE CENTER POINT AND THE STARTING ANGLE WITH A LINE SEGMENT?
-        LD          HL, [WORK_CPCNT]
-        LD          A, H
-        OR          A, A
-        RET         Z
-;  CORRECTION OF PROBLEMS WITH CLOCKWISE AND COUNTERCLOCKWISE SHIFT DEPENDING ON THE POSITION OF THE 8 QUADRANTS
-        RRCA        
-        XOR         A, L
-        BIT         5, A
-        LD          A, L
-        JR          Z, _SUB_CIRCLE_DRAW_RADIUS
-        LD          A, [WORK_CSCLXY]
-        ADD         A, L
-        LD          L, A
-_SUB_CIRCLE_DRAW_RADIUS:
-;  CORRECT ANGLE TO RESOLUTION
-        LD          A, [WORK_CSCLXY]
-        LD          H, A
-        DEC         A
-        CPL         
-        AND         A, L
-        LD          L, A
-;  CORRECTION OF PROBLEMS WITH CLOCKWISE AND COUNTERCLOCKWISE SHIFT DEPENDING ON THE POSITION OF THE 8 QUADRANTS
-        RRCA        
-        XOR         A, L
-        BIT         5, A
-        LD          A, L
-        JR          NZ, _SUB_CIRCLE_DRAW_RADIUS_SKIP1
-        ADD         A, H
-_SUB_CIRCLE_DRAW_RADIUS_SKIP1:
-        PUSH        AF
-        CALL        _SUB_CIRCLE_COS			; HL = COS(THETA)
-        LD          BC, [WORK_CIRCLE_RADIUSX]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CXOFF1], HL
-        POP         AF
-        CALL        _SUB_CIRCLE_SIN			; HL = SIN(THETA)
-        LD          BC, [WORK_CIRCLE_RADIUSY]
-        CALL        _SUB_CIRCLE_MUL
-        LD          [WORK_CIRCLE_CYOFF1], HL
-;  START POINT X1
-        LD          HL, [WORK_CIRCLE_CENTERX]
-        LD          DE, [WORK_CIRCLE_CXOFF1]
-        ADD         HL, DE
-        LD          [WORK_GXPOS], HL
-;  START POINTY1
-        LD          HL, [WORK_CIRCLE_CENTERY]
-        LD          DE, [WORK_CIRCLE_CYOFF1]
-        ADD         HL, DE
-        LD          [WORK_GYPOS], HL
-;  END POINT X1
-        LD          BC, [WORK_CIRCLE_CENTERX]
-;  I“_Y1
-        LD          DE, [WORK_CIRCLE_CENTERY]
-        JP          _SUB_CIRCLE_DRAW_LINE
-        RET         
-; 
-; 	HL = HL * BC >> 8, HL IS SIGNED, BC IS UNSIGNED.
-; 	   = (HL * C >> 8) + HL * B
-_SUB_CIRCLE_MUL:
-        LD          A, H
-        OR          A, A
-        PUSH        AF
-        JP          P, _SUB_CIRCLE_SKIP_ABS
-        CPL         
-        LD          H, A
-        LD          A, L
-        CPL         
-        LD          L, A
-        INC         HL
-_SUB_CIRCLE_SKIP_ABS:
-        EX          DE, HL
-        LD          HL, 0
-        LD          A, 8
-_SUB_CIRCLE_MUL_1ST8BIT:
-        SLA         L
-        RL          H
-        SLA         C
-        JR          NC, _SUB_CIRCLE_MUL_1ST8BIT_SKIP1
-        ADD         HL, DE
-_SUB_CIRCLE_MUL_1ST8BIT_SKIP1:
-        DEC         A
-        JR          NZ, _SUB_CIRCLE_MUL_1ST8BIT
-        RL          L
-        LD          L, H
-        LD          H, 0
-        JR          NC, _SUB_CIRCLE_MUL_2ND8BIT
-        INC         HL
-_SUB_CIRCLE_MUL_2ND8BIT:
-        SRL         B
-        JR          NC, _SUB_CIRCLE_MUL_2ND8BIT_SKIP1
-        ADD         HL, DE
-_SUB_CIRCLE_MUL_2ND8BIT_SKIP1:
-        SLA         E
-        RL          D
-        INC         B
-        DJNZ        _SUB_CIRCLE_MUL_2ND8BIT
-        POP         AF
-        RET         P
-        LD          A, H
-        CPL         
-        LD          H, A
-        LD          A, L
-        CPL         
-        LD          L, A
-        INC         HL
-        RET         
-; 	GET COS(THETA): A = THETA (0:0[DEG]`256:360[DEG]) ¨ A = COS(THETA)
-_SUB_CIRCLE_COS:
-        SUB         A, 64
-; 	SINƒÆ‚ð•Ô‚·: A = THETA (0:0[DEG]`256:360[DEG]) ¨ A = SIN(THETA)
-_SUB_CIRCLE_SIN:
-        LD          B, A
-        AND         A, 0X3F
-        LD          A, B
-        JR          Z, _SUB_CIRCLE_SIN_SPECIAL
-        BIT         6, A
-        JR          Z, _SUB_CIRCLE_SIN_SKIP1
-        NEG         
-_SUB_CIRCLE_SIN_SKIP1:
-        AND         A, 0X3F
-        ADD         A, WORK_BUF & 0X0FF
-        LD          L, A
-        LD          H, WORK_BUF >> 8
-        LD          A, [HL]
-        LD          H, 0
-        LD          L, A
-        RL          B
-        RET         C
-        CPL         
-        DEC         H
-        LD          L, A
-        INC         HL
-        RET         
-_SUB_CIRCLE_SIN_SPECIAL:
-        LD          HL, 0
-        BIT         6, A
-        RET         Z
-        INC         H
-        RLA         
-        RET         C
-        DEC         H
-        DEC         H
-        RET         
-ALLOCATE_STRING:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [HEAP_END]
-        RST         0X20
-        JR          NC, _ALLOCATE_STRING_ERROR
-        LD          [HEAP_NEXT], HL
-        POP         HL
-        LD          [HL], C
-        RET         
-_ALLOCATE_STRING_ERROR:
-        LD          E, 7
-        JP          BIOS_ERRHAND
 FREE_STRING:
         LD          DE, HEAP_START
         RST         0X20
@@ -911,9 +310,12 @@ _FREE_HEAP_LOOP2:
         RST         0X20
         RET         NC
         LD          E, [HL]
+        LD          A, E
         INC         HL
         LD          D, [HL]
+        OR          A, D
         INC         HL
+        JR          Z, _FREE_HEAP_LOOP2
         PUSH        HL
         EX          DE, HL
         LD          E, [HL]
@@ -960,6 +362,97 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
+; READ DATA FOR STRING
+SUB_READ_STRING:
+        EX          DE, HL
+        LD          HL, [DATA_PTR]
+        LD          C, [HL]
+        INC         HL
+        LD          B, [HL]
+        INC         HL
+        LD          [DATA_PTR], HL
+        EX          DE, HL
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        RET         
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
+COPY_STRING:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        ALLOCATE_STRING
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+ALLOCATE_HEAP:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        ADD         HL, BC
+        JR          C, _ALLOCATE_HEAP_ERROR
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_HEAP_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        PUSH        HL
+        DEC         BC
+        LD          E, L
+        LD          D, H
+        INC         DE
+        LD          [HL], 0
+        LDIR        
+        POP         HL
+        RET         
+_ALLOCATE_HEAP_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
+INIT_STRING_ARRAY:
+        LD          BC, STR_0
+_INIT_STRING_ARRAY_LOOP:
+        LD          [HL], C
+        INC         HL
+        LD          [HL], B
+        INC         HL
+        DEC         DE
+        DEC         DE
+        LD          A, E
+        OR          A, D
+        JR          NZ, _INIT_STRING_ARRAY_LOOP
+        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -979,6 +472,10 @@ PROGRAM_RUN:
         LDIR        
         LD          HL, STR_0
         LD          [VARS_AREA_START], HL
+        LD          HL, VARS_AREA_START
+        LD          DE, VARS_AREA_START + 2
+        LD          BC, VARS_AREA_END - VARS_AREA_START - 2
+        LDIR        
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -1006,10 +503,29 @@ H_ERRO_HANDLER:
         CALL        RESTORE_H_ERRO
         POP         DE
         JP          WORK_H_ERRO
-CONST_42407437:
-        DEFB        0X42, 0X40, 0X74, 0X37
+DATA_240:
+        DEFW        STR_2
+        DEFW        STR_3
+        DEFW        STR_4
+        DEFW        STR_5
+        DEFW        STR_4
+        DEFW        STR_6
+        DEFW        STR_2
+        DEFW        STR_5
 STR_0:
         DEFB        0X00
+STR_1:
+        DEFB        0X02, 0X0D, 0X0A
+STR_2:
+        DEFB        0X02, 0X45, 0X45
+STR_3:
+        DEFB        0X02, 0X43, 0X32
+STR_4:
+        DEFB        0X02, 0X38, 0X32
+STR_5:
+        DEFB        0X02, 0X30, 0X30
+STR_6:
+        DEFB        0X02, 0X38, 0X36
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -1018,15 +534,31 @@ HEAP_MOVE_SIZE:
         DEFW        0
 HEAP_REMAP_ADDRESS:
         DEFW        0
+DATA_PTR:
+        DEFW        DATA_240
 VAR_AREA_START:
+SVARI_I_FOR_END:
+        DEFW        0
+SVARI_I_FOR_STEP:
+        DEFW        0
+SVARI_I_LABEL:
+        DEFW        0
+VARI_I:
+        DEFW        0
+VARI_IO:
+        DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
-VARS_I:
+VARS_R:
+        DEFW        0
+VARS_SD:
         DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 VARA_AREA_END:
 VARSA_AREA_START:
+VARSA_DS:
+        DEFW        0
 VARSA_AREA_END:
 H_TIMI_BACKUP:
         DEFB        0, 0, 0, 0, 0
