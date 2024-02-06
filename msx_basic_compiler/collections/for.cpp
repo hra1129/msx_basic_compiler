@@ -179,20 +179,22 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> ‚ª³‚Ìê‡
 			s_pop = p_info->get_auto_label();
-			asm_line.set( "RST", "", "0x20", "" );
+			asm_line.set( "SBC", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "JR", "C", s_pop, "" );
+			asm_line.set( "JP", "M", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "JR", "Z", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "RET", "NC", "", "" );
+			asm_line.set( "RET" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	<STEP> ‚ª•‰‚Ìê‡
 			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "RST", "", "0x20", "" );
+			asm_line.set( "CCF" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "RET", "C", "", "" );
+			asm_line.set( "SBC", "", "HL", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "RET", "M", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LABEL", "", s_pop, "" );
 			p_info->assembler_list.body.push_back( asm_line );
