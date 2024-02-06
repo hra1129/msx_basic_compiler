@@ -1728,8 +1728,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//  POP  DE
 	//  EX   DE, HL
 	//	↓
-	//  LD HL, constant1
-	//	LD DE, constant2
+	//	LD DE, constant1
+	//  LD HL, constant2
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
 			p_next = p + 1;
@@ -1749,6 +1749,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 				continue;
 			}
 			//	マッチしたので置換
+			p_next = p;
+			p_next->operand1.s_value = "DE";
 			p_next = p + 1;
 			this->info.assembler_list.body.erase( p_next );	//	PUSH HL
 			p_next = p + 2;
@@ -1756,7 +1758,6 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p_next = p + 2;
 			this->info.assembler_list.body.erase( p_next );	//	EX DE, HL
 			p_next = p + 1;
-			p_next->operand1.s_value = "DE";
 		}
 	}
 
