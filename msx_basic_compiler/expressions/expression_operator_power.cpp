@@ -36,9 +36,9 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 		return;
 	}
 	//	æ‚É€‚ðˆ—
-	this->p_left->compile( p_info );
+	this->p_left->compile( p_info );						//	Šî”
 	p_info->assembler_list.push_hl( this->p_left->type );
-	this->p_right->compile( p_info );
+	this->p_right->compile( p_info );						//	Žw”
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
 		//	‚±‚Ì‰‰ŽZŽq‚Í•¶Žš—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
@@ -51,12 +51,18 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
 		//	®”Œ^‚Ìê‡
 		p_info->assembler_list.add_label( "bios_intexp", "0x0383f" );
+		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303A" );
+		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_intexp", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
@@ -69,4 +75,5 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
+	this->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 }
