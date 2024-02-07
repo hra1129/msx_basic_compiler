@@ -1,2 +1,11 @@
-﻿  expression_operator_power.cpp
-  msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe
+﻿  expression_atn.cpp
+  expression_cos.cpp
+  expression_exp.cpp
+  expression_log.cpp
+  expression_operator_power.cpp
+  expression_rnd.cpp
+  expression_sin.cpp
+  expression_tan.cpp
+  コードを生成中...
+  LINK : 前回のインクリメンタル リンクで D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
+LINK : fatal error LNK1104: ファイル 'D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Debug\msx_bacon.exe' を開くことができません。

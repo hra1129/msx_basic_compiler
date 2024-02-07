@@ -68,9 +68,12 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 	else {
 		//	À”‚Ìê‡A”{¸“x‚É¸Ši
 		p_info->assembler_list.add_label( "bios_dblexp", "0x037d7" );
+		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303A" );
 		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_dblexp", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
 		p_info->assembler_list.body.push_back( asm_line );
