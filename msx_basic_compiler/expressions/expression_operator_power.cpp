@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "expression_operator_power.h"
+#include "expression_term.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_OPERATOR_POWER::optimization( CCOMPILE_INFO *p_info ) {
@@ -24,6 +25,54 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_POWER::optimization( CCOMPILE_INFO *p_inf
 	if( p != nullptr ) {
 		delete (this->p_right);
 		this->p_right = p;
+	}
+
+	//	Ž–‘OŒvŽZˆ—
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_left->is_constant && this->p_right->is_constant ) {
+		//	’è”‚Ìê‡
+		if( this->p_left->type != CEXPRESSION_TYPE::STRING && this->p_right->type != CEXPRESSION_TYPE::STRING ) {
+			//	”’l‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			p_term->set_double( pow( std::stod( this->p_left->s_value ), std::stod( this->p_right->s_value ) ) );
+			return p_term;
+		}
+	}
+
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_left->is_constant && this->p_left->type != CEXPRESSION_TYPE::STRING ) {
+		//	’è”‚Ìê‡
+		if(  std::stod( this->p_left->s_value ) == 1.0 ) {
+			//	1^n ‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			p_term->set_double( 1.0 );
+			return p_term;
+		}
+		else if(  std::stod( this->p_left->s_value ) == 0.0 ) {
+			//	1^n ‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			p_term->set_double( 0.0 );
+			return p_term;
+		}
+	}
+
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_right->is_constant && this->p_right->type != CEXPRESSION_TYPE::STRING ) {
+		//	’è”‚Ìê‡
+		if(  std::stod( this->p_right->s_value ) == 1.0 ) {
+			//	n^1 ‚Ìê‡
+			CEXPRESSION_NODE* p_node;
+			p_node = this->p_left;
+			this->p_left = nullptr;
+			return p_node;
+		}
+		else if(  std::stod( this->p_left->s_value ) == 0.0 ) {
+			//	n^0 ‚Ìê‡
+			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
+			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			p_term->set_double( 1.0 );
+			return p_term;
+		}
 	}
 	return nullptr;
 }

@@ -1,14 +1,7 @@
-﻿  expression_atn.cpp
-  expression_cos.cpp
-  expression_exp.cpp
-  expression_log.cpp
-  expression_operator_power.cpp
-  expression_rnd.cpp
-  expression_sin.cpp
-  expression_tan.cpp
+﻿  expression_operator_power.cpp
   コード生成しています。
-  96 of 2414 functions ( 4.0%) were compiled, the rest were copied from previous compilation.
+  1 of 2414 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    120 functions had inline decision re-evaluated but remain unchanged
+    134 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

@@ -14,15 +14,11 @@ WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
 WORK_PRTFLG                     = 0X0F416
-BIOS_INTEXP                     = 0X0383F
-BIOS_FRCDBL                     = 0X0303A
+BIOS_FOUT                       = 0X03425
 WORK_DAC                        = 0X0F7F6
+WORK_VALTYP                     = 0X0F663
 WORK_CSRX                       = 0X0F3DD
 WORK_LINLEN                     = 0X0F3B0
-BIOS_FOUT                       = 0X03425
-WORK_VALTYP                     = 0X0F663
-WORK_ARG                        = 0X0F847
-BIOS_DBLEXP                     = 0X037D7
 BIOS_NEWSTT                     = 0X04601
 BIOS_ERRHAND                    = 0X0406F
 ; BSAVE HEADER -----------------------------------------------------------
@@ -67,13 +63,10 @@ PROGRAM_START:
 LINE_100:
         XOR         A, A
         LD          [WORK_PRTFLG], A
-        LD          DE, 2
-        LD          HL, 7
-        CALL        BIOS_INTEXP
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        CALL        LD_DAC_DOUBLE_REAL
-        LD          HL, WORK_DAC
+        LD          HL, 128
+        LD          [WORK_DAC + 2], HL
+        LD          A, 2
+        LD          [WORK_VALTYP], A
         CALL        STR
         LD          A, [WORK_LINLEN]
         INC         A
@@ -96,20 +89,10 @@ _PT0:
 LINE_110:
         XOR         A, A
         LD          [WORK_PRTFLG], A
-        LD          HL, CONST_41200000
-        CALL        PUSH_SINGLE_REAL_HL
-        LD          HL, CONST_41700000
-        LD          DE, WORK_ARG
-        LD          BC, 4
-        LDIR        
-        CALL        POP_SINGLE_REAL_DAC
-        LD          [WORK_DAC+4], HL
-        LD          [WORK_DAC+6], HL
-        CALL        BIOS_DBLEXP
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        CALL        LD_DAC_DOUBLE_REAL
-        LD          HL, WORK_DAC
+        LD          HL, 128
+        LD          [WORK_DAC + 2], HL
+        LD          A, 2
+        LD          [WORK_VALTYP], A
         CALL        STR
         LD          A, [WORK_LINLEN]
         INC         A
@@ -132,20 +115,10 @@ _PT1:
 LINE_120:
         XOR         A, A
         LD          [WORK_PRTFLG], A
-        LD          HL, CONST_41200000
-        CALL        PUSH_SINGLE_REAL_HL
-        LD          HL, CONST_41700000
-        LD          DE, WORK_ARG
-        LD          BC, 4
-        LDIR        
-        CALL        POP_SINGLE_REAL_DAC
-        LD          [WORK_DAC+4], HL
-        LD          [WORK_DAC+6], HL
-        CALL        BIOS_DBLEXP
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        CALL        LD_DAC_DOUBLE_REAL
-        LD          HL, WORK_DAC
+        LD          HL, 128
+        LD          [WORK_DAC + 2], HL
+        LD          A, 2
+        LD          [WORK_VALTYP], A
         CALL        STR
         LD          A, [WORK_LINLEN]
         INC         A
@@ -235,37 +208,6 @@ _STR_LOOP_EXIT:
         POP         HL
         LD          [HL], B
         RET         
-LD_DAC_DOUBLE_REAL:
-        LD          DE, WORK_DAC
-        LD          BC, 8
-        LD          A, C
-        LD          [WORK_VALTYP], A
-        LDIR        
-        RET         
-PUSH_SINGLE_REAL_HL:
-        POP         BC
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        PUSH        DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        DE
-        PUSH        BC
-        RET         
-POP_SINGLE_REAL_DAC:
-        POP         BC
-        POP         HL
-        LD          [WORK_DAC+2], HL
-        POP         HL
-        LD          [WORK_DAC+0], HL
-        LD          HL, 0
-        LD          [WORK_DAC+4], HL
-        LD          [WORK_DAC+6], HL
-        PUSH        BC
-        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -305,10 +247,6 @@ H_ERRO_HANDLER:
         CALL        RESTORE_H_ERRO
         POP         DE
         JP          WORK_H_ERRO
-CONST_41200000:
-        DEFB        0X41, 0X20, 0X00, 0X00
-CONST_41700000:
-        DEFB        0X41, 0X70, 0X00, 0X00
 STR_0:
         DEFB        0X00
 STR_1:
