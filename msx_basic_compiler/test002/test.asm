@@ -106,6 +106,7 @@ LINE_110:
         LD          [WORK_DAC+4], HL
         LD          [WORK_DAC+6], HL
         CALL        BIOS_DBLEXP
+        CALL        BIOS_FRCDBL
         LD          HL, WORK_DAC
         CALL        LD_DAC_DOUBLE_REAL
         LD          HL, WORK_DAC
@@ -141,6 +142,7 @@ LINE_120:
         LD          [WORK_DAC+4], HL
         LD          [WORK_DAC+6], HL
         CALL        BIOS_DBLEXP
+        CALL        BIOS_FRCDBL
         LD          HL, WORK_DAC
         CALL        LD_DAC_DOUBLE_REAL
         LD          HL, WORK_DAC
