@@ -99,13 +99,11 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
 		//	®”Œ^‚Ìê‡
-		p_info->assembler_list.add_label( "bios_intexp", "0x0383f" );
+		p_info->assembler_list.add_label( "bios_intexp", "0x0383f" );	//	DE ^ HL
 		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303A" );
 		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );				//	HL = Žw”, DE = Šî”
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_intexp", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -116,7 +114,7 @@ void CEXPRESSION_OPERATOR_POWER::compile( CCOMPILE_INFO *p_info ) {
 	}
 	else {
 		//	ŽÀ”‚Ìê‡A”{¸“x‚É¸Ši
-		p_info->assembler_list.add_label( "bios_dblexp", "0x037d7" );
+		p_info->assembler_list.add_label( "bios_dblexp", "0x037d7" );	//	dac ^ arg
 		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303A" );
 		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 
