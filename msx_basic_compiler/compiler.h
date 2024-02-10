@@ -43,6 +43,42 @@ private:
 
 	void sub_return_line_num( void );
 
+	bool is_pair_register( char h, char l ) {
+		const char* p_pair_registers[] = { "AF", "BC", "DE", "HL" };
+		int i;
+		for( i = 0; i < sizeof( p_pair_registers ) / sizeof( p_pair_registers[0] ); i++ ) {
+			if( p_pair_registers[i][0] == h && p_pair_registers[i][1] == l ) {
+				return true;
+			}
+			if( p_pair_registers[i][0] == l && p_pair_registers[i][1] == h ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool is_pair_low_register( char l ) {
+		const char* p_pair_registers[] = { "AF", "BC", "DE", "HL" };
+		int i;
+		for( i = 0; i < sizeof( p_pair_registers ) / sizeof( p_pair_registers[0] ); i++ ) {
+			if( p_pair_registers[i][1] == l ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const char *get_pair_register( char reg8 ) {
+		const char* p_pair_registers[] = { "AF", "BC", "DE", "HL" };
+		int i;
+		for( i = 0; i < sizeof( p_pair_registers ) / sizeof( p_pair_registers[0] ); i++ ) {
+			if( p_pair_registers[i][0] == reg8 || p_pair_registers[i][1] == reg8 ) {
+				return p_pair_registers[i];
+			}
+		}
+		return "null";
+	}
+
 	int check_16bit_register( const std::string s ) const {
 		if( s == "HL" ) {
 			return 0;
