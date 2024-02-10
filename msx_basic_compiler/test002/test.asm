@@ -75,30 +75,12 @@ _PT0:
         EI          
 _PT1:
 LINE_20:
-        LD          HL, VARI_I
-        PUSH        HL
         LD          HL, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, SVARI_I_FOR_END
-        PUSH        HL
+        LD          [VARI_I], HL
         LD          HL, 9
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, SVARI_I_FOR_STEP
-        PUSH        HL
+        LD          [SVARI_I_FOR_END], HL
         LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
+        LD          [SVARI_I_FOR_STEP], HL
         LD          HL, _PT3
         LD          [SVARI_I_LABEL], HL
         JR          _PT2
@@ -159,12 +141,7 @@ LINE_30:
         LD          [HL], D
         POP         HL
         CALL        FREE_STRING
-        LD          HL, 3
-        LD          B, L
-        PUSH        BC
-        LD          HL, 1
-        POP         BC
-        LD          C, L
+        LD          BC, ((1) & 255) | (((3) & 255) << 8)
         PUSH        BC
         LD          HL, STR_2
         PUSH        HL

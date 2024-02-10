@@ -1,5 +1,5 @@
 copy ..\baconloader\BACONLDR.BIN .
-..\x64\release\msx_bacon.exe -O0 test.asc test.asm
+..\x64\release\msx_bacon.exe -O3 test.asc test.asm
 ..\zma.exe test.asm test.bin
 if exist test2.asc (
 	if exist zma_test.log del zma_test.log
