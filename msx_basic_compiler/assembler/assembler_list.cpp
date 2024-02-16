@@ -3770,6 +3770,183 @@ void CASSEMBLER_LIST::activate_circle( class CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
+//	開いているファイルを閉じる
+//	L = 1～15 : CLOSE #L
+//
+void CASSEMBLER_LIST::activate_close( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_close" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_close" );
+
+	this->add_label( "bios_errhand", "0x0406F" );
+	this->add_label( "work_maxfil", "0x0f85f" );
+	this->add_label( "bios_imult", "0x03193" );
+	this->add_label( "blib_fclose", "0x04063" );
+
+	asm_line.set( "LABEL", "", "sub_close" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[work_maxfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "52" );				//	Bad file number
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "C", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "NZ", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET", "Z" );
+	this->subroutines.push_back( asm_line );			//	CLOSE#0 は、何もせずに戻る(エラーにはならない)
+	asm_line.set( "DEC", "", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "292" );				//	FCB 37 + BUFFER 255
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_imult" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "[varia__file_info]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD", "", "HL", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[HL]" );				//	0: No Open, 1～8: FILE, 128: GRP, 129: CON, 130: CRT, 255: NUL
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "8" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NC", "sub_close_end" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_fclose" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_close_end" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "0" );				//	No Open にマークする
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	開いている全てのファイルを閉じる
+void CASSEMBLER_LIST::activate_all_close( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_all_close" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_all_close" );
+	this->activate_close();
+
+	this->add_label( "work_maxfil", "0x0f85f" );
+	asm_line.set( "LABEL", "", "sub_all_close" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[work_maxfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET", "Z" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "L", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_all_close_loop" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_close" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NZ", "sub_all_close_loop" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	HL = 新しい MAXFILES の値
+void CASSEMBLER_LIST::activate_maxfiles( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_maxfiles" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_maxfiles" );
+	this->activate_all_close();
+	this->activate_init_files();
+	this->add_label( "work_maxfil", "0x0f85f" );
+
+	asm_line.set( "LABEL", "", "sub_maxfiles" );
+	this->subroutines.push_back( asm_line );
+
+	//	まず現在開いているファイルを全て close する
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_all_close" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	//	maxfil を更新
+	asm_line.set( "LD", "", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_maxfil]", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "sub_init_files" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	
+void CASSEMBLER_LIST::activate_init_files( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_init_files" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_init_files" );
+
+	asm_line.set( "LABEL", "", "sub_init_files" );
+	this->subroutines.push_back( asm_line );
+
+	//	メモリが確保済みであれば解放する
+	asm_line.set( "LD", "", "HL", "[varia__file_info]" );
+	this->subroutines.push_back( asm_line );
+
+	//	メモリを確保する。ゼロクリアされるので、全て閉じた状態になる。
+	this->add_label( "bios_imult", "0x03193" );
+	this->activate_allocate_heap();
+	asm_line.set( "LD", "", "A", "[work_maxfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "292" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_imult" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "allocate_heap" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;

@@ -83,6 +83,10 @@ public:
 	void activate_read_double( void );
 	void activate_val( void );
 	void activate_circle( class CCOMPILE_INFO *p_info );
+	void activate_close( void );
+	void activate_all_close( void );
+	void activate_maxfiles( void );
+	void activate_init_files( void );
 };
 
 #endif

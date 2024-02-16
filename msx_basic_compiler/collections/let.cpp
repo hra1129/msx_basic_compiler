@@ -140,6 +140,29 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
+	if( p_info->list.p_position->s_word == "MAXFILES" ) {
+		p_info->use_file_access = true;
+		//	ファイルの上限数を設定
+		p_info->list.p_position++;
+		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		p_info->assembler_list.activate_maxfiles();
+		if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
+			asm_line.set( "CALL", "", "sub_maxfiles" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+		}
+		return true;
+	}
 	else if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		//	変数名では無いので LET ではない。
 		if( has_let ) {
