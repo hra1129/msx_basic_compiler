@@ -1502,6 +1502,10 @@ void CASSEMBLER_LIST::activate_check_array( void ) {
 }
 
 // --------------------------------------------------------------------
+//	文字列配列をチェックする
+//	HL ... 文字列配列変数の格納アドレス
+//	D .... 次元数
+//	BC ... 
 void CASSEMBLER_LIST::activate_check_sarray( CCONSTANT_INFO *p_constants ) {
 	CASSEMBLER_LINE asm_line;
 
