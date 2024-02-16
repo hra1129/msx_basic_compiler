@@ -97,11 +97,11 @@ public:
 				break;
 			}
 		}
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "var_area_end", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "LABEL", "", "var_area_end" );
 		asm_list.variables_area.push_back( asm_line );
 
 		//	配列でない文字列
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "vars_area_start", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "LABEL", "", "vars_area_start" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
 			if( it->second.dimension != 0 || it->second.type != CVARIABLE_TYPE::STRING ) {
@@ -117,7 +117,7 @@ public:
 		asm_list.variables_area.push_back( asm_line );
 
 		//	配列の整数・単精度・倍精度変数
-		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "vara_area_start", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "LABEL", "", "vara_area_start" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
 			if( it->second.dimension == 0 || it->second.type == CVARIABLE_TYPE::STRING ) {

@@ -338,6 +338,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
 	this->info.assembler_list.add_label( "work_filtab", "0x0F860" );
+	this->info.assembler_list.add_label( "work_maxfil", "0x0f85f" );
 
 	//	初期化処理 (BACONLIB存在確認)
 	asm_line.set( "LABEL", "", "start_address", "" );
@@ -522,10 +523,25 @@ void CCOMPILER::exec_terminator( void ) {
 	this->info.assembler_list.add_label( "bios_errhand", "0x0406F" );
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
 	this->info.assembler_list.add_label( "work_filtab", "0x0F860" );
+	if( this->info.use_file_access ) {
+		this->info.assembler_list.activate_all_close();
+	}
 
 	//	プログラムの終了処理
 	asm_line.set( "LABEL", "", "program_termination", "" );
 	this->info.assembler_list.body.push_back( asm_line );
+	if( this->info.use_file_access ) {
+		//	全てのファイルを閉じる
+		asm_line.set( "CALL", "", "sub_all_close" );
+		this->info.assembler_list.body.push_back( asm_line );
+		//	ファイルを使用しているので、ファイル用ワークエリアを確保
+		CVARIABLE variable;
+		variable.s_name		= "_file_info";
+		variable.s_label	= "varia_" + variable.s_name;
+		variable.type		= CVARIABLE_TYPE::INTEGER;
+		variable.dimension	= 1;
+		this->info.variables.dictionary[ variable.s_name ] = variable;
+	}
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( "CALL", "", "restore_h_erro", "" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -580,6 +596,25 @@ void CCOMPILER::exec_sub_run( void ) {
 	//	RUN用サブルーチン
 	asm_line.set( "LABEL", "", "program_run", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	ファイルを全て close する
+	if( this->info.use_file_access ) {
+		this->info.assembler_list.activate_all_close();
+		asm_line.set( "LD", "", "HL", "[varia__file_info]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "H" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "L" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "file_init_skip" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "sub_all_close" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "file_init_skip" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+
+	//	メモリを初期化
 	asm_line.set( "LD", "", "HL", "heap_start" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_next]", "HL" );
@@ -602,6 +637,13 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_end]", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	//	ファイル用の情報エリアを確保
+	if( this->info.use_file_access ) {
+		this->info.assembler_list.activate_init_files();
+		asm_line.set( "CALL", "", "sub_init_files" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 
 	asm_line.set( "DI" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -635,7 +677,6 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "EI" );
 	this->info.assembler_list.body.push_back( asm_line );
-
 	//	RUN用サブルーチンの中で変数領域をクリアする
 	int variable_area_bytes = this->info.variables.var_area_size + this->info.variables.vars_area_count + this->info.variables.vara_area_count;
 	if( variable_area_bytes == 0 ) {
