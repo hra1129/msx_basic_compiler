@@ -1126,6 +1126,8 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	//	‘ÎÛ‚ÌƒAƒhƒŒƒX‚È‚Ì‚Åˆ—‚·‚é
 	asm_line.set( "LD", "", "HL", "[heap_move_size]" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "SBC", "", "HL", "DE" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "POP", "", "DE", "" );
