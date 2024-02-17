@@ -17,7 +17,6 @@ SIGNATURE                       = 0X4010
 BIOS_ERRHAND_REDIM              = 0X0405E
 BIOS_UMULT                      = 0X0314A
 BIOS_ERRHAND                    = 0X0406F
-BIOS_CLS                        = 0X000C3
 BLIB_MID                        = 0X04033
 BIOS_FIN                        = 0X3299
 BIOS_FRCDBL                     = 0X303A
@@ -30,6 +29,7 @@ WORK_PRTFLG                     = 0X0F416
 BIOS_FOUT                       = 0X03425
 WORK_CSRX                       = 0X0F3DD
 WORK_LINLEN                     = 0X0F3B0
+BLIB_MID_CMD                    = 0X0406C
 BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
@@ -119,8 +119,6 @@ LINE_10:
         LD          H, B
         CALL        FREE_STRING
 LINE_1725:
-        XOR         A, A
-        CALL        BIOS_CLS
         LD          HL, 0
         LD          [VARI_I], HL
         LD          HL, 19
@@ -491,7 +489,61 @@ _PT20:
         LD          HL, STR_3
         CALL        PUTS
 LINE_1802:
-; MID$(MP$(Z),J*2+1,2)=R$
+        LD          HL, VARSA_MP
+        LD          D, 1
+        LD          BC, 27
+        CALL        CHECK_SARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          HL, [VARI_Z]
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        DEC         HL
+        PUSH        DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        COPY_STRING
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, [VARI_J]
+        PUSH        HL
+        LD          HL, 2
+        POP         DE
+        CALL        BIOS_IMULT
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        ADD         HL, DE
+        LD          B, L
+        LD          C, (2) & 255
+        PUSH        BC
+        LD          HL, [VARS_R]
+        PUSH        HL
+        LD          HL, VARSA_MP
+        LD          D, 1
+        LD          BC, 27
+        CALL        CHECK_SARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          HL, [VARI_Z]
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        POP         HL
+        POP         BC
+        EX          DE, HL
+        LD          IX, BLIB_MID_CMD
+        CALL        CALL_BLIB
 LINE_1803:
         LD          HL, [SVARI_K_LABEL]
         CALL        JP_HL
@@ -683,6 +735,7 @@ _FREE_HEAP_SARRAY_ELEMENTS:
         RST         0X20
         JR          C, _FREE_HEAP_LOOP2_NEXT
         LD          HL, [HEAP_MOVE_SIZE]
+        EX          DE, HL
         SBC         HL, DE
         POP         DE
         EX          DE, HL
