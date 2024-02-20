@@ -356,9 +356,7 @@ LINE_10000:
         LD          HL, 2
         POP         DE
         CALL        BIOS_IMULT
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
+        LD          DE, 1
         ADD         HL, DE
         LD          B, L
         LD          C, (2) & 255
@@ -367,9 +365,7 @@ LINE_10000:
         CALL        ALLOCATE_STRING
         PUSH        HL
         LD          HL, [VARI_X]
-        PUSH        HL
-        LD          HL, 65
-        POP         DE
+        LD          DE, 65
         ADD         HL, DE
         LD          A, L
         POP         HL
@@ -381,9 +377,7 @@ LINE_10000:
         CALL        ALLOCATE_STRING
         PUSH        HL
         LD          HL, [VARI_Y]
-        PUSH        HL
-        LD          HL, 65
-        POP         DE
+        LD          DE, 65
         ADD         HL, DE
         LD          A, L
         POP         HL
