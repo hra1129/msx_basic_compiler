@@ -1011,7 +1011,9 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JR", "C", "_free_heap_loop1_next", "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "[heap_move_size]" );
+	asm_line.set( "LD", "", "HL", "[heap_move_size]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "SBC", "", "HL", "DE" );
 	this->subroutines.push_back( asm_line );
