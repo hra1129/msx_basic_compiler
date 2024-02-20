@@ -14,21 +14,24 @@ BIOS_ENASLT                     = 0X0024
 WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
+WORK_ROMVER                     = 0X0002D
+BIOS_CHGMOD                     = 0X0005F
+BIOS_CHGMODP                    = 0X001B5
+BIOS_EXTROM                     = 0X0015F
+BLIB_WIDTH                      = 0X0403C
+BIOS_CLS                        = 0X000C3
+BIOS_ERAFNK                     = 0X000CC
 BIOS_ERRHAND_REDIM              = 0X0405E
 BIOS_UMULT                      = 0X0314A
 BIOS_ERRHAND                    = 0X0406F
-BLIB_MID                        = 0X04033
-BIOS_FIN                        = 0X3299
-BIOS_FRCDBL                     = 0X303A
-WORK_DAC                        = 0X0F7F6
-WORK_BUF                        = 0X0F55E
-WORK_VALTYP                     = 0X0F663
-BIOS_FRCINT                     = 0X02F8A
-BIOS_IMULT                      = 0X03193
-WORK_PRTFLG                     = 0X0F416
-BIOS_FOUT                       = 0X03425
+BIOS_POSIT                      = 0X000C6
+WORK_CSRY                       = 0X0F3DC
 WORK_CSRX                       = 0X0F3DD
-WORK_LINLEN                     = 0X0F3B0
+WORK_CSRSW                      = 0X0FCA9
+WORK_PRTFLG                     = 0X0F416
+BLIB_LEFT                       = 0X04030
+BIOS_IMULT                      = 0X03193
+WORK_BUF                        = 0X0F55E
 BLIB_MID_CMD                    = 0X0406C
 BIOS_NEWSTT                     = 0X04601
 ; BSAVE HEADER -----------------------------------------------------------
@@ -70,12 +73,32 @@ SETUP_H_ERRO:
 JP_HL:
         JP          HL
 PROGRAM_START:
-LINE_5:
+LINE_10:
+        LD          HL, 1
+        LD          A, [WORK_ROMVER]
+        OR          A, A
+        LD          A, L
+        JR          NZ, _PT0
+        CALL        BIOS_CHGMOD
+        JR          _PT1
+_PT0:
+        LD          IX, BIOS_CHGMODP
+        CALL        BIOS_EXTROM
+        EI          
+_PT1:
+        LD          HL, 32
+        LD          IX, BLIB_WIDTH
+        CALL        CALL_BLIB
+        XOR         A, A
+        CALL        BIOS_CLS
+        CALL        BIOS_ERAFNK
+LINE_20:
+LINE_30:
         LD          HL, [VARSA_MP]
         LD          A, L
         OR          A, H
         JP          NZ, BIOS_ERRHAND_REDIM
-        LD          HL, 20
+        LD          HL, 24
         INC         HL
         PUSH        HL
         ADD         HL, HL
@@ -107,60 +130,49 @@ LINE_5:
         DEC         DE
         DEC         DE
         CALL        INIT_STRING_ARRAY
-LINE_10:
-        LD          HL, VARS_R
-        LD          DE, STR_1
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        FREE_STRING
-LINE_1725:
+LINE_50:
         LD          HL, 0
-        LD          [VARI_I], HL
-        LD          HL, 19
-        LD          [SVARI_I_FOR_END], HL
+        LD          [VARI_Y], HL
+        LD          HL, 23
+        LD          [SVARI_Y_FOR_END], HL
         LD          HL, 1
-        LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT1
-        LD          [SVARI_I_LABEL], HL
-        JR          _PT0
-_PT1:
-        LD          HL, [VARI_I]
-        LD          DE, [SVARI_I_FOR_STEP]
+        LD          [SVARI_Y_FOR_STEP], HL
+        LD          HL, _PT3
+        LD          [SVARI_Y_LABEL], HL
+        JR          _PT2
+_PT3:
+        LD          HL, [VARI_Y]
+        LD          DE, [SVARI_Y_FOR_STEP]
         ADD         HL, DE
-        LD          [VARI_I], HL
+        LD          [VARI_Y], HL
         LD          A, D
-        LD          DE, [SVARI_I_FOR_END]
+        LD          DE, [SVARI_Y_FOR_END]
         RLCA        
-        JR          C, _PT2
+        JR          C, _PT4
         SBC         HL, DE
-        JP          M, _PT3
-        JR          Z, _PT3
+        JP          M, _PT5
+        JR          Z, _PT5
         RET         
-_PT2:
+_PT4:
         CCF         
         SBC         HL, DE
         RET         M
-_PT3:
+_PT5:
         POP         HL
-_PT0:
+_PT2:
         LD          HL, VARSA_MP
         LD          D, 1
         LD          BC, 27
         CALL        CHECK_SARRAY
         CALL        CALC_ARRAY_TOP
-        LD          HL, [VARI_I]
+        LD          HL, [VARI_Y]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
         PUSH        HL
-        LD          HL, 30
+        LD          HL, 32
         PUSH        HL
-        LD          HL, STR_2
+        LD          HL, STR_1
         POP         DE
         CALL        STRING
         POP         DE
@@ -173,19 +185,54 @@ _PT0:
         LD          L, C
         LD          H, B
         CALL        FREE_STRING
-        LD          HL, [SVARI_I_LABEL]
+LINE_55:
+        LD          HL, 0
+        LD          [VARI_X], HL
+        LD          HL, 15
+        LD          [SVARI_X_FOR_END], HL
+        LD          HL, 1
+        LD          [SVARI_X_FOR_STEP], HL
+        LD          HL, _PT7
+        LD          [SVARI_X_LABEL], HL
+        JR          _PT6
+_PT7:
+        LD          HL, [VARI_X]
+        LD          DE, [SVARI_X_FOR_STEP]
+        ADD         HL, DE
+        LD          [VARI_X], HL
+        LD          A, D
+        LD          DE, [SVARI_X_FOR_END]
+        RLCA        
+        JR          C, _PT8
+        SBC         HL, DE
+        JP          M, _PT9
+        JR          Z, _PT9
+        RET         
+_PT8:
+        CCF         
+        SBC         HL, DE
+        RET         M
+_PT9:
+        POP         HL
+_PT6:
+LINE_60:
+        CALL        LINE_10000
+LINE_70:
+        LD          HL, [SVARI_X_LABEL]
         CALL        JP_HL
-LINE_1730:
+        LD          HL, [SVARI_Y_LABEL]
+        CALL        JP_HL
+LINE_80:
         LD          HL, 0
         LD          [VARI_I], HL
-        LD          HL, 9
+        LD          HL, 22
         LD          [SVARI_I_FOR_END], HL
         LD          HL, 1
         LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT5
+        LD          HL, _PT11
         LD          [SVARI_I_LABEL], HL
-        JR          _PT4
-_PT5:
+        JR          _PT10
+_PT11:
         LD          HL, [VARI_I]
         LD          DE, [SVARI_I_FOR_STEP]
         ADD         HL, DE
@@ -193,201 +240,27 @@ _PT5:
         LD          A, D
         LD          DE, [SVARI_I_FOR_END]
         RLCA        
-        JR          C, _PT6
+        JR          C, _PT12
         SBC         HL, DE
-        JP          M, _PT7
-        JR          Z, _PT7
+        JP          M, _PT13
+        JR          Z, _PT13
         RET         
-_PT6:
-        CCF         
-        SBC         HL, DE
-        RET         M
-_PT7:
-        POP         HL
-_PT4:
-        LD          HL, VARS_A
-        CALL        SUB_READ_STRING
-        LD          HL, VARI_L
-        PUSH        HL
-        LD          HL, [VARS_A]
-        CALL        COPY_STRING
-        LD          A, [HL]
-        PUSH        AF
-        CALL        FREE_STRING
-        POP         AF
-        LD          L, A
-        LD          H, 0
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-LINE_1740:
-        LD          HL, 0
-        LD          [VARI_J], HL
-        LD          HL, SVARI_J_FOR_END
-        PUSH        HL
-        LD          HL, [VARI_L]
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        EX          DE, HL
-        OR          A, A
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, 1
-        LD          [SVARI_J_FOR_STEP], HL
-        LD          HL, _PT9
-        LD          [SVARI_J_LABEL], HL
-        JR          _PT8
-_PT9:
-        LD          HL, [VARI_J]
-        LD          DE, [SVARI_J_FOR_STEP]
-        ADD         HL, DE
-        LD          [VARI_J], HL
-        LD          A, D
-        LD          DE, [SVARI_J_FOR_END]
-        RLCA        
-        JR          C, _PT10
-        SBC         HL, DE
-        JP          M, _PT11
-        JR          Z, _PT11
-        RET         
-_PT10:
-        CCF         
-        SBC         HL, DE
-        RET         M
-_PT11:
-        POP         HL
-_PT8:
-        LD          HL, VARS_B
-        PUSH        HL
-        LD          HL, [VARS_A]
-        CALL        COPY_STRING
-        PUSH        HL
-        LD          HL, [VARI_J]
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        ADD         HL, DE
-        PUSH        HL
-        LD          C, (1) & 255
-        POP         HL
-        LD          B, L
-        POP         HL
-        PUSH        HL
-        LD          IX, BLIB_MID
-        CALL        CALL_BLIB
-        POP         DE
-        PUSH        HL
-        EX          DE, HL
-        CALL        FREE_STRING
-        POP         HL
-        CALL        COPY_STRING
-        POP         DE
-        EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        FREE_STRING
-LINE_1741:
-        LD          HL, VARI_B
-        PUSH        HL
-        LD          HL, [VARS_B]
-        CALL        COPY_STRING
-        PUSH        HL
-        CALL        SUB_VAL
-        POP         HL
-        CALL        FREE_STRING
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        LD          HL, [VARI_B]
-        LD          A, L
-        OR          A, H
-        JP          Z, _PT12
-        LD          DE, 2
-        RST         0X20
-        JP          NC, _PT12
-        ADD         HL, HL
-        LD          DE, _PT13 - 2
-        ADD         HL, DE
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        EX          DE, HL
-        LD          DE, _PT12
-        PUSH        DE
-        JP          HL
-_PT13:
-        DEFW        LINE_1800
 _PT12:
-LINE_1742:
-        LD          HL, [SVARI_J_LABEL]
-        CALL        JP_HL
-LINE_1743:
-        LD          HL, [SVARI_I_LABEL]
-        CALL        JP_HL
-LINE_1750:
-        JP          program_termination
-LINE_1800:
-        LD          HL, 0
-        LD          [VARI_K], HL
-        LD          HL, 1
-        LD          [SVARI_K_FOR_END], HL
-        LD          [SVARI_K_FOR_STEP], HL
-        LD          HL, _PT15
-        LD          [SVARI_K_LABEL], HL
-        JR          _PT14
-_PT15:
-        LD          HL, [VARI_K]
-        LD          DE, [SVARI_K_FOR_STEP]
-        ADD         HL, DE
-        LD          [VARI_K], HL
-        LD          A, D
-        LD          DE, [SVARI_K_FOR_END]
-        RLCA        
-        JR          C, _PT16
-        SBC         HL, DE
-        JP          M, _PT17
-        JR          Z, _PT17
-        RET         
-_PT16:
         CCF         
         SBC         HL, DE
         RET         M
-_PT17:
+_PT13:
         POP         HL
-_PT14:
-        LD          HL, VARI_Z
+_PT10:
+        LD          H, (0) & 255
+        INC         H
         PUSH        HL
         LD          HL, [VARI_I]
-        PUSH        HL
-        LD          HL, 2
-        POP         DE
-        CALL        BIOS_IMULT
-        PUSH        HL
-        LD          HL, [VARI_K]
-        POP         DE
-        ADD         HL, DE
-        POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-LINE_1801:
+        LD          A, L
+        INC         A
+        POP         HL
+        LD          L, A
+        CALL        BIOS_POSIT
         XOR         A, A
         LD          [WORK_PRTFLG], A
         LD          HL, VARSA_MP
@@ -395,7 +268,7 @@ LINE_1801:
         LD          BC, 27
         CALL        CHECK_SARRAY
         CALL        CALC_ARRAY_TOP
-        LD          HL, [VARI_Z]
+        LD          HL, [VARI_I]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
@@ -404,97 +277,62 @@ LINE_1801:
         LD          D, [HL]
         EX          DE, HL
         CALL        COPY_STRING
-        LD          A, [HL]
-        PUSH        AF
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
         CALL        FREE_STRING
-        POP         AF
+        LD          HL, [SVARI_I_LABEL]
+        CALL        JP_HL
+LINE_85:
+        LD          H, (0) & 255
+        INC         H
+        PUSH        HL
+        LD          A, 23
+        INC         A
+        POP         HL
         LD          L, A
-        LD          H, 0
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        STR
-        LD          A, [WORK_LINLEN]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [WORK_CSRX]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _PT18
-        PUSH        HL
-        LD          HL, STR_3
-        CALL        PUTS
-        POP         HL
-_PT18:
-        CALL        PUTS
-        LD          A, 32
-        RST         0X18
-        LD          HL, [VARI_Z]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        STR
-        LD          A, [WORK_LINLEN]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [WORK_CSRX]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _PT19
-        PUSH        HL
-        LD          HL, STR_3
-        CALL        PUTS
-        POP         HL
-_PT19:
-        CALL        PUTS
-        LD          A, 32
-        RST         0X18
-        LD          HL, [VARI_J]
-        PUSH        HL
-        LD          HL, 2
-        POP         DE
-        CALL        BIOS_IMULT
-        PUSH        HL
-        LD          HL, 1
-        POP         DE
-        ADD         HL, DE
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        STR
-        LD          A, [WORK_LINLEN]
-        INC         A
-        INC         A
-        LD          B, A
-        LD          A, [WORK_CSRX]
-        ADD         A, [HL]
-        CP          A, B
-        JR          C, _PT20
-        PUSH        HL
-        LD          HL, STR_3
-        CALL        PUTS
-        POP         HL
-_PT20:
-        CALL        PUTS
-        LD          A, 32
-        RST         0X18
-        LD          HL, [VARS_R]
-        CALL        COPY_STRING
-        PUSH        HL
-        CALL        PUTS
-        POP         HL
-        CALL        FREE_STRING
-        LD          HL, STR_3
-        CALL        PUTS
-LINE_1802:
+        CALL        BIOS_POSIT
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
         LD          HL, VARSA_MP
         LD          D, 1
         LD          BC, 27
         CALL        CHECK_SARRAY
         CALL        CALC_ARRAY_TOP
-        LD          HL, [VARI_Z]
+        LD          HL, 23
+        ADD         HL, HL
+        POP         DE
+        ADD         HL, DE
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        CALL        COPY_STRING
+        PUSH        HL
+        LD          C, (31) & 255
+        POP         HL
+        PUSH        HL
+        LD          IX, BLIB_LEFT
+        CALL        CALL_BLIB
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        CALL        FREE_STRING
+        POP         HL
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+LINE_90:
+        JP          LINE_90
+LINE_10000:
+        LD          HL, VARSA_MP
+        LD          D, 1
+        LD          BC, 27
+        CALL        CHECK_SARRAY
+        CALL        CALC_ARRAY_TOP
+        LD          HL, [VARI_Y]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
@@ -513,7 +351,7 @@ LINE_1802:
         LD          [HL], D
         POP         HL
         CALL        FREE_STRING
-        LD          HL, [VARI_J]
+        LD          HL, [VARI_X]
         PUSH        HL
         LD          HL, 2
         POP         DE
@@ -525,14 +363,42 @@ LINE_1802:
         LD          B, L
         LD          C, (2) & 255
         PUSH        BC
-        LD          HL, [VARS_R]
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        PUSH        HL
+        LD          HL, [VARI_X]
+        PUSH        HL
+        LD          HL, 65
+        POP         DE
+        ADD         HL, DE
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        PUSH        HL
+        LD          HL, [VARI_Y]
+        PUSH        HL
+        LD          HL, 65
+        POP         DE
+        ADD         HL, DE
+        LD          A, L
+        POP         HL
+        INC         HL
+        LD          [HL], A
+        DEC         HL
+        POP         DE
+        CALL        STR_ADD
         PUSH        HL
         LD          HL, VARSA_MP
         LD          D, 1
         LD          BC, 27
         CALL        CHECK_SARRAY
         CALL        CALC_ARRAY_TOP
-        LD          HL, [VARI_Z]
+        LD          HL, [VARI_Y]
         ADD         HL, HL
         POP         DE
         ADD         HL, DE
@@ -541,26 +407,13 @@ LINE_1802:
         LD          D, [HL]
         POP         HL
         POP         BC
+        PUSH        HL
         EX          DE, HL
         LD          IX, BLIB_MID_CMD
         CALL        CALL_BLIB
-LINE_1803:
-        LD          HL, [SVARI_K_LABEL]
-        CALL        JP_HL
-LINE_1804:
+        POP         HL
+        CALL        FREE_STRING
         RET         
-LINE_16019:
-; =========== MAP DATA
-LINE_16020:
-LINE_16030:
-LINE_16040:
-LINE_16050:
-LINE_16060:
-LINE_16070:
-LINE_16080:
-LINE_16090:
-LINE_16100:
-LINE_16110:
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -638,121 +491,6 @@ _INIT_STRING_ARRAY_LOOP:
         OR          A, D
         JR          NZ, _INIT_STRING_ARRAY_LOOP
         RET         
-FREE_STRING:
-        LD          DE, HEAP_START
-        RST         0X20
-        RET         C
-        LD          DE, [HEAP_NEXT]
-        RST         0X20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          FREE_HEAP
-FREE_HEAP:
-        PUSH        HL
-        ADD         HL, BC
-        LD          [HEAP_MOVE_SIZE], BC
-        LD          [HEAP_REMAP_ADDRESS], HL
-        EX          DE, HL
-        LD          HL, [HEAP_NEXT]
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
-        LD          A, C
-        OR          A, B
-        JR          Z, _FREE_HEAP_LOOP0
-        LDIR        
-_FREE_HEAP_LOOP0:
-        LD          [HEAP_NEXT], DE
-        LD          HL, VARS_AREA_START
-_FREE_HEAP_LOOP1:
-        LD          DE, VARSA_AREA_END
-        RST         0X20
-        JR          NC, _FREE_HEAP_LOOP1_END
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [HEAP_REMAP_ADDRESS]
-        EX          DE, HL
-        RST         0X20
-        JR          C, _FREE_HEAP_LOOP1_NEXT
-        LD          DE, [HEAP_MOVE_SIZE]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_FREE_HEAP_LOOP1_NEXT:
-        POP         HL
-        INC         HL
-        JR          _FREE_HEAP_LOOP1
-_FREE_HEAP_LOOP1_END:
-        LD          HL, VARSA_AREA_START
-_FREE_HEAP_LOOP2:
-        LD          DE, VARSA_AREA_END
-        RST         0X20
-        RET         NC
-        LD          E, [HL]
-        LD          A, E
-        INC         HL
-        LD          D, [HL]
-        OR          A, D
-        INC         HL
-        JR          Z, _FREE_HEAP_LOOP2
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        LD          C, [HL]
-        INC         HL
-        LD          B, 0
-        ADD         HL, BC
-        ADD         HL, BC
-        EX          DE, HL
-        SBC         HL, BC
-        SBC         HL, BC
-        RR          H
-        RR          L
-        LD          C, L
-        LD          B, H
-        EX          DE, HL
-_FREE_HEAP_SARRAY_ELEMENTS:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [HEAP_REMAP_ADDRESS]
-        EX          DE, HL
-        RST         0X20
-        JR          C, _FREE_HEAP_LOOP2_NEXT
-        LD          HL, [HEAP_MOVE_SIZE]
-        EX          DE, HL
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_FREE_HEAP_LOOP2_NEXT:
-        POP         HL
-        INC         HL
-        DEC         BC
-        LD          A, C
-        OR          A, B
-        JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
-        POP         HL
-        JR          _FREE_HEAP_LOOP2
 CHECK_SARRAY:
         LD          A, [HL]
         INC         HL
@@ -875,19 +613,132 @@ STRING_LOOP_ENTER:
         DJNZ        STRING_LOOP
         POP         HL
         RET         
-; READ DATA FOR STRING
-SUB_READ_STRING:
+FREE_STRING:
+        LD          DE, HEAP_START
+        RST         0X20
+        RET         C
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          FREE_HEAP
+FREE_HEAP:
+        PUSH        HL
+        ADD         HL, BC
+        LD          [HEAP_MOVE_SIZE], BC
+        LD          [HEAP_REMAP_ADDRESS], HL
         EX          DE, HL
-        LD          HL, [DATA_PTR]
+        LD          HL, [HEAP_NEXT]
+        SBC         HL, DE
+        LD          C, L
+        LD          B, H
+        POP         HL
+        EX          DE, HL
+        LD          A, C
+        OR          A, B
+        JR          Z, _FREE_HEAP_LOOP0
+        LDIR        
+_FREE_HEAP_LOOP0:
+        LD          [HEAP_NEXT], DE
+        LD          HL, VARS_AREA_START
+_FREE_HEAP_LOOP1:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
+        JR          NC, _FREE_HEAP_LOOP1_END
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [HEAP_REMAP_ADDRESS]
+        EX          DE, HL
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP1_NEXT
+        LD          HL, [HEAP_MOVE_SIZE]
+        EX          DE, HL
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_FREE_HEAP_LOOP1_NEXT:
+        POP         HL
+        INC         HL
+        JR          _FREE_HEAP_LOOP1
+_FREE_HEAP_LOOP1_END:
+        LD          HL, VARSA_AREA_START
+_FREE_HEAP_LOOP2:
+        LD          DE, VARSA_AREA_END
+        RST         0X20
+        RET         NC
+        LD          E, [HL]
+        LD          A, E
+        INC         HL
+        LD          D, [HL]
+        OR          A, D
+        INC         HL
+        JR          Z, _FREE_HEAP_LOOP2
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
         LD          C, [HL]
         INC         HL
-        LD          B, [HL]
-        INC         HL
-        LD          [DATA_PTR], HL
+        LD          B, 0
+        ADD         HL, BC
+        ADD         HL, BC
         EX          DE, HL
-        LD          [HL], C
+        SBC         HL, BC
+        SBC         HL, BC
+        RR          H
+        RR          L
+        LD          C, L
+        LD          B, H
+        EX          DE, HL
+_FREE_HEAP_SARRAY_ELEMENTS:
+        LD          E, [HL]
         INC         HL
-        LD          [HL], B
+        LD          D, [HL]
+        PUSH        HL
+        LD          HL, [HEAP_REMAP_ADDRESS]
+        EX          DE, HL
+        RST         0X20
+        JR          C, _FREE_HEAP_LOOP2_NEXT
+        LD          HL, [HEAP_MOVE_SIZE]
+        EX          DE, HL
+        SBC         HL, DE
+        POP         DE
+        EX          DE, HL
+        DEC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        PUSH        HL
+_FREE_HEAP_LOOP2_NEXT:
+        POP         HL
+        INC         HL
+        DEC         BC
+        LD          A, C
+        OR          A, B
+        JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
+        POP         HL
+        JR          _FREE_HEAP_LOOP2
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
         RET         
 COPY_STRING:
         LD          A, [HL]
@@ -902,47 +753,51 @@ COPY_STRING:
         LDIR        
         POP         HL
         RET         
-; VAL FUNCTION
-SUB_VAL:
+STR_ADD:
+        PUSH        DE
+        PUSH        HL
+        LD          C, [HL]
+        LD          A, [DE]
+        ADD         A, C
+        JR          C, _STR_ADD_ERROR
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        INC         HL
+        LD          DE, WORK_BUF+1
+        LD          B, 0
+        INC         C
+        DEC         C
+        JR          Z, _STR_ADD_S1
+        LDIR        
+_STR_ADD_S1:
+        POP         HL
+        LD          C, [HL]
+        INC         HL
+        INC         C
+        DEC         C
+        JR          Z, _STR_ADD_S2
+        LDIR        
+_STR_ADD_S2:
+        LD          [WORK_BUF], A
+        POP         HL
+        CALL        FREE_STRING
+        POP         HL
+        CALL        FREE_STRING
+        LD          A, [WORK_BUF]
+        CALL        ALLOCATE_STRING
+        PUSH        HL
+        LD          DE, WORK_BUF
+        EX          DE, HL
         LD          C, [HL]
         LD          B, 0
-        INC         HL
-        LD          DE, WORK_BUF
+        INC         BC
         LDIR        
-        XOR         A, A
-        LD          [DE], A
-        LD          HL, WORK_BUF
-        LD          A, [HL]
-        CALL        BIOS_FIN
-        RET         
-PUTS:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_PUTS_LOOP:
-        INC         HL
-        LD          A, [HL]
-        RST         0X18
-        DJNZ        _PUTS_LOOP
-        RET         
-STR:
-        CALL        BIOS_FOUT
-FOUT_ADJUST:
-        DEC         HL
-        PUSH        HL
-        XOR         A, A
-        LD          B, A
-_STR_LOOP:
-        INC         HL
-        CP          A, [HL]
-        JR          Z, _STR_LOOP_EXIT
-        INC         B
-        JR          _STR_LOOP
-_STR_LOOP_EXIT:
         POP         HL
-        LD          [HL], B
         RET         
+_STR_ADD_ERROR:
+        LD          E, 15
+        JP          BIOS_ERRHAND
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -959,12 +814,6 @@ PROGRAM_RUN:
         LD          DE, VAR_AREA_START + 1
         LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
-        LDIR        
-        LD          HL, STR_0
-        LD          [VARS_AREA_START], HL
-        LD          HL, VARS_AREA_START
-        LD          DE, VARS_AREA_START + 2
-        LD          BC, VARS_AREA_END - VARS_AREA_START - 2
         LDIR        
         RET         
 ; H.TIMI PROCESS -----------------
@@ -993,40 +842,12 @@ H_ERRO_HANDLER:
         CALL        RESTORE_H_ERRO
         POP         DE
         JP          WORK_H_ERRO
-DATA_16020:
-        DEFW        STR_4
-DATA_16030:
-        DEFW        STR_4
-DATA_16040:
-        DEFW        STR_4
-DATA_16050:
-        DEFW        STR_5
-DATA_16060:
-        DEFW        STR_4
-DATA_16070:
-        DEFW        STR_4
-DATA_16080:
-        DEFW        STR_4
-DATA_16090:
-        DEFW        STR_6
-DATA_16100:
-        DEFW        STR_4
-DATA_16110:
-        DEFW        STR_4
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X02, 0X80, 0X80
-STR_2:
         DEFB        0X01, 0X20
-STR_3:
+STR_2:
         DEFB        0X02, 0X0D, 0X0A
-STR_4:
-        DEFB        0X0F, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30, 0X30
-STR_5:
-        DEFB        0X0F, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X30, 0X31, 0X31, 0X31, 0X31
-STR_6:
-        DEFB        0X0F, 0X31, 0X31, 0X31, 0X31, 0X30, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31, 0X31
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -1035,8 +856,6 @@ HEAP_MOVE_SIZE:
         DEFW        0
 HEAP_REMAP_ADDRESS:
         DEFW        0
-DATA_PTR:
-        DEFW        DATA_16020
 VAR_AREA_START:
 SVARI_I_FOR_END:
         DEFW        0
@@ -1044,38 +863,26 @@ SVARI_I_FOR_STEP:
         DEFW        0
 SVARI_I_LABEL:
         DEFW        0
-SVARI_J_FOR_END:
+SVARI_X_FOR_END:
         DEFW        0
-SVARI_J_FOR_STEP:
+SVARI_X_FOR_STEP:
         DEFW        0
-SVARI_J_LABEL:
+SVARI_X_LABEL:
         DEFW        0
-SVARI_K_FOR_END:
+SVARI_Y_FOR_END:
         DEFW        0
-SVARI_K_FOR_STEP:
+SVARI_Y_FOR_STEP:
         DEFW        0
-SVARI_K_LABEL:
-        DEFW        0
-VARI_B:
+SVARI_Y_LABEL:
         DEFW        0
 VARI_I:
         DEFW        0
-VARI_J:
+VARI_X:
         DEFW        0
-VARI_K:
-        DEFW        0
-VARI_L:
-        DEFW        0
-VARI_Z:
+VARI_Y:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
-VARS_A:
-        DEFW        0
-VARS_B:
-        DEFW        0
-VARS_R:
-        DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 VARA_AREA_END:

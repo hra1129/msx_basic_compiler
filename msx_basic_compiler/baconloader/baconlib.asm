@@ -2678,6 +2678,7 @@ sub_mid_cmd::
 			ld		a, h
 			ld		b, 0
 			adc		a, b
+			ld		h, a
 			; ‘‚«‘Ö‚¦ˆ—
 			inc		de
 			ex		de, hl
