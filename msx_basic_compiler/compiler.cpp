@@ -1737,6 +1737,39 @@ void CCOMPILER::optimize_push_pop( void ) {
 		}
 	}
 
+	//	PUSH HL
+	//	LD HL, xxx ‚Ü‚½‚Í [xxx]
+	//	POP DE
+	//	ADD HL, DE
+	//	«
+	//	LD DE, xxx ‚Ü‚½‚Í [xxx]
+	//	ADD HL, DE
+	//	¦DE ‚Ì‘ã‚í‚è‚É BC ‚Å‚à—Ç‚¢
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.s_value != "HL" ) continue;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::POP || (p_next->operand1.s_value != "BC" && p_next->operand1.s_value != "DE") ) continue;
+			p_back = p_next;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::ADD || p_next->operand1.s_value != "HL" || p_next->operand2.s_value != p_back->operand1.s_value ) continue;
+
+			p_next = p + 1;
+			p_next->operand1.s_value = p_back->operand1.s_value;	//	LD HL, xxx ¨ LD DE, xxx
+
+			p_next = p - 1;
+			this->info.assembler_list.body.erase( p + 2 );			//	POP DE íœ
+			this->info.assembler_list.body.erase( p     );			//	PUSH HL íœ
+			p = p_next;
+		}
+	}
+
 	//	PUSH rp1
 	//	POP rp2
 	//	«
