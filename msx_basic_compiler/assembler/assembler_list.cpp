@@ -1245,6 +1245,39 @@ void CASSEMBLER_LIST::activate_copy_string( void ) {
 }
 
 // --------------------------------------------------------------------
+//	HLに変数などの文字列のアドレスを指定して呼ぶ
+//	更新可能な文字列であれば、それをそのまま HL に返す
+//	更新不可能な文字列であれば、コピーを作成してそのアドレスを HL に返す
+void CASSEMBLER_LIST::activate_get_writeable_string( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "get_writeable_string" ) ) {
+		return;
+	}
+	this->activate_copy_string();
+	asm_line.set( "LABEL", "", "get_writeable_string", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "heap_start" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RST", "", "0x20", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "C", "_get_writeable_string_make_copy" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "[heap_next]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RST", "", "0x20", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_get_writeable_string_make_copy" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "copy_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LIST::activate_str( void ) {
 	CASSEMBLER_LINE asm_line;
 

@@ -28,8 +28,7 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	p_info->assembler_list.activate_copy_string();
-	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_get_writeable_string();
 	//	変数のアドレスを得て、その内容をコピーに置き換える
 	std::vector< CBASIC_WORD >::const_iterator p_position_back = p_info->list.p_position;
 	CVARIABLE variable = p_info->p_compiler->get_variable_address();
@@ -41,13 +40,11 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "DEC", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "DE", "" );					//	変数に入ってる文字列のアドレス
-	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL", "" );					//	変数のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "EX", "", "DE", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "copy_string", "" );			//	変数に入ってる文字列をコピーする
+	asm_line.set( "CALL", "", "get_writeable_string", "" );	//	変数に入ってる文字列を、必要に応じてコピーする（書き込み可能な文字列に変換する）
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "POP", "", "DE" );						//	変数のアドレスを取得
 	p_info->assembler_list.body.push_back( asm_line );
@@ -58,10 +55,6 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( "INC", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[HL]", "D" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "POP", "", "HL" );						//	変数に入っていた文字列のアドレスを取得
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "free_string" );				//	解放
 	p_info->assembler_list.body.push_back( asm_line );
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
@@ -169,6 +162,7 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( "CALL", "", "call_blib" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( !is_compatible_mode ) {
+		p_info->assembler_list.activate_free_string();
 		asm_line.set( "POP", "", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "free_string" );

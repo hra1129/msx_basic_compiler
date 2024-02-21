@@ -59,6 +59,7 @@ public:
 	void activate_free_array( void );
 	void activate_free_sarray( void );
 	void activate_copy_string( void );
+	void activate_get_writeable_string( void );
 	void activate_allocate_heap( void );
 	void activate_free_heap( void );
 	void activate_init_string_array( void );

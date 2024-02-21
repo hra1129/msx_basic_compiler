@@ -340,17 +340,14 @@ LINE_10000:
         INC         HL
         LD          D, [HL]
         DEC         HL
-        PUSH        DE
         PUSH        HL
         EX          DE, HL
-        CALL        COPY_STRING
+        CALL        GET_WRITEABLE_STRING
         POP         DE
         EX          DE, HL
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        POP         HL
-        CALL        FREE_STRING
         LD          HL, [VARI_X]
         PUSH        HL
         LD          HL, 2
@@ -746,6 +743,16 @@ COPY_STRING:
         INC         BC
         LDIR        
         POP         HL
+        RET         
+GET_WRITEABLE_STRING:
+        LD          DE, HEAP_START
+        RST         0X20
+        JR          C, _GET_WRITEABLE_STRING_MAKE_COPY
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        RET         C
+_GET_WRITEABLE_STRING_MAKE_COPY:
+        CALL        COPY_STRING
         RET         
 STR_ADD:
         PUSH        DE
