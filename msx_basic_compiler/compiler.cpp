@@ -523,6 +523,7 @@ void CCOMPILER::exec_terminator( void ) {
 	this->info.assembler_list.add_label( "bios_errhand", "0x0406F" );
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
 	this->info.assembler_list.add_label( "work_filtab", "0x0F860" );
+	this->info.assembler_list.add_label( "work_txttab", "0x0F676" );
 	if( this->info.use_file_access ) {
 		this->info.assembler_list.activate_all_close();
 	}
@@ -551,13 +552,17 @@ void CCOMPILER::exec_terminator( void ) {
 	//	プログラムの終了処理 (スタック復元)
 	asm_line.set( "LD", "", "SP", "[work_filtab]" );
 	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "0x8001" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_txttab]", "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "_basic_end" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_newstt", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_basic_end", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "DEFB", "", "':', 0x81, 0x00", "" );
+	asm_line.set( "DEFB", "", "':', 0x92, ':', 0x94, ':', 0x81, 0x00", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LABEL", "", "err_return_without_gosub", "" );
 	this->info.assembler_list.body.push_back( asm_line );

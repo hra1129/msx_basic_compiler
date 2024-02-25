@@ -39,6 +39,7 @@ WORK_CSRSW                      = 0X0FCA9
 WORK_PRTFLG                     = 0X0F416
 BLIB_MID_CMD                    = 0X0406C
 BIOS_NEWSTT                     = 0X04601
+WORK_TXTTAB                     = 0X0F676
 ; BSAVE HEADER -----------------------------------------------------------
         DEFB        0XFE
         DEFW        START_ADDRESS
@@ -757,10 +758,12 @@ PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
         LD          SP, [WORK_FILTAB]
+        LD          HL, 0X8001
+        LD          [WORK_TXTTAB], HL
         LD          HL, _BASIC_END
         CALL        BIOS_NEWSTT
 _BASIC_END:
-        DEFB        ':', 0X81, 0X00
+        DEFB        ':', 0X92, ':', 0X94, ':', 0X81, 0X00
 ERR_RETURN_WITHOUT_GOSUB:
         LD          E, 3
         JP          BIOS_ERRHAND
