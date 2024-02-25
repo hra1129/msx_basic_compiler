@@ -42,6 +42,7 @@ $ make install
 ### Special thanks to "MSX-BACON のデバッグに協力して頂いた方々"
 ```
 nkt360さん (@nkt360)
+IKATENさん (@ikaten_retro)
 ちくわ帝国さん (@chikuwa_empire)
 b.p.sさん (@BasicProgrammer)
 naoさん (@nyaonyao21)
