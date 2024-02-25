@@ -1213,8 +1213,8 @@ void CASSEMBLER_LIST::activate_copy_string( void ) {
 	if( this->is_registered_subroutine( "copy_string" ) ) {
 		return;
 	}
-	this->activate_allocate_string();
 	this->subrouines_list.push_back( "copy_string" );
+	this->activate_allocate_string();
 	asm_line.set( "LABEL", "", "copy_string", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[HL]" );
@@ -1254,6 +1254,7 @@ void CASSEMBLER_LIST::activate_get_writeable_string( void ) {
 	if( this->is_registered_subroutine( "get_writeable_string" ) ) {
 		return;
 	}
+	this->subrouines_list.push_back( "get_writeable_string" );
 	this->activate_copy_string();
 	asm_line.set( "LABEL", "", "get_writeable_string", "" );
 	this->subroutines.push_back( asm_line );
