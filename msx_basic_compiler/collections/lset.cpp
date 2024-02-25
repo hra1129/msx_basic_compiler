@@ -26,37 +26,37 @@ bool CLSET::exec( CCOMPILE_INFO *p_info ) {
 	CVARIABLE variable = p_info->p_compiler->get_variable_address();
 	p_info->assembler_list.activate_allocate_string();
 	p_info->assembler_list.activate_free_string();
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );					//	HL = 変数のアドレス
+	asm_line.set( "PUSH", "", "HL", "" );					//	HL = 変数のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
+	asm_line.set( "LD", "", "E", "[HL]" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( "INC", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );		//	DE = 元の文字列
+	asm_line.set( "LD", "", "D", "[HL]" );					//	DE = 元の文字列
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[DE]" );		//	A = 元の文字列の長さ
+	asm_line.set( "LD", "", "A", "[DE]" );					//	A = 元の文字列の長さ
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "AF", COPERAND_TYPE::NONE, "" );					//	元の文字列の長さを保存
+	asm_line.set( "PUSH", "", "AF", "" );					//	元の文字列の長さを保存
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );				//	HL = 元の文字列
+	asm_line.set( "EX", "", "DE", "HL" );					//	HL = 元の文字列
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );			//	元の文字列を解放
+	asm_line.set( "CALL", "", "free_string", "" );			//	元の文字列を解放
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "AF", COPERAND_TYPE::NONE, "" );					//	元の文字列の長さを復帰
+	asm_line.set( "POP", "", "AF", "" );					//	元の文字列の長さを復帰
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "allocate_string", COPERAND_TYPE::NONE, "" );		//	HL = 結果の格納先を確保
+	asm_line.set( "CALL", "", "allocate_string", "" );		//	HL = 結果の格納先を確保
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );					//	DE = 変数のアドレス
+	asm_line.set( "POP", "", "DE", "" );					//	DE = 変数のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );				//	HL = 変数のアドレス, DE = 結果の格納先
+	asm_line.set( "EX", "", "DE", "HL" );					//	HL = 変数のアドレス, DE = 結果の格納先
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );					//	HL = 変数のアドレス
+	asm_line.set( "PUSH", "", "HL", "" );					//	HL = 変数のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "E" );
+	asm_line.set( "LD", "", "[HL]", "E" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( "INC", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "D" );		//	変数に結果の格納先を保存
+	asm_line.set( "LD", "", "[HL]", "D" );					//	変数に結果の格納先を保存
 	p_info->assembler_list.body.push_back( asm_line );
 
 	//	= のチェック
@@ -81,31 +81,31 @@ bool CLSET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );				//	DE = 変数のアドレス
+	asm_line.set( "POP", "", "DE", "" );				//	DE = 変数のアドレス
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );			//	HL = 変数のアドレス, DE = 右辺
+	asm_line.set( "EX", "", "DE", "HL" );			//	HL = 変数のアドレス, DE = 右辺
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );				//	右辺保存
+	asm_line.set( "PUSH", "", "DE", "" );				//	右辺保存
 	p_info->assembler_list.body.push_back( asm_line );
 
 	if( is_rset ) {
 		p_info->assembler_list.add_label( "blib_rset", "0x04078" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_rset" );
+		asm_line.set( "LD", "", "IX", "blib_rset" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
 		p_info->assembler_list.add_label( "blib_lset", "0x04075" );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_lset" );
+		asm_line.set( "LD", "", "IX", "blib_lset" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );				//	右辺復帰
+	asm_line.set( "POP", "", "HL", "" );				//	右辺復帰
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );		//	元の文字列を解放
+	asm_line.set( "CALL", "", "free_string", "" );		//	元の文字列を解放
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }
