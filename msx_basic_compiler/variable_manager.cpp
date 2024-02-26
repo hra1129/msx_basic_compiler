@@ -498,6 +498,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 	}
 	//	•Ï”–¼‚ðŽæ“¾
 	s_name = p_info->list.p_position->s_word;
+	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 ) {
 		//	•Ï”–¼Å‘å 2•¶Žš§ŒÀ

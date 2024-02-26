@@ -163,7 +163,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	static const char image[] = { 13, 10 };
 	CSTRING value;
 
-	if( p_info->list.p_position->s_word != "PRINT" && p_info->list.p_position->s_word != "LPRINT" ) {
+	if( p_info->list.p_position->s_word != "?" && p_info->list.p_position->s_word != "PRINT" && p_info->list.p_position->s_word != "LPRINT" ) {
 		return false;
 	}
 
