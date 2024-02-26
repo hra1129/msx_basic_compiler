@@ -352,6 +352,8 @@ blib_entries::
 			jp		sub_point
 	blib_get_sin_table:
 			jp		sub_get_sin_table
+	blib_set_function_key:
+			jp		sub_set_function_key
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -5805,6 +5807,63 @@ sub_get_sin_table::
 			db		97, 103, 109, 115, 120, 126, 131, 136, 142, 147, 152, 157, 162, 167, 171, 176
 			db		181, 185, 189, 193, 197, 201, 205, 209, 212, 216, 219, 222, 225, 228, 231, 234
 			db		236, 238, 241, 243, 244, 246, 248, 249, 251, 252, 253, 254, 254, 255, 255, 255
+			endscope
+
+; =============================================================================
+;	get sin sub_set_function_key
+;	input:
+;		E ....... ファンクションキーの番号 1～10
+;		HL ...... 割り付ける文字列
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファンクションキーに文字列を割り当てる
+; =============================================================================
+			scope	sub_set_function_key
+sub_set_function_key::
+			ld		a, e
+			dec		a
+			cp		a, 10
+			jp		nc, err_illegal_function_call
+			push	hl
+			; DE = A * 16 + fnkstr
+			add		a, a
+			add		a, a
+			add		a, a
+			add		a, a
+			ld		e, a
+			ld		d, 0
+			ld		b, d
+			ld		hl, fnkstr
+			add		hl, de
+			ex		de, hl
+			pop		hl
+			; 長さチェック
+			ld		a, [hl]
+			inc		hl
+			or		a, a
+			jr		z, _zero_fill
+			ld		c, a
+			cp		a, 15
+			jr		c, _not_cut
+			ld		c, 15
+		_not_cut:
+			ld		a, c
+			; コピー
+			ldir
+			; 残りを 0 で埋める (埋めておかないとファンクションキー表示に残骸が出てしまう)
+		_zero_fill:
+			ld		l, e
+			ld		h, d
+			inc		de
+			ld		[hl], 0
+			xor		a, 15
+			ld		c, a
+			ret		z
+			ldir
+			ret
 			endscope
 
 ; =============================================================================
