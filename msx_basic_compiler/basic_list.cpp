@@ -646,7 +646,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 	if( this->p_file_image[0] == '&' ) {
 		this->p_file_image++;
 		this->skip_white_space();
-		if( this->p_file_image[0] == 'B' ) {
+		if( toupper(this->p_file_image[0]) == 'B' ) {
 			//	2進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "01" );
@@ -654,7 +654,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
-		if( this->p_file_image[0] == 'O' ) {
+		if( toupper(this->p_file_image[0]) == 'O' ) {
 			//	8進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "01234567" );
@@ -662,7 +662,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
-		if( this->p_file_image[0] == 'H' ) {
+		if( toupper(this->p_file_image[0]) == 'H' ) {
 			//	16進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "0123456789abcdefABCDEF" );
