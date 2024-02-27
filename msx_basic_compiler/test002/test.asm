@@ -149,7 +149,6 @@ _PT1:
         LD          HL, 0
         OR          A, A
         SBC         HL, DE
-        LD          HL, WORK_DAC
         LD          A, 2
         LD          [WORK_VALTYP], A
         LD          [WORK_DAC + 2], HL
@@ -451,7 +450,6 @@ LINE_200:
         LD          HL, 0
         OR          A, A
         SBC         HL, DE
-        LD          HL, WORK_DAC
         POP         DE
         EX          DE, HL
         LD          [HL], E
