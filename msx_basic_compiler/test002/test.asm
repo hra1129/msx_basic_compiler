@@ -187,9 +187,10 @@ _SUB_INPUT_NUMBER:
         EX          DE, HL
         PUSH        DE
         LD          A, [HL]
+        PUSH        HL
         CALL        BIOS_FIN
-        LD          A, D
-        OR          A, A
+        POP         DE
+        RST         0X20
         JP          Z, _SUB_INPUT_REDO_FROM_START
         CALL        _SUB_INPUT_SKIP_WHITE
         LD          A, [HL]
