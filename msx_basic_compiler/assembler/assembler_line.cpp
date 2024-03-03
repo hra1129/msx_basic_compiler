@@ -199,8 +199,14 @@ void CASSEMBLER_LINE::set( std::string s_mnemonic, std::string s_cond, std::stri
 
 	std::transform( s_mnemonic.begin(), s_mnemonic.end(), s_mnemonic.begin(), ::toupper );
 	std::transform( s_cond.begin(),     s_cond.end(),     s_cond.begin(),     ::toupper );
-	std::transform( s_operand1.begin(), s_operand1.end(), s_operand1.begin(), ::toupper );
-	std::transform( s_operand2.begin(), s_operand2.end(), s_operand2.begin(), ::toupper );
+
+	if( s_mnemonic == "DEFB" || s_mnemonic == "DEFW" || s_mnemonic == "COMMENT" ) {
+		//	‘å•¶Žš‚É•ÏŠ·‚µ‚È‚¢
+	}
+	else {
+		std::transform( s_operand1.begin(), s_operand1.end(), s_operand1.begin(), ::toupper );
+		std::transform( s_operand2.begin(), s_operand2.end(), s_operand2.begin(), ::toupper );
+	}
 
 	this->type = command_name_list[ s_mnemonic ];
 	this->condition = condition_name_list[ s_cond ];
