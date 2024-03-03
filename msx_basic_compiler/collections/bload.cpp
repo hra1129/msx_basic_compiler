@@ -47,13 +47,19 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "R" || p_info->list.p_position->s_word == "r" ) {
 			p_info->list.p_position++;
+			if( !is_load && p_info->list.p_position->s_word == "," ) {
+
+			}
 			//	BLOAD "ファイル名",R
 			p_info->assembler_list.activate_bload_r();
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_bload_r", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		else if( !is_load && p_info->list.p_position->s_word == "S" ) {
+		else if( !is_load && (p_info->list.p_position->s_word == "S" || p_info->list.p_position->s_word == "s") ) {
 			p_info->list.p_position++;
+			if( !is_load && p_info->list.p_position->s_word == "," ) {
+
+			}
 			//	BLOAD "ファイル名",S
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -76,6 +82,9 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else if( exp.compile( p_info ) ) {
+
 		}
 		else {
 			p_info->errors.add( SYNTAX_ERROR, line_no );

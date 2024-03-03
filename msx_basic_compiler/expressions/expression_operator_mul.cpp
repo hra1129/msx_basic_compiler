@@ -59,8 +59,9 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_MUL::optimization( CCOMPILE_INFO *p_info 
 		if( r == -1.0 ) {
 			CEXPRESSION_OPERATOR_MINUS *p_minus = new CEXPRESSION_OPERATOR_MINUS();
 			p_minus->type = p_right->type;
+			p_minus->p_right = p_right;
 			this->p_right = nullptr;
-			return p_right;
+			return p_minus;
 		}
 	}
 	if( this->p_right->is_constant ) {
@@ -79,8 +80,9 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_MUL::optimization( CCOMPILE_INFO *p_info 
 		if( r == -1.0 ) {
 			CEXPRESSION_OPERATOR_MINUS *p_minus = new CEXPRESSION_OPERATOR_MINUS();
 			p_minus->type = p_left->type;
+			p_minus->p_right = p_left;
 			this->p_left = nullptr;
-			return p_left;
+			return p_minus;
 		}
 	}
 	return nullptr;
