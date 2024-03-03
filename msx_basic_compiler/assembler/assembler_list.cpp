@@ -1823,13 +1823,15 @@ void CASSEMBLER_LIST::activate_sub_input( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "a", "[hl]" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "hl", "" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_fin", "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "a", "d" );
+	asm_line.set( "POP", "", "de", "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "OR", "", "a", "a" );
+	asm_line.set( "RST", "", "0x20" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "JP", "Z", "_sub_input_redo_from_start", "" );
+	asm_line.set( "JP", "Z", "_sub_input_redo_from_start", "" );	//	★空チェック
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "_sub_input_skip_white", "" );
 	this->subroutines.push_back( asm_line );
