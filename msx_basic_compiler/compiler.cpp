@@ -722,6 +722,18 @@ void CCOMPILER::exec_sub_run( void ) {
 		asm_line.set( "LDIR" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
+	if( this->info.use_input ) {
+		asm_line.set( "LD", "", "HL", "SVARS_INPUT_FREE_STR0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "BC", "16 << 8" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_sub_input_clear" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[hl]", "c" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "DJNZ", "", "_sub_input_clear" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 }
@@ -1617,6 +1629,17 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
 		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_last", CVARIABLE_TYPE::UNSIGNED_BYTE );
 		this->info.variable_manager.put_special_variable( &(this->info), "on_stop_line", CVARIABLE_TYPE::INTEGER );
+	}
+	//	input
+	if( this->info.use_input ) {
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str0", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str1", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str2", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str3", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str4", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str5", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str6", CVARIABLE_TYPE::STRING );
+		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str7", CVARIABLE_TYPE::STRING );
 	}
 	//	•Ï”ƒ_ƒ“ƒv
 	this->info.constants.dump( this->info.assembler_list, this->info.options );

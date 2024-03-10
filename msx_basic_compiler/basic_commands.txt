@@ -858,6 +858,8 @@ MSX-BACON による MSX-BASIC の命令サポート一覧
 	INPUT ["文字列";] <変数名> [, <変数名> ...]
 【備考】
 	入力された値を変数に格納する。
+	MSX-BACONでは、変数は最大８個まで。９個以上並べると、コンパイル時に OVERFLOW 
+	のエラーになる。
 【例】
 	INPUT A$,B$
 	INPUT "message";A
