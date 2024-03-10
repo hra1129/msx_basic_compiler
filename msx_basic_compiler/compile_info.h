@@ -92,6 +92,7 @@ public:
 	bool use_on_key = false;
 	bool use_on_stop = false;
 	bool use_return_line_no = false;
+	bool use_input = false;
 
 	bool is_interrupt_use( void ) const {
 		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_stop || this->use_on_key );

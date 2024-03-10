@@ -84,6 +84,10 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
+	if( variable_count > 8 ) {
+		p_info->errors.add( OVERFLOW_ERROR, line_no );
+		return true;
+	}
 	p_info->assembler_list.body.insert( p_info->assembler_list.body.end(), assembler_list_buffer.begin(), assembler_list_buffer.end() );
 
 	s_data = s_data + ", 0";
@@ -93,5 +97,6 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_data, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
+	p_info->use_input = true;
 	return true;
 }
