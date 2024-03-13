@@ -30,10 +30,15 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 		exp.release();
 	}
 
+	p_info->assembler_list.add_label( "work_buf", "0x0F55E" );
 	if( p_info->list.is_command_end() ) {
 		//	BLOAD "ファイル名"
 		p_info->assembler_list.activate_bload();
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_bload", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "LD", "", "HL", "0" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_buf]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "sub_bload" );
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
@@ -47,48 +52,91 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "R" || p_info->list.p_position->s_word == "r" ) {
 			p_info->list.p_position++;
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
 			if( !is_load && p_info->list.p_position->s_word == "," ) {
-
+				//	BLOAD "ファイル名",R,オフセット
+				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
+					exp.release();
+				}
+				else {
+					p_info->errors.add( SYNTAX_ERROR, line_no );
+					return true;
+				}
 			}
-			//	BLOAD "ファイル名",R
+			else {
+				//	BLOAD "ファイル名",R
+				asm_line.set( "LD", "", "HL", "0" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
 			p_info->assembler_list.activate_bload_r();
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_bload_r", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "LD", "", "[sub_bload_r]work_buf]", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "sub_bload_r" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else if( !is_load && (p_info->list.p_position->s_word == "S" || p_info->list.p_position->s_word == "s") ) {
-			p_info->list.p_position++;
-			if( !is_load && p_info->list.p_position->s_word == "," ) {
-
-			}
-			//	BLOAD "ファイル名",S
-			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[heap_end]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[heap_next]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::SBC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::CONSTANT, "L" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "H" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->assembler_list.add_label( "work_buf", "0x0F55E" );
 			p_info->assembler_list.add_label( "blib_bload_s", "0x04057" );
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_bload_s" );
+			p_info->list.p_position++;
+			asm_line.set( "PUSH", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+			if( !is_load && p_info->list.p_position->s_word == "," ) {
+				//	BLOAD "ファイル名",S,オフセット
+				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
+					exp.release();
+				}
+				else {
+					p_info->errors.add( SYNTAX_ERROR, line_no );
+					return true;
+				}
+			}
+			else {
+				//	BLOAD "ファイル名",S
+				asm_line.set( "LD", "", "HL", "0" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			asm_line.set( "LD", "", "[sub_bload_r]work_buf]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-		}
-		else if( exp.compile( p_info ) ) {
-
+			asm_line.set( "LD", "", "HL", "[heap_end]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "[heap_next]" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "OR", "", "A", "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "SBC", "", "HL", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "C", "L" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "B", "H" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "IX", "blib_bload_s" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			p_info->errors.add( SYNTAX_ERROR, line_no );
-			return true;
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			if( exp.compile( p_info ) ) {
+				exp.release();
+				//	BLOAD "ファイル名", オフセット
+				p_info->assembler_list.activate_bload();
+				asm_line.set( "LD", "", "[work_buf]", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "sub_bload" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				p_info->errors.add( SYNTAX_ERROR, line_no );
+				return true;
+			}
 		}
 	}
 	else {

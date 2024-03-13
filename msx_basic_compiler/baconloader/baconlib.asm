@@ -2471,9 +2471,10 @@ sub_fwrite::
 ; =============================================================================
 ;	BLOAD ファイル名,S
 ;	input:
-;		HL ... ファイル名
-;		DE ... 読みだし用バッファ
-;		BC ... 読みだし用バッファのサイズ
+;		HL ...... ファイル名
+;		DE ...... 読みだし用バッファ
+;		BC ...... 読みだし用バッファのサイズ
+;		[buf] ... オフセット
 ;	output:
 ;		none
 ;	break:
@@ -2487,12 +2488,12 @@ sub_bload_s::
 			ld		[buffer_address], de
 			ld		[buffer_size], bc
 			; ファイルを開く
-			ld		de, buf				; FCB を buf に置く
+			ld		de, bsave_fcb		; FCB を bsave_fcb に置く
 			call	sub_fopen
 			or		a, a
 			jp		nz, err_file_not_found
 			; ヘッダを読み出す
-			ld		hl, buf				; FCB
+			ld		hl, bsave_fcb		; FCB
 			ld		de, bsave_head
 			ld		bc, 7
 			call	sub_fread
@@ -2508,6 +2509,8 @@ sub_bload_s::
 			ld		[bsave_head_size], hl
 			; VRAMアドレスをセットする
 			ld		hl, [bsave_head_start]
+			ld		de, [bsave_offset]
+			add		hl, de
 			ld		a, [scrmod]
 			cp		a, 5
 			jr		nc, screen5over
@@ -2526,7 +2529,7 @@ sub_bload_s::
 			jr		c, skip1
 			ld		bc, [bsave_head_size]
 		skip1:
-			ld		hl, buf
+			ld		hl, bsave_fcb
 			ld		de, [buffer_address]
 			push	bc							; 読み出すサイズ
 			call	sub_fread
@@ -2551,10 +2554,12 @@ sub_bload_s::
 			or		a, d
 			jr		nz, load_loop
 			; ファイルを閉じる
-			ld		hl, buf
+			ld		hl, bsave_fcb
 			jp		sub_fclose
 
-	bsave_head				= buf + 37
+	bsave_offset			= buf
+	bsave_fcb				= buf + 2
+	bsave_head				= bsave_fcb + 37
 	bsave_head_signature	= bsave_head
 	bsave_head_start		= bsave_head + 1
 	bsave_head_end			= bsave_head + 3
@@ -2566,7 +2571,8 @@ sub_bload_s::
 ; =============================================================================
 ;	BLOAD HL
 ;	input:
-;		HL ... ファイル名
+;		HL ...... ファイル名
+;		[buf] ... オフセット
 ;	output:
 ;		HL ... 実行開始アドレス
 ;		DE ... 先頭アドレス
@@ -2579,12 +2585,12 @@ sub_bload_s::
 sub_bload::
 			ei
 			; ファイルを開く
-			ld		de, buf				; FCB を buf に置く
+			ld		de, bsave_fcb				; FCB を bsave_fcb に置く
 			call	sub_fopen
 			or		a, a
 			jp		nz, err_file_not_found
 			; ヘッダを読み出す
-			ld		hl, buf				; FCB
+			ld		hl, bsave_fcb				; FCB
 			ld		de, bsave_head
 			ld		bc, 7
 			call	sub_fread
@@ -2598,10 +2604,19 @@ sub_bload::
 			ld		de, [bsave_head_start]
 			sbc		hl, de
 			ld		[bsave_head_size], hl
+			; 実行アドレスにオフセットを加算
+			ld		hl, [bsave_head_exec]
+			ld		de, [bsave_offset]
+			add		hl, de
+			ld		[bsave_head_exec], hl
+			; 開始アドレスにオフセットを加算
+			ld		hl, [bsave_head_start]
+			add		hl, de
+			ld		[bsave_head_start], hl
+			ex		de, hl
 			; 読み出す
 			ld		bc, [bsave_head_size]
-			ld		hl, buf
-			ld		de, [bsave_head_start]
+			ld		hl, bsave_fcb
 			push	bc							; 読み出すサイズ
 			call	sub_fread
 			pop		bc							; 読み出すサイズ
@@ -2609,13 +2624,15 @@ sub_bload::
 			sbc		hl, bc
 			jp		nz, err_device_io			; 指定のサイズ読めなかった場合は Device I/O Error
 			; ファイルを閉じる
-			ld		hl, buf
+			ld		hl, bsave_fcb
 			call	sub_fclose
 			ld		hl, [bsave_head_exec]
 			ld		de, [bsave_head_start]
 			ret
 
-	bsave_head				= buf + 37
+	bsave_offset			= buf
+	bsave_fcb				= buf + 2
+	bsave_head				= bsave_fcb + 37
 	bsave_head_signature	= bsave_head
 	bsave_head_start		= bsave_head + 1
 	bsave_head_end			= bsave_head + 3
