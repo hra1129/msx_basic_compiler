@@ -55,6 +55,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( "PUSH", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			if( !is_load && p_info->list.p_position->s_word == "," ) {
+				p_info->list.p_position++;
 				//	BLOAD "ファイル名",R,オフセット
 				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 					exp.release();
@@ -70,7 +71,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			p_info->assembler_list.activate_bload_r();
-			asm_line.set( "LD", "", "[sub_bload_r]work_buf]", "HL" );
+			asm_line.set( "LD", "", "[work_buf]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -84,6 +85,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			asm_line.set( "PUSH", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			if( !is_load && p_info->list.p_position->s_word == "," ) {
+				p_info->list.p_position++;
 				//	BLOAD "ファイル名",S,オフセット
 				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 					exp.release();
@@ -98,7 +100,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 				asm_line.set( "LD", "", "HL", "0" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			asm_line.set( "LD", "", "[sub_bload_r]work_buf]", "HL" );
+			asm_line.set( "LD", "", "[work_buf]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "HL", "[heap_end]" );
 			p_info->assembler_list.body.push_back( asm_line );
