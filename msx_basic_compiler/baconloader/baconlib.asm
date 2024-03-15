@@ -94,6 +94,7 @@ dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
 rndx		:= 0xF857
+savend		:= 0xF87D
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 cloc		:= 0xF92A
 cmask		:= 0xF92C
@@ -102,6 +103,8 @@ acpage		:= 0xFAF6
 linwrk		:= 0xFC18
 scrmod		:= 0xFCAF
 oldscr		:= 0xFCB0
+runbnf		:= 0xFCBE
+savent		:= 0xFCBF
 mainrom		:= 0xFCC1
 exptbl		:= 0xFCC1
 rg8sav		:= 0xFFE7
@@ -2574,8 +2577,10 @@ sub_bload_s::
 ;		HL ...... ファイル名
 ;		[buf] ... オフセット
 ;	output:
-;		HL ... 実行開始アドレス
-;		DE ... 先頭アドレス
+;		HL ......... 実行開始アドレス
+;		DE ......... 先頭アドレス
+;		[RUNBNF] ... 0
+;		[SAVENT] ... 実行開始アドレス
 ;	break:
 ;		all
 ;	comment:
@@ -2620,14 +2625,16 @@ sub_bload::
 			push	bc							; 読み出すサイズ
 			call	sub_fread
 			pop		bc							; 読み出すサイズ
-			or		a, a
+			xor		a, a
 			sbc		hl, bc
 			jp		nz, err_device_io			; 指定のサイズ読めなかった場合は Device I/O Error
 			; ファイルを閉じる
+			ld		[runbnf], a
 			ld		hl, bsave_fcb
 			call	sub_fclose
 			ld		hl, [bsave_head_exec]
 			ld		de, [bsave_head_start]
+			ld		[savent], hl
 			ret
 
 	bsave_offset			= buf
@@ -2709,10 +2716,11 @@ sub_mid_cmd::
 ; =============================================================================
 ;	BSAVE HL
 ;	input:
-;		HL ... ファイル名
-;		DE ... 開始アドレス、終了アドレス、実行アドレスが格納されているアドレス
+;		HL ......... ファイル名
+;		DE ......... 開始アドレス、終了アドレス、実行アドレスが格納されているアドレス
 ;	output:
-;		none
+;		[savent] ... 実行アドレス
+;		[savend] ... 終了アドレス
 ;	break:
 ;		all
 ;	comment:
@@ -2756,6 +2764,11 @@ sub_bsave::
 			; ファイルを閉じる
 			ld		hl, buf
 			call	sub_fclose
+			; 実行アドレスをコピーする
+			ld		hl, [bsave_head_exec]
+			ld		[savent], hl
+			ld		hl, [bsave_head_end]
+			ld		[savend], hl
 			ret
 
 	bsave_head				= buf + 37
@@ -2772,7 +2785,8 @@ sub_bsave::
 ;		HL ... ファイル名
 ;		DE ... 開始アドレス、終了アドレス、実行アドレス、ワークエリア開始アドレス、終了アドレスが格納されているアドレス
 ;	output:
-;		none
+;		[savent] .... 書き込みサイズ
+;		[savend] .... 終了アドレス
 ;	break:
 ;		all
 ;	comment:
@@ -2810,8 +2824,10 @@ sub_bsave_s::
 			; 書き出すサイズを計算 (bsave_head_end - bsave_head_start + 1)
 			ld		hl, [bsave_head_end]
 			ld		de, [bsave_head_start]
+			ld		[savend], hl
 			sbc		hl, de
 			ld		[bsave_data_size], hl
+			ld		[savent], hl
 			; VRAMアドレスをセット
 			ld		hl, [bsave_head_start]
 			ld		a, [romver]
