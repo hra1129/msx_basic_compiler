@@ -1,7 +1,7 @@
-﻿  bload.cpp
+﻿  locate.cpp
   コード生成しています。
   1 of 2422 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    125 functions had inline decision re-evaluated but remain unchanged
+    126 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

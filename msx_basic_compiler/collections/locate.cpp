@@ -40,9 +40,9 @@ bool CLOCATE::exec( CCOMPILE_INFO *p_info ) {
 
 		if( p_info->list.is_command_end() ) {
 			//	LOCATE X ‚Ìê‡
-			asm_line.set( "LD", "" "A", "[work_csry]" );
+			asm_line.set( "LD", "", "A", "[work_csry]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "" "L", "A" );
+			asm_line.set( "LD", "", "L", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "bios_posit" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -54,9 +54,9 @@ bool CLOCATE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	else {
 		//	‘æ1ˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
-		asm_line.set( "LD", "" "A", "[work_csrx]" );
+		asm_line.set( "LD", "", "A", "[work_csrx]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "" "H", "A" );
+		asm_line.set( "LD", "", "H", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( p_info->list.is_command_end() ) {
 			//	LOCATE : ˆø”‚ª‘S‚­‚È‚¢ê‡
@@ -78,11 +78,11 @@ bool CLOCATE::exec( CCOMPILE_INFO *p_info ) {
 		//	‘æ2ˆø”‚ª‘¶İ‚µ‚½ê‡
 		if( !has_x ) {
 			//	LOCATE ,Y : ‘æ1ˆø”‚ÍÈ—ª‚³‚ê‚Ä‚¢‚½ê‡
-			asm_line.set( "LD", "" "A", "[work_csrx]" );
+			asm_line.set( "LD", "", "A", "[work_csrx]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "" "H", "A" );
+			asm_line.set( "LD", "", "H", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "INC", "" "L" );
+			asm_line.set( "INC", "", "L" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
@@ -115,11 +115,11 @@ bool CLOCATE::exec( CCOMPILE_INFO *p_info ) {
 			//	LOCATE X, : ‘æ2ˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
 			asm_line.set( "POP", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "" "A", "[work_csry]" );
+			asm_line.set( "LD", "", "A", "[work_csry]" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "INC", "" "A" );
+			asm_line.set( "INC", "", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "" "L", "A" );
+			asm_line.set( "LD", "", "L", "A" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "bios_posit" );
 			p_info->assembler_list.body.push_back( asm_line );

@@ -14,13 +14,11 @@ BIOS_ENASLT                     = 0X0024
 WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
-WORK_BUF                        = 0X0F55E
-BLIB_BLOAD                      = 0X04054
-WORK_USRTAB                     = 0X0F39A
-WORK_VALTYP                     = 0X0F663
-WORK_DAC                        = 0X0F7F6
-BIOS_FRCINT                     = 0X02F8A
-BIOS_FRCDBL                     = 0X0303A
+BIOS_POSIT                      = 0X000C6
+WORK_CSRY                       = 0X0F3DC
+WORK_CSRX                       = 0X0F3DD
+WORK_CSRSW                      = 0X0FCA9
+WORK_PRTFLG                     = 0X0F416
 BIOS_NEWSTT                     = 0X04601
 BIOS_ERRHAND                    = 0X0406F
 WORK_TXTTAB                     = 0X0F676
@@ -64,93 +62,13 @@ JP_HL:
         JP          HL
 PROGRAM_START:
 LINE_100:
-        LD          HL, 49151
-        DI          
-        LD          SP, HL
-        LD          [WORK_HIMEM], HL
-        LD          DE, ERR_RETURN_WITHOUT_GOSUB
-        PUSH        DE
-        EI          
-        LD          DE, _PT0
-        JP          PROGRAM_RUN
-_PT0:
+        LD          H, (256) & 255
+        INC         H
+        LD          A, [WORK_CSRY]
+        LD          L, A
+        CALL        BIOS_POSIT
 LINE_110:
-        LD          HL, STR_1
-        PUSH        HL
-        LD          HL, 8192
-        LD          [WORK_BUF], HL
-        POP         HL
-        CALL        SUB_BLOAD
-LINE_120:
-        LD          HL, 49152
-        LD          [WORK_USRTAB + 0], HL
-LINE_130:
-        LD          HL, VARD_A
-        PUSH        HL
-        LD          HL, 48
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          HL, _PT1
-        PUSH        HL
-        LD          HL, [WORK_USRTAB + 0]
-        PUSH        HL
-        LD          HL, WORK_DAC
-        RET         
-_PT1:
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        POP         DE
-        CALL        LD_DE_DOUBLE_REAL
-        LD          HL, VARD_A
-        PUSH        HL
-        LD          HL, 49
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          HL, _PT2
-        PUSH        HL
-        LD          HL, [WORK_USRTAB + 0]
-        PUSH        HL
-        LD          HL, WORK_DAC
-        RET         
-_PT2:
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        POP         DE
-        CALL        LD_DE_DOUBLE_REAL
-        LD          HL, VARD_A
-        PUSH        HL
-        LD          HL, 50
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        LD          HL, _PT3
-        PUSH        HL
-        LD          HL, [WORK_USRTAB + 0]
-        PUSH        HL
-        LD          HL, WORK_DAC
-        RET         
-_PT3:
-        CALL        BIOS_FRCINT
-        LD          HL, [WORK_DAC + 2]
-        LD          [WORK_DAC + 2], HL
-        LD          A, 2
-        LD          [WORK_VALTYP], A
-        CALL        BIOS_FRCDBL
-        LD          HL, WORK_DAC
-        POP         DE
-        CALL        LD_DE_DOUBLE_REAL
+        JP          program_termination
 PROGRAM_TERMINATION:
         CALL        RESTORE_H_ERRO
         CALL        RESTORE_H_TIMI
@@ -195,41 +113,6 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-SUB_BLOAD:
-        PUSH        HL
-        CALL        RESTORE_H_ERRO
-        CALL        RESTORE_H_TIMI
-        LD          HL, SUB_BLOAD_TRANS_START
-        LD          DE, SUB_BLOAD_TRANS
-        LD          BC, SUB_BLOAD_TRANS_END - SUB_BLOAD_TRANS
-        LDIR        
-        POP         HL
-        CALL        SUB_BLOAD_TRANS
-        DI          
-        CALL        SETUP_H_TIMI
-        CALL        SETUP_H_ERRO
-        EI          
-        RET         
-SUB_BLOAD_TRANS_START:
-        ORG         WORK_BUF + 50
-SUB_BLOAD_TRANS:
-        LD          IY, [WORK_BLIBSLOT - 1]
-        LD          IX, BLIB_BLOAD
-        CALL        BIOS_CALSLT
-        LD          HL, [WORK_HIMEM]
-        EX          DE, HL
-        RST         0X20
-        RET         NC
-        LD          HL, _BLOAD_BASIC_END
-        CALL        BIOS_NEWSTT
-_BLOAD_BASIC_END:
-        DEFB        ':', 0x81, 0x00
-SUB_BLOAD_TRANS_END:
-        ORG         SUB_BLOAD_TRANS_START + SUB_BLOAD_TRANS_END - SUB_BLOAD_TRANS
-LD_DE_DOUBLE_REAL:
-        LD          BC, 8
-        LDIR        
-        RET         
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -242,11 +125,6 @@ PROGRAM_RUN:
         LD          HL, [WORK_FILTAB]
         SBC         HL, DE
         LD          [HEAP_END], HL
-        LD          HL, VAR_AREA_START
-        LD          DE, VAR_AREA_START + 1
-        LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
-        LD          [HL], 0
-        LDIR        
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -276,8 +154,6 @@ H_ERRO_HANDLER:
         JP          WORK_H_ERRO
 STR_0:
         DEFB        0X00
-STR_1:
-        DEFB        0X0B, 0X54, 0X45, 0X53, 0X54, 0X41, 0X53, 0X4D, 0X2E, 0X42, 0X49, 0X4E
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -287,8 +163,6 @@ HEAP_MOVE_SIZE:
 HEAP_REMAP_ADDRESS:
         DEFW        0
 VAR_AREA_START:
-VARD_A:
-        DEFW        0, 0, 0, 0
 VAR_AREA_END:
 VARS_AREA_START:
 VARS_AREA_END:
