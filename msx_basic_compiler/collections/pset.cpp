@@ -19,7 +19,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word != "PSET" && p_info->list.p_position->s_word != "PRESET" ) {
 		return false;
 	}
-	is_preset = (p_info->list.p_position->s_word != "PRESET");
+	is_preset = (p_info->list.p_position->s_word == "PRESET");
 
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
