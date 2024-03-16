@@ -83,7 +83,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	YÀ•W
-		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
