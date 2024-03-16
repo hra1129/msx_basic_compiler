@@ -108,7 +108,7 @@ LINE_20:
 LINE_30:
         XOR         A, A
         LD          [WORK_LOGOPR], A
-        LD          A, [WORK_FORCLR]
+        LD          A, [WORK_BAKCLR]
         CALL        BIOS_SETATR
         LD          HL, 128
         LD          [WORK_CLOC], HL
