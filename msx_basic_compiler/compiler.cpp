@@ -1837,8 +1837,12 @@ void CCOMPILER::optimize_push_pop( void ) {
 					p->operand2.s_value = "A";
 					p->operand2.type = COPERAND_TYPE::REGISTER;
 					p->type = CMNEMONIC_TYPE::XOR;
+					p->operand1.s_value = "A";
 				}
-				p->operand1.s_value = "A";
+				else {
+					p->operand1.s_value = "A";
+					p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";
+				}
 			}
 		}
 	}
