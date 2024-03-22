@@ -349,6 +349,10 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "JP", "NZ", "bios_syntax_error", "" );
 	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[work_maxfil]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[svari_maxfiles_backup]", "A" );
+	this->info.assembler_list.body.push_back( asm_line );
 	//	実行の度の blib 初期化
 	this->info.assembler_list.add_label( "blib_init_ncalbas", "0x0404e" );
 	asm_line.set( "LD", "", "IX", "blib_init_ncalbas" );
@@ -535,13 +539,10 @@ void CCOMPILER::exec_terminator( void ) {
 		//	全てのファイルを閉じる
 		asm_line.set( "CALL", "", "sub_all_close" );
 		this->info.assembler_list.body.push_back( asm_line );
-		//	ファイルを使用しているので、ファイル用ワークエリアを確保
-		CVARIABLE variable;
-		variable.s_name		= "_file_info";
-		variable.s_label	= "varia_" + variable.s_name;
-		variable.type		= CVARIABLE_TYPE::INTEGER;
-		variable.dimension	= 1;
-		this->info.variables.dictionary[ variable.s_name ] = variable;
+		asm_line.set( "LD", "", "A", "[svari_maxfiles_backup]" );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_maxfil]", "A" );
+		this->info.assembler_list.body.push_back( asm_line );
 	}
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( "CALL", "", "restore_h_erro", "" );
@@ -605,7 +606,7 @@ void CCOMPILER::exec_sub_run( void ) {
 	//	ファイルを全て close する
 	if( this->info.use_file_access ) {
 		this->info.assembler_list.activate_all_close();
-		asm_line.set( "LD", "", "HL", "[varia__file_info]" );
+		asm_line.set( "LD", "", "HL", "[svaria_file_info]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "H" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -614,6 +615,10 @@ void CCOMPILER::exec_sub_run( void ) {
 		asm_line.set( "JR", "Z", "file_init_skip" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "CALL", "", "sub_all_close" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "0" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svaria_file_info]", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LABEL", "", "file_init_skip" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -642,13 +647,6 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_end]", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-
-	//	ファイル用の情報エリアを確保
-	if( this->info.use_file_access ) {
-		this->info.assembler_list.activate_init_files();
-		asm_line.set( "CALL", "", "sub_init_files" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-	}
 
 	asm_line.set( "DI" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -732,6 +730,12 @@ void CCOMPILER::exec_sub_run( void ) {
 		asm_line.set( "LD", "", "[hl]", "c" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DJNZ", "", "_sub_input_clear" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+	//	ファイル用の情報エリアを確保
+	if( this->info.use_file_access ) {
+		this->info.assembler_list.activate_init_files();
+		asm_line.set( "CALL", "", "sub_init_files" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	asm_line.set( "RET" );
@@ -1640,6 +1644,10 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str5", CVARIABLE_TYPE::STRING );
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str6", CVARIABLE_TYPE::STRING );
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str7", CVARIABLE_TYPE::STRING );
+	}
+	if( this->info.use_file_access ) {
+		this->info.variable_manager.put_special_variable( &( this->info ), "maxfiles_backup", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &( this->info ), "file_info", CVARIABLE_TYPE::INTEGER, CVARIABLE_TYPE::INTEGER, true );
 	}
 	//	変数ダンプ
 	this->info.constants.dump( this->info.assembler_list, this->info.options );

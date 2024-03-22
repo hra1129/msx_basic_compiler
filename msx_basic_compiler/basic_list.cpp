@@ -18,6 +18,7 @@ struct CBASIC_RESERVED_WORD {
 static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { -1 },				"FRANDOMIZE" },
 	{ { -1 },				"INTERVAL" },
+	{ { -1 },				"MAXFILES" },
 	{ { -1 },				"BINDATA" },
 	{ { -1 },				"CHRHEX$" },
 	{ { -1 },				"HEXDATA" },

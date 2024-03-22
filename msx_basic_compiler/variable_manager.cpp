@@ -761,7 +761,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 }
 
 // --------------------------------------------------------------------
-CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type, CVARIABLE_TYPE var_name_type ) {
+CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type, CVARIABLE_TYPE var_name_type, bool is_array ) {
 	CVARIABLE variable;
 	std::string s_label;
 
@@ -777,12 +777,20 @@ CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, 
 	case CVARIABLE_TYPE::DOUBLE_REAL:	s_label = "svard";	break;
 	case CVARIABLE_TYPE::STRING:		s_label = "svars";	break;
 	}
+	if( is_array ) {
+		s_label = s_label + "a";
+	}
 	s_label = s_label + "_" + s_name;
 	//	•Ï”‚ð“o˜^‚·‚é
 	variable.s_name = s_name;
 	variable.s_label = s_label;
 	variable.type = var_type;
-	variable.dimension = 0;
+	if( is_array ) {
+		variable.dimension = 1;
+	}
+	else {
+		variable.dimension = 0;
+	}
 	if( p_info->variables.dictionary.count( s_label ) == 0 ) {
 		p_info->variables.dictionary[ s_label ] = variable;
 	}

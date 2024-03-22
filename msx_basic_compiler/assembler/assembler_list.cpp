@@ -948,9 +948,11 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	if( this->is_registered_subroutine( "free_heap" ) ) {
 		return;
 	}
+	//	HL に解放するメモリのアドレス、BC に解放するメモリのサイズを入れて呼び出す
 	this->subrouines_list.push_back( "free_heap" );
 	asm_line.set( "LABEL", "", "free_heap", "" );
 	this->subroutines.push_back( asm_line );
+	//	ブロック転送の情報をメモリに保存する
 	asm_line.set( "PUSH", "", "HL", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "ADD", "", "HL", "BC" );
@@ -959,6 +961,7 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_remap_address]", "HL" );
 	this->subroutines.push_back( asm_line );
+	//	ブロック転送のサイズやアドレスを計算する
 	asm_line.set( "EX", "", "DE", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "[heap_next]" );
@@ -979,10 +982,12 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JR", "Z", "_free_heap_loop0", "" );
 	this->subroutines.push_back( asm_line );
+	//	ブロック転送する
 	asm_line.set( "LDIR", "", "", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_free_heap_loop0", "" );
 	this->subroutines.push_back( asm_line );
+	//	文字列変数/数値配列変数/文字列配列変数の実体アドレスを更新する
 	asm_line.set( "LD", "", "[heap_next]", "DE" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "vars_area_start" );
@@ -1039,6 +1044,7 @@ void CASSEMBLER_LIST::activate_free_heap( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_free_heap_loop1_end", "" );
 	this->subroutines.push_back( asm_line );
+	//	文字列配列変数の中身に入っている実体アドレスを更新する
 	asm_line.set( "LD", "", "HL", "varsa_area_start" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_free_heap_loop2", "" );
@@ -4047,9 +4053,13 @@ void CASSEMBLER_LIST::activate_close( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "[varia__file_info]" );
+	asm_line.set( "LD", "", "DE", "[svaria_file_info]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "ADD", "", "HL", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[HL]" );				//	0: No Open, 1～8: FILE, 128: GRP, 129: CON, 130: CRT, 255: NUL
 	this->subroutines.push_back( asm_line );
@@ -4095,6 +4105,8 @@ void CASSEMBLER_LIST::activate_all_close( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET", "Z" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "H", "0" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "L", "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "sub_all_close_loop" );
@@ -4139,6 +4151,8 @@ void CASSEMBLER_LIST::activate_maxfiles( void ) {
 	//	maxfil を更新
 	asm_line.set( "LD", "", "A", "L" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "AND", "", "A", "15" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_maxfil]", "A" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JP", "", "sub_init_files" );
@@ -4154,17 +4168,36 @@ void CASSEMBLER_LIST::activate_init_files( void ) {
 		return;
 	}
 	this->subrouines_list.push_back( "sub_init_files" );
+	this->add_label( "bios_imult", "0x03193" );
+	this->activate_allocate_heap();
+	this->activate_free_heap();
 
 	asm_line.set( "LABEL", "", "sub_init_files" );
 	this->subroutines.push_back( asm_line );
 
 	//	メモリが確保済みであれば解放する
-	asm_line.set( "LD", "", "HL", "[varia__file_info]" );
+	asm_line.set( "LD", "", "HL", "[svaria_file_info]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "BC" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "BC" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "NZ", "free_heap" );
 	this->subroutines.push_back( asm_line );
 
 	//	メモリを確保する。ゼロクリアされるので、全て閉じた状態になる。
-	this->add_label( "bios_imult", "0x03193" );
-	this->activate_allocate_heap();
 	asm_line.set( "LD", "", "A", "[work_maxfil]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "E", "A" );
@@ -4175,7 +4208,27 @@ void CASSEMBLER_LIST::activate_init_files( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "H" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "allocate_heap" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[svaria_file_info]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "D" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->subroutines.push_back( asm_line );
