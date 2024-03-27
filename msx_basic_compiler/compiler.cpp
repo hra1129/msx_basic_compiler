@@ -11,6 +11,7 @@
 #include "collections/call.h"
 #include "collections/circle.h"
 #include "collections/clear.h"
+#include "collections/close.h"
 #include "collections/cls.h"
 #include "collections/color.h"
 #include "collections/color_sprite.h"
@@ -49,6 +50,7 @@
 #include "collections/on_sprite.h"
 #include "collections/on_strig.h"
 #include "collections/on_stop.h"
+#include "collections/open.h"
 #include "collections/out.h"
 #include "collections/paint.h"
 #include "collections/play.h"
@@ -116,6 +118,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CLSET );
 	this->collection.push_back( new CLINE );
 	this->collection.push_back( new CLOCATE );
+	this->collection.push_back( new CCLOSE );
 	this->collection.push_back( new CNAME );
 	this->collection.push_back( new CNEXT );
 	this->collection.push_back( new CMID );
@@ -125,6 +128,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CONSTRIG );
 	this->collection.push_back( new CONSTOP );
 	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB は、ON～GOSUB より後
+	this->collection.push_back( new COPEN );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPAINT );
 	this->collection.push_back( new CPLAY );
@@ -605,7 +609,6 @@ void CCOMPILER::exec_sub_run( void ) {
 
 	//	ファイルを全て close する
 	if( this->info.use_file_access ) {
-		this->info.assembler_list.activate_all_close();
 		asm_line.set( "LD", "", "HL", "[svaria_file_info]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "H" );
@@ -649,37 +652,37 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
 	asm_line.set( "DI" );
-	this->info.assembler_list.body.push_back( asm_line );
+	this->info.assembler_list.subroutines.push_back( asm_line );
 	if( this->info.use_on_sprite ) {
 		//	ON SPRITE の飛び先初期化
 		asm_line.set( "LD", "", "HL", "_code_ret" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "[svari_on_sprite_line]", "HL" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
 		//	ON INTERVAL の飛び先初期化
 		asm_line.set( "LD", "", "[svari_on_interval_line]", "HL" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_key ) {
 		//	ON KEY の飛び先初期化
 		asm_line.set( "LD", "", "[svari_on_key01_line]", "HL" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "HL", "svari_on_key01_line" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "DE", "svari_on_key01_line + 2" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "BC", "20 - 2" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LDIR" );
-		this->info.assembler_list.body.push_back( asm_line );
+		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	//	初期化処理 (H.ERROフック)
 	asm_line.set( "CALL", "", "setup_h_erro", "" );
-	this->info.assembler_list.body.push_back( asm_line );
+	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "EI" );
-	this->info.assembler_list.body.push_back( asm_line );
+	this->info.assembler_list.subroutines.push_back( asm_line );
 	//	RUN用サブルーチンの中で変数領域をクリアする
 	int variable_area_bytes = this->info.variables.var_area_size + this->info.variables.vars_area_count + this->info.variables.vara_area_count;
 	if( variable_area_bytes == 0 ) {
@@ -734,12 +737,16 @@ void CCOMPILER::exec_sub_run( void ) {
 	}
 	//	ファイル用の情報エリアを確保
 	if( this->info.use_file_access ) {
-		this->info.assembler_list.activate_init_files();
 		asm_line.set( "CALL", "", "sub_init_files" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+
+	if( this->info.use_file_access ) {
+		this->info.assembler_list.activate_all_close();
+		this->info.assembler_list.activate_init_files();
+	}
 }
 
 // --------------------------------------------------------------------

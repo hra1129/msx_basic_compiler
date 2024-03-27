@@ -4235,6 +4235,133 @@ void CASSEMBLER_LIST::activate_init_files( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_open_for_input( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_open_for_input" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_open_for_input" );
+	this->add_label( "blib_open_for_input", "0x40e4" );
+	this->activate_open_sub();
+
+	//	HL ... ファイル名
+	//	DE ... ファイル番号
+	asm_line.set( "LABEL", "", "sub_open_for_input" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_open_for_output" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_open_for_output( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_open_for_output" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_open_for_output" );
+	this->add_label( "blib_open_for_output", "0x40e7" );
+	this->activate_open_sub();
+
+	//	HL ... ファイル名
+	//	DE ... ファイル番号
+	asm_line.set( "LABEL", "", "sub_open_for_output" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_open_for_output" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_open_for_append( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_open_for_append" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_open_for_append" );
+	this->add_label( "blib_open_for_append", "0x40ea" );
+	this->activate_open_sub();
+
+	//	HL ... ファイル名
+	//	DE ... ファイル番号
+	asm_line.set( "LABEL", "", "sub_open_for_append" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_open_for_append" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_open_sub( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_open_sub" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_open_sub" );
+	this->add_label( "bios_imult", "0x03193" );
+	this->add_label( "bios_errhand", "0x0406F" );
+
+	//	HL ... ファイル名
+	//	DE ... ファイル番号
+	//	→ DE に FILE_INFO
+	asm_line.set( "LABEL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NZ", "_sub_open_bad_file_number" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "15" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NC", "_sub_open_bad_file_number" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "292" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_imult" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "[SVARIA_FILE_INFO]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD", "", "HL", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_sub_open_bad_file_number" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "52" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 bool CASSEMBLER_LIST::save_sub( FILE *p_file, std::vector< CASSEMBLER_LINE > *p_list ) {
 	bool b_result = true;
 	std::vector< CASSEMBLER_LINE >::iterator p;
