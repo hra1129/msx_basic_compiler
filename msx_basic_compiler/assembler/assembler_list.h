@@ -88,6 +88,10 @@ public:
 	void activate_all_close( void );
 	void activate_maxfiles( void );
 	void activate_init_files( void );
+	void activate_open_for_input( void );
+	void activate_open_for_output( void );
+	void activate_open_for_append( void );
+	void activate_open_sub( void );
 };
 
 #endif
