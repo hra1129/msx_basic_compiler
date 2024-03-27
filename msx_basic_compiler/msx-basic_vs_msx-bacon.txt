@@ -34,3 +34,18 @@ MSX-BASICとの違い
 　MSX の BIOS に組み込まれている演算ルーチン群を利用します。そして、MathPack は
 　BASIC のエラーチェックが入っているため、MathPack を使うケースでは、MSX-BASICと
 　同様のエラーが発生します。
+
+2. DEFxxx
+　変数の暗黙の方を指定する DEFINT, DEFSNG, DEFDBL, DEFSTR ですが、MSX-BACON では
+　コンパイル時に確定させてしまいます。
+　MSX-BACON は、変数の名前をアドレスに変換してしまうため、コンパイル結果には、
+　変数の名前の情報は残っていません。このため、動的に暗黙の型を切り替えられません。
+　具体的には、下記のコードの挙動が、MSX-BASIC と異なります。
+
+	100 A%=100:A!=200:A#=300:A$="STR"
+	110 DEFINT A:GOSUB 1000
+	120 DEFSNG A:GOSUB 1000
+	130 DEFDBL A:GOSUB 1000
+	140 DEFSTR A:GOSUB 1000
+	150 END
+	160 PRINT A:RETURN
