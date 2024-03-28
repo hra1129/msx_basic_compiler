@@ -1652,8 +1652,8 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str6", CVARIABLE_TYPE::STRING );
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str7", CVARIABLE_TYPE::STRING );
 	}
+	this->info.variable_manager.put_special_variable( &( this->info ), "maxfiles_backup", CVARIABLE_TYPE::INTEGER );
 	if( this->info.use_file_access ) {
-		this->info.variable_manager.put_special_variable( &( this->info ), "maxfiles_backup", CVARIABLE_TYPE::INTEGER );
 		this->info.variable_manager.put_special_variable( &( this->info ), "file_info", CVARIABLE_TYPE::INTEGER, CVARIABLE_TYPE::INTEGER, true );
 	}
 	//	•Ï”ƒ_ƒ“ƒv
