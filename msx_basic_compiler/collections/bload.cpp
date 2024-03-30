@@ -34,9 +34,9 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.is_command_end() ) {
 		//	BLOAD "ƒtƒ@ƒCƒ‹–¼"
 		p_info->assembler_list.activate_bload();
-		asm_line.set( "LD", "", "HL", "0" );
+		asm_line.set( "LD", "", "DE", "0" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "[work_buf]", "HL" );
+		asm_line.set( "LD", "", "[work_buf]", "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "sub_bload" );
 		p_info->assembler_list.body.push_back( asm_line );
