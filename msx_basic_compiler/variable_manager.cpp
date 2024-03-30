@@ -617,7 +617,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "1" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		p_info->assembler_list.add_label( "bios_umult", "0x0314a" );
+		p_info->assembler_list.add_label( "bios_imult", "0x03193" );
 		for( i = 0; i < dimension; i++ ) {
 			//	要素数の計算式を評価
 			p_exp = exp_list[i];
@@ -638,7 +638,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				//	DE = BC * DE
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_umult", COPERAND_TYPE::NONE, "" );
+				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_imult", COPERAND_TYPE::NONE, "" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			//	サイズ計算のここまでの結果をスタックに積む
