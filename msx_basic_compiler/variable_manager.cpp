@@ -614,48 +614,42 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.body.push_back( asm_line );
 		//	サイズ計算の最初の係数 1 をスタックに積む
 		if( dimension == 0 ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "1" );
+			asm_line.set( "LD", "", "DE", "1" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		p_info->assembler_list.add_label( "bios_imult", "0x03193" );
 		for( i = 0; i < dimension; i++ ) {
+			if( i > 0 ) {
+				//	一つ前の演算結果をスタックに待避
+				asm_line.set( "PUSH", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
 			//	要素数の計算式を評価
 			p_exp = exp_list[i];
 			p_exp->compile( p_info );
 			delete p_exp;
 			exp_list[i] = nullptr;
-			if( i > 0 ) {
-				//	サイズ計算の直前の結果をスタックから取り出す
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-			}
 			//	計算した要素数をスタックに積む
-			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "INC", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			if( i > 0 ) {
-				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-				p_info->assembler_list.body.push_back( asm_line );
-				//	DE = BC * DE
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_imult", COPERAND_TYPE::NONE, "" );
+				//	一つ前の演算結果をスタックから復帰
+				asm_line.set( "POP", "", "DE" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			//	サイズ計算のここまでの結果をスタックに積む
-			if( (i + 1) < dimension ) {
-				if( i == 0 ) {
-					asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-					p_info->assembler_list.body.push_back( asm_line );
-				}
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "PUSH", "", "HL" );							//	要素数を積む (CALC_ARRAY_TOPのため)
+			p_info->assembler_list.body.push_back( asm_line );
+			if( i > 0 ) {
+				//	HL = HL * DE
+				asm_line.set( "CALL", "", "bios_imult" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 		}
 		//	必要なメモリサイズに変換する
-		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+		asm_line.set( "ADD", "", "HL", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( element_size > 2 ) {
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+			asm_line.set( "ADD", "", "HL", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		if( element_size > 4 ) {
