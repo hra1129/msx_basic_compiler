@@ -306,6 +306,47 @@ void CCALL::iotfind( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
+//	CALL TURBO ON/OFF( xxx ) ‚ÍA–³Ž‹‚·‚é
+void CCALL::turbo( CCOMPILE_INFO* p_info ) {
+	CEXPRESSION exp;
+
+	p_info->list.p_position++;
+	if( p_info->list.is_command_end() ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	if( p_info->list.p_position->s_word != "ON" && p_info->list.p_position->s_word != "OFF" ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	p_info->list.p_position++;
+	if( p_info->list.is_command_end() ) {
+		return;
+	}
+	if( p_info->list.p_position->s_word != "(" ) {
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return;
+	}
+	p_info->list.p_position++;
+	for( ;; ) {
+		exp.makeup_node( p_info );
+		if( p_info->list.is_command_end() ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return;
+		}
+		exp.release();
+		if( p_info->list.p_position->s_word == ")" ) {
+			break;
+		}
+		if( p_info->list.p_position->s_word == "," ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return;
+		}
+		p_info->list.p_position++;
+	}
+}
+
+// --------------------------------------------------------------------
 //  CALL Šg’£–½—ß
 bool CCALL::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
@@ -329,6 +370,10 @@ bool CCALL::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "IOTPUT" ) {
 		this->iotput( p_info );
+		return true;
+	}
+	if( p_info->list.p_position->s_word == "TURBO" ) {
+		this->turbo( p_info );
 		return true;
 	}
 	//	”ñ‘Î‰ž‚Ì–½—ß
