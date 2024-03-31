@@ -40,6 +40,7 @@ private:
 	void optimize_push_pop( void );
 	void optimize_remove_interrupt_process( void );
 	void optimize_ldir( void );
+	void optimize_calculation( void );
 
 	void sub_return_line_num( void );
 
@@ -130,6 +131,8 @@ public:
 	//	is_lop = false : 結果を work_logopr (0x0fB02) に格納する。通常はこちら。
 	//	is_lop = true  : 結果を work_lop (0xf570) に格納する。ビットブロックトランスファはこちら。
 	void put_logical_operation( bool is_lop = false );
+
+	bool is_integer( const std::string s );
 };
 
 #endif
