@@ -562,7 +562,18 @@ void CCOMPILER::exec_terminator( void ) {
 	}
 
 	//	プログラムの終了処理
-	asm_line.set( "LABEL", "", "program_termination", "" );
+	asm_line.set( "LABEL", "", "program_termination" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_termination" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "SP", "[work_himem]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "_basic_end" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "JP", "", "bios_newstt", "" );
+	this->info.assembler_list.body.push_back( asm_line );
+
+	asm_line.set( "LABEL", "", "sub_termination" );
 	this->info.assembler_list.body.push_back( asm_line );
 	if( this->info.use_file_access ) {
 		//	全てのファイルを閉じる
@@ -600,16 +611,12 @@ void CCOMPILER::exec_terminator( void ) {
 	//	プログラムの終了処理 (H.TIMI復元)
 	asm_line.set( "CALL", "", "restore_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	プログラムの終了処理 (スタック復元)
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
-	this->info.assembler_list.body.push_back( asm_line );
+	//	プログラムの終了処理
 	asm_line.set( "LD", "", "HL", "0x8001" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_txttab]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "_basic_end" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "bios_newstt", "" );
+	asm_line.set( "RET" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_basic_end", "" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -1546,6 +1553,8 @@ void CCOMPILER::exec_sub_restore_h_timi( void ) {
 void CCOMPILER::exec_sub_on_error( void ) {
 	CASSEMBLER_LINE asm_line;
 
+	this->info.assembler_list.add_label( "work_errflg", "0x0f414" );
+
 	//	H.ERRO復元処理ルーチン
 	asm_line.set( "LABEL", "", "restore_h_erro", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1569,17 +1578,25 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	//	H.ERRO処理ルーチン
 	asm_line.set( "LABEL", "", "h_erro_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-
-
-	asm_line.set( "PUSH", "", "DE", "" );				// Eにエラーコードが入っているので保存
+	asm_line.set( "PUSH", "", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "restore_h_timi", "" );
+	asm_line.set( "PUSH", "", "DE" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "restore_h_erro", "" );
+	asm_line.set( "PUSH", "", "BC" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "", "DE", "" );
+	asm_line.set( "CALL", "", "restore_h_timi" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "JP", "", "work_h_erro", "" );
+	asm_line.set( "CALL", "", "restore_h_erro" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_termination" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "BC" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "work_h_erro" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
 	//	H.ERRO待避エリア
