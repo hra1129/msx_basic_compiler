@@ -79,6 +79,23 @@
 #include "collections/width.h"
 #include "variable_manager.h"
 #include "./expressions/expression.h"
+#include <cctype>
+
+// --------------------------------------------------------------------
+bool CCOMPILER::is_integer( const std::string s ) {
+	size_t i;
+	bool flag = false;
+
+	for( i = 0; i < s.size(); i++ ) {
+		if( !flag && ( s[i] == '-' || s[i] == '+' ) ) {
+			flag = true;
+		}
+		else if( !isdigit( s[i] ) ) {
+			return false;
+		}
+	}
+	return true;
+}
 
 // --------------------------------------------------------------------
 void CCOMPILER::initialize( void ) {
@@ -1743,10 +1760,14 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 // --------------------------------------------------------------------
 void CCOMPILER::optimize( void ) {
+	int i;
 
 	this->optimize_interrupt_process();
-	this->optimize_push_pop();
-	this->optimize_ldir();
+	for( i = 0; i < 3; i++ ) {
+		this->optimize_calculation();
+		this->optimize_push_pop();
+		this->optimize_ldir();
+	}
 }
 
 // --------------------------------------------------------------------
@@ -1923,7 +1944,12 @@ void CCOMPILER::optimize_push_pop( void ) {
 				}
 				else {
 					p->operand1.s_value = "A";
-					p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";
+					if( is_integer( p->operand2.s_value ) ) {
+						p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) & 255 );
+					}
+					else {
+						p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";
+					}
 				}
 			}
 		}
@@ -2308,6 +2334,33 @@ void CCOMPILER::optimize_ldir( void ) {
 			this->info.assembler_list.body.erase( p_next[2] );
 			this->info.assembler_list.body.erase( p_next[1] );
 			this->info.assembler_list.body.erase( p_next[0] );
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+void CCOMPILER::optimize_calculation( void ) {
+	std::vector< CASSEMBLER_LINE >::iterator p, p_next;
+
+	//	LD   HL, constant
+	//	INC  HL
+	//	«
+	//  LD   HL, constant + 1
+	//
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			p_next = p + 1;
+			if( p_next->type != CMNEMONIC_TYPE::INC || p_next->operand1.s_value != p->operand1.s_value ) {
+				continue;
+			}
+			//	ŠY“–
+			this->info.assembler_list.body.erase( p_next );
+			if( is_integer( p->operand2.s_value ) ) {
+				p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) + 1 );
+			}
+			else {
+				p->operand2.s_value = '(' + p->operand2.s_value + ") + 1";
+			}
 		}
 	}
 }
