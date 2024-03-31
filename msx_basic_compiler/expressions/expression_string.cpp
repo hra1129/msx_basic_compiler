@@ -37,18 +37,28 @@ void CEXPRESSION_STRING::compile( CCOMPILE_INFO *p_info ) {
 	//	‘æ‚Pˆø”‚ðˆ—
 	this->p_operand1->compile( p_info );
 	this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand1->type );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( "PUSH", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 
 	//	‘æ‚Qˆø”‚ðˆ—
 	this->p_operand2->compile( p_info );
-	this->convert_type( p_info, CEXPRESSION_TYPE::STRING, this->p_operand2->type );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.body.push_back( asm_line );
-
 	p_info->assembler_list.activate_string();
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "string", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.body.push_back( asm_line );
+	if( this->p_operand2->type == CEXPRESSION_TYPE::STRING ) {
+		asm_line.set( "POP", "", "DE" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "string" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand2->type );
+		asm_line.set( "LD", "", "A", "L" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "DE" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "string_a" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+
 
 	this->type = CEXPRESSION_TYPE::STRING;
 }

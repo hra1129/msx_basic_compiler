@@ -1345,13 +1345,13 @@ void CASSEMBLER_LIST::activate_string( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[HL]" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NZ", "string_skip", "" );
+	asm_line.set( "JR", "NZ", "string_a", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "E", "5" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JP", "", "bios_errhand", "" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "string_skip", "" );
+	asm_line.set( "LABEL", "", "string_a", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "AF", "" );
 	this->subroutines.push_back( asm_line );
