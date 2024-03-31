@@ -15,6 +15,7 @@ private:
 	void iotget( CCOMPILE_INFO *p_info );
 	void iotput( CCOMPILE_INFO *p_info );
 	void iotfind( CCOMPILE_INFO *p_info );
+	void turbo( CCOMPILE_INFO *p_info );
 public:
 	bool exec( CCOMPILE_INFO *p_info );
 };
