@@ -360,6 +360,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
 	this->info.assembler_list.add_label( "work_maxfil", "0x0f85f" );
 	this->info.assembler_list.add_label( "work_txttab", "0x0F676" );
+	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT を呼ぶと [VARTAB]→[STREND], [STREND] ～ [STREND] + [VALTYP] を 00h で塗りつぶすため、初期化が必要。
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
 
 	//	初期化処理 (BACONLIB存在確認)
@@ -374,6 +375,10 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	asm_line.set( "LD", "", "[0x8001]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[0x8002]", "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "heap_start" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_vartab]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "_BASIC_START" );
 	this->info.assembler_list.body.push_back( asm_line );

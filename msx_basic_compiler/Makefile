@@ -5,7 +5,9 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/bload.cpp \
 	collections/bsave.cpp \
 	collections/call.cpp \
+	collections/circle.cpp \
 	collections/clear.cpp \
+	collections/close.cpp \
 	collections/cls.cpp \
 	collections/color.cpp \
 	collections/color_sprite.cpp \
@@ -23,6 +25,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/error.cpp \
 	collections/files.cpp \
 	collections/for.cpp \
+	collections/get.cpp \
 	collections/gosub.cpp \
 	collections/goto.cpp \
 	collections/if.cpp \
@@ -43,6 +46,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/on_sprite.cpp \
 	collections/on_stop.cpp \
 	collections/on_strig.cpp \
+	collections/open.cpp \
 	collections/out.cpp \
 	collections/paint.cpp \
 	collections/play.cpp \
@@ -57,8 +61,13 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/return.cpp \
 	collections/run.cpp \
 	collections/screen.cpp \
+	collections/setadjust.cpp \
+	collections/setbeep.cpp \
 	collections/setpage.cpp \
+	collections/setprompt.cpp \
+	collections/setscreen.cpp \
 	collections/setscroll.cpp \
+	collections/settitle.cpp \
 	collections/sound.cpp \
 	collections/swap.cpp \
 	collections/vpoke.cpp \
@@ -128,6 +137,7 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_peek.cpp \
 	expressions/expression_peeks.cpp \
 	expressions/expression_peekw.cpp \
+	expressions/expression_point.cpp \
 	expressions/expression_right.cpp \
 	expressions/expression_rnd.cpp \
 	expressions/expression_sgn.cpp \
