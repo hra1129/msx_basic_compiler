@@ -50,5 +50,6 @@ SAILORMAN BRAVO BROSさん（@brapunch2000）
 櫻井洋志さん (@h_sakurai)
 反動さん (@FF14_hando)
 野球帽美緒さん (@baseballcap_mio)
+MSX研鑽推進委員会さん (@mdpc___)
 ```
 	※順不同、（）は X（旧Twitter）のアカウント
