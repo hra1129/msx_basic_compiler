@@ -379,7 +379,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "[work_usrtab + 0]" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[usr0_backup]", "HL" );
+	asm_line.set( "LD", "", "[svari_usr0_backup]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "heap_start" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -391,7 +391,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_BASIC_START_RET", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[usr0_backup]" );
+	asm_line.set( "LD", "", "HL", "[svari_usr0_backup]" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_usrtab + 0]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
