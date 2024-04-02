@@ -361,6 +361,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_maxfil", "0x0f85f" );
 	this->info.assembler_list.add_label( "work_txttab", "0x0F676" );
 	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT を呼ぶと [VARTAB]→[STREND], [STREND] ～ [STREND] + [VALTYP] を 00h で塗りつぶすため、初期化が必要。
+	this->info.assembler_list.add_label( "work_usrtab", "0x0F39A" );
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
 
 	//	初期化処理 (BACONLIB存在確認)
@@ -376,6 +377,10 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[0x8002]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[work_usrtab + 0]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[usr0_backup]", "HL" );
+	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "heap_start" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_vartab]", "HL" );
@@ -385,6 +390,10 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	asm_line.set( "CALL", "", "bios_newstt" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_BASIC_START_RET", "" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[usr0_backup]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_usrtab + 0]", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "1" );
 	this->info.assembler_list.body.push_back( asm_line );
@@ -1741,7 +1750,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str6", CVARIABLE_TYPE::STRING );
 		this->info.variable_manager.put_special_variable( &( this->info ), "input_free_str7", CVARIABLE_TYPE::STRING );
 	}
-	this->info.variable_manager.put_special_variable( &( this->info ), "maxfiles_backup", CVARIABLE_TYPE::INTEGER );
+	this->info.variable_manager.put_special_variable( &( this->info ), "usr0_backup", CVARIABLE_TYPE::INTEGER );
 	if( this->info.use_file_access ) {
 		this->info.variable_manager.put_special_variable( &( this->info ), "file_info", CVARIABLE_TYPE::INTEGER, CVARIABLE_TYPE::INTEGER, true );
 	}
