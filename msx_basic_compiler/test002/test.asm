@@ -8,6 +8,7 @@ WORK_HIMEM                      = 0X0FC4A
 WORK_MAXFIL                     = 0X0F85F
 WORK_TXTTAB                     = 0X0F676
 WORK_VARTAB                     = 0X0F6C2
+WORK_USRTAB                     = 0X0F39A
 BIOS_NEWSTT                     = 0X04601
 BLIB_INIT_NCALBAS               = 0X0404E
 BIOS_SYNTAX_ERROR               = 0X4055
@@ -34,11 +35,15 @@ START_ADDRESS:
         LD          HL, 0
         LD          [0X8001], HL
         LD          [0X8002], HL
+        LD          HL, [WORK_USRTAB + 0]
+        LD          [SVARI_USR0_BACKUP], HL
         LD          HL, HEAP_START
         LD          [WORK_VARTAB], HL
         LD          HL, _BASIC_START
         CALL        BIOS_NEWSTT
 _BASIC_START_RET:
+        LD          HL, [SVARI_USR0_BACKUP]
+        LD          [WORK_USRTAB + 0], HL
         LD          A, 1
         LD          [WORK_MAXFIL], A
         LD          SP, [WORK_HIMEM]
@@ -498,7 +503,7 @@ HEAP_MOVE_SIZE:
 HEAP_REMAP_ADDRESS:
         DEFW        0
 VAR_AREA_START:
-SVARI_MAXFILES_BACKUP:
+SVARI_USR0_BACKUP:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
