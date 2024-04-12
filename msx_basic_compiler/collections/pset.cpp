@@ -32,6 +32,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "bios_pset", "0x057F5" );
 	p_info->assembler_list.add_label( "bios_setatr", "0x0011A" );
 	p_info->assembler_list.add_label( "subrom_setc", "0x009D" );
+	p_info->assembler_list.add_label( "work_grpacx", "0xFCB7" );
+	p_info->assembler_list.add_label( "work_grpacy", "0xFCB9" );
 	p_info->assembler_list.add_label( "work_cloc", "0xF92A" );
 	p_info->assembler_list.add_label( "work_cmask", "0xF92C" );
 	p_info->assembler_list.add_label( "work_scrmod", "0xFCAF" );
@@ -80,6 +82,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( "LD", "", "[work_grpacx]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	YÀ•W
@@ -87,6 +91,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( "LD", "", "[work_grpacy]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cmask]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );
@@ -138,6 +144,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( "LD", "", "[work_grpacx]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		//	YÀ•W
@@ -145,6 +153,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( "LD", "", "[work_grpacy]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cmask]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );

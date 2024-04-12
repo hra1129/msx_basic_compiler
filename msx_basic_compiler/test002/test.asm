@@ -20,14 +20,33 @@ SIGNATURE                       = 0X4010
 BIOS_ERRHAND                    = 0X0406F
 BIOS_IMULT                      = 0X03193
 BLIB_FCLOSE                     = 0X04063
+BIOS_CHGCLR                     = 0X00062
+WORK_FORCLR                     = 0X0F3E9
+WORK_BAKCLR                     = 0X0F3EA
+WORK_BDRCLR                     = 0X0F3EB
+WORK_GRPACX                     = 0XFCB7
+WORK_GRPACY                     = 0XFCB9
+WORK_ROMVER                     = 0X0002D
+BIOS_CHGMOD                     = 0X0005F
+BIOS_CHGMODP                    = 0X001B5
+BIOS_EXTROM                     = 0X0015F
 BLIB_OPEN_FOR_OUTPUT            = 0X40E7
 BLIB_FILE_PUTS                  = 0X040ED
 WORK_PRTFLG                     = 0X0F416
 WORK_PTRFIL                     = 0X0F864
-BIOS_POSIT                      = 0X000C6
-WORK_CSRY                       = 0X0F3DC
-WORK_CSRX                       = 0X0F3DD
-WORK_CSRSW                      = 0X0FCA9
+BIOS_PSET                       = 0X057F5
+BIOS_SETATR                     = 0X0011A
+SUBROM_SETC                     = 0X009D
+WORK_CLOC                       = 0XF92A
+WORK_CMASK                      = 0XF92C
+WORK_SCRMOD                     = 0XFCAF
+WORK_LOGOPR                     = 0X0FB02
+WORK_GXPOS                      = 0X0FCB3
+WORK_GYPOS                      = 0X0FCB5
+BIOS_LINE                       = 0X058FC
+BIOS_LINEB                      = 0X05912
+BIOS_LINEBF                     = 0X058C1
+BLIB_INPUT                      = 0X0407E
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
 ; BSAVE header -----------------------------------------------------------
@@ -92,6 +111,28 @@ PROGRAM_START:
 LINE_100:
         LD          HL, 1
         CALL        SUB_MAXFILES
+        LD          A, 15
+        LD          [WORK_FORCLR], A
+        LD          A, 4
+        LD          [WORK_BAKCLR], A
+        LD          A, 7
+        LD          [WORK_BDRCLR], A
+        CALL        BIOS_CHGCLR
+        LD          HL, 5
+        LD          A, [WORK_ROMVER]
+        OR          A, A
+        LD          A, L
+        JR          NZ, _PT0
+        CALL        BIOS_CHGMOD
+        JR          _PT1
+_PT0:
+        LD          IX, BIOS_CHGMODP
+        CALL        BIOS_EXTROM
+        EI          
+_PT1:
+        LD          HL, 0
+        LD          [WORK_GRPACX], HL
+        LD          [WORK_GRPACY], HL
 LINE_110:
         LD          HL, STR_1
         LD          DE, 1
@@ -109,8 +150,28 @@ LINE_120:
         LD          HL, 0
         LD          [WORK_PTRFIL], HL
 LINE_130:
-        LD          HL, (11) | ((11) << 8)
-        CALL        BIOS_POSIT
+        XOR         A, A
+        LD          [WORK_LOGOPR], A
+        LD          A, [WORK_FORCLR]
+        CALL        BIOS_SETATR
+        LD          HL, 100
+        LD          [WORK_GRPACX], HL
+        LD          [WORK_CLOC], HL
+        LD          HL, 100
+        LD          [WORK_GRPACY], HL
+        LD          [WORK_CMASK], HL
+        EX          DE, HL
+        LD          BC, [WORK_CLOC]
+        LD          A, [WORK_SCRMOD]
+        CP          A, 5
+        JR          NC, _PT2
+        CALL        BIOS_PSET
+        JR          _PT3
+_PT2:
+        LD          IX, SUBROM_SETC
+        CALL        BIOS_EXTROM
+        EI          
+_PT3:
         XOR         A, A
         LD          [WORK_PRTFLG], A
         LD          HL, 1
@@ -123,12 +184,44 @@ LINE_130:
         LD          HL, 0
         LD          [WORK_PTRFIL], HL
 LINE_140:
+        LD          HL, 10
+        LD          [WORK_GXPOS], HL
+        LD          [WORK_GRPACX], HL
+        LD          HL, 10
+        LD          [WORK_GYPOS], HL
+        LD          [WORK_GRPACY], HL
         XOR         A, A
-        LD          [WORK_PRTFLG], A
-        LD          HL, STR_5
-        CALL        PUTS
-        LD          HL, STR_3
-        CALL        PUTS
+        LD          [WORK_LOGOPR], A
+        LD          A, 13
+        CALL        BIOS_SETATR
+        LD          HL, 200
+        PUSH        HL
+        EX          DE, HL
+        POP         BC
+        PUSH        DE
+        PUSH        BC
+        CALL        BIOS_LINE
+        POP         HL
+        LD          [WORK_GXPOS], HL
+        POP         HL
+        LD          [WORK_GYPOS], HL
+LINE_150:
+        LD          HL, VARS_I
+        PUSH        HL
+        LD          A, 1
+        CALL        ALLOCATE_STRING
+        LD          IX, BLIB_INPUT
+        CALL        CALL_BLIB
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
 PROGRAM_TERMINATION:
         CALL        SUB_TERMINATION
         LD          SP, [WORK_HIMEM]
@@ -447,17 +540,24 @@ PUT_STRING:
         CALL        CALL_BLIB
         POP         HL
         JP          FREE_STRING
-PUTS:
-        LD          B, [HL]
-        INC         B
-        DEC         B
-        RET         Z
-_PUTS_LOOP:
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
         INC         HL
-        LD          A, [HL]
-        RST         0X18
-        DJNZ        _PUTS_LOOP
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        LD          [HL], C
         RET         
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
 PROGRAM_RUN:
         LD          HL, [SVARIA_FILE_INFO]
         LD          A, H
@@ -488,6 +588,8 @@ FILE_INIT_SKIP:
         LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
         LDIR        
+        LD          HL, STR_0
+        LD          [VARS_AREA_START], HL
         CALL        SUB_INIT_FILES
         RET         
 ; H.TIMI PROCESS -----------------
@@ -524,15 +626,13 @@ H_ERRO_HANDLER:
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X04, 0X43, 0X52, 0X54, 0X3A
+        DEFB        0X04, 0X47, 0X52, 0X50, 0X3A
 STR_2:
         DEFB        0X01, 0X41
 STR_3:
         DEFB        0X02, 0X0D, 0X0A
 STR_4:
         DEFB        0X01, 0X42
-STR_5:
-        DEFB        0X03, 0X61, 0X62, 0X63
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -546,6 +646,8 @@ SVARI_USR0_BACKUP:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
+VARS_I:
+        DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 SVARIA_FILE_INFO:
