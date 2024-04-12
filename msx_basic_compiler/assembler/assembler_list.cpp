@@ -648,32 +648,6 @@ void CASSEMBLER_LIST::activate_puts( void ) {
 }
 
 // --------------------------------------------------------------------
-void CASSEMBLER_LIST::activate_spc( void ) {
-	CASSEMBLER_LINE asm_line;
-
-	if( this->is_registered_subroutine( "spc" ) ) {
-		return;
-	}
-	this->subrouines_list.push_back( "spc" );
-	asm_line.set( "LABEL", "", "spc", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "L" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "32" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_spc_loop", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RST", "", "0x18", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "DJNZ", "", "_spc_loop", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RET", "", "", "" );
-	this->subroutines.push_back( asm_line );
-}
-
-// --------------------------------------------------------------------
 //	A に文字列長 1～255 を入れて呼ぶ。 HL に確保したアドレスを返す。
 void CASSEMBLER_LIST::activate_allocate_string( void ) {
 	CASSEMBLER_LINE asm_line;
@@ -1287,6 +1261,9 @@ void CASSEMBLER_LIST::activate_str( void ) {
 	if( this->is_registered_subroutine( "str" ) ) {
 		return;
 	}
+	// DACに入っている数値を文字列に変換する STR(dac)
+	// 結果は一時バッファへカエされるので free_string の必要は無いが
+	// 変数などへ代入する場合は、コピーを作成して代入すること。
 	this->subrouines_list.push_back( "str" );
 	this->add_label( "bios_fout", "0x03425" );
 	asm_line.set( "LABEL", "", "str", "" );
@@ -1727,60 +1704,6 @@ void CASSEMBLER_LIST::activate_calc_array_top( void ) {
 	asm_line.set( "JR", "NZ", "_calc_array_top_l1", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "DE", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RET", "", "", "" );
-	this->subroutines.push_back( asm_line );
-}
-
-// --------------------------------------------------------------------
-void CASSEMBLER_LIST::activate_comma( void ) {
-	CASSEMBLER_LINE asm_line;
-
-	if( this->is_registered_subroutine( "print_comma" ) ) {
-		return;
-	}
-	this->subrouines_list.push_back( "print_comma" );
-	asm_line.set( "LABEL", "", "print_comma", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[work_clmlst]" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "A" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "[work_csrx]" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "DEC", "NONE", "A", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "CP", "", "A", "B" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "JR", "C", "_print_comma_loop1", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "NONE", "A", "10" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RST", "", "0x18", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "NONE", "A", "13" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RST", "", "0x18", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RET", "", "", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_print_comma_loop1", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "SUB", "", "A", "14" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "JR", "NC", "_print_comma_loop1", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "NEG", "NONE", "", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "B", "A" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "' '" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_print_comma_loop2", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "RST", "", "0x18", "" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "DJNZ", "", "_print_comma_loop2", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET", "", "", "" );
 	this->subroutines.push_back( asm_line );
@@ -4316,7 +4239,7 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 
 	//	HL ... ファイル名
 	//	DE ... ファイル番号
-	//	→ DE に FILE_INFO
+	//	→ work_ptrfil に FILE_INFO
 	asm_line.set( "LABEL", "", "sub_open_sub" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL" );
@@ -4347,7 +4270,7 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "INC", "", "HL" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "EX", "", "DE", "HL" );
+	asm_line.set( "LD", "", "[work_ptrfil]", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "POP", "", "HL" );
 	this->subroutines.push_back( asm_line );
@@ -4358,6 +4281,175 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 	asm_line.set( "LD", "", "E", "52" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JP", "", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	ファイル番号 #n の n から FILE_INFO のアドレスを求めるルーチン
+//	HL = 1～15
+void CASSEMBLER_LIST::activate_file_number( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_file_number" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_file_number" );
+	this->add_label( "bios_imult", "0x03193" );
+	this->add_label( "work_ptrfil", "0x0f864" );	//	結果の格納先
+
+	asm_line.set( "LABEL", "", "sub_file_number" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "15" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "52" );			//	Bad file number
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "NC", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC", "", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "NZ", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "292" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_imult" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "[svaria_file_info]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD", "", "HL", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_ptrfil]", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_put_integer( class CCOMPILE_INFO* p_info ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "put_integer" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "put_integer" );
+
+	this->activate_str();
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "work_valtyp", "0x0f663" );
+	this->add_label( "blib_put_digits", "0x040f6" );
+
+	asm_line.set( "LABEL", "", "put_integer" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_dac + 2]",  "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "2" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[work_valtyp]",  "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","str",  "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_put_digits" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "","call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_put_single_real( class CCOMPILE_INFO* p_info ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "put_single_real" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "put_single_real" );
+
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "work_valtyp", "0x0f663" );
+	this->add_label( "blib_put_digits", "0x040f6" );
+
+	this->activate_str();
+	this->activate_ld_dac_single_real();
+
+	asm_line.set( "LABEL", "", "put_single_real" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","ld_dac_single_real",  "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_dac" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","str",  "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_put_digits" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "","call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_put_double_real( class CCOMPILE_INFO *p_info ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "put_double_real" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "put_double_real" );
+
+	this->add_label( "work_dac", "0x0f7f6" );
+	this->add_label( "work_valtyp", "0x0f663" );
+	this->add_label( "blib_put_digits", "0x040f6" );
+
+	this->activate_str();
+	this->activate_ld_dac_double_real();
+
+	asm_line.set( "LABEL", "", "put_double_real" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","ld_dac_double_real",  "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_dac" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","str",  "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_put_digits" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "","call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_put_string( class CCOMPILE_INFO* p_info ) {
+	CASSEMBLER_LINE asm_line;
+	static const char image[] = { 13, 10 };
+	CSTRING value;
+
+	if( this->is_registered_subroutine( "put_string" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "put_string" );
+
+	std::string s_label_crlf = p_info->constants.add( value );
+
+	p_info->assembler_list.activate_free_string();
+	s_label_crlf = p_info->constants.add( value );
+
+	asm_line.set( "LABEL", "", "put_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_file_puts" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "","call_blib" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "free_string" );
 	this->subroutines.push_back( asm_line );
 }
 
