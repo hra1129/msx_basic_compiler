@@ -20,7 +20,14 @@ SIGNATURE                       = 0X4010
 BIOS_ERRHAND                    = 0X0406F
 BIOS_IMULT                      = 0X03193
 BLIB_FCLOSE                     = 0X04063
-BIOS_ERRHAND_REDIM              = 0X0405E
+BLIB_OPEN_FOR_OUTPUT            = 0X40E7
+BLIB_FILE_PUTS                  = 0X040ED
+WORK_PRTFLG                     = 0X0F416
+WORK_PTRFIL                     = 0X0F864
+BIOS_POSIT                      = 0X000C6
+WORK_CSRY                       = 0X0F3DC
+WORK_CSRX                       = 0X0F3DD
+WORK_CSRSW                      = 0X0FCA9
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
 ; BSAVE header -----------------------------------------------------------
@@ -83,93 +90,45 @@ _BASIC_START:
         DEFB        ':', 'A', 0xEF, 0xDD, '(', 0x11, ')', 0x00
 PROGRAM_START:
 LINE_100:
-        LD          HL, 0
+        LD          HL, 1
         CALL        SUB_MAXFILES
 LINE_110:
-        LD          HL, [VARIA_A]
-        LD          A, L
-        OR          A, H
-        JP          NZ, BIOS_ERRHAND_REDIM
-        LD          HL, 1001
-        PUSH        HL
-        ADD         HL, HL
-        LD          DE, 5
-        ADD         HL, DE
-        PUSH        HL
-        LD          C, L
-        LD          B, H
-        CALL        ALLOCATE_HEAP
-        LD          [VARIA_A], HL
-        POP         BC
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          A, 1
-        LD          [HL], A
-        INC         HL
-        POP         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        LD          HL, [VARIA_B]
-        LD          A, L
-        OR          A, H
-        JP          NZ, BIOS_ERRHAND_REDIM
-        LD          HL, 1001
-        PUSH        HL
-        ADD         HL, HL
-        LD          DE, 5
-        ADD         HL, DE
-        PUSH        HL
-        LD          C, L
-        LD          B, H
-        CALL        ALLOCATE_HEAP
-        LD          [VARIA_B], HL
-        POP         BC
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          A, 1
-        LD          [HL], A
-        INC         HL
-        POP         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        LD          HL, [VARIA_C]
-        LD          A, L
-        OR          A, H
-        JP          NZ, BIOS_ERRHAND_REDIM
-        LD          HL, 20001
-        PUSH        HL
-        ADD         HL, HL
-        LD          DE, 5
-        ADD         HL, DE
-        PUSH        HL
-        LD          C, L
-        LD          B, H
-        CALL        ALLOCATE_HEAP
-        LD          [VARIA_C], HL
-        POP         BC
-        DEC         BC
-        DEC         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
-        INC         HL
-        LD          A, 1
-        LD          [HL], A
-        INC         HL
-        POP         BC
-        LD          [HL], C
-        INC         HL
-        LD          [HL], B
+        LD          HL, STR_1
+        LD          DE, 1
+        CALL        SUB_OPEN_FOR_OUTPUT
+LINE_120:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, STR_2
+        CALL        PUT_STRING
+        LD          HL, STR_3
+        LD          IX, BLIB_FILE_PUTS
+        CALL        CALL_BLIB
+        LD          HL, 0
+        LD          [WORK_PTRFIL], HL
+LINE_130:
+        LD          HL, (11) | ((11) << 8)
+        CALL        BIOS_POSIT
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, STR_4
+        CALL        PUT_STRING
+        LD          HL, STR_3
+        LD          IX, BLIB_FILE_PUTS
+        CALL        CALL_BLIB
+        LD          HL, 0
+        LD          [WORK_PTRFIL], HL
+LINE_140:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, STR_5
+        CALL        PUTS
+        LD          HL, STR_3
+        CALL        PUTS
 PROGRAM_TERMINATION:
         CALL        SUB_TERMINATION
         LD          SP, [WORK_HIMEM]
@@ -429,6 +388,76 @@ SUB_MAXFILES:
         AND         A, 15
         LD          [WORK_MAXFIL], A
         JP          SUB_INIT_FILES
+SUB_OPEN_SUB:
+        PUSH        HL
+        LD          A, D
+        OR          A, A
+        JR          NZ, _SUB_OPEN_BAD_FILE_NUMBER
+        DEC         E
+        LD          A, E
+        CP          A, 15
+        JR          NC, _SUB_OPEN_BAD_FILE_NUMBER
+        LD          HL, 292
+        CALL        BIOS_IMULT
+        LD          DE, [SVARIA_FILE_INFO]
+        ADD         HL, DE
+        INC         HL
+        INC         HL
+        LD          [WORK_PTRFIL], HL
+        POP         HL
+        RET         
+_SUB_OPEN_BAD_FILE_NUMBER:
+        LD          E, 52
+        JP          BIOS_ERRHAND
+SUB_OPEN_FOR_OUTPUT:
+        CALL        SUB_OPEN_SUB
+        LD          IX, BLIB_OPEN_FOR_OUTPUT
+        JP          CALL_BLIB
+SUB_FILE_NUMBER:
+        DEC         HL
+        LD          A, L
+        CP          A, 15
+        LD          E, 52
+        JP          NC, BIOS_ERRHAND
+        INC         H
+        DEC         H
+        JP          NZ, BIOS_ERRHAND
+        LD          DE, 292
+        CALL        BIOS_IMULT
+        LD          DE, [SVARIA_FILE_INFO]
+        ADD         HL, DE
+        INC         HL
+        INC         HL
+        LD          [WORK_PTRFIL], HL
+        RET         
+FREE_STRING:
+        LD          DE, HEAP_START
+        RST         0X20
+        RET         C
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          FREE_HEAP
+PUT_STRING:
+        PUSH        HL
+        LD          IX, BLIB_FILE_PUTS
+        CALL        CALL_BLIB
+        POP         HL
+        JP          FREE_STRING
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
 PROGRAM_RUN:
         LD          HL, [SVARIA_FILE_INFO]
         LD          A, H
@@ -494,6 +523,16 @@ H_ERRO_HANDLER:
         JP          WORK_H_ERRO
 STR_0:
         DEFB        0X00
+STR_1:
+        DEFB        0X04, 0X43, 0X52, 0X54, 0X3A
+STR_2:
+        DEFB        0X01, 0X41
+STR_3:
+        DEFB        0X02, 0X0D, 0X0A
+STR_4:
+        DEFB        0X01, 0X42
+STR_5:
+        DEFB        0X03, 0X61, 0X62, 0X63
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -510,12 +549,6 @@ VARS_AREA_START:
 VARS_AREA_END:
 VARA_AREA_START:
 SVARIA_FILE_INFO:
-        DEFW        0
-VARIA_A:
-        DEFW        0
-VARIA_B:
-        DEFW        0
-VARIA_C:
         DEFW        0
 VARA_AREA_END:
 VARSA_AREA_START:

@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
+bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
 	int offset;
@@ -17,7 +17,7 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
 	//	書式文字列
 	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_buf]", COPERAND_TYPE::REGISTER, "HL" );
+		asm_line.set( "LD", "", "[work_buf]",  "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 	}
@@ -26,7 +26,7 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	offset = 2;
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_buf+2" );
+	asm_line.set( "LD", "", "HL", "work_buf+2" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	書式と引数の間はセミコロンのみ
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ";" ) {
@@ -37,71 +37,71 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	//	引数
 	for(;;) {
-		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		asm_line.set( "PUSH", "", "HL",  "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
 			//	DEに演算結果、HLにBUFの格納先
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			asm_line.set( "POP", "", "DE",  "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+			asm_line.set( "EX", "", "DE",  "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			//	型に応じて格納方法が異なる
 			switch( exp.get_type() ) {
 			case CEXPRESSION_TYPE::INTEGER:
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "2" );
+				asm_line.set( "LD", "", "[HL]", "2" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "E" );
+				asm_line.set( "LD", "", "[HL]", "E" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "D" );
+				asm_line.set( "LD", "", "[HL]", "D" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				offset += 3;
 				break;
 			case CEXPRESSION_TYPE::STRING:
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "3" );
+				asm_line.set( "LD", "", "[HL]", "3" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "E" );
+				asm_line.set( "LD", "", "[HL]", "E" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "D" );
+				asm_line.set( "LD", "", "[HL]", "D" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
 				offset += 3;
 				break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:
 				p_info->assembler_list.activate_ld_de_single_real();
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "4" );
+				asm_line.set( "LD", "", "[HL]", "4" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				asm_line.set( "EX", "", "DE",  "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "ld_de_single_real", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "CALL", "", "ld_de_single_real",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				asm_line.set( "EX", "", "DE",  "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				offset += 5;
 				break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:
 				p_info->assembler_list.activate_ld_de_double_real();
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "8" );
+				asm_line.set( "LD", "", "[HL]", "8" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "INC", "", "HL",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				asm_line.set( "EX", "", "DE",  "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "ld_de_double_real", COPERAND_TYPE::NONE, "" );
+				asm_line.set( "CALL", "", "ld_de_double_real",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "DE", COPERAND_TYPE::REGISTER, "HL" );
+				asm_line.set( "EX", "", "DE",  "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				offset += 9;
 				break;
@@ -134,7 +134,7 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
 			break;
 		}
 	}
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::CONSTANT, "0" );
+	asm_line.set( "LD", "", "[HL]", "0" );
 	p_info->assembler_list.body.push_back( asm_line );
 	offset++;
 	if( offset > 258 ) {
@@ -142,9 +142,9 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
 	}
 	p_info->assembler_list.add_label( "blib_using", "0x0404b" );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_using" );
+	asm_line.set( "LD", "", "IX", "blib_using" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+	asm_line.set( "CALL", "","call_blib",  "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }
@@ -160,40 +160,78 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	bool is_printer = false;
 	std::string s_label;
 	std::string s_label_crlf;
-	static const char image[] = { 13, 10 };
-	CSTRING value;
+	bool is_file = false;
 
 	if( p_info->list.p_position->s_word != "?" && p_info->list.p_position->s_word != "PRINT" && p_info->list.p_position->s_word != "LPRINT" ) {
 		return false;
 	}
 
+	p_info->assembler_list.add_label( "blib_file_puts", "0x040ed" );
 	p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
 		//	LPRINT の場合
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "1" );
+		asm_line.set( "LD", "", "A", "1" );
 		p_info->assembler_list.body.push_back( asm_line );
 		is_printer = true;
 	}
 	else {
 		//	PRINT の場合
-		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		asm_line.set( "XOR", "", "A",  "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_prtflg]", COPERAND_TYPE::REGISTER, "A" );
+	asm_line.set( "LD", "", "[work_prtflg]",  "A" );
 	p_info->assembler_list.body.push_back( asm_line );
 
 	p_info->list.p_position++;
-	p_info->assembler_list.activate_puts();
 
-	value.set( 2, image );
+	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "#" ) {
+		if( is_printer ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return false;
+		}
+		//	ファイル番号の処理
+		is_file = true;
+		p_info->list.p_position++;
+		if( !exp.compile( p_info ) ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return false;
+		}
+		p_info->assembler_list.activate_file_number();
+		p_info->use_file_access = true;
+		asm_line.set( "CALL", "", "sub_file_number" );			//	PTRFIL (F864h) に FILE_INFO のアドレスを格納、範囲外なら bad file number のエラー
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
+
+		if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::SYMBOL || p_info->list.p_position->s_word != "," ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return false;
+		}
+		p_info->list.p_position++;
+	}
+	else {
+		asm_line.set( "LD", "", "[work_ptrfil + 1]", "A" );
+	}
+
 	has_semicolon = false;
 	while( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "SPC(" ) {
 			//	SPC(n) の場合
 			p_info->list.p_position++;
-			p_info->assembler_list.activate_spc();
+			p_info->assembler_list.add_label( "blib_spc", "0x040f0" );
 			if( exp.compile( p_info ) ) {
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "spc", COPERAND_TYPE::NONE, "" );
+				if( is_file ) {
+					asm_line.set( "LD", "", "DE", "[work_ptrfil]" );
+					p_info->assembler_list.body.push_back( asm_line );
+					asm_line.set( "LD", "", "A", "[DE]" );
+					p_info->assembler_list.body.push_back( asm_line );
+				}
+				else {
+					asm_line.set( "XOR", "", "A", "A" );
+					p_info->assembler_list.body.push_back( asm_line );
+				}
+				asm_line.set( "LD", "", "IX", "blib_spc" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "","call_blib",  "" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			else {
@@ -211,16 +249,18 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			//	TAB(n) の場合
 			p_info->list.p_position++;
 			p_info->assembler_list.add_label( "blib_tab", "0x04048" );
-			if( exp.compile( p_info ) ) {
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_tab" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
+			exp.makeup_node( p_info );
+			if( is_file ) {
+				//	ファイルの場合、何も出さないので TAB() 呼び出しを出さない
 			}
 			else {
-				return false;
+				exp.compile( p_info );
+				asm_line.set( "XOR", "", "A", "A" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "IX", "blib_tab" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "","call_blib",  "" );
+				p_info->assembler_list.body.push_back( asm_line );
 			}
 			if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")" ) {
 				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
@@ -233,17 +273,29 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SYMBOL && p_info->list.p_position->s_word == "," ) {
 			//	, の場合
 			p_info->list.p_position++;
-			p_info->assembler_list.activate_comma();
+			p_info->assembler_list.add_label( "blib_comma", "0x040f3" );
 			p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
 			p_info->assembler_list.add_label( "work_clmlst", "0x0f3b2" );
-			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "print_comma", COPERAND_TYPE::NONE, "" );
+			if( is_file ) {
+				asm_line.set( "LD", "", "DE", "[work_ptrfil]" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "A", "[DE]" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				asm_line.set( "XOR", "", "A", "A" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			asm_line.set( "LD", "", "IX", "blib_comma" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "","call_blib",  "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			has_semicolon = true;
 		}
 		else if( p_info->list.p_position->s_word == "USING" ) {
 			//	USING の場合
 			p_info->list.p_position++;
-			if( !this->exec_using( p_info ) ) {
+			if( !this->exec_using( p_info, is_file ) ) {
 				//	エラーだった場合
 				return true;			//	PRINT USING として処理はしたので、true
 			}
@@ -265,157 +317,31 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			switch( exp.get_type() ) {
 			default:
 			case CEXPRESSION_TYPE::INTEGER:
-				p_info->assembler_list.activate_str();
-				p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
-				p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
-				p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
-				p_info->assembler_list.add_label( "work_linlen", "0x0f3b0" );
-				s_label_crlf = p_info->constants.add( value );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_dac + 2]", COPERAND_TYPE::REGISTER, "HL" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_valtyp]", COPERAND_TYPE::REGISTER, "A" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_linlen]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_csrx]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
-				p_info->assembler_list.body.push_back( asm_line );
-				s_label = p_info->get_auto_label();
-				asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label_crlf );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.activate_put_single_real( p_info );
+				asm_line.set( "CALL", "", "put_integer" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::SINGLE_REAL:
-				p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
-				p_info->assembler_list.add_label( "work_linlen", "0x0f3b0" );
-				p_info->assembler_list.activate_str();
-				p_info->assembler_list.activate_ld_dac_single_real();
-				s_label_crlf = p_info->constants.add( value );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "ld_dac_single_real", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_linlen]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_csrx]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
-				p_info->assembler_list.body.push_back( asm_line );
-				s_label = p_info->get_auto_label();
-				asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label_crlf );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.activate_put_single_real( p_info );
+				asm_line.set( "CALL", "", "put_single_real" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::DOUBLE_REAL:
-				p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
-				p_info->assembler_list.add_label( "work_linlen", "0x0f3b0" );
-				p_info->assembler_list.activate_str();
-				p_info->assembler_list.activate_ld_dac_double_real();
-				s_label_crlf = p_info->constants.add( value );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "ld_dac_double_real", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_linlen]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_csrx]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
-				p_info->assembler_list.body.push_back( asm_line );
-				s_label = p_info->get_auto_label();
-				asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label_crlf );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "32" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::RST, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "0x18", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.activate_put_double_real( p_info );
+				asm_line.set( "CALL", "", "put_double_real" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::STRING:
-				p_info->assembler_list.activate_free_string();
-				s_label_crlf = p_info->constants.add( value );
-				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "free_string", COPERAND_TYPE::NONE, "" );
-				p_info->assembler_list.body.push_back( asm_line );
+				if( is_file ) {
+					p_info->assembler_list.activate_put_string( p_info );
+					asm_line.set( "CALL", "", "put_string" );
+					p_info->assembler_list.body.push_back( asm_line );
+				}
+				else {
+					p_info->assembler_list.activate_puts();
+					asm_line.set( "CALL", "", "puts" );
+					p_info->assembler_list.body.push_back( asm_line );
+				}
 				break;
 			}
 			has_semicolon = false;
@@ -428,18 +354,37 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	}
 
 	if( p_info->list.is_command_end() && !has_semicolon ) {
+		static const char image[] = { 13, 10 };
+		CSTRING value;
+		value.set( 2, image );
+
 		//	最後の改行
 		s_label_crlf = p_info->constants.add( value );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_label_crlf );
+		asm_line.set( "LD", "", "HL", s_label_crlf );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "puts", COPERAND_TYPE::NONE, "" );
-		p_info->assembler_list.body.push_back( asm_line );
+		if( is_file ) {
+			asm_line.set( "LD", "", "IX", "blib_file_puts" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "","call_blib" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else {
+			p_info->assembler_list.activate_puts();
+			asm_line.set( "CALL", "","puts" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
 	}
 
 	if( is_printer ) {
-		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		asm_line.set( "XOR", "", "A",  "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_prtflg]", COPERAND_TYPE::REGISTER, "A" );
+		asm_line.set( "LD", "", "[work_prtflg]",  "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	if( is_file ) {
+		asm_line.set( "LD", "", "HL",  "0" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_ptrfil]",  "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	return true;

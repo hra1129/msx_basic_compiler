@@ -53,7 +53,6 @@ public:
 	void activate_ld_de_single_real( void );
 	void activate_ld_de_double_real( void );
 	void activate_puts( void );
-	void activate_spc( void );
 	void activate_allocate_string( void );
 	void activate_free_string( void );
 	void activate_free_array( void );
@@ -73,7 +72,6 @@ public:
 	void activate_check_array( void );
 	void activate_check_sarray( class CCONSTANT_INFO *p_constants );
 	void activate_calc_array_top( void );
-	void activate_comma( void );
 	void activate_sub_input( void );
 	void activate_bload_r( void );
 	void activate_bload( void );
@@ -92,6 +90,11 @@ public:
 	void activate_open_for_output( void );
 	void activate_open_for_append( void );
 	void activate_open_sub( void );
+	void activate_file_number( void );
+	void activate_put_integer( class CCOMPILE_INFO *p_info );
+	void activate_put_single_real( class CCOMPILE_INFO *p_info );
+	void activate_put_double_real( class CCOMPILE_INFO *p_info );
+	void activate_put_string( class CCOMPILE_INFO *p_info );
 };
 
 #endif

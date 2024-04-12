@@ -1883,6 +1883,35 @@ void CCOMPILER::optimize_push_pop( void ) {
 	}
 
 	//	PUSH HL
+	//	LD HL, xxx
+	//	EX DE, HL
+	//  POP HL
+	//	«
+	//	LD DE, xxx
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.s_value == "HL" ) {
+			p_next = p + 1;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "HL" ) continue;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::EX || p_next->operand1.s_value != "DE" ) continue;
+
+			p_next++;
+			if( p_next == this->info.assembler_list.body.end() ) break;
+			if( p_next->type != CMNEMONIC_TYPE::POP || p_next->operand1.s_value != "HL" ) continue;
+
+			p--;
+			this->info.assembler_list.body.erase( p + 4 );
+			this->info.assembler_list.body.erase( p + 3 );
+			this->info.assembler_list.body.erase( p + 1 );
+			p++;
+			p->operand1.s_value = "DE";
+		}
+	}
+
+	//	PUSH HL
 	//	LD HL, xxx ‚Ü‚½‚Í [xxx]
 	//	POP DE
 	//	ADD HL, DE
@@ -2134,8 +2163,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 					p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != s_reg ) {
 					continue;
 				}
-				p->operand1.s_value = s_reg;					//	LD   rp1, constant1 ¨ LD   rp2, constant1
-				this->info.assembler_list.body.erase( p + 1 );	//	LD   rp2, rp1
+				p->operand1.s_value = p_next->operand1.s_value;		//	LD   rp1, constant1 ¨ LD   rp2, constant1
+				this->info.assembler_list.body.erase( p_next );		//	LD   rp2, rp1
 			}
 			else {
 				char rp2h, rp2l;
@@ -2186,7 +2215,12 @@ void CCOMPILER::optimize_push_pop( void ) {
 				}
 				rp2l = p_next->operand1.s_value[0];
 				p->operand1.s_value = rp2l;										//	LD rp1, constant1 ¨ LD rp2, constant1
-				p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";	//	LD rp2, constant1 ¨ LD rp2, (constant1) & 255
+				if( is_integer( p->operand2.s_value ) ) {
+					p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) & 255 );
+				}
+				else {
+					p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";	//	LD rp2, constant1 ¨ LD rp2, (constant1) & 255
+				}
 				this->info.assembler_list.body.erase( p + 1 );
 			}
 		}
@@ -2300,6 +2334,9 @@ void CCOMPILER::optimize_ldir( void ) {
 	//	remove
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
+			if( ( p + 1 ) == this->info.assembler_list.body.end() || ( p + 2 ) == this->info.assembler_list.body.end() || ( p + 3 ) == this->info.assembler_list.body.end() ) {
+				continue;
+			}
 			p_next[0] = p;
 			p_next[1] = p + 1;
 			p_next[2] = p + 2;

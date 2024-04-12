@@ -27,6 +27,7 @@ ldirvm		:= 0x005C
 chgmod		:= 0x005F
 calpat		:= 0x0084
 calatr		:= 0x0087
+grpprt		:= 0x008D
 chget		:= 0x009F
 readc		:= 0x011D
 rslreg		:= 0x0138
@@ -94,6 +95,7 @@ dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
 rndx		:= 0xF857
+ptrfil		:= 0xF864
 savend		:= 0xF87D
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
 cloc		:= 0xF92A
@@ -363,6 +365,14 @@ blib_entries::
 			jp		sub_open_for_output
 	blib_open_for_append:
 			jp		sub_open_for_append
+	blib_file_puts:
+			jp		sub_file_puts
+	blib_spc:
+			jp		sub_spc
+	blib_comma:
+			jp		sub_comma
+	blib_put_digits:
+			jp		sub_put_digits
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -1580,23 +1590,93 @@ sub_colorsprite_str::
 			endscope
 
 ; =============================================================================
-;	PRINT TAB(A)
+;	PRINT #de, HL
 ;	input:
-;		A ..... TAB() の引数
+;		HL .......... 出力する文字列
+;		[ptrfil] .... FILE_INFOのアドレス
 ;	output:
 ;		none
 ;	break:
 ;		all
 ;	comment:
-;		桁位置が A になるまでスペースを出す
+;		file_info[0]
+;			0 ...... オープンされていない
+;			1～8 ... ディスク上のファイル
+;			128 .... GRP:
+;			129 .... CON:
+;			130 .... CRT:
+;			255 .... NUL:
+; =============================================================================
+			scope	sub_file_puts
+sub_file_puts::
+			ld		b, [hl]		; 文字数
+			inc		hl
+sub_file_puts_with_len::
+			ld		de, [ptrfil]
+			ld		a, [de]
+			dec		a
+			cp		a, 8		; 0～7 ならファイル
+			jr		c, _for_file
+			sub		a, 129
+			jr		z, _for_con
+			jr		c, _for_grp
+			dec		a
+			ret		nz
+	_for_crt:
+	_for_con:
+			; CRT:, CON: の場合 -----------------------------------------------
+			exx
+			ld		hl, 0
+			ld		[ptrfil], hl
+			exx
+	_for_crt_loop:
+			ld		a, [hl]
+			inc		hl
+			rst		0x18
+			djnz	_for_crt_loop
+			ld		[ptrfil], de
+			ret
+	_for_grp:
+			inc		a
+			ret		nz
+			; GRP: の場合 -----------------------------------------------------
+	_for_grp_loop:
+			ld		a, [hl]
+			inc		hl
+			call	grpprt
+			djnz	_for_grp_loop
+			ret
+	_for_file:
+			; ファイルの場合 --------------------------------------------------
+			ex		de, hl
+			ld		hl, [ptrfil]
+			ld		c, b
+			ld		b, 0
+			jp		sub_fwrite
+			endscope
+
+; =============================================================================
+;	PRINT #DE, TAB(L)
+;	input:
+;		L ..... TAB() の引数
+;		A ..... ファイルの種類 (FILE_INFOの先頭 1byte), 通常の PRINT なら 0
+;		DE .... FILE_INFOのアドレス, 通常の PRINT なら無効
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		桁位置が L になるまでスペースを出す
 ; =============================================================================
 			scope	sub_tab
 sub_tab::
-			ld		e, a
+			or		a, a
+			ret		nz						; ファイルの場合は何も出さない
+			; 通常の PRINT の場合
 			ld		a, [csrx]
 			dec		a						; csrx が +1 の位置なので 0基準に戻す
 	_loop:
-			cp		a, e					; CP 現在の桁位置, 目標桁位置
+			cp		a, l					; CP 現在の桁位置, 目標桁位置
 			ret		nc
 			ld		c, a
 			ld		a, ' '
@@ -1604,6 +1684,143 @@ sub_tab::
 			ld		a, c
 			inc		a
 			jr		_loop
+			endscope
+
+; =============================================================================
+;	PRINT #DE, SPC(L)
+;	input:
+;		L .......... SPC() の引数
+;		A .......... ファイルの種類 (FILE_INFOの先頭 1byte), 通常の PRINT なら 0
+;		[ptrfil] ... FILE_INFOのアドレス, 通常の PRINT なら無効
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		L の数だけスペースを出力。0 なら何も出さない。
+; =============================================================================
+			scope	sub_spc
+sub_spc::
+			; 0 か？
+			inc		l
+			dec		l
+			ret		z
+			; 0 以外だった場合 buf に指定数のスペースを並べる
+			ld		c, l
+			ld		b, 0
+			ld		hl, buf
+			ld		de, buf + 2
+			ld		[hl], c
+			inc		hl
+			ld		[hl], ' '
+			ldir
+			or		a, a
+			ld		hl, buf
+			jp		nz, sub_file_puts		; PRINT # の場合は、sub_file_puts で出力
+			; 通常の PRINT の場合
+			jp		sub_puts
+			endscope
+
+; =============================================================================
+;	PRINT #DE, expression , expression
+;	input:                ~
+;		A ..... ファイルの種類 (FILE_INFOの先頭 1byte), 通常の PRINT なら 0
+;		DE .... FILE_INFOのアドレス, 通常の PRINT なら無効
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		カンマの処理
+; =============================================================================
+			scope	sub_comma
+sub_comma::
+			or		a, a
+			jr		nz, _for_file
+			; 通常の print の場合
+			ld		a, [clmlst]
+			ld		b, a
+			ld		a, [csrx]
+			dec		a
+			cp		a, b
+			jr		c, _print_comma_loop1
+			ld		a, 10
+			rst		0x18
+			ld		a, 13
+			rst		0x18
+			ret
+	_print_comma_loop1:
+			sub		a, 14
+			jr		nc, _print_comma_loop1
+			neg
+			ld		b, a
+			ld		a, ' '
+	_print_comma_loop2:
+			rst		0x18
+			djnz	_print_comma_loop2
+			ret
+	_for_file::
+			; PRINT # の場合
+			push	de
+			ld		bc, 14 - 1
+			ld		hl, buf
+			ld		de, buf + 1
+			ld		[hl], ' '
+			ldir
+			pop		de
+			ld		b, 14
+			ld		hl, buf
+			jp		sub_file_puts_with_len
+			endscope
+
+; =============================================================================
+;	PRINT #de, HL
+;	input:
+;		HL .... 数値表現の文字列
+;		A ..... ファイルの種類 (FILE_INFOの先頭 1byte), 通常の PRINT なら 0
+;		DE .... FILE_INFOのアドレス
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		file_info[0]
+;			0 ...... オープンされていない
+;			1～8 ... ディスク上のファイル
+;			128 .... GRP:
+;			129 .... CON:
+;			130 .... CRT:
+;			255 .... NUL:
+; =============================================================================
+			scope	sub_put_digits
+sub_put_digits::
+			or		a, a
+			jr		nz, _for_file
+			; 標準出力の場合
+			ld		a, [linlen]
+			inc		a
+			inc		a
+			ld		b, a
+			ld		a, [csrx]
+			add		a, [hl]
+			cp		a, b
+			jr		c, _skip
+			push	hl
+			ld		hl, s_crlf
+			call	sub_puts
+			pop		hl
+	_skip:
+			call	sub_puts
+			ld		a, 32
+			rst		0x18
+			ret
+			; ファイルへの出力の場合
+			ld		b, [hl]
+			inc		hl
+			call	sub_file_puts_with_len
+			ld		b, 1
+			ld		hl, s_space
+			jp		sub_file_puts_with_len
 			endscope
 
 ; =============================================================================
@@ -3416,7 +3633,7 @@ sub_files::
 			ld		a, l
 			or		a, h
 			jr		nz, skip
-			ld		hl, wildcard_all
+			ld		hl, s_wildcard_all
 		skip:
 			; FCB生成
 			ld		de, find_file_name
@@ -3432,7 +3649,7 @@ sub_files::
 			dec		a
 			jr		nz, skip_print_crlf
 			; カーソルが左端にないので改行する
-			ld		hl, data_crlf
+			ld		hl, s_crlf
 			call	sub_puts
 		skip_print_crlf:
 
@@ -3460,7 +3677,7 @@ sub_files::
 			jr		nc, loop
 			; これ以上右に表示できないので改行
 		put_return:
-			ld		hl, data_crlf
+			ld		hl, s_crlf
 			call	sub_puts
 			jr		loop
 
@@ -3470,7 +3687,7 @@ sub_files::
 			dec		a
 			jr		z, finish
 			; カーソルが左端にないので改行する
-			ld		hl, data_crlf
+			ld		hl, s_crlf
 			call	sub_puts
 		finish:
 			ret
@@ -5931,7 +6148,6 @@ sub_open_for_input::
 			cp		a, 4
 			jr		c, _is_file
 			; CRT/GRP/CON/NUL であるか調べる
-			push	de
 			ld		de, s_grp
 			call	_id_check
 			ld		de, s_con
@@ -5940,7 +6156,6 @@ sub_open_for_input::
 			call	_id_check
 			ld		de, s_nul
 			call	_id_check
-			pop		de
 			; ファイルだったのでファイルをオープンする
 	_is_file:
 			call	sub_fopen
@@ -5961,8 +6176,8 @@ sub_open_for_input::
 			jp		pe, _id_check_loop
 			pop		hl						; 保存した HL を廃棄
 			pop		hl						; 戻りアドレスを廃棄
-			pop		hl						; file_info のアドレス
 			ld		a, [de]
+			ld		hl, [ptrfil]
 			ld		[hl], a					; file_info の先頭に ID を書き込む
 			ret
 	_id_check_exit:
@@ -5973,8 +6188,8 @@ sub_open_for_input::
 ; =============================================================================
 ;	open HL for output as #n
 ;	input:
-;		HL ...... ファイル名
-;		DE ...... file info のアドレス
+;		HL .......... ファイル名
+;		[ptrfil] .... file info のアドレス
 ;	output:
 ;		none
 ;	break:
@@ -5996,7 +6211,6 @@ sub_open_for_output::
 			cp		a, 4
 			jr		c, _is_file
 			; CRT/GRP/CON/NUL であるか調べる
-			push	de
 			ld		de, s_grp
 			call	_id_check
 			ld		de, s_con
@@ -6005,7 +6219,6 @@ sub_open_for_output::
 			call	_id_check
 			ld		de, s_nul
 			call	_id_check
-			pop		de
 			; ファイルだったのでファイルをオープンする
 	_is_file:
 			call	sub_fcreate
@@ -6026,8 +6239,8 @@ sub_open_for_output::
 			jp		pe, _id_check_loop
 			pop		hl						; 保存した HL を廃棄
 			pop		hl						; 戻りアドレスを廃棄
-			pop		hl						; file_info のアドレス
 			ld		a, [de]
+			ld		hl, [ptrfil]
 			ld		[hl], a					; file_info の先頭に ID を書き込む
 			ret
 	_id_check_exit:
@@ -6061,7 +6274,6 @@ sub_open_for_append::
 			cp		a, 4
 			jr		c, _is_file
 			; CRT/GRP/CON/NUL であるか調べる
-			push	de
 			ld		de, s_grp
 			call	_id_check
 			ld		de, s_con
@@ -6070,7 +6282,6 @@ sub_open_for_append::
 			call	_id_check
 			ld		de, s_nul
 			call	_id_check
-			pop		de
 			; ファイルだったのでファイルをオープンする
 	_is_file:
 			push	de
@@ -6096,8 +6307,8 @@ sub_open_for_append::
 			jp		pe, _id_check_loop
 			pop		hl						; 保存した HL を廃棄
 			pop		hl						; 戻りアドレスを廃棄
-			pop		hl						; file_info のアドレス
 			ld		a, [de]
+			ld		hl, [ptrfil]
 			ld		[hl], a					; file_info の先頭に ID を書き込む
 			ret
 	_id_check_exit:
@@ -6127,9 +6338,9 @@ err_bad_file_mode			:= $+1
 			endscope
 
 			scope	public_data
-data_crlf::
+s_crlf::
 			db		2, 0x0A, 0x0D
-wildcard_all::
+s_wildcard_all::
 			db		3, "*.*"
 s_grp::
 			db		"GRP:", 128
@@ -6139,4 +6350,6 @@ s_crt::
 			db		"CRT:", 130
 s_nul::
 			db		"NUL:", 255
+s_space::
+			db		" "
 			endscope
