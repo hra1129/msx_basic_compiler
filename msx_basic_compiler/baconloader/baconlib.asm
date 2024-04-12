@@ -1617,7 +1617,7 @@ sub_file_puts_with_len::
 			dec		a
 			cp		a, 8		; 0Å`7 Ç»ÇÁÉtÉ@ÉCÉã
 			jr		c, _for_file
-			sub		a, 129
+			sub		a, 129 - 1
 			jr		z, _for_con
 			jr		c, _for_grp
 			dec		a

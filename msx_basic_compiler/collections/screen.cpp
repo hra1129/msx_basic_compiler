@@ -27,6 +27,8 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 
+		p_info->assembler_list.add_label( "work_grpacx", "0xFCB7" );
+		p_info->assembler_list.add_label( "work_grpacy", "0xFCB9" );
 		p_info->assembler_list.add_label( "work_romver", "0x0002D" );
 		p_info->assembler_list.add_label( "bios_chgmod", "0x0005F" );		//	パレットの初期化無し
 		p_info->assembler_list.add_label( "bios_chgmodp", "0x001B5" );		//	パレットの初期化あり
@@ -35,7 +37,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		s_label2 = p_info->get_auto_label();
 		//	MSX2以上では BASIC の SCREEN 命令で画面モードを切り替えるとパレットを初期化するため、chgmodp の方を呼ぶ必要がある
 		//	chgmodp は、SUB-ROM に存在するため、MSX1 では chgmod を呼ぶ必要あり。
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[work_romver]" );
+		asm_line.set( "LD", "", "A", "[work_romver]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
