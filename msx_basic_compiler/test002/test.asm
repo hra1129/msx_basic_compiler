@@ -27,6 +27,8 @@ BIOS_FOUT                       = 0X03425
 WORK_DAC                        = 0X0F7F6
 WORK_VALTYP                     = 0X0F663
 BLIB_PUT_DIGITS                 = 0X040F6
+WORK_BUF                        = 0X0F55E
+BLIB_USING                      = 0X0404B
 BLIB_FCLOSE                     = 0X04063
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
@@ -129,20 +131,30 @@ LINE_140:
         EX          DE, HL
         LD          HL, CONST_4112345678901234
         CALL        LD_DE_DOUBLE_REAL
+        LD          HL, VARS_D
+        LD          DE, STR_5
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
 LINE_150:
         XOR         A, A
         LD          [WORK_PRTFLG], A
         LD          HL, 1
         CALL        SUB_FILE_NUMBER
-        LD          HL, STR_5
+        LD          HL, STR_6
         CALL        PUT_STRING
         LD          HL, [VARI_A]
         CALL        PUT_INTEGER
-        LD          HL, STR_6
+        LD          HL, STR_7
         CALL        PUT_STRING
         LD          HL, VARF_B
         CALL        PUT_SINGLE_REAL
-        LD          HL, STR_7
+        LD          HL, STR_8
         CALL        PUT_STRING
         LD          HL, VARD_C
         CALL        PUT_DOUBLE_REAL
@@ -152,6 +164,39 @@ LINE_150:
         LD          HL, 0
         LD          [WORK_PTRFIL], HL
 LINE_160:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, STR_9
+        LD          [WORK_BUF], HL
+        LD          HL, WORK_BUF+2
+        LD          DE, VARD_C
+        LD          [HL], 8
+        INC         HL
+        EX          DE, HL
+        CALL        LD_DE_DOUBLE_REAL
+        EX          DE, HL
+        PUSH        HL
+        LD          HL, [VARS_D]
+        CALL        COPY_STRING
+        POP         DE
+        EX          DE, HL
+        LD          [HL], 3
+        INC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        LD          [HL], 0
+        LD          IX, BLIB_USING
+        CALL        CALL_BLIB
+        LD          HL, STR_3
+        LD          IX, BLIB_FILE_PUTS
+        CALL        CALL_BLIB
+        LD          HL, 0
+        LD          [WORK_PTRFIL], HL
+LINE_170:
         LD          HL, 1
 PROGRAM_TERMINATION:
         CALL        SUB_TERMINATION
@@ -432,6 +477,37 @@ PUT_DOUBLE_REAL:
         CALL        STR
         LD          IX, BLIB_PUT_DIGITS
         JP          CALL_BLIB
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        LD          E, A
+        LD          C, A
+        LD          D, 0
+        ADD         HL, DE
+        INC         HL
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        LD          [HL], C
+        RET         
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
+COPY_STRING:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        ALLOCATE_STRING
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 SUB_CLOSE:
         LD          A, [WORK_MAXFIL]
         LD          E, 52
@@ -503,6 +579,8 @@ FILE_INIT_SKIP:
         LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
         LDIR        
+        LD          HL, STR_0
+        LD          [VARS_AREA_START], HL
         CALL        SUB_INIT_FILES
         RET         
 ALLOCATE_HEAP:
@@ -601,11 +679,15 @@ STR_3:
 STR_4:
         DEFB        0X08, 0X32, 0X6E, 0X64, 0X20, 0X6C, 0X69, 0X6E, 0X65
 STR_5:
-        DEFB        0X02, 0X41, 0X3D
+        DEFB        0X08, 0X61, 0X62, 0X63, 0X64, 0X65, 0X66, 0X67, 0X68
 STR_6:
-        DEFB        0X03, 0X3A, 0X42, 0X3D
+        DEFB        0X02, 0X41, 0X3D
 STR_7:
+        DEFB        0X03, 0X3A, 0X42, 0X3D
+STR_8:
         DEFB        0X03, 0X3A, 0X43, 0X3D
+STR_9:
+        DEFB        0X0B, 0X23, 0X23, 0X2E, 0X23, 0X23, 0X23, 0X20, 0X26, 0X20, 0X20, 0X26
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -625,6 +707,8 @@ VARI_A:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
+VARS_D:
+        DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 SVARIA_FILE_INFO:

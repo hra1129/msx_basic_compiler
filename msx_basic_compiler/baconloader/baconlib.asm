@@ -91,6 +91,7 @@ ntmsxp		:= 0xF417
 buf			:= 0xF55E
 valtyp		:= 0xF663
 parm2		:= 0xF750
+fbuffr		:= 0xF7C5
 dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
@@ -1826,9 +1827,9 @@ sub_put_digits::
 			endscope
 
 ; =============================================================================
-;	PRINT USING <buf>
+;	PRINT#,USING <buf>
 ;	input:
-;		[ptrfil] ..... file_infoのアドレス
+;		[ptrfil] ..... file_infoのアドレス, 通常の PRINT では 0
 ;	output:
 ;		none
 ;	break:
@@ -1896,7 +1897,7 @@ sub_using::
 			; -----------------------------------------------------------------
 			; 書式ではない文字
 	no_format:
-			rst		0x18
+			call	_put_a					; 1文字出力
 			jr		main_loop
 
 			; -----------------------------------------------------------------
@@ -1970,14 +1971,7 @@ sub_using::
 			ld		hl, pufout
 			ld		[ncalbas_address], hl
 			call	ncalbas
-	pufout_loop:
-			ld		a, [hl]
-			or		a, a
-			jr		z, pufout_loop_exit
-			rst		0x18
-			inc		hl
-			jr		pufout_loop
-	pufout_loop_exit:
+			call	_put_asciiz
 			pop		de							; 引数の参照位置を復帰
 			pop		bc							; サイズ情報を復帰
 			pop		hl							; 書式の参照位置を復帰
@@ -2171,7 +2165,7 @@ sub_using::
 	string_loop:
 			ld		a, [hl]
 			inc		hl
-			rst		0x18
+			call	_put_a					; 1文字出力
 	string_loop_1st:
 			djnz	string_loop
 			pop		bc
@@ -2232,14 +2226,14 @@ sub_using::
 			ld		a, [de]					; && にはめ込む文字
 			inc		de
 	replace_first_is_space:
-			rst		0x18					; 1文字出力
+			call	_put_a					; 1文字出力
 			dec		b						; && にはめ込む文字列を 1文字消費
 			jr		z, insert_space
 
 	replace_loop:
 			ld		a, [de]					; && にはめ込む文字
 			inc		de
-			rst		0x18					; 1文字出力
+			call	_put_a					; 1文字出力
 
 			ld		a, [hl]					; 書式上の文字
 			inc		hl
@@ -2251,7 +2245,7 @@ sub_using::
 
 	insert_space:
 			ld		a, ' '					; && にはめ込む文字
-			rst		0x18					; 1文字出力
+			call	_put_a					; 1文字出力
 
 			ld		a, [hl]					; 書式上の文字
 			inc		hl
@@ -2289,7 +2283,7 @@ sub_using::
 			jr		z, blank_string
 			ld		a, [hl]
 	blank_string:
-			rst		0x18
+			call	_put_a
 			pop		hl						; 書式のアドレスを復帰
 			jp		main_loop
 
@@ -2314,6 +2308,63 @@ sub_using::
 			dec		b
 			inc		hl
 			ret
+			; -----------------------------------------------------------------
+			; Aレジスタの1文字のみ出力
+	_put_a:
+			push	hl
+			push	de
+			push	bc
+			ld		de, [ptrfil]
+			inc		d
+			dec		d
+			jr		nz, _file_put_a
+			; 通常の PRINT だった場合
+			rst		0x18
+			pop		bc
+			pop		de
+			pop		hl
+			ret
+			; ファイルだった場合
+	_file_put_a:
+			ld		b, 1
+			ld		[fbuffr], a
+			ld		hl, fbuffr
+			call	sub_file_puts_with_len
+			pop		bc
+			pop		de
+			pop		hl
+			ret
+
+			; -----------------------------------------------------------------
+			; 0端末の文字列を出力
+	_put_asciiz:
+			ld		de, [ptrfil]
+			ld		a, d
+			or		a, a
+			jr		nz, _file_put_asciiz
+			; 通常の PRINT だった場合
+	_put_asciiz_loop:
+			ld		a, [hl]
+			or		a, a
+			ret		z
+			rst		0x18
+			inc		hl
+			jr		_put_asciiz_loop
+			; ファイルだった場合
+	_file_put_asciiz:
+			xor		a, a
+			ld		b, a
+			push	hl
+	_file_put_asciiz_get_len:
+			ld		a, [hl]
+			or		a, a
+			jr		z, _file_put_asciiz_get_len_exit
+			inc		b
+			inc		hl
+			jr		_file_put_asciiz_get_len
+	_file_put_asciiz_get_len_exit:
+			pop		hl
+			jp		sub_file_puts_with_len
 			endscope
 
 ; =============================================================================
