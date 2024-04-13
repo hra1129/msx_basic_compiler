@@ -1759,7 +1759,7 @@ sub_comma::
 			rst		0x18
 			djnz	_print_comma_loop2
 			ret
-	_for_file::
+	_for_file:
 			; PRINT # の場合
 			push	de
 			ld		bc, 14 - 1
@@ -1776,9 +1776,8 @@ sub_comma::
 ; =============================================================================
 ;	PRINT #de, HL
 ;	input:
-;		HL .... 数値表現の文字列
-;		A ..... ファイルの種類 (FILE_INFOの先頭 1byte), 通常の PRINT なら 0
-;		DE .... FILE_INFOのアドレス
+;		HL ........ 数値表現の文字列
+;		ptrfil .... FILE_INFOのアドレス
 ;	output:
 ;		none
 ;	break:
@@ -1794,7 +1793,9 @@ sub_comma::
 ; =============================================================================
 			scope	sub_put_digits
 sub_put_digits::
-			or		a, a
+			ld		de, [ptrfil]
+			ld		a, d
+			or		a, e
 			jr		nz, _for_file
 			; 標準出力の場合
 			ld		a, [linlen]
@@ -1814,6 +1815,7 @@ sub_put_digits::
 			ld		a, 32
 			rst		0x18
 			ret
+	_for_file:
 			; ファイルへの出力の場合
 			ld		b, [hl]
 			inc		hl
