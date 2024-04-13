@@ -146,7 +146,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "","D", "L" );		//	Â‚ğ D ‚ÖŠi”[
+			asm_line.set( "LD", "","D", "A" );		//	Â‚ğ D ‚ÖŠi”[
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "","HL" );			//	—Î‚ğ•œŒ³
 			p_info->assembler_list.body.push_back( asm_line );

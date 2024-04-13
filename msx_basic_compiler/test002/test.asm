@@ -297,7 +297,7 @@ LINE_1140:
         PUSH        HL
         LD          A, L
         AND         A, 0X07
-        LD          D, L
+        LD          D, A
         POP         HL
         LD          A, L
         AND         A, 0X07
@@ -325,7 +325,7 @@ LINE_1150:
         PUSH        HL
         XOR         A, A
         AND         A, 0X07
-        LD          D, L
+        LD          D, A
         POP         HL
         LD          A, L
         AND         A, 0X07
@@ -352,7 +352,7 @@ LINE_1160:
         PUSH        HL
         LD          A, 7
         AND         A, 0X07
-        LD          D, L
+        LD          D, A
         POP         HL
         LD          A, L
         AND         A, 0X07
@@ -379,7 +379,7 @@ LINE_1170:
         PUSH        HL
         XOR         A, A
         AND         A, 0X07
-        LD          D, L
+        LD          D, A
         POP         HL
         LD          A, L
         AND         A, 0X07
@@ -406,7 +406,7 @@ LINE_1180:
         PUSH        HL
         LD          A, 7
         AND         A, 0X07
-        LD          D, L
+        LD          D, A
         POP         HL
         LD          A, L
         AND         A, 0X07
