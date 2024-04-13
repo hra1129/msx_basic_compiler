@@ -174,7 +174,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "","HL" );			//	パレット番号を復元
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "OR", "","D", "L" );		//	パレット番号を D へ
+			asm_line.set( "LD", "","D", "L" );		//	パレット番号を D へ
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "","IX", "bios_setplt" );
 			p_info->assembler_list.body.push_back( asm_line );

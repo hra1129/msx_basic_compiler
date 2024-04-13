@@ -2238,7 +2238,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 			rp1l = p->operand1.s_value[0];
 			p_next = p + 1;
 			if( p_next == this->info.assembler_list.body.end() ||
-				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p->operand2.type != COPERAND_TYPE::CONSTANT ) {
+				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand2.type != COPERAND_TYPE::CONSTANT ) {
 				continue;
 			}
 			if( p_next->operand1.s_value.size() != 1 ) {
