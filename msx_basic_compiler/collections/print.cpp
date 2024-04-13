@@ -317,7 +317,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			switch( exp.get_type() ) {
 			default:
 			case CEXPRESSION_TYPE::INTEGER:
-				p_info->assembler_list.activate_put_single_real( p_info );
+				p_info->assembler_list.activate_put_integer( p_info );
 				asm_line.set( "CALL", "", "put_integer" );
 				p_info->assembler_list.body.push_back( asm_line );
 				break;

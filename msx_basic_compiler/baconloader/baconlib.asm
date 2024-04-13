@@ -1826,13 +1826,20 @@ sub_put_digits::
 ; =============================================================================
 ;	PRINT USING <buf>
 ;	input:
-;		none
+;		[ptrfil] ..... file_infoのアドレス
 ;	output:
 ;		none
 ;	break:
 ;		all
 ;	comment:
 ;		BUF に書式文字列のアドレス, BUF+2以降にパラメータを格納して呼ぶ
+;		file_info[0]
+;			0 ...... オープンされていない
+;			1～8 ... ディスク上のファイル
+;			128 .... GRP:
+;			129 .... CON:
+;			130 .... CRT:
+;			255 .... NUL:
 ; =============================================================================
 			scope	sub_using
 sub_using::
@@ -6158,6 +6165,7 @@ sub_open_for_input::
 			call	_id_check
 			; ファイルだったのでファイルをオープンする
 	_is_file:
+			ld		de, [ptrfil]
 			call	sub_fopen
 			or		a, a
 			ret		z
@@ -6221,6 +6229,7 @@ sub_open_for_output::
 			call	_id_check
 			; ファイルだったのでファイルをオープンする
 	_is_file:
+			ld		de, [ptrfil]
 			call	sub_fcreate
 			or		a, a
 			ret		z
@@ -6284,7 +6293,8 @@ sub_open_for_append::
 			call	_id_check
 			; ファイルだったのでファイルをオープンする
 	_is_file:
-			push	de
+			; CRT/GRP/CON/NUL の場合、最低でも 4文字存在する
+			ld		de, [ptrfil]
 			call	sub_fopen
 			pop		de
 			or		a, a
