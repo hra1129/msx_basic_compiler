@@ -374,6 +374,8 @@ blib_entries::
 			jp		sub_comma
 	blib_put_digits:
 			jp		sub_put_digits
+	blib_open_for_none:
+			jp		sub_open_for_none
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -6346,10 +6348,8 @@ sub_open_for_append::
 			call	_id_check
 			; ファイルだったのでファイルをオープンする
 	_is_file:
-			; CRT/GRP/CON/NUL の場合、最低でも 4文字存在する
 			ld		de, [ptrfil]
 			call	sub_fopen
-			pop		de
 			or		a, a
 			ret		z
 			call	sub_fcreate
@@ -6370,6 +6370,89 @@ sub_open_for_append::
 			jp		pe, _id_check_loop
 			pop		hl						; 保存した HL を廃棄
 			pop		hl						; 戻りアドレスを廃棄
+			ld		a, [de]
+			ld		hl, [ptrfil]
+			ld		[hl], a					; file_info の先頭に ID を書き込む
+			ret
+	_id_check_exit:
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	open HL for append as #n
+;	input:
+;		HL ...... ファイル名
+;		DE ...... file info のアドレス
+;		A ....... LEN=n の n, 0 を指定すると 256 の扱い。省略時は 0 にする。
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		"CAS:" ... 非対応
+;		"CRT:" ... テキスト画面 ID=130 : LENの指定は無視。
+;		"GRP:" ... グラフィック画面 ID=128 : LENの指定は無視。
+;		"LPT:" ... 非対応
+;		"MEM:" ... 非対応
+;		"A:"～"H:" ... ディスク ID=1～8
+;		"CON:" ... 非対応
+;		"NUL:" ... 非対応
+; =============================================================================
+			scope	sub_open_for_none
+sub_open_for_none::
+			; LEN=n が存在する場合はファイル扱い
+			push	af
+			or		a, a
+			jr		nz, _is_file
+			; CRT/GRP/CON/NUL の場合、最低でも 4文字存在する
+			ld		a, [hl]
+			cp		a, 4
+			jr		c, _is_file
+			; CRT/GRP/CON/NUL であるか調べる
+			ld		de, s_grp
+			call	_id_check
+			ld		de, s_crt
+			call	_id_check
+			; ファイルだったのでファイルをオープンする
+	_is_file:
+			ld		de, [ptrfil]
+			call	sub_fopen
+			or		a, a
+			jr		z, _set_len
+			call	sub_fcreate
+			or		a, a
+			jr		z, _set_len
+			; オープンに失敗したのでエラー
+			jp		err_device_io
+			; LEN=n の値をセットする
+	_set_len:
+			ld		hl, [ptrfil]
+			ld		de, 14
+			add		hl, de					; レコードサイズ
+			pop		af
+			dec		a
+			ld		e, a
+			ld		d, 0
+			inc		de						; 1～256
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			ret
+			; ID (CRT/GRP/CON/NUL) を調べて一致すればそのまま終わる
+	_id_check:
+			push	hl
+			inc		hl						; 最初の文字へ
+			ld		bc, 4
+	_id_check_loop:
+			ld		a, [de]
+			inc		de
+			cpi
+			jr		nz, _id_check_exit
+			jp		pe, _id_check_loop
+			pop		hl						; 保存した HL を廃棄
+			pop		hl						; 戻りアドレスを廃棄
+			pop		af						; LEN = n の値を廃棄
 			ld		a, [de]
 			ld		hl, [ptrfil]
 			ld		[hl], a					; file_info の先頭に ID を書き込む

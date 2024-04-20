@@ -3972,7 +3972,7 @@ void CASSEMBLER_LIST::activate_close( void ) {
 	this->subroutines.push_back( asm_line );			//	CLOSE#0 は、何もせずに戻る(エラーにはならない)
 	asm_line.set( "DEC", "", "L" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "292" );				//	FCB 37 + BUFFER 255
+	asm_line.set( "LD", "", "DE", "file_info_size" );				//	FCB 37 + BUFFER 256
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
@@ -4127,7 +4127,7 @@ void CASSEMBLER_LIST::activate_init_files( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "D", "0" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "292" );
+	asm_line.set( "LD", "", "HL", "file_info_size" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
@@ -4227,6 +4227,30 @@ void CASSEMBLER_LIST::activate_open_for_append( void ) {
 }
 
 // --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_open_for_none( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_open_for_none" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_open_for_none" );
+	this->add_label( "blib_open_for_none", "0x40f9" );
+	this->activate_open_sub();
+
+	//	HL ... ファイル名
+	//	DE ... ファイル番号
+	//	A .... LEN
+	asm_line.set( "LABEL", "", "sub_open_for_none" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_open_for_none" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "call_blib" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LIST::activate_open_sub( void ) {
 	CASSEMBLER_LINE asm_line;
 
@@ -4241,6 +4265,8 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 	//	DE ... ファイル番号
 	//	→ work_ptrfil に FILE_INFO
 	asm_line.set( "LABEL", "", "sub_open_sub" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "AF" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL" );
 	this->subroutines.push_back( asm_line );
@@ -4258,7 +4284,7 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JR", "NC", "_sub_open_bad_file_number" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "292" );
+	asm_line.set( "LD", "", "HL", "file_info_size" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
@@ -4273,6 +4299,8 @@ void CASSEMBLER_LIST::activate_open_sub( void ) {
 	asm_line.set( "LD", "", "[work_ptrfil]", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "POP", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "AF" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->subroutines.push_back( asm_line );
@@ -4315,7 +4343,7 @@ void CASSEMBLER_LIST::activate_file_number( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JP", "NZ", "bios_errhand" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "292" );
+	asm_line.set( "LD", "", "DE", "file_info_size" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "bios_imult" );
 	this->subroutines.push_back( asm_line );
