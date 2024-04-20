@@ -363,6 +363,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT を呼ぶと [VARTAB]→[STREND], [STREND] ～ [STREND] + [VALTYP] を 00h で塗りつぶすため、初期化が必要。
 	this->info.assembler_list.add_label( "work_usrtab", "0x0F39A" );
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
+	this->info.assembler_list.add_label( "file_info_size", "37 + 256" );	//	FCB + BUFFER
 
 	//	初期化処理 (BACONLIB存在確認)
 	asm_line.set( "LABEL", "", "start_address", "" );

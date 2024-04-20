@@ -89,6 +89,7 @@ public:
 	void activate_open_for_input( void );
 	void activate_open_for_output( void );
 	void activate_open_for_append( void );
+	void activate_open_for_none( void );
 	void activate_open_sub( void );
 	void activate_file_number( void );
 	void activate_put_integer( class CCOMPILE_INFO *p_info );

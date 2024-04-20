@@ -31,7 +31,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	if( p_info->list.is_command_end() || (p_info->list.p_position->s_word != "FOR" && p_info->list.p_position->s_word != "#") ) {
+	if( p_info->list.is_command_end() || (p_info->list.p_position->s_word != "FOR" && p_info->list.p_position->s_word != "AS") ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
@@ -74,19 +74,17 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	if( exp.compile( p_info ) ) {
-		asm_line.set( "EX", "", "DE", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		exp.release();
-	}
-	else {
+	if( !exp.compile( p_info ) ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	asm_line.set( "POP", "", "HL" );
-	p_info->assembler_list.body.push_back( asm_line );
+	exp.release();
 	if( for_type != 3 ) {
 		//	FOR INPUT, OUTPUT, APPEND の場合はここで確定
+		asm_line.set( "EX", "", "DE", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 		switch( for_type ) {
 		default:
 		case 0:		//	FOR INPUT
@@ -108,10 +106,42 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 	}
 	//	FORの指定が無い場合は、#n の後に LEN の指定があるか確認する
 	if( p_info->list.is_command_end() ) {
-		//	LEN が無ければデフォルト
-		//	★まだ
+		//	AS #n で終わっているので LEN = 256 と判断する
+		asm_line.set( "EX", "", "DE", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "XOR", "", "A", "A" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
-	//	LEN があればフィールド長に設定する
-	//	★まだ
+	else {
+		//	LEN = n があるかチェックする
+		if( p_info->list.p_position->s_word != "LEN" ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return true;
+		}
+		p_info->list.p_position++;
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "=" ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return true;
+		}
+		p_info->list.p_position++;
+		asm_line.set( "PUSH", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( !exp.compile( p_info ) ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return true;
+		}
+		exp.release();
+		asm_line.set( "LD", "", "A", "L" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "DE" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	p_info->assembler_list.activate_open_for_none();
+	asm_line.set( "CALL", "", "sub_open_for_none" );
+	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }
