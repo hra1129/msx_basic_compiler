@@ -180,6 +180,7 @@
     <ClCompile Include="collections\end.cpp" />
     <ClCompile Include="collections\erase.cpp" />
     <ClCompile Include="collections\error.cpp" />
+    <ClCompile Include="collections\field.cpp" />
     <ClCompile Include="collections\files.cpp" />
     <ClCompile Include="collections\for.cpp" />
     <ClCompile Include="collections\get.cpp" />
@@ -212,6 +213,7 @@
     <ClCompile Include="collections\pokew.cpp" />
     <ClCompile Include="collections\print.cpp" />
     <ClCompile Include="collections\pset.cpp" />
+    <ClCompile Include="collections\put.cpp" />
     <ClCompile Include="collections\put_sprite.cpp" />
     <ClCompile Include="collections\read.cpp" />
     <ClCompile Include="collections\restore.cpp" />
@@ -347,6 +349,7 @@
     <ClInclude Include="collections\end.h" />
     <ClInclude Include="collections\erase.h" />
     <ClInclude Include="collections\error.h" />
+    <ClInclude Include="collections\field.h" />
     <ClInclude Include="collections\files.h" />
     <ClInclude Include="collections\for.h" />
     <ClInclude Include="collections\get.h" />
@@ -379,6 +382,7 @@
     <ClInclude Include="collections\pokew.h" />
     <ClInclude Include="collections\print.h" />
     <ClInclude Include="collections\pset.h" />
+    <ClInclude Include="collections\put.h" />
     <ClInclude Include="collections\put_sprite.h" />
     <ClInclude Include="collections\read.h" />
     <ClInclude Include="collections\restore.h" />

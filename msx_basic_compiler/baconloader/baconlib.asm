@@ -376,6 +376,8 @@ blib_entries::
 			jp		sub_put_digits
 	blib_open_for_none:
 			jp		sub_open_for_none
+	blib_put:
+			jp		sub_put
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -6382,9 +6384,9 @@ sub_open_for_append::
 ; =============================================================================
 ;	open HL for append as #n
 ;	input:
-;		HL ...... ファイル名
-;		DE ...... file info のアドレス
-;		A ....... LEN=n の n, 0 を指定すると 256 の扱い。省略時は 0 にする。
+;		HL ......... ファイル名
+;		[ptrfil] ... file info のアドレス
+;		A .......... LEN=n の n, 0 を指定すると 256 の扱い。省略時は 0 にする。
 ;	output:
 ;		none
 ;	break:
@@ -6463,6 +6465,110 @@ sub_open_for_none::
 			endscope
 
 ; =============================================================================
+;	put #n, record
+;	input:
+;		[ptrfil] ... file info のアドレス
+;		HL ......... レコード番号
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		"A:"～"H:" ... ディスク ID=1～8
+;		ディスク以外の場合、
+; =============================================================================
+			scope	sub_put
+sub_put::
+			; ID を取得
+			ld		de, [ptrfil]
+			ld		a, [de]
+			dec		a
+			cp		a, 8
+			jp		nc, err_sequential_io_only		; ディスク以外なら Sequential I/O only エラー
+			; レコード番号
+			ld		a, l
+			or		a, h
+			jp		z, err_illegal_function_call	; レコード番号 = 0 なら Illiegal function call エラー
+			dec		hl
+			push	de								; FCBのアドレスを保存
+			ex		de, hl
+			ld		bc, 33
+			add		hl, bc							; +33: ランダムレコードフィールドにレコード番号をセット
+			ld		[hl], e
+			inc		hl								; +34
+			ld		[hl], d
+			inc		hl								; +35
+			inc		hl								; +36
+			inc		hl								; +37: FCB の次にあるFIELD変数リストの先頭アドレス
+			; memset( buf, 0, 256 )
+			push	hl
+			ld		hl, buf
+			ld		de, buf + 1
+			ld		bc, 256
+			ld		[hl], 0
+			ldir
+			pop		hl
+			; buf に変数の内容をかき集めてくる処理
+			ld		de, buf
+			ld		b, 16							; 変数の数は最大 16
+	_loop:
+			ld		a, [hl]							; 長さを取得
+			or		a, a
+			jr		z, _exit_loop
+			inc		hl
+			; -- 文字列変数のアドレスを得る
+			ld		[buf + 256], de					; buf の現在位置を保存
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			inc		hl
+			push	hl								; FIELD変数リストのアドレス保存
+			ex		de, hl							; HL = 文字列変数のアドレス
+			; -- 文字列のアドレスを得る
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl							; HL = 文字列のアドレス
+			; -- 文字列変数が示す文字列の文字数を得る
+			ld		c, [hl]
+			inc		hl
+			cp		a, c							; 充てられた文字数(a) と 実在する文字数(c) を比較
+			jr		c, _over_length
+			ld		c, a
+	_over_length:
+			sub		a, c							; a に残り文字数
+			push	bc								; 繰り返しカウンターを保存
+			ld		b, 0
+			ld		de, [buf + 256]					; buf の現在位置を復帰
+			ldir									; 文字列を buf へ転送, de に buf の現在位置更新結果
+			or		a, a							; 残り文字数が 0 でなければ 0 で埋める
+			jr		z, _skip_zero_fill
+			ld		l, e
+			ld		h, d
+			inc		de
+			ld		c, a
+			ld		[hl], 0
+			ldir									; 0 で埋める処理, de に buf の現在位置更新結果
+	_skip_zero_fill:
+			pop		bc								; 繰り返しカウンター復帰
+			pop		hl								; FIELD変数リストのアドレス復帰
+			djnz	_loop
+	_exit_loop:
+			; DTA を buf にセット
+			ld		c, _SETDTA
+			ld		de, buf
+			call	bdos
+			; ファンクションコール 26h で書き込み
+			pop		de								; FCBのアドレスを復帰
+			ld		c, _WRBLK
+			ld		hl, 1
+			call	bdos
+			or		a, a
+			jp		nz, err_device_io
+			ret
+			endscope
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
@@ -6476,6 +6582,8 @@ err_file_not_found			:= $+1
 			ld		bc, 0x351E
 err_bad_file_name			:= $+1
 			ld		bc, 0x381E
+err_sequential_io_only		:= $+1
+			ld		bc, 0x3A1E
 err_bad_file_mode			:= $+1
 			ld		bc, 0x3D1E
 			ld		iy, [exptbl - 1]		; MAIN-ROM SLOT

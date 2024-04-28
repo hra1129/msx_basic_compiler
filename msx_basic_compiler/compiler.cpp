@@ -27,6 +27,7 @@
 #include "collections/end.h"
 #include "collections/erase.h"
 #include "collections/error.h"
+#include "collections/field.h"
 #include "collections/files.h"
 #include "collections/for.h"
 #include "collections/get.h"
@@ -59,6 +60,7 @@
 #include "collections/pokes.h"
 #include "collections/print.h"
 #include "collections/pset.h"
+#include "collections/put.h"
 #include "collections/put_sprite.h"
 #include "collections/read.h"
 #include "collections/restore.h"
@@ -122,6 +124,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CERASE );
 	this->collection.push_back( new CERROR );
 	this->collection.push_back( new CFOR );
+	this->collection.push_back( new CFIELD );
 	this->collection.push_back( new CFILES );
 	this->collection.push_back( new CGET );
 	this->collection.push_back( new CGOTO );
@@ -154,6 +157,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CPOKES );
 	this->collection.push_back( new CPRINT );
 	this->collection.push_back( new CPSET );
+	this->collection.push_back( new CPUT );
 	this->collection.push_back( new CPUTSPRITE );
 	this->collection.push_back( new CREAD );
 	this->collection.push_back( new CRESTORE );
@@ -363,7 +367,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT を呼ぶと [VARTAB]→[STREND], [STREND] ～ [STREND] + [VALTYP] を 00h で塗りつぶすため、初期化が必要。
 	this->info.assembler_list.add_label( "work_usrtab", "0x0F39A" );
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
-	this->info.assembler_list.add_label( "file_info_size", "37 + 256" );	//	FCB + BUFFER
+	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 16" );	//	FCB + (サイズ 1byte + 文字列変数アドレス 2byte) * 16
 
 	//	初期化処理 (BACONLIB存在確認)
 	asm_line.set( "LABEL", "", "start_address", "" );
@@ -1844,7 +1848,11 @@ void CCOMPILER::optimize_push_pop( void ) {
 		}
 	}
 
-	//	push rp; ld rp2, xx; pop rp の push/pop を削除する
+	//	push rp
+	//	ld rp2, xx
+	//	pop rp
+	//	↓
+	//	ld rp2, xx
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER ) {
 			p_next = p + 1;
@@ -1853,7 +1861,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 				continue;
 			}
 			p_next = p + 2;
-			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::POP && p->operand1.s_value != p_next->operand1.s_value ) {
+			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::POP || p->operand1.s_value != p_next->operand1.s_value ) {
 				continue;
 			}
 			p_back = p - 1;
