@@ -332,6 +332,8 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 				break;
 			case CEXPRESSION_TYPE::STRING:
+				asm_line.set( "PUSH", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
 				if( is_file ) {
 					p_info->assembler_list.activate_put_string( p_info );
 					asm_line.set( "CALL", "", "put_string" );
@@ -342,6 +344,11 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 					asm_line.set( "CALL", "", "puts" );
 					p_info->assembler_list.body.push_back( asm_line );
 				}
+				asm_line.set( "POP", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "free_string" );
+				p_info->assembler_list.body.push_back( asm_line );
+				p_info->assembler_list.activate_free_string();
 				break;
 			}
 			has_semicolon = false;

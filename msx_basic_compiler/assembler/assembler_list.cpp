@@ -4590,9 +4590,13 @@ void CASSEMBLER_LIST::activate_space( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD",		"", "[HL]", "' '" );
 	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "DEC",	"", "C" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET",	"Z" );						//	w’è‚Ì’·‚³‚ª 1 ‚È‚ç‚±‚±‚Å–ß‚é
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "PUSH",	"", "HL" );
 	this->subroutines.push_back( asm_line );
