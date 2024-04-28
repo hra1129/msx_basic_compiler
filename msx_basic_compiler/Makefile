@@ -23,6 +23,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/end.cpp \
 	collections/erase.cpp \
 	collections/error.cpp \
+	collections/field.cpp \
 	collections/files.cpp \
 	collections/for.cpp \
 	collections/get.cpp \
@@ -55,6 +56,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/pokew.cpp \
 	collections/print.cpp \
 	collections/pset.cpp \
+	collections/put.cpp \
 	collections/put_sprite.cpp \
 	collections/read.cpp \
 	collections/restore.cpp \

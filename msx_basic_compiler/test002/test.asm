@@ -10,7 +10,7 @@ WORK_TXTTAB                     = 0X0F676
 WORK_VARTAB                     = 0X0F6C2
 WORK_USRTAB                     = 0X0F39A
 BIOS_NEWSTT                     = 0X04601
-FILE_INFO_SIZE                  = 37 + 256
+FILE_INFO_SIZE                  = 37 + 3 * 16
 BLIB_INIT_NCALBAS               = 0X0404E
 BIOS_SYNTAX_ERROR               = 0X4055
 BIOS_CALSLT                     = 0X001C
@@ -18,36 +18,12 @@ BIOS_ENASLT                     = 0X0024
 WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
-BIOS_ERRHAND                    = 0X0406F
-BIOS_IMULT                      = 0X03193
-BLIB_FCLOSE                     = 0X04063
-BIOS_CHGCLR                     = 0X00062
-WORK_FORCLR                     = 0X0F3E9
-WORK_BAKCLR                     = 0X0F3EA
-WORK_BDRCLR                     = 0X0F3EB
-WORK_GRPACX                     = 0XFCB7
-WORK_GRPACY                     = 0XFCB9
-WORK_ROMVER                     = 0X0002D
-BIOS_CHGMOD                     = 0X0005F
-BIOS_CHGMODP                    = 0X001B5
-BIOS_EXTROM                     = 0X0015F
 BLIB_OPEN_FOR_NONE              = 0X40F9
-WORK_GXPOS                      = 0X0FCB3
-WORK_GYPOS                      = 0X0FCB5
-WORK_SCRMOD                     = 0X0FCAF
-BIOS_LINE                       = 0X058FC
-BIOS_LINEB                      = 0X05912
-BIOS_LINEBF                     = 0X058C1
-BIOS_SETATR                     = 0X0011A
-WORK_LOGOPR                     = 0X0FB02
-BIOS_PSET                       = 0X057F5
-SUBROM_SETC                     = 0X009D
-WORK_CLOC                       = 0XF92A
-WORK_CMASK                      = 0XF92C
-BLIB_FILE_PUTS                  = 0X040ED
-WORK_PRTFLG                     = 0X0F416
+BIOS_IMULT                      = 0X03193
+BIOS_ERRHAND                    = 0X0406F
 WORK_PTRFIL                     = 0X0F864
-BLIB_INPUT                      = 0X0407E
+BLIB_PUT                        = 0X40FC
+BLIB_FCLOSE                     = 0X04063
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
 ; BSAVE header -----------------------------------------------------------
@@ -110,130 +86,50 @@ _BASIC_START:
         DEFB        ':', 'A', 0xEF, 0xDD, '(', 0x11, ')', 0x00
 PROGRAM_START:
 LINE_100:
-        LD          HL, 1
-        CALL        SUB_MAXFILES
-        LD          A, 15
-        LD          [WORK_FORCLR], A
-        LD          A, 4
-        LD          [WORK_BAKCLR], A
-        LD          A, 7
-        LD          [WORK_BDRCLR], A
-        CALL        BIOS_CHGCLR
-        LD          HL, 2
-        LD          A, [WORK_ROMVER]
-        OR          A, A
-        LD          A, L
-        JR          NZ, _PT0
-        CALL        BIOS_CHGMOD
-        JR          _PT1
-_PT0:
-        LD          IX, BIOS_CHGMODP
-        CALL        BIOS_EXTROM
-        EI          
-_PT1:
 LINE_110:
         LD          HL, STR_1
-        LD          DE, 1
+        PUSH        HL
+        LD          HL, 1
+        EX          DE, HL
+        POP         HL
         XOR         A, A
         CALL        SUB_OPEN_FOR_NONE
 LINE_120:
-        LD          HL, 0
-        LD          [WORK_GXPOS], HL
-        LD          [WORK_GRPACX], HL
-        LD          HL, 0
-        LD          [WORK_GYPOS], HL
-        LD          [WORK_GRPACY], HL
-        XOR         A, A
-        LD          [WORK_LOGOPR], A
-        LD          A, 15
-        CALL        BIOS_SETATR
-        LD          HL, 255
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          DE, 37
+        ADD         HL, DE
         PUSH        HL
-        LD          HL, 191
+        LD          HL, 10
+        POP         DE
         EX          DE, HL
-        POP         BC
-        PUSH        DE
-        PUSH        BC
-        CALL        BIOS_LINE
-        POP         HL
-        LD          [WORK_GXPOS], HL
-        POP         HL
-        LD          [WORK_GYPOS], HL
+        LD          [HL], E
+        INC         HL
+        EX          DE, HL
+        LD          HL, VARS_A
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        PUSH        HL
+        LD          HL, 5
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        EX          DE, HL
+        LD          HL, VARS_B
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        LD          [HL], 0
 LINE_130:
-        XOR         A, A
-        LD          [WORK_LOGOPR], A
-        LD          A, [WORK_FORCLR]
-        CALL        BIOS_SETATR
-        LD          HL, 0
-        LD          [WORK_GRPACX], HL
-        LD          [WORK_CLOC], HL
-        LD          HL, 0
-        LD          [WORK_GRPACY], HL
-        LD          [WORK_CMASK], HL
-        EX          DE, HL
-        LD          BC, [WORK_CLOC]
-        LD          A, [WORK_SCRMOD]
-        CP          A, 5
-        JR          NC, _PT2
-        CALL        BIOS_PSET
-        JR          _PT3
-_PT2:
-        LD          IX, SUBROM_SETC
-        CALL        BIOS_EXTROM
-        EI          
-_PT3:
-        XOR         A, A
-        LD          [WORK_PRTFLG], A
-        LD          HL, 1
-        CALL        SUB_FILE_NUMBER
-        LD          HL, STR_2
-        CALL        PUT_STRING
-        LD          HL, STR_3
-        LD          IX, BLIB_FILE_PUTS
-        CALL        CALL_BLIB
-        LD          HL, 0
-        LD          [WORK_PTRFIL], HL
-LINE_140:
-        XOR         A, A
-        LD          [WORK_LOGOPR], A
-        LD          A, [WORK_FORCLR]
-        CALL        BIOS_SETATR
-        LD          HL, 0
-        LD          [WORK_GRPACX], HL
-        LD          [WORK_CLOC], HL
-        LD          HL, 8
-        LD          [WORK_GRPACY], HL
-        LD          [WORK_CMASK], HL
-        EX          DE, HL
-        LD          BC, [WORK_CLOC]
-        LD          A, [WORK_SCRMOD]
-        CP          A, 5
-        JR          NC, _PT4
-        CALL        BIOS_PSET
-        JR          _PT5
-_PT4:
-        LD          IX, SUBROM_SETC
-        CALL        BIOS_EXTROM
-        EI          
-_PT5:
-        XOR         A, A
-        LD          [WORK_PRTFLG], A
-        LD          HL, 1
-        CALL        SUB_FILE_NUMBER
-        LD          HL, STR_4
-        CALL        PUT_STRING
-        LD          HL, STR_3
-        LD          IX, BLIB_FILE_PUTS
-        CALL        CALL_BLIB
-        LD          HL, 0
-        LD          [WORK_PTRFIL], HL
-LINE_150:
-        LD          HL, VARS_I
+        LD          HL, VARS_A
         PUSH        HL
-        LD          A, 1
-        CALL        ALLOCATE_STRING
-        LD          IX, BLIB_INPUT
-        CALL        CALL_BLIB
+        LD          HL, STR_2
         POP         DE
         EX          DE, HL
         LD          C, [HL]
@@ -244,6 +140,29 @@ LINE_150:
         LD          L, C
         LD          H, B
         CALL        FREE_STRING
+        LD          HL, VARS_B
+        PUSH        HL
+        LD          HL, STR_3
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+LINE_140:
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        PUSH        HL
+        LD          HL, 1
+        POP         DE
+        LD          IX, BLIB_PUT
+        CALL        CALL_BLIB
+LINE_150:
+        LD          HL, 1
 PROGRAM_TERMINATION:
         CALL        SUB_TERMINATION
         LD          SP, [WORK_HIMEM]
@@ -301,69 +220,61 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-SUB_CLOSE:
-        LD          A, [WORK_MAXFIL]
-        LD          E, 52
-        CP          A, L
-        JP          C, BIOS_ERRHAND
-        LD          A, H
+SUB_OPEN_SUB:
+        PUSH        AF
+        PUSH        HL
+        LD          A, D
         OR          A, A
+        JR          NZ, _SUB_OPEN_BAD_FILE_NUMBER
+        DEC         E
+        LD          A, E
+        CP          A, 15
+        JR          NC, _SUB_OPEN_BAD_FILE_NUMBER
+        LD          HL, FILE_INFO_SIZE
+        CALL        BIOS_IMULT
+        LD          DE, [SVARIA_FILE_INFO]
+        ADD         HL, DE
+        INC         HL
+        INC         HL
+        LD          [WORK_PTRFIL], HL
+        POP         HL
+        POP         AF
+        RET         
+_SUB_OPEN_BAD_FILE_NUMBER:
+        LD          E, 52
+        JP          BIOS_ERRHAND
+SUB_OPEN_FOR_NONE:
+        CALL        SUB_OPEN_SUB
+        LD          IX, BLIB_OPEN_FOR_NONE
+        JP          CALL_BLIB
+SUB_FILE_NUMBER:
+        DEC         HL
+        LD          A, L
+        CP          A, 15
+        LD          E, 52
+        JP          NC, BIOS_ERRHAND
+        INC         H
+        DEC         H
         JP          NZ, BIOS_ERRHAND
-        OR          A, L
-        RET         Z
-        DEC         L
         LD          DE, FILE_INFO_SIZE
         CALL        BIOS_IMULT
         LD          DE, [SVARIA_FILE_INFO]
         ADD         HL, DE
         INC         HL
         INC         HL
-        LD          A, [HL]
-        DEC         A
-        CP          A, 8
-        JR          NC, SUB_CLOSE_END
-        PUSH        HL
-        LD          IX, BLIB_FCLOSE
-        CALL        CALL_BLIB
-        POP         HL
-SUB_CLOSE_END:
-        LD          [HL], 0
+        LD          [WORK_PTRFIL], HL
         RET         
-SUB_ALL_CLOSE:
-        LD          A, [WORK_MAXFIL]
-        OR          A, A
-        RET         Z
-        LD          H, 0
-        LD          L, A
-SUB_ALL_CLOSE_LOOP:
-        PUSH        HL
-        CALL        SUB_CLOSE
-        POP         HL
-        DEC         L
-        JR          NZ, SUB_ALL_CLOSE_LOOP
-        RET         
-ALLOCATE_HEAP:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        ADD         HL, BC
-        JR          C, _ALLOCATE_HEAP_ERROR
-        LD          DE, [HEAP_END]
+FREE_STRING:
+        LD          DE, HEAP_START
         RST         0X20
-        JR          NC, _ALLOCATE_HEAP_ERROR
-        LD          [HEAP_NEXT], HL
-        POP         HL
-        PUSH        HL
-        DEC         BC
-        LD          E, L
-        LD          D, H
-        INC         DE
-        LD          [HL], 0
-        LDIR        
-        POP         HL
-        RET         
-_ALLOCATE_HEAP_ERROR:
-        LD          E, 7
-        JP          BIOS_ERRHAND
+        RET         C
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        RET         NC
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        JP          FREE_HEAP
 FREE_HEAP:
         PUSH        HL
         ADD         HL, BC
@@ -467,121 +378,47 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
-SUB_INIT_FILES:
-        LD          HL, [SVARIA_FILE_INFO]
-        LD          C, [HL]
-        INC         HL
-        LD          B, [HL]
-        DEC         HL
-        INC         BC
-        INC         BC
-        LD          A, H
-        OR          A, L
-        CALL        NZ, FREE_HEAP
+SUB_CLOSE:
         LD          A, [WORK_MAXFIL]
-        LD          E, A
-        LD          D, 0
-        LD          HL, FILE_INFO_SIZE
-        CALL        BIOS_IMULT
-        PUSH        HL
-        INC         HL
-        INC         HL
-        LD          C, L
-        LD          B, H
-        CALL        ALLOCATE_HEAP
-        LD          [SVARIA_FILE_INFO], HL
-        POP         DE
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        RET         
-SUB_MAXFILES:
-        PUSH        HL
-        CALL        SUB_ALL_CLOSE
-        POP         HL
-        LD          A, L
-        AND         A, 15
-        LD          [WORK_MAXFIL], A
-        JP          SUB_INIT_FILES
-SUB_OPEN_SUB:
-        PUSH        AF
-        PUSH        HL
-        LD          A, D
+        LD          E, 52
+        CP          A, L
+        JP          C, BIOS_ERRHAND
+        LD          A, H
         OR          A, A
-        JR          NZ, _SUB_OPEN_BAD_FILE_NUMBER
-        DEC         E
-        LD          A, E
-        CP          A, 15
-        JR          NC, _SUB_OPEN_BAD_FILE_NUMBER
-        LD          HL, FILE_INFO_SIZE
-        CALL        BIOS_IMULT
-        LD          DE, [SVARIA_FILE_INFO]
-        ADD         HL, DE
-        INC         HL
-        INC         HL
-        LD          [WORK_PTRFIL], HL
-        POP         HL
-        POP         AF
-        RET         
-_SUB_OPEN_BAD_FILE_NUMBER:
-        LD          E, 52
-        JP          BIOS_ERRHAND
-SUB_OPEN_FOR_NONE:
-        CALL        SUB_OPEN_SUB
-        LD          IX, BLIB_OPEN_FOR_NONE
-        JP          CALL_BLIB
-SUB_FILE_NUMBER:
-        DEC         HL
-        LD          A, L
-        CP          A, 15
-        LD          E, 52
-        JP          NC, BIOS_ERRHAND
-        INC         H
-        DEC         H
         JP          NZ, BIOS_ERRHAND
+        OR          A, L
+        RET         Z
+        DEC         L
         LD          DE, FILE_INFO_SIZE
         CALL        BIOS_IMULT
         LD          DE, [SVARIA_FILE_INFO]
         ADD         HL, DE
         INC         HL
         INC         HL
-        LD          [WORK_PTRFIL], HL
-        RET         
-FREE_STRING:
-        LD          DE, HEAP_START
-        RST         0X20
-        RET         C
-        LD          DE, [HEAP_NEXT]
-        RST         0X20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          FREE_HEAP
-PUT_STRING:
+        LD          A, [HL]
+        DEC         A
+        CP          A, 8
+        JR          NC, SUB_CLOSE_END
         PUSH        HL
-        LD          IX, BLIB_FILE_PUTS
+        LD          IX, BLIB_FCLOSE
         CALL        CALL_BLIB
         POP         HL
-        JP          FREE_STRING
-ALLOCATE_STRING:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [HEAP_END]
-        RST         0X20
-        JR          NC, _ALLOCATE_STRING_ERROR
-        LD          [HEAP_NEXT], HL
-        POP         HL
-        LD          [HL], C
+SUB_CLOSE_END:
+        LD          [HL], 0
         RET         
-_ALLOCATE_STRING_ERROR:
-        LD          E, 7
-        JP          BIOS_ERRHAND
+SUB_ALL_CLOSE:
+        LD          A, [WORK_MAXFIL]
+        OR          A, A
+        RET         Z
+        LD          H, 0
+        LD          L, A
+SUB_ALL_CLOSE_LOOP:
+        PUSH        HL
+        CALL        SUB_CLOSE
+        POP         HL
+        DEC         L
+        JR          NZ, SUB_ALL_CLOSE_LOOP
+        RET         
 PROGRAM_RUN:
         LD          HL, [SVARIA_FILE_INFO]
         LD          A, H
@@ -614,7 +451,61 @@ FILE_INIT_SKIP:
         LDIR        
         LD          HL, STR_0
         LD          [VARS_AREA_START], HL
+        LD          HL, VARS_AREA_START
+        LD          DE, VARS_AREA_START + 2
+        LD          BC, VARS_AREA_END - VARS_AREA_START - 2
+        LDIR        
         CALL        SUB_INIT_FILES
+        RET         
+ALLOCATE_HEAP:
+        LD          HL, [HEAP_NEXT]
+        PUSH        HL
+        ADD         HL, BC
+        JR          C, _ALLOCATE_HEAP_ERROR
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_HEAP_ERROR
+        LD          [HEAP_NEXT], HL
+        POP         HL
+        PUSH        HL
+        DEC         BC
+        LD          E, L
+        LD          D, H
+        INC         DE
+        LD          [HL], 0
+        LDIR        
+        POP         HL
+        RET         
+_ALLOCATE_HEAP_ERROR:
+        LD          E, 7
+        JP          BIOS_ERRHAND
+SUB_INIT_FILES:
+        LD          HL, [SVARIA_FILE_INFO]
+        LD          C, [HL]
+        INC         HL
+        LD          B, [HL]
+        DEC         HL
+        INC         BC
+        INC         BC
+        LD          A, H
+        OR          A, L
+        CALL        NZ, FREE_HEAP
+        LD          A, [WORK_MAXFIL]
+        LD          E, A
+        LD          D, 0
+        LD          HL, FILE_INFO_SIZE
+        CALL        BIOS_IMULT
+        PUSH        HL
+        INC         HL
+        INC         HL
+        LD          C, L
+        LD          B, H
+        CALL        ALLOCATE_HEAP
+        LD          [SVARIA_FILE_INFO], HL
+        POP         DE
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
@@ -650,13 +541,11 @@ H_ERRO_HANDLER:
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X04, 0X47, 0X52, 0X50, 0X3A
+        DEFB        0X08, 0X48, 0X4F, 0X47, 0X45, 0X2E, 0X54, 0X58, 0X54
 STR_2:
-        DEFB        0X19, 0X54, 0X68, 0X69, 0X73, 0X20, 0X69, 0X73, 0X20, 0X47, 0X52, 0X41, 0X50, 0X48, 0X49, 0X43, 0X53, 0X20, 0X53, 0X43, 0X52, 0X45, 0X45, 0X4E, 0X21, 0X21
+        DEFB        0X0A, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39, 0X30
 STR_3:
-        DEFB        0X02, 0X0D, 0X0A
-STR_4:
-        DEFB        0X14, 0X59, 0X65, 0X61, 0X68, 0X21, 0X20, 0X48, 0X65, 0X6C, 0X6C, 0X6F, 0X2C, 0X20, 0X57, 0X6F, 0X72, 0X6C, 0X64, 0X21, 0X21
+        DEFB        0X05, 0X41, 0X42, 0X43, 0X44, 0X45
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -670,7 +559,9 @@ SVARI_USR0_BACKUP:
         DEFW        0
 VAR_AREA_END:
 VARS_AREA_START:
-VARS_I:
+VARS_A:
+        DEFW        0
+VARS_B:
         DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
