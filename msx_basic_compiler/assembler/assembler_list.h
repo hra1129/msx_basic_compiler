@@ -96,6 +96,8 @@ public:
 	void activate_put_single_real( class CCOMPILE_INFO *p_info );
 	void activate_put_double_real( class CCOMPILE_INFO *p_info );
 	void activate_put_string( class CCOMPILE_INFO *p_info );
+	void activate_field( void );
+	void activate_space( void );
 };
 
 #endif
