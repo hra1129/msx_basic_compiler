@@ -18,10 +18,14 @@ BIOS_ENASLT                     = 0X0024
 WORK_MAINROM                    = 0XFCC1
 WORK_BLIBSLOT                   = 0XF3D3
 SIGNATURE                       = 0X4010
+BIOS_ERRHAND                    = 0X0406F
+BLIB_FILE_PUTS                  = 0X040ED
+WORK_PRTFLG                     = 0X0F416
 BLIB_OPEN_FOR_NONE              = 0X40F9
 BIOS_IMULT                      = 0X03193
-BIOS_ERRHAND                    = 0X0406F
 WORK_PTRFIL                     = 0X0F864
+BLIB_LSET                       = 0X04075
+BLIB_RSET                       = 0X04078
 BLIB_PUT                        = 0X40FC
 BLIB_FCLOSE                     = 0X04063
 WORK_FILTAB                     = 0XF860
@@ -86,8 +90,33 @@ _BASIC_START:
         DEFB        ':', 'A', 0xEF, 0xDD, '(', 0x11, ')', 0x00
 PROGRAM_START:
 LINE_100:
-LINE_110:
+        LD          HL, VARS_C
+        PUSH        HL
+        LD          HL, 10
+        CALL        SUB_SPACE
+        POP         DE
+        EX          DE, HL
+        LD          C, [HL]
+        LD          [HL], E
+        INC         HL
+        LD          B, [HL]
+        LD          [HL], D
+        LD          L, C
+        LD          H, B
+        CALL        FREE_STRING
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
         LD          HL, STR_1
+        CALL        PUTS
+        LD          HL, [VARS_C]
+        CALL        COPY_STRING
+        CALL        PUTS
+        LD          HL, STR_2
+        CALL        PUTS
+        LD          HL, STR_3
+        CALL        PUTS
+LINE_110:
+        LD          HL, STR_4
         PUSH        HL
         LD          HL, 1
         EX          DE, HL
@@ -101,57 +130,67 @@ LINE_120:
         ADD         HL, DE
         PUSH        HL
         LD          HL, 10
+        LD          A, L
         POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        EX          DE, HL
         LD          HL, VARS_A
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
+        CALL        SUB_FIELD
         PUSH        HL
         LD          HL, 5
+        LD          A, L
         POP         DE
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        EX          DE, HL
         LD          HL, VARS_B
-        EX          DE, HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        INC         HL
+        CALL        SUB_FIELD
         LD          [HL], 0
 LINE_130:
         LD          HL, VARS_A
         PUSH        HL
-        LD          HL, STR_2
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        FREE_STRING
+        POP         AF
+        CALL        ALLOCATE_STRING
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
+        PUSH        HL
         LD          [HL], E
         INC         HL
-        LD          B, [HL]
         LD          [HL], D
-        LD          L, C
-        LD          H, B
+        LD          HL, STR_5
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, BLIB_LSET
+        CALL        CALL_BLIB
+        POP         HL
         CALL        FREE_STRING
         LD          HL, VARS_B
         PUSH        HL
-        LD          HL, STR_3
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        FREE_STRING
+        POP         AF
+        CALL        ALLOCATE_STRING
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
+        PUSH        HL
         LD          [HL], E
         INC         HL
-        LD          B, [HL]
         LD          [HL], D
-        LD          L, C
-        LD          H, B
+        LD          HL, STR_6
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, BLIB_RSET
+        CALL        CALL_BLIB
+        POP         HL
         CALL        FREE_STRING
 LINE_140:
         LD          HL, 1
@@ -220,49 +259,46 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
-SUB_OPEN_SUB:
-        PUSH        AF
+; Allocate memory for strings. A: Length
+ALLOCATE_STRING:
+        LD          HL, [HEAP_NEXT]
         PUSH        HL
-        LD          A, D
-        OR          A, A
-        JR          NZ, _SUB_OPEN_BAD_FILE_NUMBER
-        DEC         E
-        LD          A, E
-        CP          A, 15
-        JR          NC, _SUB_OPEN_BAD_FILE_NUMBER
-        LD          HL, FILE_INFO_SIZE
-        CALL        BIOS_IMULT
-        LD          DE, [SVARIA_FILE_INFO]
+        LD          E, A
+        LD          C, A
+        LD          D, 0
         ADD         HL, DE
         INC         HL
-        INC         HL
-        LD          [WORK_PTRFIL], HL
+        LD          DE, [HEAP_END]
+        RST         0X20
+        JR          NC, _ALLOCATE_STRING_ERROR
+        LD          [HEAP_NEXT], HL
         POP         HL
-        POP         AF
+        LD          [HL], C
         RET         
-_SUB_OPEN_BAD_FILE_NUMBER:
-        LD          E, 52
+_ALLOCATE_STRING_ERROR:
+        LD          E, 7
         JP          BIOS_ERRHAND
-SUB_OPEN_FOR_NONE:
-        CALL        SUB_OPEN_SUB
-        LD          IX, BLIB_OPEN_FOR_NONE
-        JP          CALL_BLIB
-SUB_FILE_NUMBER:
-        DEC         HL
+; SPACE$ processing. L: Length. RETURN HL: Result string.
+SUB_SPACE:
         LD          A, L
-        CP          A, 15
-        LD          E, 52
-        JP          NC, BIOS_ERRHAND
-        INC         H
-        DEC         H
-        JP          NZ, BIOS_ERRHAND
-        LD          DE, FILE_INFO_SIZE
-        CALL        BIOS_IMULT
-        LD          DE, [SVARIA_FILE_INFO]
-        ADD         HL, DE
+        PUSH        AF
+        CALL        ALLOCATE_STRING
+        POP         AF
+        OR          A, A
+        RET         Z
+        LD          C, A
+        LD          B, 0
         INC         HL
-        INC         HL
-        LD          [WORK_PTRFIL], HL
+        LD          [HL], ' '
+        DEC         C
+        RET         Z
+        PUSH        HL
+        LD          E, L
+        LD          D, H
+        INC         DE
+        LDIR        
+        POP         HL
+        DEC         HL
         RET         
 FREE_STRING:
         LD          DE, HEAP_START
@@ -378,6 +414,127 @@ _FREE_HEAP_LOOP2_NEXT:
         JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
         POP         HL
         JR          _FREE_HEAP_LOOP2
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
+COPY_STRING:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        ALLOCATE_STRING
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
+SUB_OPEN_SUB:
+        PUSH        AF
+        PUSH        HL
+        LD          A, D
+        OR          A, A
+        JR          NZ, _SUB_OPEN_BAD_FILE_NUMBER
+        DEC         E
+        LD          A, E
+        CP          A, 15
+        JR          NC, _SUB_OPEN_BAD_FILE_NUMBER
+        LD          HL, FILE_INFO_SIZE
+        CALL        BIOS_IMULT
+        LD          DE, [SVARIA_FILE_INFO]
+        ADD         HL, DE
+        INC         HL
+        INC         HL
+        LD          [WORK_PTRFIL], HL
+        POP         HL
+        POP         AF
+        RET         
+_SUB_OPEN_BAD_FILE_NUMBER:
+        LD          E, 52
+        JP          BIOS_ERRHAND
+SUB_OPEN_FOR_NONE:
+        CALL        SUB_OPEN_SUB
+        LD          IX, BLIB_OPEN_FOR_NONE
+        JP          CALL_BLIB
+STRING:
+        LD          A, [HL]
+        OR          A, A
+        INC         HL
+        LD          A, [HL]
+        JR          NZ, STRING_A
+        LD          E, 5
+        JP          BIOS_ERRHAND
+STRING_A:
+        PUSH        AF
+        LD          A, E
+        CALL        ALLOCATE_STRING
+        POP         AF
+        PUSH        HL
+        INC         HL
+        LD          B, C
+        INC         B
+        JR          STRING_LOOP_ENTER
+STRING_LOOP:
+        LD          [HL], A
+        INC         HL
+STRING_LOOP_ENTER:
+        DJNZ        STRING_LOOP
+        POP         HL
+        RET         
+SUB_FILE_NUMBER:
+        DEC         HL
+        LD          A, L
+        CP          A, 15
+        LD          E, 52
+        JP          NC, BIOS_ERRHAND
+        INC         H
+        DEC         H
+        JP          NZ, BIOS_ERRHAND
+        LD          DE, FILE_INFO_SIZE
+        CALL        BIOS_IMULT
+        LD          DE, [SVARIA_FILE_INFO]
+        ADD         HL, DE
+        INC         HL
+        INC         HL
+        LD          [WORK_PTRFIL], HL
+        RET         
+; Auxiliary processing of FIELD instruction. HL: Address of variable, DE: Address of variable list, A: Length
+SUB_FIELD:
+        EX          DE, HL
+        LD          [HL], A
+        INC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        INC         HL
+        PUSH        HL
+        PUSH        DE
+        PUSH        AF
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        CALL        FREE_STRING
+        POP         AF
+        LD          L, A
+        CALL        SUB_SPACE
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        POP         HL
+        RET         
 SUB_CLOSE:
         LD          A, [WORK_MAXFIL]
         LD          E, 52
@@ -541,10 +698,16 @@ H_ERRO_HANDLER:
 STR_0:
         DEFB        0X00
 STR_1:
-        DEFB        0X08, 0X48, 0X4F, 0X47, 0X45, 0X2E, 0X54, 0X58, 0X54
+        DEFB        0X01, 0X5B
 STR_2:
-        DEFB        0X0A, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39, 0X30
+        DEFB        0X01, 0X5D
 STR_3:
+        DEFB        0X02, 0X0D, 0X0A
+STR_4:
+        DEFB        0X08, 0X48, 0X4F, 0X47, 0X45, 0X2E, 0X54, 0X58, 0X54
+STR_5:
+        DEFB        0X0A, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39, 0X30
+STR_6:
         DEFB        0X05, 0X41, 0X42, 0X43, 0X44, 0X45
 HEAP_NEXT:
         DEFW        0
@@ -562,6 +725,8 @@ VARS_AREA_START:
 VARS_A:
         DEFW        0
 VARS_B:
+        DEFW        0
+VARS_C:
         DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:

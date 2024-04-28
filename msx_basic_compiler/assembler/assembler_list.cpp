@@ -657,6 +657,8 @@ void CASSEMBLER_LIST::activate_allocate_string( void ) {
 	}
 	this->subrouines_list.push_back( "allocate_string" );
 	this->add_label( "bios_errhand", "0x0406F" );
+	asm_line.set( "COMMENT", "", "Allocate memory for strings. A: Length" );
+	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "allocate_string", "" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "[heap_next]" );
@@ -4478,6 +4480,135 @@ void CASSEMBLER_LIST::activate_put_string( class CCOMPILE_INFO* p_info ) {
 	asm_line.set( "POP", "", "HL" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JP", "", "free_string" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_field( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_field" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_field" );
+
+	this->activate_space();
+	this->activate_free_string();
+	asm_line.set( "COMMENT",	"", "Auxiliary processing of FIELD instruction. HL: Address of variable, DE: Address of variable list, A: Length" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL",	"", "sub_field" );
+	this->subroutines.push_back( asm_line );
+	// 変数リストに変数のアドレスを書き込む
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "A" );			// サイズを書き込む
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "E" );			// 変数アドレス下位
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "D" );			// 変数アドレス上位
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "HL" );					// (1) 変数リストのアドレス保存
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "DE" );					// (2) 変数のアドレス保存
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "AF" );					// (3) サイズ保存
+	this->subroutines.push_back( asm_line );
+	// 変数のアドレスから文字列のアドレスを得る
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	// 文字列を解放する
+	asm_line.set( "CALL",	"", "free_string" );
+		this->subroutines.push_back( asm_line );
+	// 指定の長さの文字列を得る ( SPACE$() )
+	asm_line.set( "POP",	"", "AF" );					// [3] サイズ復帰
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "L", "A" );				// L = サイズ
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"", "sub_space" );			// HL = space$(A)
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "DE" );					// [2] 変数のアドレスを復帰
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"", "DE", "HL" );			// HL = 変数のアドレス, DE = SPACE$() で得た文字列のアドレス
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "E" );			// 変数に文字列のアドレス下位をセット
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "D" );			// 変数に文字列のアドレス上位をセット
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "HL" );					// [1] 変数リストのアドレス
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_space( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_space" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_space" );
+
+	this->activate_allocate_string();
+	asm_line.set( "COMMENT",	"", "SPACE$ processing. L: Length. RETURN HL: Result string." );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL",	"", "sub_space" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "A", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "AF" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"", "allocate_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "AF" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR",		"", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET",	"Z" );						//	指定の長さが 0 なら何もせずに戻る
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "C", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "B", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "' '" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC",	"", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET",	"Z" );						//	指定の長さが 1 ならここで戻る
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "E", "L" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "D", "H" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LDIR" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
 	this->subroutines.push_back( asm_line );
 }
 

@@ -1,0 +1,56 @@
+HL: 変数リストのアドレス
+DE: 変数のアドレス
+A : 文字数
+
+[HL] ← DE
+free_string( [DE] )
+[DE] = allocate_string( A )
+
+	// 変数リストに変数のアドレスを書き込む
+	asm_line.set( "LD",		"", "[HL]", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "HL" );					// 変数リストのアドレス
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "DE" );					// 変数のアドレス
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"", "AF" );					// 文字数
+	this->subroutines.push_back( asm_line );
+	// 変数のアドレスから文字列のアドレスを得る
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	// 文字列を解放する
+	asm_line.set( "CALL",	"", "free_string" );
+	this->subroutines.push_back( asm_line );
+	// 指定の長さの文字列を得る ( SPACE$() )
+	asm_line.set( "POP",	"", "AF" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"", "sub_space" );			// HL = space$(A)
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "DE" );					// 変数のアドレスを復帰
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "E" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"", "[HL]", "D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"", "HL" );					// 変数リストのアドレス
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" );
+	this->subroutines.push_back( asm_line );
