@@ -6419,9 +6419,12 @@ sub_open_for_none::
 			; ファイルだったのでファイルをオープンする
 	_is_file:
 			ld		de, [ptrfil]
+			push	hl
 			call	sub_fopen
+			pop		hl
 			or		a, a
 			jr		z, _set_len
+			ld		de, [ptrfil]
 			call	sub_fcreate
 			or		a, a
 			jr		z, _set_len
