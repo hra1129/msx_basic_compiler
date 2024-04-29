@@ -176,6 +176,8 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+Makefile: msx_basic_compiler.vcxproj
+	python makefile_gen.py
 all: clean
 #	time make -j9 $(TARGET) > make.log 2>&1
 	time make -j9 $(TARGET) 2>&1 | tee make.log
