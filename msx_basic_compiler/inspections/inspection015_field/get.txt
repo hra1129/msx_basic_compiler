@@ -1,0 +1,179 @@
+1レコード読み込んで、変数へコピーする
+
+sub_get:
+		; ファイルでなければエラー
+		ld		de, [work_ptrfil]
+		ld		a, [de]
+		or		a, a
+		ld		e, 59				; File not OPEN
+		jp		z, bios_errhnd
+		cp		a, 9
+		ld		e, 61				; Bad file mode
+		jp		nc, bios_errhnd
+		; 1レコード読み取る
+		ld		de, work_buf + 1
+		ld		c, _setdta
+		call	bdos
+		ld		de, [work_ptrfil]
+		ld		hl, 1
+		ld		c, _rdblk
+		call	bdos
+		; 変数への読み込みループの準備
+		ld		hl, [work_ptrfil]
+		ld		de, 37
+		add		hl, de
+		ld		de, work_buf
+		ld		[work_buf + 256], de
+		; 変数への読み込みループ
+sub_get_loop:
+		ld		a, [hl]				; 文字数を得る
+		or		a, a
+		ret		z					; 0 なら終了
+		ld		[de], a				; [DE] = 文字数
+		inc		hl
+		ld		e, [hl]				; DE = 格納先変数のアドレス
+		inc		hl
+		ld		d, [hl]
+		inc		hl
+		push	hl					; (1) 変数リストのアドレス
+		ex		de, hl
+		ld		e, [hl]				; DE = 変数の内容(文字列のアドレス)
+		inc		hl
+		ld		d, [hl]
+		dec		hl
+		push	hl					; (2) 変数のアドレス
+		ex		de, hl				; HL = 変数内容(文字列のアドレス)
+		call	free_string			; 元の内容を解放
+		ld		hl, [work_buf + 256]
+		ld		e, [hl]
+		ld		d, 0
+		add		hl, de
+		ld		de, [work_buf + 256]
+		ld		[work_buf + 256], hl
+		ld		l, e
+		ld		h, d
+		call	copy_string			; コピーを生成
+		pop		de					; [2] 変数のアドレス
+		ex		de, hl
+		ld		[hl], e				; コピーを変数へ格納
+		inc		hl
+		ld		[hl], d
+		pop		hl					; [1] 変数リストのアドレス
+		jr		sub_get_loop
+
+
+
+	asm_line.set( "COMMENT","",		"[work_ptrfil] ... Address of FILE_INFO" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL",	"",		"sub_get" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "[work_ptrfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"a", "[de]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR",		"",		"a", "a" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"e", "59" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP",		"z",	"bios_errhnd" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP",		"",		"a", "9" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"e", "61" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP",		"nc",	"bios_errhnd" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "work_buf + 1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"c", "_setdta" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"",		"bdos" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "[work_ptrfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"hl", "1" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"c", "_rdblk" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"",		"bdos" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"hl", "[work_ptrfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "37" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD",	"",		"hl", "de" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "work_buf" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[work_buf + 256]", "de" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL",	"",		"sub_get_loop" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"a", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR",		"",		"a", "a" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET",	"z" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[de]", "a" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"e", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"d", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"",		"de", "hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"e", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"d", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH"	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"",		"de", "hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"",		"free_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"hl", "[work_buf + 256]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"e", "[hl]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"d", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD",	"",		"hl", "de" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "[work_buf + 256]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[work_buf + 256]", "hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"l", "e" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"h", "d" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL",	"",		"copy_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"",		"de" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"",		"de", "hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[hl]", "e" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[hl]", "d" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR",		"",		"sub_get_loop" );
+	this->subroutines.push_back( asm_line );

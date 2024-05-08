@@ -23,8 +23,8 @@ BIOS_IMULT                      = 0X03193
 BIOS_ERRHAND                    = 0X0406F
 WORK_PTRFIL                     = 0X0F864
 BLIB_LSET                       = 0X04075
-BLIB_RSET                       = 0X04078
 BLIB_PUT                        = 0X40FC
+BLIB_RSET                       = 0X04078
 BLIB_FCLOSE                     = 0X04063
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
@@ -144,28 +144,17 @@ LINE_130:
         CALL        FREE_STRING
         LD          HL, VARS_B
         PUSH        HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        LD          A, [DE]
-        PUSH        AF
-        EX          DE, HL
-        CALL        FREE_STRING
-        POP         AF
-        CALL        ALLOCATE_STRING
+        LD          HL, [VARS_A]
+        CALL        COPY_STRING
         POP         DE
         EX          DE, HL
-        PUSH        HL
+        LD          C, [HL]
         LD          [HL], E
         INC         HL
+        LD          B, [HL]
         LD          [HL], D
-        LD          HL, STR_3
-        POP         DE
-        EX          DE, HL
-        PUSH        DE
-        LD          IX, BLIB_RSET
-        CALL        CALL_BLIB
-        POP         HL
+        LD          L, C
+        LD          H, B
         CALL        FREE_STRING
 LINE_140:
         LD          HL, 1
@@ -193,7 +182,7 @@ LINE_150:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, STR_4
+        LD          HL, STR_3
         POP         DE
         EX          DE, HL
         PUSH        DE
@@ -218,7 +207,7 @@ LINE_150:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, STR_5
+        LD          HL, STR_4
         POP         DE
         EX          DE, HL
         PUSH        DE
@@ -547,6 +536,19 @@ SUB_FIELD:
         LD          [HL], D
         POP         HL
         RET         
+COPY_STRING:
+        LD          A, [HL]
+        PUSH        HL
+        CALL        ALLOCATE_STRING
+        POP         DE
+        PUSH        HL
+        EX          DE, HL
+        LD          C, [HL]
+        LD          B, 0
+        INC         BC
+        LDIR        
+        POP         HL
+        RET         
 SUB_CLOSE:
         LD          A, [WORK_MAXFIL]
         LD          E, 52
@@ -714,10 +716,8 @@ STR_1:
 STR_2:
         DEFB        0X0A, 0X30, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39
 STR_3:
-        DEFB        0X03, 0X41, 0X42, 0X43
-STR_4:
         DEFB        0X06, 0X30, 0X30, 0X31, 0X31, 0X32, 0X32
-STR_5:
+STR_4:
         DEFB        0X07, 0X61, 0X62, 0X63, 0X64, 0X65, 0X66, 0X67
 HEAP_NEXT:
         DEFW        0

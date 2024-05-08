@@ -98,6 +98,7 @@ public:
 	void activate_put_string( class CCOMPILE_INFO *p_info );
 	void activate_field( void );
 	void activate_space( void );
+	void activate_get( void );
 };
 
 #endif
