@@ -38,8 +38,6 @@ bool CPUT::exec( CCOMPILE_INFO *p_info ) {
 	exp.release();
 	asm_line.set( "CALL", "", "sub_file_number" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL" );
-	p_info->assembler_list.body.push_back( asm_line );
 
 	//	,
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
@@ -54,8 +52,6 @@ bool CPUT::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	exp.release();
-	asm_line.set( "POP", "", "DE" );
-	p_info->assembler_list.body.push_back( asm_line );
 
 	p_info->assembler_list.add_label( "blib_put", "0x40fc" );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::CONSTANT, "blib_put" );
