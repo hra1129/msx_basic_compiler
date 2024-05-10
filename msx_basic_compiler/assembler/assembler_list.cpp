@@ -4627,9 +4627,11 @@ void CASSEMBLER_LIST::activate_get( void ) {
 	this->subrouines_list.push_back( "sub_get" );
 
 	this->add_label( "_set_dta", "0x1A" );
+	this->add_label( "_rdblk", "0x27" );
 	this->add_label( "bdos", "0xF37D" );
 	this->add_label( "work_buf", "0x0F55E" );
 	this->add_label( "work_ptrfil", "0x0f864" );
+	this->add_label( "bios_errhand", "0x0406F" );
 
 	asm_line.set( "COMMENT","",		"[work_ptrfil] ... Address of FILE_INFO" );
 	this->subroutines.push_back( asm_line );
@@ -4643,17 +4645,33 @@ void CASSEMBLER_LIST::activate_get( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD",		"",		"e", "59" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "JP",		"z",	"bios_errhnd" );
+	asm_line.set( "JP",		"z",	"bios_errhand" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CP",		"",		"a", "9" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD",		"",		"e", "61" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "JP",		"nc",	"bios_errhnd" );
+	asm_line.set( "JP",		"nc",	"bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEC",	"",		"hl" );					//	レコード番号を 0 オリジンに変える
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX",		"",		"de", "hl" );			//	DE = レコード番号
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"hl", "[work_ptrfil]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"bc", "33" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "ADD",	"",		"hl", "bc" );			//	HL = FCB の ランダムレコードフィールド
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[hl]", "e" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"[hl]", "d" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD",		"",		"de", "work_buf + 1" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD",		"",		"c", "_setdta" );
+	asm_line.set( "LD",		"",		"c", "_set_dta" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL",	"",		"bdos" );
 	this->subroutines.push_back( asm_line );
@@ -4707,7 +4725,7 @@ void CASSEMBLER_LIST::activate_get( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "DEC",	"",		"hl" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "PUSH"	"",		"hl" );
+	asm_line.set( "PUSH",	"",		"hl" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "EX",		"",		"de", "hl" );
 	this->subroutines.push_back( asm_line );
@@ -4725,9 +4743,7 @@ void CASSEMBLER_LIST::activate_get( void ) {
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD",		"",		"[work_buf + 256]", "hl" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD",		"",		"l", "e" );
-	this->subroutines.push_back( asm_line );
-	asm_line.set( "LD",		"",		"h", "d" );
+	asm_line.set( "EX",		"",		"de", "hl" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL",	"",		"copy_string" );
 	this->subroutines.push_back( asm_line );
@@ -4742,6 +4758,8 @@ void CASSEMBLER_LIST::activate_get( void ) {
 	asm_line.set( "LD",		"",		"[hl]", "d" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "POP",	"",		"hl" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD",		"",		"de", "[work_buf + 256]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "JR",		"",		"sub_get_loop" );
 	this->subroutines.push_back( asm_line );

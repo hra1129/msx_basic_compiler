@@ -209,7 +209,12 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 	else {
-		asm_line.set( "LD", "", "[work_ptrfil + 1]", "A" );
+		asm_line.set( "LD", "", "H", "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "L", "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_ptrfil]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
 	}
 
 	has_semicolon = false;
