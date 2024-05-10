@@ -23,8 +23,14 @@ BIOS_IMULT                      = 0X03193
 BIOS_ERRHAND                    = 0X0406F
 WORK_PTRFIL                     = 0X0F864
 BLIB_LSET                       = 0X04075
-BLIB_PUT                        = 0X40FC
 BLIB_RSET                       = 0X04078
+BLIB_PUT                        = 0X40FC
+_SET_DTA                        = 0X1A
+_RDBLK                          = 0X27
+BDOS                            = 0XF37D
+WORK_BUF                        = 0X0F55E
+BLIB_FILE_PUTS                  = 0X040ED
+WORK_PRTFLG                     = 0X0F416
 BLIB_FCLOSE                     = 0X04063
 WORK_FILTAB                     = 0XF860
 WORK_ERRFLG                     = 0X0F414
@@ -93,8 +99,7 @@ LINE_110:
         PUSH        HL
         LD          HL, 1
         PUSH        HL
-        LD          HL, 30
-        LD          A, L
+        LD          A, 30
         POP         DE
         POP         HL
         CALL        SUB_OPEN_FOR_NONE
@@ -104,14 +109,12 @@ LINE_120:
         LD          DE, 37
         ADD         HL, DE
         PUSH        HL
-        LD          HL, 10
-        LD          A, L
+        LD          A, 10
         POP         DE
         LD          HL, VARS_A
         CALL        SUB_FIELD
         PUSH        HL
-        LD          HL, 20
-        LD          A, L
+        LD          A, 20
         POP         DE
         LD          HL, VARS_B
         CALL        SUB_FIELD
@@ -144,24 +147,33 @@ LINE_130:
         CALL        FREE_STRING
         LD          HL, VARS_B
         PUSH        HL
-        LD          HL, [VARS_A]
-        CALL        COPY_STRING
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        LD          A, [DE]
+        PUSH        AF
+        EX          DE, HL
+        CALL        FREE_STRING
+        POP         AF
+        CALL        ALLOCATE_STRING
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
+        PUSH        HL
         LD          [HL], E
         INC         HL
-        LD          B, [HL]
         LD          [HL], D
-        LD          L, C
-        LD          H, B
+        LD          HL, STR_3
+        POP         DE
+        EX          DE, HL
+        PUSH        DE
+        LD          IX, BLIB_RSET
+        CALL        CALL_BLIB
+        POP         HL
         CALL        FREE_STRING
 LINE_140:
         LD          HL, 1
         CALL        SUB_FILE_NUMBER
-        PUSH        HL
         LD          HL, 1
-        POP         DE
         LD          IX, BLIB_PUT
         CALL        CALL_BLIB
 LINE_150:
@@ -182,7 +194,7 @@ LINE_150:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, STR_3
+        LD          HL, STR_4
         POP         DE
         EX          DE, HL
         PUSH        DE
@@ -207,7 +219,7 @@ LINE_150:
         LD          [HL], E
         INC         HL
         LD          [HL], D
-        LD          HL, STR_4
+        LD          HL, STR_5
         POP         DE
         EX          DE, HL
         PUSH        DE
@@ -218,12 +230,97 @@ LINE_150:
 LINE_160:
         LD          HL, 1
         CALL        SUB_FILE_NUMBER
-        PUSH        HL
         LD          HL, 3
-        POP         DE
         LD          IX, BLIB_PUT
         CALL        CALL_BLIB
 LINE_170:
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, 1
+        CALL        SUB_GET
+LINE_180:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          H, A
+        LD          L, A
+        LD          [WORK_PTRFIL], HL
+        LD          HL, STR_6
+        CALL        PUTS
+        LD          HL, [VARS_A]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_7
+        CALL        PUTS
+        LD          HL, [VARS_B]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_8
+        CALL        PUTS
+LINE_190:
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, 2
+        CALL        SUB_GET
+LINE_200:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          H, A
+        LD          L, A
+        LD          [WORK_PTRFIL], HL
+        LD          HL, STR_9
+        CALL        PUTS
+        LD          HL, [VARS_A]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_7
+        CALL        PUTS
+        LD          HL, [VARS_B]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_8
+        CALL        PUTS
+LINE_210:
+        LD          HL, 1
+        CALL        SUB_FILE_NUMBER
+        LD          HL, 3
+        CALL        SUB_GET
+LINE_220:
+        XOR         A, A
+        LD          [WORK_PRTFLG], A
+        LD          H, A
+        LD          L, A
+        LD          [WORK_PTRFIL], HL
+        LD          HL, STR_10
+        CALL        PUTS
+        LD          HL, [VARS_A]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_7
+        CALL        PUTS
+        LD          HL, [VARS_B]
+        CALL        COPY_STRING
+        PUSH        HL
+        CALL        PUTS
+        POP         HL
+        CALL        FREE_STRING
+        LD          HL, STR_8
+        CALL        PUTS
+LINE_230:
         LD          HL, 1
 PROGRAM_TERMINATION:
         CALL        SUB_TERMINATION
@@ -549,6 +646,82 @@ COPY_STRING:
         LDIR        
         POP         HL
         RET         
+; [work_ptrfil] ... Address of FILE_INFO
+SUB_GET:
+        LD          DE, [WORK_PTRFIL]
+        LD          A, [DE]
+        OR          A, A
+        LD          E, 59
+        JP          Z, BIOS_ERRHAND
+        CP          A, 9
+        LD          E, 61
+        JP          NC, BIOS_ERRHAND
+        DEC         HL
+        EX          DE, HL
+        LD          HL, [WORK_PTRFIL]
+        LD          BC, 33
+        ADD         HL, BC
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        LD          DE, WORK_BUF + 1
+        LD          C, _SET_DTA
+        CALL        BDOS
+        LD          DE, [WORK_PTRFIL]
+        LD          HL, 1
+        LD          C, _RDBLK
+        CALL        BDOS
+        LD          HL, [WORK_PTRFIL]
+        LD          DE, 37
+        ADD         HL, DE
+        LD          DE, WORK_BUF
+        LD          [WORK_BUF + 256], DE
+SUB_GET_LOOP:
+        LD          A, [HL]
+        OR          A, A
+        RET         Z
+        LD          [DE], A
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        INC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        DEC         HL
+        PUSH        HL
+        EX          DE, HL
+        CALL        FREE_STRING
+        LD          HL, [WORK_BUF + 256]
+        LD          E, [HL]
+        LD          D, 0
+        ADD         HL, DE
+        LD          DE, [WORK_BUF + 256]
+        LD          [WORK_BUF + 256], HL
+        EX          DE, HL
+        CALL        COPY_STRING
+        POP         DE
+        EX          DE, HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        POP         HL
+        LD          DE, [WORK_BUF + 256]
+        JR          SUB_GET_LOOP
+PUTS:
+        LD          B, [HL]
+        INC         B
+        DEC         B
+        RET         Z
+_PUTS_LOOP:
+        INC         HL
+        LD          A, [HL]
+        RST         0X18
+        DJNZ        _PUTS_LOOP
+        RET         
 SUB_CLOSE:
         LD          A, [WORK_MAXFIL]
         LD          E, 52
@@ -713,12 +886,24 @@ STR_0:
         DEFB        0X00
 STR_1:
         DEFB        0X08, 0X48, 0X4F, 0X47, 0X45, 0X2E, 0X54, 0X58, 0X54
+STR_10:
+        DEFB        0X05, 0X52, 0X45, 0X43, 0X33, 0X3A
 STR_2:
         DEFB        0X0A, 0X30, 0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39
 STR_3:
-        DEFB        0X06, 0X30, 0X30, 0X31, 0X31, 0X32, 0X32
+        DEFB        0X07, 0X41, 0X42, 0X43, 0X44, 0X45, 0X46, 0X47
 STR_4:
+        DEFB        0X06, 0X30, 0X30, 0X31, 0X31, 0X32, 0X32
+STR_5:
         DEFB        0X07, 0X61, 0X62, 0X63, 0X64, 0X65, 0X66, 0X67
+STR_6:
+        DEFB        0X05, 0X52, 0X45, 0X43, 0X31, 0X3A
+STR_7:
+        DEFB        0X01, 0X3A
+STR_8:
+        DEFB        0X02, 0X0D, 0X0A
+STR_9:
+        DEFB        0X05, 0X52, 0X45, 0X43, 0X32, 0X3A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
