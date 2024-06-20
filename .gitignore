@@ -5,4 +5,7 @@
 *.idb
 *.ipdb
 *.iobj
+*.ilk
 .vs
+/msx_basic_compiler/msx_basi.ea90cff4/Debug/*.ilk
+*.recipe
