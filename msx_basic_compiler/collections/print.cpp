@@ -168,6 +168,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "blib_file_puts", "0x040ed" );
 	p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
+	p_info->assembler_list.add_label( "work_ptrfil", "0x0f864" );
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
 		//	LPRINT �̏ꍇ
 		asm_line.set( "LD", "", "A", "1" );
