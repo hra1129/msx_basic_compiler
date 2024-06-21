@@ -41,6 +41,7 @@ void CEXPRESSION_FIX::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "bios_fixer", "0x030be" );
 	if( this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
 		this->type = CEXPRESSION_TYPE::INTEGER;
+		return;
 	}
 	else if( this->p_operand->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
 		p_info->assembler_list.add_label( "bios_frcsng", "0x02fb2" );
