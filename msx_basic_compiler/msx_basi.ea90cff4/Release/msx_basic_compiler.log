@@ -1,5 +1,4 @@
-﻿  assembler_line.cpp
-  assembler_list.cpp
+﻿  assembler_list.cpp
   basic_list.cpp
   beep.cpp
   bload.cpp
@@ -18,8 +17,8 @@
   defint.cpp
   defsng.cpp
   defstr.cpp
-  コンパイル中...
   defusr.cpp
+  コンパイル中...
   dim.cpp
   end.cpp
   erase.cpp
@@ -39,8 +38,8 @@
   line.cpp
   locate.cpp
   lset.cpp
-  コンパイル中...
   mid.cpp
+  コンパイル中...
   name.cpp
   next.cpp
   on_goto.cpp
@@ -60,8 +59,8 @@
   pset.cpp
   put.cpp
   put_sprite.cpp
-  コンパイル中...
   read.cpp
+  コンパイル中...
   restore.cpp
   return.cpp
   run.cpp
@@ -79,12 +78,10 @@
   vpokes.cpp
   width.cpp
   compiler.cpp
-  double_real.cpp
-  error_list.cpp
-  コンパイル中...
   expression.cpp
   expression_abs.cpp
   expression_asc.cpp
+  コンパイル中...
   expression_atn.cpp
   expression_base.cpp
   expression_bin.cpp
@@ -102,10 +99,10 @@
   expression_fix.cpp
   expression_fre.cpp
   expression_function.cpp
-  コンパイル中...
   expression_hex.cpp
   expression_hexchr.cpp
   expression_inkey.cpp
+  コンパイル中...
   expression_inp.cpp
   expression_input.cpp
   expression_instr.cpp
@@ -123,10 +120,10 @@
   expression_operator_add.cpp
   expression_operator_and.cpp
   expression_operator_div.cpp
-  コンパイル中...
   expression_operator_equ.cpp
   expression_operator_eqv.cpp
   expression_operator_ge.cpp
+  コンパイル中...
   expression_operator_gt.cpp
   expression_operator_imp.cpp
   expression_operator_intdiv.cpp
@@ -144,10 +141,10 @@
   expression_pad.cpp
   expression_peek.cpp
   expression_peeks.cpp
-  コンパイル中...
   expression_peekw.cpp
   expression_point.cpp
   expression_right.cpp
+  コンパイル中...
   expression_rnd.cpp
   expression_sgn.cpp
   expression_sin.cpp
@@ -165,15 +162,14 @@
   expression_variable.cpp
   expression_varptr.cpp
   expression_vdp.cpp
-  コンパイル中...
   expression_vpeek.cpp
   expression_vpeeks.cpp
   msx_basic_compiler.cpp
-  single_real.cpp
-  string_value.cpp
+  コンパイル中...
   variable_manager.cpp
   コード生成しています。
-  Previous IPDB not found, fall back to full compilation.
-  All 2450 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  250 of 2458 functions (10.2%) were compiled, the rest were copied from previous compilation.
+    2 functions were new in current compilation
+    88 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe
