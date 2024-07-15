@@ -1,5 +1,4 @@
-﻿  assembler_line.cpp
-  assembler_list.cpp
+﻿  assembler_list.cpp
   basic_list.cpp
   beep.cpp
   bload.cpp
@@ -18,9 +17,9 @@
   defint.cpp
   defsng.cpp
   defstr.cpp
+  defusr.cpp
   コードを生成中...
   コンパイル中...
-  defusr.cpp
   dim.cpp
   end.cpp
   erase.cpp
@@ -40,9 +39,9 @@
   line.cpp
   locate.cpp
   lset.cpp
+  mid.cpp
   コードを生成中...
   コンパイル中...
-  mid.cpp
   name.cpp
   next.cpp
   on_goto.cpp
@@ -62,9 +61,9 @@
   pset.cpp
   put.cpp
   put_sprite.cpp
+  read.cpp
   コードを生成中...
   コンパイル中...
-  read.cpp
   restore.cpp
   return.cpp
   run.cpp
@@ -82,13 +81,11 @@
   vpokes.cpp
   width.cpp
   compiler.cpp
-  double_real.cpp
-  error_list.cpp
-  コードを生成中...
-  コンパイル中...
   expression.cpp
   expression_abs.cpp
   expression_asc.cpp
+  コードを生成中...
+  コンパイル中...
   expression_atn.cpp
   expression_base.cpp
   expression_bin.cpp
@@ -106,11 +103,11 @@
   expression_fix.cpp
   expression_fre.cpp
   expression_function.cpp
-  コードを生成中...
-  コンパイル中...
   expression_hex.cpp
   expression_hexchr.cpp
   expression_inkey.cpp
+  コードを生成中...
+  コンパイル中...
   expression_inp.cpp
   expression_input.cpp
   expression_instr.cpp
@@ -128,11 +125,11 @@
   expression_operator_add.cpp
   expression_operator_and.cpp
   expression_operator_div.cpp
-  コードを生成中...
-  コンパイル中...
   expression_operator_equ.cpp
   expression_operator_eqv.cpp
   expression_operator_ge.cpp
+  コードを生成中...
+  コンパイル中...
   expression_operator_gt.cpp
   expression_operator_imp.cpp
   expression_operator_intdiv.cpp
@@ -150,11 +147,11 @@
   expression_pad.cpp
   expression_peek.cpp
   expression_peeks.cpp
-  コードを生成中...
-  コンパイル中...
   expression_peekw.cpp
   expression_point.cpp
   expression_right.cpp
+  コードを生成中...
+  コンパイル中...
   expression_rnd.cpp
   expression_sgn.cpp
   expression_sin.cpp
@@ -172,13 +169,11 @@
   expression_variable.cpp
   expression_varptr.cpp
   expression_vdp.cpp
-  コードを生成中...
-  コンパイル中...
   expression_vpeek.cpp
   expression_vpeeks.cpp
   msx_basic_compiler.cpp
-  single_real.cpp
-  string_value.cpp
+  コードを生成中...
+  コンパイル中...
   variable_manager.cpp
   コードを生成中...
   msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\x64\Debug\msx_bacon.exe

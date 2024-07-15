@@ -288,11 +288,14 @@ int CBASIC_LIST::get_2bytes( void ) {
 }
 
 // --------------------------------------------------------------------
-void CBASIC_LIST::skip_white_space( void ) {
+bool CBASIC_LIST::skip_white_space( void ) {
+	int n = 0;
 
 	while( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == ' ' || this->p_file_image[0] == '\t' || this->p_file_image[0] == '\r' || this->p_file_image[0] == 26) ) {
 		this->p_file_image++;
+		n++;
 	}
+	return( n != 0 );
 }
 
 // --------------------------------------------------------------------
@@ -308,9 +311,9 @@ int CBASIC_LIST::get_integer( void ) {
 }
 
 // --------------------------------------------------------------------
-CBASIC_WORD CBASIC_LIST::get_word( void ) {
+std::string CBASIC_LIST::get_word( void ) {
 	int i, number;
-	CBASIC_WORD s_word;
+	std::string s_word;
 	char s[32];
 
 	//	スペースは読み飛ばす
@@ -318,67 +321,61 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 	if( *(this->p_file_image) == 0x0B || *( this->p_file_image ) == 0x0C || *( this->p_file_image ) == 0x1C ) {
 		//	2byte の値だった場合
 		this->p_file_image++;
-		s_word.s_word = std::to_string( this->get_2bytes() );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
+		s_word = std::to_string( this->get_2bytes() );
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x0E ) {
 		//	行番号だった場合
 		this->p_file_image++;
 		number = this->get_2bytes();
-		s_word.s_word = std::to_string( number );
-		s_word.type = CBASIC_WORD_TYPE::LINE_NO;
+		s_word = std::to_string( number );
 		this->jump_target_line_no.push_back( number );
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x0F ){
 		//	1byte の値だった場合
 		this->p_file_image++;
-		s_word.s_word = std::to_string( this->get_1byte() );
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
+		s_word = std::to_string( this->get_1byte() );
 		return s_word;
 	}
 	if( *( this->p_file_image ) >= 0x11 && *( this->p_file_image ) <= 0x1A ){
 		//	1桁の数値だった場合
-		s_word.s_word = std::to_string( *( this->p_file_image ) - 0x11 );
+		s_word = std::to_string( *( this->p_file_image ) - 0x11 );
 		this->p_file_image++;
-		s_word.type = CBASIC_WORD_TYPE::INTEGER;
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x1D ) {
 		//	単精度浮動小数点数だった場合
 		this->p_file_image++;
-		s_word.s_word = "";
+		s_word = "";
 		for( i = 0; i < 4; i++ ) {
 			sprintf( s, "%02X", this->p_file_image[0] );
-			s_word.s_word = s_word.s_word + s;
+			s_word = s_word + s;
 			this->p_file_image++;
 		}
-		s_word.type = CBASIC_WORD_TYPE::SINGLE_REAL;
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x1F ){
 		//	倍精度浮動小数点数だった場合
 		this->p_file_image++;
-		s_word.s_word = "";
+		s_word = "";
 		for( i = 0; i < 4; i++ ) {
 			sprintf( s, "%02X", this->p_file_image[0] );
-			s_word.s_word = s_word.s_word + s;
+			s_word = s_word + s;
 			this->p_file_image++;
 		}
-		s_word.type = CBASIC_WORD_TYPE::DOUBLE_REAL;
 		return s_word;
 	}
 	if( *( this->p_file_image ) == '"' ) {
 		//	文字列だった場合
-		s_word.s_word = "";
-		s_word.type = CBASIC_WORD_TYPE::STRING;
+		s_word = "\"";
 		this->p_file_image++;
 		while( *(this->p_file_image) != '\"' && *(this->p_file_image) != 0 ){
-			s_word.s_word = s_word.s_word + (char)*(this->p_file_image);
+			s_word = s_word + (char)*(this->p_file_image);
 			this->p_file_image++;
 		}
 		if( *(this->p_file_image) == '\"' ) {
+			s_word = s_word + "\"";
 			this->p_file_image++;
 		}
 		return s_word;
@@ -393,14 +390,12 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 				number = (number << 1) | ( *(this->p_file_image) - '0' );
 				this->p_file_image++;
 			}
-			s_word.s_word = std::to_string( number );
-			s_word.type = CBASIC_WORD_TYPE::INTEGER;
+			s_word = std::to_string( number );
 			return s_word;
 		}
 		else {
 			//	'&' だった場合
-			s_word.s_word = '&';
-			s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+			s_word = '&';
 			return s_word;
 		}
 	}
@@ -416,24 +411,21 @@ CBASIC_WORD CBASIC_LIST::get_word( void ) {
 		if( p_code == p->code.end() ) {
 			//	予約語コードと一致した場合、その予約語を返す
 			this->p_file_image += i;
-			s_word.s_word = p->s_name;
-			s_word.type = CBASIC_WORD_TYPE::RESERVED_WORD;
+			s_word = p->s_name;
 			return s_word;
 		}
 	}
 	//	予約語でない記号があるか調べる
 	if( !isalpha(this->p_file_image[0] & 255) ) {
-		s_word.s_word = (char)this->p_file_image[0];
-		s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+		s_word = (char)this->p_file_image[0];
 		this->p_file_image++;
 		return s_word;
 	}
 	//	変数名などアルファベットで始まる単語の場合
-	s_word.s_word = "";
-	s_word.type = CBASIC_WORD_TYPE::UNKNOWN_NAME;
+	s_word = "";
 	while( this->p_file_image != this->file_image.end() ) {
 		if( isalpha(this->p_file_image[0] & 255) || isdigit(this->p_file_image[0] & 255) ) {
-			s_word.s_word = s_word.s_word + (char)this->p_file_image[0];
+			s_word = s_word + (char)this->p_file_image[0];
 		}
 		else {
 			break;
@@ -737,14 +729,13 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 }
 
 // --------------------------------------------------------------------
-CBASIC_WORD CBASIC_LIST::get_comment( void ) {
-	CBASIC_WORD s_word;
+std::string CBASIC_LIST::get_comment( void ) {
+	std::string s_word;
 
-	s_word.s_word = "";
-	s_word.type = CBASIC_WORD_TYPE::COMMENT;
+	s_word = "";
 	while( this->p_file_image != this->file_image.end() && this->p_file_image[0] != 0 && this->p_file_image[0] != '\n' ) {
 		if( this->p_file_image[0] != '\r' ) {
-			s_word.s_word = s_word.s_word + (char)this->p_file_image[0];
+			s_word = s_word + (char)this->p_file_image[0];
 		}
 		this->p_file_image++;
 	}
@@ -754,12 +745,16 @@ CBASIC_WORD CBASIC_LIST::get_comment( void ) {
 // --------------------------------------------------------------------
 bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 	int next_address;
-	CBASIC_WORD s_word;
+	std::string s_word;
+	CBASIC_WORD b_word;
 	bool is_data = false;
+	std::vector< std::string > text_code;
+	std::string s;
 
 	//	skip 0xFF
 	this->p_file_image++;
 
+	//	中間コードをテキストに変換する
 	while( this->p_file_image != this->file_image.end() ) {
 		//	次の行のアドレスと行番号 を取得
 		next_address = this->get_2bytes();
@@ -768,33 +763,54 @@ bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 			break;
 		}
 		line_no = this->get_2bytes();
+		s = std::to_string( line_no ) + " ";
+		text_code.push_back( s );
 		//	行内の解釈
 		while( this->p_file_image != this->file_image.end() && (this->p_file_image[0] != 0) ) {
-			//	単語を1つ取得して、行番号を付与してリストに追加
-			s_word = this->get_word();
-			s_word.line_no = line_no;
-			this->words.push_back( s_word );
-			if( !is_data && (s_word.s_word == "DATA" || s_word.s_word == "HEXDATA" || s_word.s_word == "BINDATA") && s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD ) {
-				is_data = true;
+			if( this->skip_white_space() ) {
+				s = " ";
+				text_code.push_back( s );
 			}
-			else if( is_data ) {
-				this->skip_white_space();
-				s_word = this->get_data_word();
-				this->words.push_back( s_word );
+			//	単語を1つ取得して、行番号を付与してリストに追加
+			if( is_data ) {
+				b_word = this->get_data_word();
+				if( b_word.type == CBASIC_WORD_TYPE::STRING ) {
+					s = "\"" + b_word.s_word + "\"";
+				}
+				else {
+					s = b_word.s_word;
+				}
+				text_code.push_back( s );
 				if( this->p_file_image != this->file_image.end() && (this->p_file_image[0] == ',') ) {
 					this->p_file_image++;
 					is_data = true;
+					s = ",";
+					text_code.push_back( s );
 				}
 				else {
 					is_data = false;
 				}
 			}
-			else if( s_word.type == CBASIC_WORD_TYPE::RESERVED_WORD && (s_word.s_word == "'" || s_word.s_word == "REM") ) {
-				this->skip_white_space();
-				s_word = this->get_comment();
-				s_word.line_no = line_no;
-				this->words.push_back( s_word );
-				break;
+			else {
+				s_word = this->get_word();
+				if( !is_data && ( s_word == "DATA" || s_word == "HEXDATA" || s_word == "BINDATA" ) ) {
+					is_data = true;
+					s = s_word + " ";
+					text_code.push_back( s );
+				}
+				else if( s_word == "'" || s_word == "REM" ) {
+					s = s_word + " ";
+					text_code.push_back( s );
+					this->skip_white_space();
+					s_word = this->get_comment();
+					s = s_word;
+					text_code.push_back( s );
+					break;
+				}
+				else {
+					s = s_word;
+					text_code.push_back( s );
+				}
 			}
 		}
 		if( this->p_file_image == this->file_image.end() ) {
@@ -802,8 +818,18 @@ bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 			errors.add( "Cannot find terminator code.", line_no );
 			return false;
 		}
+		s = "\r\n";
+		text_code.push_back( s );
 		this->p_file_image++;
 	}
+	//	テキストに置き換える
+	this->file_image.resize( 0 );
+	for( std::string &basic_word : text_code ) {
+		for( char c : basic_word ) {
+			this->file_image.push_back( c );
+		}
+	}
+	this->p_file_image = this->file_image.begin();
 	return true;
 }
 
@@ -880,7 +906,8 @@ bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 			this->words.push_back( s_word );
 			this->skip_white_space();
 			if( s_word.s_word == "'" || s_word.s_word == "REM" ) {
-				s_word = this->get_comment();
+				s_word.s_word = this->get_comment();
+				s_word.type = CBASIC_WORD_TYPE::COMMENT;
 				s_word.line_no = line_no;
 				this->words.push_back( s_word );
 				break;
@@ -923,6 +950,10 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 	if( this->check_binary_program( p_in ) ) {
 		this->s_source_type = "Precompiled code";
 		result = this->load_binary( errors );
+		if( !result ) {
+			return false;
+		}
+		result = this->load_ascii( errors );
 	}
 	else {
 		this->s_source_type = "ASCII code";

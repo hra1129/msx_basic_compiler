@@ -46,15 +46,15 @@ private:
 
 	bool check_binary_program( FILE *p_file );
 	bool load_file( FILE *p_file );
-	void skip_white_space( void );
+	bool skip_white_space( void );
 	int get_integer( void );
 	int get_1byte( void );
 	int get_2bytes( void );
 	std::string get_word_in_charlist( const char *p_charlist, bool ignore_space = false );
 	std::string get_char_in_charlist( const char *p_charlist, bool ignore_space = false );
 	CBASIC_WORD get_decimal( const std::string s, const std::string s_type );
-	CBASIC_WORD get_comment( void );
-	CBASIC_WORD get_word( void );
+	std::string get_comment( void );
+	std::string get_word( void );
 	CBASIC_WORD get_ascii_word( bool label_ok );
 	CBASIC_WORD get_data_word( void );
 
