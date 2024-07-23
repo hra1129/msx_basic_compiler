@@ -1357,11 +1357,11 @@ sub_putsprite::
 			ei
 			ld		h, a				; H = スプライト番号
 			ld		a, [scrmod]
-			dec		a
-			cp		a, 12
+			cp		a, 12+1
 			jp		nc, err_syntax
-			cp		a, 3
+			cp		a, 4
 			jr		nc, _sprite_mode2
+	; スプライトモード1の場合 -------------------------------------------------
 	_sprite_mode1:
 			; スプライトアトリビュートを求める
 			ld		a, h				; A = スプライト番号
@@ -1423,15 +1423,19 @@ sub_putsprite::
 	_skip_col1:
 			ei
 			ret
+	; スプライトモード2の場合 -------------------------------------------------
 	_sprite_mode2:
 			; スプライトアトリビュートを求める
 			ld		a, h
-			ld		[buf + 0], a
+			and		a, 31
+			ld		[buf + 0], a		; buf[0] にスプライト番号を保存
 			push	de					; パターンと色保存
 			push	hl					; フラグ保存
-			call	calatr
+			call	calatr				; 破壊: AF, DE, HL
 			pop		de					; フラグ復帰
 			ld		a, e				; A = フラグ
+			ld		[buf + 1], a		; buf[1] にフラグを保存
+			ld		[buf + 2], hl		; buf[2], buf[3] にアトリビュートのアドレスを保存
 			; 座標指定
 			rrca
 			jr		nc, _skip_pos2
@@ -1441,6 +1445,7 @@ sub_putsprite::
 			out		[vdpport0], a		; Y座標
 			ld		a, b
 			out		[vdpport0], a		; X座標
+			ld		[buf + 4], bc		; buf[4] に Y座標, buf[5] に X座標を保存
 			ld		a, e
 	_skip_pos2:
 			inc		hl
@@ -1470,7 +1475,7 @@ sub_putsprite::
 			;	SCREEN 4   : 1E00h-1E7Fh 1C00h-1DFFh
 			;	SCREEN 5,6 : 7600h-767Fh 7400h-75FFh
 			;	SCREEN 7-12: FA00h-FA7Fh F800h-F9FFh
-			ld		a, h
+			ld		a, [buf + 3]
 			and		a, 0xFC
 			rrca
 			ld		h, a
@@ -1487,6 +1492,63 @@ sub_putsprite::
 			out		[vdpport0], a		; 色
 			djnz	_loop1
 	_skip_col2:
+			; X, Y座標変更したか？
+			ld		a, [buf + 1]
+			rrca
+			ret		nc					; X, Y 変更無しならここで終了
+			; 自身の CCビットは立っているか？
+			ld		a, [buf + 3]
+			and		a, 0xFC
+			rrca
+			ld		h, a
+			ld		a, l
+			and		a, 0x7C
+			add		a, a
+			add		a, a
+			ld		l, a
+			rl		h
+			call	nsetrd				; AFだけ破壊
+			in		a, [vdpport0]
+			and		a, 0x40				; CCビット以外をマスク
+			ret		nz					; CCビットが立っていれば、ここで終了
+			; CCビット = 1 の数を数える
+			ld		b, 1				; 1つ多めにして置いて、最後に dec b して 0 判定する
+			ld		a, [buf + 0]
+			xor		a, 31
+			ld		c, a				; 残りカウント: C = スプライト番号 xor 31
+			inc		c
+			ld		de, 16
+	_cc_count_loop:
+			dec		c
+			jr		z, _cc_count_exit
+			add		hl, de
+			call	nsetrd				; AFだけ破壊
+			in		a, [vdpport0]
+			and		a, 0x40				; CCビット以外をマスク
+			jr		z, _cc_count_exit
+			inc		b					; CC=1 だったのでカウントアップ
+			jr		_cc_count_loop
+	_cc_count_exit:
+			dec		b
+			ret		z					; CC=1 が一つも無い場合は、ここで終了
+			; CCビット = 1 のスプライトの座標を更新する
+			ld		hl, [buf + 2]		; buf[2], buf[3] からアトリビュートのアドレスを復元
+			inc		hl
+			inc		hl
+			inc		hl
+			inc		hl
+			call	nstwrt				; AFだけ破壊
+			ld		de, [buf + 4]		; buf[4], buf[5] から Y座標・X座標を復元
+	_cc_xy_update_loop:
+			ld		a, e
+			out		[vdpport0], a
+			ld		a, d
+			out		[vdpport0], a
+			nop
+			in		a, [vdpport0]
+			nop
+			in		a, [vdpport0]
+			djnz	_cc_xy_update_loop
 			ret
 			endscope
 
@@ -1527,8 +1589,9 @@ sub_colorsprite::
 			rlca
 			rlca
 			rlca
-			rlca
+			rlca						; 桁あふれは Cf へ
 			ld		l, a
+			ld		a, 0				; Cf破壊しないように LD で 0
 			adc		a, h
 			ld		h, a				; HL = カラーテーブルのアドレス
 			ld		a, c				; A = 色
