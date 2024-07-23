@@ -6,7 +6,7 @@
     <LocalDebuggerWorkingDirectory>.\test002</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-O3 test.bas test.asm</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-O3 test.asc test.asm</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>.\test002</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
