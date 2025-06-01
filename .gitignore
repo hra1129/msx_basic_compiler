@@ -6,6 +6,7 @@
 *.ipdb
 *.iobj
 *.ilk
-.vs
+.vs/
 /msx_basic_compiler/msx_basi.ea90cff4
 *.recipe
+*.log
