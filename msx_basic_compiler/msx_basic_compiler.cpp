@@ -62,6 +62,7 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 			}
 			else if( s == "-start" && (i + 1) != argc ) {
 				this->start_address = atoi( argv[i + 1] );
+				i++;
 				if( this->start_address < 32768 ) {
 					this->start_address = 32768;
 				}
@@ -71,6 +72,7 @@ bool COPTIONS::parse_options( char *argv[], int argc ) {
 			}
 			else if( s == "-stack" && (i + 1) != argc ) {
 				this->stack_size = atoi( argv[i + 1] );
+				i++;
 				if( this->stack_size < 0 ) {
 					this->stack_size = 0;
 				}
