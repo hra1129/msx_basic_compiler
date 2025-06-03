@@ -131,6 +131,8 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		//	-- X座標
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::RLC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "" );	//	符号を Cf へ
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "C" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "L" );
@@ -144,6 +146,8 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	//	-- パラメーター省略フラグ
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, std::to_string( active_flag ) );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::RL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	//	-- 呼び出し
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::CONSTANT, "blib_putsprite" );

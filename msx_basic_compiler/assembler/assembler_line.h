@@ -74,6 +74,8 @@ enum class CMNEMONIC_TYPE: int {
 	RRCA,
 	DI,
 	EI,
+	CPIR,
+	CPDR,
 };
 
 enum class CCONDITION: int {

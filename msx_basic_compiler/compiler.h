@@ -99,6 +99,71 @@ private:
 		return 999;
 	}
 
+	bool is_flag_change( std::vector< CASSEMBLER_LINE >::iterator p ) {
+		if( p->type == CMNEMONIC_TYPE::COMMENT || p->type == CMNEMONIC_TYPE::LABEL || p->type == CMNEMONIC_TYPE::CONSTANT ) {
+			return false;
+		}
+		if( ( p->type == CMNEMONIC_TYPE::EX || p->type == CMNEMONIC_TYPE::POP ) && p->operand1.s_value == "AF" ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::RR || p->type == CMNEMONIC_TYPE::RL || p->type == CMNEMONIC_TYPE::RRC || p->type == CMNEMONIC_TYPE::RLC ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::SLA || p->type == CMNEMONIC_TYPE::SRA || p->type == CMNEMONIC_TYPE::SRL ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::AND || p->type == CMNEMONIC_TYPE::OR || p->type == CMNEMONIC_TYPE::XOR || p->type == CMNEMONIC_TYPE::NEG || p->type == CMNEMONIC_TYPE::CPL ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::ADD || p->type == CMNEMONIC_TYPE::ADC || p->type == CMNEMONIC_TYPE::SUB || p->type == CMNEMONIC_TYPE::SBC || p->type == CMNEMONIC_TYPE::CP ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::RLCA || p->type == CMNEMONIC_TYPE::RRCA || p->type == CMNEMONIC_TYPE::RLA || p->type == CMNEMONIC_TYPE::RRA ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::OTIR || p->type == CMNEMONIC_TYPE::OUTI || p->type == CMNEMONIC_TYPE::INIR || p->type == CMNEMONIC_TYPE::INI ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::OTDR || p->type == CMNEMONIC_TYPE::OUTD || p->type == CMNEMONIC_TYPE::INDR || p->type == CMNEMONIC_TYPE::IND ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::CPI || p->type == CMNEMONIC_TYPE::CPIR || p->type == CMNEMONIC_TYPE::CPD || p->type == CMNEMONIC_TYPE::CPDR ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::DJNZ || p->type == CMNEMONIC_TYPE::BIT ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::CCF || p->type == CMNEMONIC_TYPE::SCF ) {
+			return true;
+		}
+		if( (p->type == CMNEMONIC_TYPE::INC || p->type == CMNEMONIC_TYPE::DEC) && check_16bit_register( p->operand1.s_value ) == 999 ) {
+			return true;
+		}
+		return false;
+	}
+
+	bool use_flag_command( std::vector< CASSEMBLER_LINE >::iterator p ) {
+		if( p->type == CMNEMONIC_TYPE::COMMENT || p->type == CMNEMONIC_TYPE::LABEL || p->type == CMNEMONIC_TYPE::CONSTANT ) {
+			return false;
+		}
+		if( p->type == CMNEMONIC_TYPE::RR || p->type == CMNEMONIC_TYPE::RL ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::SLA || p->type == CMNEMONIC_TYPE::SRA || p->type == CMNEMONIC_TYPE::SRL ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::ADC || p->type == CMNEMONIC_TYPE::SBC ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::RLA || p->type == CMNEMONIC_TYPE::RRA ) {
+			return true;
+		}
+		if( p->type == CMNEMONIC_TYPE::CCF ) {
+			return true;
+		}
+		return false;
+	}
+
 public:
 	CCOMPILE_INFO info;
 

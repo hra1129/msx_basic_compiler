@@ -1833,6 +1833,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	std::string s_word;
 	std::string s_rp1;
 	int count;
+	bool replace_ok;
 
 	//	push rp; pop rp を削除する
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -1990,23 +1991,41 @@ void CCOMPILER::optimize_push_pop( void ) {
 			}
 			if( p_next->type == CMNEMONIC_TYPE::LD && p_next->operand1.type == COPERAND_TYPE::REGISTER && p_next->operand1.s_value == "A" && p_next->operand2.type == COPERAND_TYPE::REGISTER && p_next->operand2.s_value == "L" ) {
 				this->info.assembler_list.body.erase( p_next );
-				if( p->operand2.s_value == "0" ) {
-					p->operand2.s_value = "A";
-					p->operand2.type = COPERAND_TYPE::REGISTER;
-					p->type = CMNEMONIC_TYPE::XOR;
-					p->operand1.s_value = "A";
+				p->operand1.s_value = "A";
+				if( is_integer( p->operand2.s_value ) ) {
+					p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) & 255 );
 				}
 				else {
-					p->operand1.s_value = "A";
-					if( is_integer( p->operand2.s_value ) ) {
-						p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) & 255 );
-					}
-					else {
-						p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";
-					}
+					p->operand2.s_value = "(" + p->operand2.s_value + ") & 255";
 				}
 			}
 		}
+	}
+
+	//	LD A, 0
+	//	↓
+	//	XOR A, A
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+		if( p->type != CMNEMONIC_TYPE::LD || p->operand1.type != COPERAND_TYPE::REGISTER || p->operand1.s_value != "A" || p->operand2.type != COPERAND_TYPE::CONSTANT ) {
+			continue;
+		}
+		//	LD A,0 の次以降に、フラグを使う命令よりも前に、フラグを変化させる命令があるか？
+		replace_ok = false;
+		for( p_next = p + 1; p != this->info.assembler_list.body.end(); p_next++ ) {
+			if( is_flag_change( p_next ) ) {
+				replace_ok = true;
+				break;
+			}
+			if( p_next->type == CMNEMONIC_TYPE::LD && p_next->operand1.type == COPERAND_TYPE::REGISTER && p_next->operand1.s_value == "A" ) {
+				replace_ok = true;
+				break;
+			}
+			if( use_flag_command( p_next ) ) {
+				replace_ok = false;
+				break;
+			}
+		}
+		
 	}
 
 	//	0: LD HL, constant1
@@ -2274,6 +2293,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	↓
 	//	  :
 	//	LD rp1, constant
+	//	※ : のところにラベルがある場合は非該当
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type != CMNEMONIC_TYPE::LD || p->operand1.type != COPERAND_TYPE::REGISTER || p->operand2.type != COPERAND_TYPE::CONSTANT ) {
 			continue;
@@ -2285,6 +2305,9 @@ void CCOMPILER::optimize_push_pop( void ) {
 		}
 		count = 0;	//	間に挟まっている push, pop の数
 		for( pp = p_next + 1; pp != this->info.assembler_list.body.end(); pp++ ) {
+			if( pp->type == CMNEMONIC_TYPE::LABEL ) {
+				break;
+			}
 			if( pp->type == CMNEMONIC_TYPE::PUSH ) {
 				count++;
 				continue;

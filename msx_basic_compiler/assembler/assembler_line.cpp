@@ -77,6 +77,8 @@ std::map< CMNEMONIC_TYPE, CCOMMAND_TYPE > command_list = {
 	{ CMNEMONIC_TYPE::RRCA,       { 0, "RRCA" } },
 	{ CMNEMONIC_TYPE::EI,         { 0, "EI" } },
 	{ CMNEMONIC_TYPE::DI,         { 0, "DI" } },
+	{ CMNEMONIC_TYPE::CPIR,       { 0, "CPIR" } },
+	{ CMNEMONIC_TYPE::CPDR,       { 0, "CPDR" } },
 };
 
 std::map< CCONDITION, std::string > condition_list = {
@@ -167,6 +169,8 @@ std::map< std::string, CMNEMONIC_TYPE > command_name_list = {
 	{ "RRCA",		CMNEMONIC_TYPE::RRCA },
 	{ "EI",			CMNEMONIC_TYPE::EI },
 	{ "DI",			CMNEMONIC_TYPE::DI },
+	{ "CPIR",		CMNEMONIC_TYPE::CPIR },
+	{ "CPDR",		CMNEMONIC_TYPE::CPDR },
 };
 
 std::map< std::string, CCONDITION > condition_name_list = {

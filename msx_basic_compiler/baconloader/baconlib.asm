@@ -36,6 +36,8 @@ extrom		:= 0x015F
 bigfil		:= 0x016B
 nsetrd		:= 0x016E
 nstwrt		:= 0x0171
+nrdvrm		:= 0x0174
+nwrvrm		:= 0x0177
 fout		:= 0x3425
 pufout		:= 0x3426
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
@@ -541,7 +543,7 @@ sub_key_list::
 ; =============================================================================
 			scope	_send_device_path
 _send_device_path::
-			ld		c, 8
+			ld		c, 0x58						; IOT通信ポート
 			; デバイスパス送信開始コマンド
 			ld		a, 0xe0
 			out		[c], a
@@ -591,6 +593,10 @@ _send_string::
 			jr		z, _iot_send_string_exit
 			jr		nc, _iot_send_string_loop1
 	_iot_send_string_exit:
+			; 文字列終了コマンド
+			xor		a, a
+			out		[c], a
+			; エラーフラグ取得
 			in		a, [c]
 			rlca									; エラーなら cf = 1, 正常なら cf = 0
 			ret		nc
@@ -614,6 +620,12 @@ _send_string::
 			scope	sub_iotget_int
 sub_iotget_int::
 			ei
+			; 開始前のおまじない
+			ld		a, 0xAA
+			out		[0x58], a
+			ld		a, 0x02
+			out		[0x58], a
+			; デバイスパスを送信
 			call	_send_device_path
 			; 受信コマンド送信
 			ld		a, 0xe0
@@ -646,6 +658,7 @@ sub_iotget_int::
 			scope	sub_iotget_str
 sub_iotget_str::
 			ei
+			; デバイスパスを送信
 			call	_send_device_path
 			; 受信コマンド送信
 			ld		a, 0xe0
@@ -667,7 +680,11 @@ sub_iotget_str::
 			ld		[hl], a
 			djnz	_loop
 			ld		hl, buf
-			ret
+			; エラーチェック
+			in		a, [c]
+			or		a, a
+			ret		z
+			jp		err_device_io
 			endscope
 
 ; =============================================================================
@@ -1342,9 +1359,10 @@ sub_setsprite::
 ;		D ..... 色
 ;		E ..... パターン番号
 ;		L ..... パラメータ有効フラグ (0:無効, 1:有効)
-;		        bit0: 座標
-;		        bit1: パターン番号
-;		        bit2: 色
+;				bit0: X座標負数フラグ
+;		        bit1: 座標
+;		        bit2: パターン番号
+;		        bit3: 色
 ;	output:
 ;		none
 ;	break:
@@ -1355,7 +1373,11 @@ sub_setsprite::
 			scope	sub_putsprite
 sub_putsprite::
 			ei
-			ld		h, a				; H = スプライト番号
+			ld		[buf+29], a			; スプライト番号保存
+			push	de					; パターンと色を保存
+			push	hl					; フラグを保存
+			call	calatr				; スプライトアトリビュートテーブルのアドレスを計算: AF, DE, HL破壊
+			ld		[buf+4], hl			; スプライトアトリビュートテーブルのアドレスを保存
 			ld		a, [scrmod]
 			cp		a, 12+1
 			jp		nc, err_syntax
@@ -1363,128 +1385,340 @@ sub_putsprite::
 			jr		nc, _sprite_mode2
 	; スプライトモード1の場合 -------------------------------------------------
 	_sprite_mode1:
-			; スプライトアトリビュートを求める
-			ld		a, h				; A = スプライト番号
-			push	de					; パターンと色保存
-			push	hl					; フラグ保存
-			call	calatr
-			pop		de					; フラグ復帰
-			ld		a, e				; A = フラグ
-			; 座標指定
-			rrca
-			di
-			jr		nc, _skip_pos1
-			ld		e, a
-			ld		a, l
-			out		[vdpport1], a
-			ld		a, h
-			or		a, 0x40
-			out		[vdpport1], a
-			ld		a, c
-			out		[vdpport0], a		; Y座標
+			; スプライトアトリビュートテーブルの内容を [buf+0]～[buf+3] へ読み込む
+			call	setrd				; Read用VRAMアドレスセット: AF破壊
+			ld		hl, buf
+			in		a, [vdpport0]		; Y座標
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; X座標
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; パターン
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; 属性と色
+			ld		[hl], a
+			inc		hl
+			pop		hl					; フラグを復帰
+			pop		de					; パターンと色を復帰
+			; EC bit 更新
+			ld		a, [buf+3]			; A = [EC][0][0][0][COL][COL][COL][COL]
+			rlca						; A = [0][0][0][COL][COL][COL][COL][EC]
+			rrc		l					; Cy = 0: X座標は正, 1: X座標は負
+			jr		nc, _sp1_x_plus
+	_sp1_x_minus:
+			rra							; A = [EC(NEW)][0][0][0][COL][COL][COL][COL]
+			ld		[buf+3], a
 			ld		a, b
-			out		[vdpport0], a		; X座標
-			ld		a, e
-	_skip_pos1:
-			inc		hl
-			inc		hl
-			; パターン
-			pop		bc
-			rrca
-			jr		nc, _skip_pat1
-
-			ld		e, a
-			ld		a, l
-			out		[vdpport1], a
-			ld		a, h
-			or		a, 0x40
-			out		[vdpport1], a
+			add		a, 32
+			ld		b, a
+			jr		_sp1_xy
+	_sp1_x_plus:
+			rra							; A = [EC(NEW)][0][0][0][COL][COL][COL][COL]
+			ld		[buf+3], a
+			; 座標更新
+	_sp1_xy:
+			rrc		l					; Cy = 0: 座標更新無し, 1: 座標更新あり
+			jr		nc, _sp1_skip_xy
+			ld		[buf+0], bc
+	_sp1_skip_xy:
+			; パターン更新
+			rrc		l					; Cy = 0: パターン更新無し, 1: パターン更新あり
+			jr		nc, _sp1_skip_pattern
 			ld		a, [rg1sav]			; 0bXXXX_XXSX : Sprite Size S:0=8x8, 1=16x16
 			and		a, 0b0000_0010
-			ld		a, c
-			jr		z, _skip_pat1_0
+			ld		a, e
+			jr		z, _sp1_8x8
 			add		a, a				; 16x16 の場合は、4倍する
 			add		a, a
-	_skip_pat1_0:
-			out		[vdpport0], a		; パターン
-			ld		a, e
-	_skip_pat1:
+	_sp1_8x8:
+			ld		[buf+2], a
+	_sp1_skip_pattern:
+			; 色更新
+			rrc		l					; Cy = 0: 色更新無し, 1: 色更新あり
+			jr		nc, _sp1_skip_color
+			ld		a, [buf+3]
+			and		a, 0xF0
+			or		a, d
+			ld		[buf+3], a
+	_sp1_skip_color:
+			; VRAMへ転送
+			ld		hl, [buf+4]
+			call	setwrt				; Write用VRAMアドレスセット: AF破壊
+			ld		hl, buf
+			ld		a, [hl]
+			out		[vdpport0], a
 			inc		hl
-			; 色
-			rrca
-			jr		nc, _skip_col1
-			ld		a, l
-			out		[vdpport1], a
-			ld		a, h
-			or		a, 0x40
-			out		[vdpport1], a
-			ld		a, b
-			out		[vdpport0], a		; 色
-	_skip_col1:
-			ei
+			ld		a, [hl]
+			out		[vdpport0], a
+			inc		hl
+			ld		a, [hl]
+			out		[vdpport0], a
+			inc		hl
+			ld		a, [hl]
+			out		[vdpport0], a
 			ret
-	; スプライトモード2の場合 -------------------------------------------------
-	_sprite_mode2:
-			; スプライトアトリビュートを求める
-			ld		a, h
-			and		a, 31
-			ld		[buf + 0], a		; buf[0] にスプライト番号を保存
-			push	de					; パターンと色保存
-			push	hl					; フラグ保存
-			call	calatr				; 破壊: AF, DE, HL
-			pop		de					; フラグ復帰
-			ld		a, e				; A = フラグ
-			ld		[buf + 1], a		; buf[1] にフラグを保存
-			ld		[buf + 2], hl		; buf[2], buf[3] にアトリビュートのアドレスを保存
-			; 座標指定
-			rrca
-			jr		nc, _skip_pos2
-			ld		e, a
-			call	nstwrt
-			ld		a, c
-			out		[vdpport0], a		; Y座標
-			ld		a, b
-			out		[vdpport0], a		; X座標
-			ld		[buf + 4], bc		; buf[4] に Y座標, buf[5] に X座標を保存
-			ld		a, e
-	_skip_pos2:
-			inc		hl
-			inc		hl
-			; パターン
-			pop		bc
-			rrca
-			jr		nc, _skip_pat2
 
-			ld		e, a
-			call	nstwrt
+	; スプライトモード2の場合 -------------------------------------------------
+	;	[buf+0]...[buf+3] : アトリビュートのコピー, [buf+3] の bit7 には EC bit に書き込む値
+	;	[buf+4], [buf+5]  : アトリビュートのアドレス
+	;	[buf+6]           : EC bit 更新の有無 0: 更新しない, 1: 更新する
+	;	[buf+8]...[buf+23]: Color Table のバックアップ
+	;	[buf+24], [buf+25]: カラーテーブルのアドレス
+	;	[buf+26]          : 座標の更新の有無 0: 更新していない, 1: 更新した
+	;	[buf+27], [buf+28]: Y座標, X座標 のバックアップ
+	;	[buf+29]          : スプライト番号
+	_sprite_mode2:
+			; スプライトアトリビュートテーブルの内容を [buf+0]～[buf+3] へ読み込む
+			call	nsetrd				; Read用VRAMアドレスセット: AF破壊
+			ld		hl, buf
+			in		a, [vdpport0]		; Y座標
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; X座標
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; パターン
+			ld		[hl], a
+			inc		hl
+			in		a, [vdpport0]		; EC bit のバックアップ (VDPはこの値を使わない)
+			ld		[hl], a
+			pop		hl					; フラグを復帰
+			pop		de					; パターンと色を復帰
+			; 座標の更新が無い場合は EC bit の更新 / X座標32加算 / 座標の更新 はスキップする
+			bit		1, l				; L: [0][0][0][0][COLOR UPD][Pattern UPD][座標 UPD][X負数]
+			jr		nz, _sp2_check_ec_bit
+			rr		l					; L: [X負数][0][0][0][0][COLOR UPD][Pattern UPD][座標 UPD]
+			rr		l					; L: [座標 UPD][X負数][0][0][0][0][COLOR UPD][Pattern UPD]
+			jr		_sp2_skip_xy
+			; EC bit を更新すべきか判断する
+	_sp2_check_ec_bit:
+			ld		a, [buf+3]			; A = [EC][0][0][0][0][0][0][0]
+			rla							; bit0 = 負なら 1, 正なら 0
+			xor		a, l				; L:bit0 = [X負数]
+			and		a, 1				; A = EC bit の更新必要ない なら 0, 更新必要なら 1
+			ld		[buf+6], a			; 結果を保存しておく, フラグ変えない。
+			jr		z, _sp2_skip_ec_bit
+			; 次のために X座標の正負情報を 属性の bit7 に書き込んでおく
+			ld		a, l				; bit0 = 負なら 1, 正なら 0
+			rrca						; bit7 へ移動
+			and		a, 0x80				; A = [負なら1][0][0][0][0][0][0][0]
+			ld		[buf+3], a
+	_sp2_skip_ec_bit:
+			rrc		l					; X座標が負かどうかを Cyフラグへ (負なら Cy=1)
+			jr		nc, _sp2_skip_add
+			ld		a, b				; X座標 (Bレジスタ) に 32 を加算する
+			add		a, 32
+			ld		b, a
+	_sp2_skip_add:
+			xor		a, a
+			ld		[buf+26], a
+			rrc		l					; 座標指定の有無を Cyフラグへ
+			jr		nc, _sp2_skip_xy
+	_sp2_xy:
+			ld		[buf+0], bc			; buf[0] に Y座標, buf[1] に X座標を保存
+			ld		[buf+27], bc		; buf[27] にも保存
+			inc		a
+			ld		[buf+26], a			; フラグを立てる
+	_sp2_skip_xy:
+			rrc		l					; パターン更新の有無を Cyフラグへ
+			jr		nc, _sp2_skip_pattern
 			ld		a, [rg1sav]			; 0bXXXX_XXSX : Sprite Size S:0=8x8, 1=16x16
 			and		a, 0b0000_0010
-			ld		a, c
-			jr		z, _skip_pat2_0
+			ld		a, e
+			jr		z, _sp2_8x8
 			add		a, a				; 16x16 の場合は、4倍する
 			add		a, a
-	_skip_pat2_0:
-			out		[vdpport0], a		; パターン
+	_sp2_8x8:
+			ld		[buf+2], a
+	_sp2_skip_pattern:
+			ld		a, [buf+6]			; EC bit の更新をチェック
+			or		a, a
+			jr		nz, _sp2_ec_bit_update
+			rlc		l					; 色の更新が無ければ戻る
+			ret		nc
+			; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	_sp2_update_color:
+			; 色だけ更新 → この場合、指定のスプライトだけが対象になる
+			call	_sp2_get_color_table
+			ld		[buf+24], hl
+			; カラーテーブルをまとめて読み出す
+			call	nsetrd
+			ld		bc, (16 << 4) | vdpport0
+			ld		hl, buf+8
+			inir
+			; カラーテーブルをまとめて更新
+			ld		hl, [buf+24]
+			call	nstwrt
+			ld		b, 16
+			ld		hl, buf+8
+	_sp2_update_color_wr:
+			ld		a, [hl]
+			inc		hl
+			and		a, 0xF0
+			or		a, d
+			out		[c], a
+			djnz	_sp2_update_color_wr
+			; CC bit 確認: 1 なら追従処理は行わない。0 なら追従処理を行う。
+			ld		a, [buf+8]
+			and		a, 0x40
+			ret		nz
+	_sp2_update_cc:
+			; 座標の更新の有無を見る
+			ld		a, [buf+26]
+			or		a, a
+			ret		z					; 座標の更新が無いなら何もしない
+			; 残りスプライト数を計算する
+			ld		a, [buf+29]
+			and		a, 31
+			xor		a, 31
+			ret		z					; 残りが 0 なら何もしない
+			ld		b, a
+	_sp2_update_cc_loop:
+			; カラーテーブルの先頭を読む
+			ld		hl, [buf+24]
+			ld		de, 16
+			add		hl, de
+			ld		[buf+24], hl
+			call	nrdvrm				; VRAM読み出し : 破壊 F
+			; CC bit をチェックして、0 なら何もせずに終わる
+			and		a, 0x40
+			ret		z
+			; 座標を更新する
+			ld		hl, [buf+4]
+			inc		hl
+			inc		hl
+			inc		hl
+			inc		hl
+			ld		[buf+4], hl
+			call	nstwrt				; VRAMアドレスセット(書き込み用) : 破壊 AF
+			ld		de, [buf+27]
 			ld		a, e
-	_skip_pat2:
-			; 色
-			rrca
-			jr		nc, _skip_col2
-			; カラーテーブル( 4[byte] * 32[plane] = 128[byte] )のアドレスを求める
+			out		[vdpport0], a
+			ld		a, d
+			out		[vdpport0], a
+			djnz	_sp2_update_cc_loop
+			ret
+			; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+			; EC bit の更新が必要な場合
+	_sp2_ec_bit_update:
+			rlc		l					; 色の更新の有無をチェック
+			jr		nc, _sp2_update_ec_bit_only
+	_sp2_update_ec_bit_and_color:
+			; 色と EC bit の両方を更新
+			call	_sp2_get_color_table
+			ld		[buf+24], hl
+			; カラーテーブルをまとめて読み出す
+			call	nsetrd
+			ld		bc, (16 << 4) | vdpport0
+			ld		hl, buf+8
+			inir
+			; カラーテーブルをまとめて更新
+			ld		hl, [buf+24]
+			call	nstwrt
+			ld		a, [buf+3]
+			and		a, 0x80
+			ld		d, a
+			ld		b, 16
+			ld		hl, buf+8
+	_sp2_update_color_ec_wr:
+			ld		a, [hl]
+			and		a, 0x7F
+			or		a, d
+			inc		hl
+			and		a, 0xF0
+			or		a, d
+			out		[c], a
+			djnz	_sp2_update_color_ec_wr
+			; CC bit 確認: 1 なら追従処理は行わない。0 なら追従処理を行う。
+			ld		a, [buf+8]
+			and		a, 0x40
+			ret		nz
+	_sp2_update_cc_ec:
+			; 座標の更新の有無を見る
+			ld		a, [buf+26]
+			or		a, a
+			ret		z					; 座標の更新が無いなら何もしない
+			; 残りスプライト数を計算する
+			ld		a, [buf+29]
+			and		a, 31
+			xor		a, 31
+			ret		z					; 残りが 0 なら何もしない
+			ld		b, a
+	_sp2_update_cc_ec_loop:
+			; カラーテーブルの先頭を読む
+			ld		hl, [buf+24]
+			ld		de, 16
+			add		hl, de
+			ld		[buf+24], hl
+			call	nrdvrm				; VRAM読み出し : 破壊 F
+			; CC bit をチェックして、0 なら何もせずに終わる
+			bit		6, a
+			ret		z
+			; 座標を更新する
+			ld		hl, [buf+4]
+			inc		hl
+			inc		hl
+			inc		hl
+			inc		hl
+			ld		[buf+4], hl
+			call	nstwrt				; VRAMアドレスセット(書き込み用) : 破壊 AF
+			ld		de, [buf+27]
+			ld		a, e
+			out		[vdpport0], a
+			ld		a, d
+			out		[vdpport0], a
+			djnz	_sp2_update_cc_ec_loop
+			ret
+
+			; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	_sp2_update_ec_bit_only:
+			; 色は変えずに EC bit だけ更新 → この場合、重ね合わせスプライト全てが対象になる
+			call	_sp2_get_color_table
+			ld		[buf+24], hl
+			; カラーテーブルをまとめて読み出す
+			call	nsetrd
+			ld		bc, (16 << 4) | vdpport0
+			ld		hl, buf+8
+			inir
+			; カラーテーブルをまとめて更新
+			ld		hl, [buf+24]
+			call	nstwrt
+			ld		b, 16
+			ld		hl, buf+8
+			; EC bit に書き込む値
+			ld		a, [buf+3]
+			and		a, 0x80
+			ld		c, a						; C の MSB に書き込む値
+	_sp2_update_ec_wr:
+			ld		a, [hl]						; カラーテーブルの 1byte を読む
+			and		a, 0x7F						; EC bit を下ろす
+			or		a, c						; EC bit に書き込みたい値をセット
+			out		[vdpport0], a
+			inc		hl
+			djnz	_sp2_update_ec_wr
+			
+
+	_sp2_get_color_table:
+			; カラーテーブルのアドレスを求める
 			;	             Attribute   Color
 			;	SCREEN 4   : 1E00h-1E7Fh 1C00h-1DFFh
 			;	SCREEN 5,6 : 7600h-767Fh 7400h-75FFh
 			;	SCREEN 7-12: FA00h-FA7Fh F800h-F9FFh
-			ld		a, [buf + 3]
-			and		a, 0xFC
-			rrca
+			;	Color = ((Attr & 127) << 2) + (Attr & 0xFC)
+			ld		hl, [buf+4]
+			ld		a, h
+			and		a, 0xFC			; ビットマスク と Cy = 0
+			rl		l
+			rl		l				; l = l << 2 して、Cy に l の MSB を。
+			adc		a, 0			; A = A + Cy
 			ld		h, a
-			ld		a, l
-			and		a, 0x7C
-			add		a, a
-			add		a, a
-			ld		l, a
-			rl		h
+			ld		[buf+24], hl
+			ret
+
+
+
 			call	nstwrt
 			ld		a, b
 			ld		b, 16
