@@ -1,6 +1,26 @@
 # msx_basic_compiler
 MSX-BASICコンパイラ「BACON」
 
+## 使用方法
+
+MSX BASICのプログラム hello.bas を用意します
+```basic
+10 PRINT "HELLO! BACON"
+20 GOTO 10
+```
+
+マシン語 hello.bin に変換します
+```sh
+msx_bacon hello.bas hello.asm
+zma hello.asm hello.bin
+```
+
+[BACONLDR.BIN](msx_basic_compiler/baconloader/BACONLDR.BIN) と共に、MSX上で動かします
+```MSX
+bload"BACONLDR.BIN",r
+bload"hello.bin",r
+```
+
 -------------------------------------------------------------------------------
 MSX-BASICとの相違点
 
