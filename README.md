@@ -9,7 +9,7 @@ MSX BASICのプログラム hello.bas を用意します
 20 GOTO 10
 ```
 
-マシン語 hello.bin に変換します
+マシン語 hello.bin に変換します (アセンブラ [ZMA](https://github.com/hra1129/zma) を使用)
 ```sh
 msx_bacon hello.bas hello.asm
 zma hello.asm hello.bin
