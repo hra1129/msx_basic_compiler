@@ -71,5 +71,6 @@ SAILORMAN BRAVO BROSさん（@brapunch2000）
 反動さん (@FF14_hando)
 野球帽美緒さん (@baseballcap_mio)
 MSX研鑽推進委員会さん (@mdpc___)
+福野泰介さん (@taisukef)
 ```
 	※順不同、（）は X（旧Twitter）のアカウント
