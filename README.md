@@ -1,6 +1,26 @@
 # msx_basic_compiler
 MSX-BASICコンパイラ「BACON」
 
+## 使用方法
+
+MSX BASICのプログラム hello.bas を用意します
+```basic
+10 PRINT "HELLO! BACON"
+20 GOTO 10
+```
+
+マシン語 hello.bin に変換します (アセンブラ [ZMA](https://github.com/hra1129/zma) を使用)
+```sh
+msx_bacon hello.bas hello.asm
+zma hello.asm hello.bin
+```
+
+[BACONLDR.BIN](msx_basic_compiler/baconloader/BACONLDR.BIN) と共に、MSX上で動かします
+```MSX
+bload"BACONLDR.BIN",r
+bload"hello.bin",r
+```
+
 -------------------------------------------------------------------------------
 MSX-BASICとの相違点
 
@@ -51,5 +71,6 @@ SAILORMAN BRAVO BROSさん（@brapunch2000）
 反動さん (@FF14_hando)
 野球帽美緒さん (@baseballcap_mio)
 MSX研鑽推進委員会さん (@mdpc___)
+福野泰介さん (@taisukef)
 ```
 	※順不同、（）は X（旧Twitter）のアカウント
