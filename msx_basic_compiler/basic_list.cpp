@@ -9,6 +9,7 @@
 #include "double_real.h"
 #include <cstring>
 #include <cmath>
+#include <memory>
 
 struct CBASIC_RESERVED_WORD {
 	std::vector< int > code;
@@ -238,22 +239,26 @@ bool CBASIC_LIST::is_command_end( void ) {
 // --------------------------------------------------------------------
 //	中間言語形式(バイナリファイル)か、ASCIIセーブ形式かを判定する
 //	中間言語形式であれば true を返す
-bool CBASIC_LIST::check_binary_program( FILE *p_file ) {
+bool CBASIC_LIST::check_binary_program( void ) const {
 
-	return( *(this->p_file_image) == 0xFF );
+	return( this->p_file_image != this->file_image.end() && *this->p_file_image == 0xFF );
 }
 
 // --------------------------------------------------------------------
 bool CBASIC_LIST::load_file( FILE *p_file ) {
 	long file_size, read_size;
 
-	fseek( p_file, 0, SEEK_END );
+	if( fseek( p_file, 0, SEEK_END ) != 0 ) {
+		return false;
+	}
 	file_size = ftell( p_file );
-	fseek( p_file, 0, SEEK_SET );
+	if( file_size < 0 || fseek( p_file, 0, SEEK_SET ) != 0 ) {
+		return false;
+	}
 
 	file_image.resize( (size_t) file_size );
 	read_size = (long) fread( file_image.data(), 1, file_size, p_file );
-	
+
 	this->p_file_image = file_image.begin();
 	return( read_size == file_size );
 }
@@ -318,6 +323,9 @@ std::string CBASIC_LIST::get_word( void ) {
 
 	//	スペースは読み飛ばす
 	this->skip_white_space();
+	if( this->p_file_image == this->file_image.end() ) {
+		return s_word;
+	}
 	if( *(this->p_file_image) == 0x0B || *( this->p_file_image ) == 0x0C || *( this->p_file_image ) == 0x1C ) {
 		//	2byte の値だった場合
 		this->p_file_image++;
@@ -348,7 +356,7 @@ std::string CBASIC_LIST::get_word( void ) {
 		//	単精度浮動小数点数だった場合
 		this->p_file_image++;
 		s_word = "";
-		for( i = 0; i < 4; i++ ) {
+		for( i = 0; i < 4 && this->p_file_image != this->file_image.end(); i++ ) {
 			sprintf( s, "%02X", this->p_file_image[0] );
 			s_word = s_word + s;
 			this->p_file_image++;
@@ -359,7 +367,7 @@ std::string CBASIC_LIST::get_word( void ) {
 		//	倍精度浮動小数点数だった場合
 		this->p_file_image++;
 		s_word = "";
-		for( i = 0; i < 4; i++ ) {
+		for( i = 0; i < 4 && this->p_file_image != this->file_image.end(); i++ ) {
 			sprintf( s, "%02X", this->p_file_image[0] );
 			s_word = s_word + s;
 			this->p_file_image++;
@@ -370,11 +378,11 @@ std::string CBASIC_LIST::get_word( void ) {
 		//	文字列だった場合
 		s_word = "\"";
 		this->p_file_image++;
-		while( *(this->p_file_image) != '\"' && *(this->p_file_image) != 0 ){
+		while( this->p_file_image != this->file_image.end() && *(this->p_file_image) != '\"' && *(this->p_file_image) != 0 ){
 			s_word = s_word + (char)*(this->p_file_image);
 			this->p_file_image++;
 		}
-		if( *(this->p_file_image) == '\"' ) {
+		if( this->p_file_image != this->file_image.end() && *(this->p_file_image) == '\"' ) {
 			s_word = s_word + "\"";
 			this->p_file_image++;
 		}
@@ -403,7 +411,7 @@ std::string CBASIC_LIST::get_word( void ) {
 	for( auto p = reserved_words.begin(); p != reserved_words.end(); p++ ) {
 		i = 0;
 		auto p_code = p->code.begin();
-		for( ; p_code != p->code.end(); p_code++, i++ ) {
+		for( ; p_code != p->code.end() && this->p_file_image + i != this->file_image.end(); p_code++, i++ ) {
 			if( this->p_file_image[i] != *p_code ) {
 				break;
 			}
@@ -639,32 +647,56 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 		return s_word;
 	}
 	if( this->p_file_image[0] == '&' ) {
+		auto p_ampersand = this->p_file_image;
 		this->p_file_image++;
 		this->skip_white_space();
-		if( toupper(this->p_file_image[0]) == 'B' ) {
+		if( this->p_file_image != this->file_image.end() && toupper(this->p_file_image[0] & 255) == 'B' ) {
 			//	2進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "01" );
+			if( s.empty() ) {
+				this->p_file_image = p_ampersand + 1;
+				s_word.s_word.assign( 1, '&' );
+				s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+				return s_word;
+			}
 			s_word.s_word = std::to_string( stoi( s, nullptr, 2 ) );
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
-		if( toupper(this->p_file_image[0]) == 'O' ) {
+		if( this->p_file_image != this->file_image.end() && toupper(this->p_file_image[0] & 255) == 'O' ) {
 			//	8進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "01234567" );
+			if( s.empty() ) {
+				this->p_file_image = p_ampersand + 1;
+				s_word.s_word.assign( 1, '&' );
+				s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+				return s_word;
+			}
 			s_word.s_word = std::to_string( stoi( s, nullptr, 8 ) );
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
-		if( toupper(this->p_file_image[0]) == 'H' ) {
+		if( this->p_file_image != this->file_image.end() && toupper(this->p_file_image[0] & 255) == 'H' ) {
 			//	16進数の値だった場合
 			this->p_file_image++;
 			s = this->get_word_in_charlist( "0123456789abcdefABCDEF" );
+			if( s.empty() ) {
+				this->p_file_image = p_ampersand + 1;
+				s_word.s_word.assign( 1, '&' );
+				s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+				return s_word;
+			}
 			s_word.s_word = std::to_string( stoi( s, nullptr, 16 ) );
 			s_word.type = CBASIC_WORD_TYPE::INTEGER;
 			return s_word;
 		}
+		this->p_file_image = p_ampersand;
+		s_word.s_word.assign( 1, '&' );
+		s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+		this->p_file_image++;
+		return s_word;
 	}
 	if( isdigit( this->p_file_image[0] & 255 ) || this->p_file_image[0] == '.' ) {
 		//	10進数の値だった場合、整数・単精度実数・倍精度実数のどれか
@@ -693,7 +725,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 	for( auto p = reserved_words.begin(); p != reserved_words.end(); p++ ) {
 		i = 0;
 		auto p_name = p->s_name.begin();
-		for( ; p_name != p->s_name.end(); p_name++, i++ ) {
+		for( ; p_name != p->s_name.end() && this->p_file_image + i != this->file_image.end(); p_name++, i++ ) {
 			if( toupper( this->p_file_image[i] & 255 ) != *p_name ) {
 				break;
 			}
@@ -709,7 +741,7 @@ CBASIC_WORD CBASIC_LIST::get_ascii_word( bool label_ok ) {
 	//	予約語でない記号があるか調べる
 	if( !isalpha(this->p_file_image[0] & 255) ) {
 		s_word.s_word = (char)this->p_file_image[0];
-		s_word.type = CBASIC_WORD_TYPE::SYMBOL;
+			s_word.type = CBASIC_WORD_TYPE::SYMBOL;
 		this->p_file_image++;
 		return s_word;
 	}
@@ -934,20 +966,24 @@ bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 
 // --------------------------------------------------------------------
 bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
-	FILE *p_in;
+	std::unique_ptr< FILE, decltype( &fclose ) > p_in( fopen( s_file_name.c_str(), "rb" ), &fclose );
 	bool result;
 
-	p_in = fopen( s_file_name.c_str(), "rb" );
-	if( p_in == NULL ) {
+	if( !p_in ) {
 		errors.add( "Cannot open the input file (" + s_file_name + ").", 0 );
 		return false;
 	}
-	if( !this->load_file( p_in ) ){
+	if( !this->load_file( p_in.get() ) ){
 		errors.add( "Cannot read the input file (" + s_file_name + ").", 0 );
 		return false;
 	}
 
-	if( this->check_binary_program( p_in ) ) {
+	if( this->file_image.empty() ) {
+		errors.add( "The input file is empty.", 0 );
+		return false;
+	}
+
+	if( this->check_binary_program() ) {
 		this->s_source_type = "Precompiled code";
 		result = this->load_binary( errors );
 		if( !result ) {
@@ -959,7 +995,7 @@ bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
 		this->s_source_type = "ASCII code";
 		result = this->load_ascii( errors );
 	}
-	fclose( p_in );
+
 	return result;
 }
 

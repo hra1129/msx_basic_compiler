@@ -44,7 +44,7 @@ private:
 	int line_no;
 	int current_line_no;
 
-	bool check_binary_program( FILE *p_file );
+	bool check_binary_program( void ) const;
 	bool load_file( FILE *p_file );
 	bool skip_white_space( void );
 	int get_integer( void );

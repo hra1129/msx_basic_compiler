@@ -16,17 +16,10 @@ static void usage( const char *p_name ) {
 	fprintf( stderr, "Usage> %s [options] <input.bas> <output.asm>\n", p_name );
 	fprintf( stderr, "\n" );
 	fprintf( stderr, "  [options]\n" );
-	fprintf( stderr, "  Output types.\n" );
-	fprintf( stderr, "    -zma .......... Output files are ZMA type assembly language. (default)\n" );
-	fprintf( stderr, "    -m80 .......... Output files are M80 type assembly language.\n" );
+	fprintf( stderr, "  Output is ZMA assembly language; target selection is not supported.\n" );
 	fprintf( stderr, "  Compile mode.\n" );
 	fprintf( stderr, "    -compatible ... Mode for compatibility with MSX-BASIC.\n" );
 	fprintf( stderr, "    -original ..... MSX-BACON Extension Mode.\n" );
-	fprintf( stderr, "  Target types.\n" );
-	fprintf( stderr, "    -msx .......... MSX1 (default)\n");
-	fprintf( stderr, "    -msx2 ......... MSX2\n");
-	fprintf( stderr, "    -msx2p ........ MSX2+\n");
-	fprintf( stderr, "    -msxtr ........ MSXturboR\n");
 	fprintf( stderr, "  Optimization levels.\n" );
 	fprintf( stderr, "    -O0 ........... No optimization is performed.\n");
 	fprintf( stderr, "    -O1 ........... Only pre-calculation of arithmetic nodes.\n");

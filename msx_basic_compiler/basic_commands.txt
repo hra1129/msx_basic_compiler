@@ -1691,9 +1691,8 @@ MSX-BACON による MSX-BASIC の命令サポート一覧
 	SCREEN <画面モード>
 【備考】
 	画面モードを変更する。
-	コンパイルオプション(-msx, -msx2, -msx2p, -msxtr)によって挙動が変わる。
-	-msx の場合、BIOS の CHGMOD による画面モード変更になる。
-	それ以外の場合、SUB-ROM の CHGMODP による画面モード変更になる。
+	対象機種の選択オプション(-msx, -msx2, -msx2p, -msxtr)は現行コンパイラでは使用できない。
+	MSX1ではBIOSのCHGMOD、MSX2以降ではSUB-ROMのCHGMODPを実行時に呼び分ける。
 	CHGMOD はカラーパレットの初期化を行わない点が異なる。
 	MSX2以上の MSX-BASIC で SCREEN <画面モード> を実行するとカラーパレットが
 	初期化されるため、このような挙動にした。

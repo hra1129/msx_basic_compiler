@@ -167,7 +167,7 @@ SRCS =	assembler/assembler_line.cpp \
 
 OBJS    = $(SRCS:.cpp=.o)
 CC      = g++
-CFLAGS  = -std=c++1y -Wno-delete-abstract-non-virtual-dtor -Wno-deprecated-declarations
+CFLAGS  = -std=c++17 -Wno-deprecated-declarations
 TARGET  = msx_bacon
 
 $(TARGET): $(OBJS)
