@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Put Sprite
 // ====================================================================
 //	2023/Oct/21st	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  PUT <ÉXÉvÉâÉCÉgî‘çÜ>, ( <Xç¿ïW>, <Yç¿ïW> ), <êF>, <ÉpÉ^Å[Éìî‘çÜ>
+//  PUT <„Çπ„Éó„É©„Ç§„ÉàÁï™Âè∑>, ( <XÂ∫ßÊ®ô>, <YÂ∫ßÊ®ô> ), <Ëâ≤>, <„Éë„Çø„Éº„É≥Áï™Âè∑>
 bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -32,7 +32,7 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	ëÊ1à¯êî <ÉXÉvÉâÉCÉgî‘çÜ>
+	//	Á¨¨1ÂºïÊï∞ <„Çπ„Éó„É©„Ç§„ÉàÁï™Âè∑>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -47,11 +47,11 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî ( <Xç¿ïW>, <Yç¿ïW> )
+	//	Á¨¨2ÂºïÊï∞ ( <XÂ∫ßÊ®ô>, <YÂ∫ßÊ®ô> )
 	if( p_info->list.p_position->s_word == "(" ) {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-			//	Xç¿ïW
+			//	XÂ∫ßÊ®ô
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -66,7 +66,7 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		}
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-			//	Yç¿ïW
+			//	YÂ∫ßÊ®ô
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -85,7 +85,7 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-			//	êF
+			//	Ëâ≤
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -95,7 +95,7 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-			//	ÉpÉ^Å[Éì
+			//	„Éë„Çø„Éº„É≥
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -103,21 +103,21 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	if( !has_xy_parameter && !has_color_parameter && !has_pattern_parameter ) {
-		//	ÉpÉâÉÅÅ[É^Ç™àÍÇ¬Ç‡ñ≥Ç¢èÍçáÇÕÉGÉâÅ[
+		//	„Éë„É©„É°„Éº„Çø„Åå‰∏Ä„Å§„ÇÇÁÑ°„ÅÑÂ†¥Âêà„ÅØ„Ç®„É©„Éº
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	//	èàóùÇåƒÇ—èoÇ∑
+	//	Âá¶ÁêÜ„ÇíÂëº„Å≥Âá∫„Åô
 	int active_flag = 0;
 	p_info->assembler_list.add_label( "blib_putsprite", "0x04045" );
 	if( has_pattern_parameter ) {
-		//	-- ÉpÉ^Å[Éìî‘çÜ
+		//	-- „Éë„Çø„Éº„É≥Áï™Âè∑
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		active_flag = 2;
 	}
 	if( has_color_parameter ) {
-		//	-- êF
+		//	-- Ëâ≤
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::NONE, "L" );
@@ -125,13 +125,13 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		active_flag |= 4;
 	}
 	if( has_xy_parameter ) {
-		//	-- Yç¿ïW
+		//	-- YÂ∫ßÊ®ô
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	-- Xç¿ïW
+		//	-- XÂ∫ßÊ®ô
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::RLC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "" );	//	ïÑçÜÇ Cf Ç÷
+		asm_line.set( CMNEMONIC_TYPE::RLC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "" );	//	Á¨¶Âè∑„Çí Cf „Å∏
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::NONE, "C" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -139,17 +139,17 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		active_flag |= 1;
 	}
-	//	-- ÉXÉvÉâÉCÉgî‘çÜ
+	//	-- „Çπ„Éó„É©„Ç§„ÉàÁï™Âè∑
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "L" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	-- ÉpÉâÉÅÅ[É^Å[è»ó™ÉtÉâÉO
+	//	-- „Éë„É©„É°„Éº„Çø„ÉºÁúÅÁï•„Éï„É©„Ç∞
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, std::to_string( active_flag ) );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RL, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	-- åƒÇ—èoÇµ
+	//	-- Âëº„Å≥Âá∫„Åó
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::CONSTANT, "blib_putsprite" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );

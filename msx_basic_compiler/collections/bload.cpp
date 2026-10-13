@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Bload
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  BLOAD "ƒtƒ@ƒCƒ‹–¼" [,S]
+//  BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å" [,S]
 bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -29,11 +29,32 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
 	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return true;
+	}
+	p_info->assembler_list.activate_copy_string_to_buffer();
+	p_info->assembler_list.activate_free_string();
+	auto emit_legacy_filename = [&]() {
+		asm_line.set( "PUSH", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "copy_string_to_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "free_string" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+	};
 
 	p_info->assembler_list.add_label( "work_buf", "0x0F55E" );
 	if( p_info->list.is_command_end() ) {
-		//	BLOAD "ƒtƒ@ƒCƒ‹–¼"
+		//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å"
 		p_info->assembler_list.activate_bload();
+		emit_legacy_filename();
 		asm_line.set( "LD", "", "DE", "0" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_buf]", "DE" );
@@ -56,7 +77,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			if( !is_load && p_info->list.p_position->s_word == "," ) {
 				p_info->list.p_position++;
-				//	BLOAD "ƒtƒ@ƒCƒ‹–¼",R,ƒIƒtƒZƒbƒg
+				//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å",R,ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 					exp.release();
 				}
@@ -66,7 +87,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 				}
 			}
 			else {
-				//	BLOAD "ƒtƒ@ƒCƒ‹–¼",R
+				//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å",R
 				asm_line.set( "LD", "", "HL", "0" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
@@ -75,6 +96,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
+			emit_legacy_filename();
 			asm_line.set( "CALL", "", "sub_bload_r" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
@@ -86,7 +108,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			if( !is_load && p_info->list.p_position->s_word == "," ) {
 				p_info->list.p_position++;
-				//	BLOAD "ƒtƒ@ƒCƒ‹–¼",S,ƒIƒtƒZƒbƒg
+				//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å",S,ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 				if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 					exp.release();
 				}
@@ -96,12 +118,15 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 				}
 			}
 			else {
-				//	BLOAD "ƒtƒ@ƒCƒ‹–¼",S
+				//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å",S
 				asm_line.set( "LD", "", "HL", "0" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			asm_line.set( "LD", "", "[work_buf]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			emit_legacy_filename();
 			asm_line.set( "LD", "", "HL", "[heap_end]" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "DE", "[heap_next]" );
@@ -114,7 +139,7 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "B", "H" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "POP", "", "HL" );
+			asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "IX", "blib_bload_s" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -126,12 +151,13 @@ bool CBLOAD::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			if( exp.compile( p_info ) ) {
 				exp.release();
-				//	BLOAD "ƒtƒ@ƒCƒ‹–¼", ƒIƒtƒZƒbƒg
+				//	BLOAD "ãƒ•ã‚¡ã‚¤ãƒ«å", ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 				p_info->assembler_list.activate_bload();
 				asm_line.set( "LD", "", "[work_buf]", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "POP", "", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
+				emit_legacy_filename();
 				asm_line.set( "CALL", "", "sub_bload" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}

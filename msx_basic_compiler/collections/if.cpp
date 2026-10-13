@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: If
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  IF ðŒŽ® {THEN ƒXƒe[ƒgƒƒ“ƒg|THEN s”Ô†|GOTO s”Ô†} [{ELSE ƒXƒe[ƒgƒƒ“ƒg|ELSE s”Ô†}]
+//  IF æ¡ä»¶å¼ {THEN ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆ|THEN è¡Œç•ªå·|GOTO è¡Œç•ªå·} [{ELSE ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆ|ELSE è¡Œç•ªå·}]
 bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	std::string s_end_label;
@@ -21,7 +21,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	CEXPRESSION exp;
-	//	ðŒŽ®
+	//	æ¡ä»¶å¼
 	s_end_label		= p_info->get_auto_label();
 	s_false_label	= p_info->get_auto_label();
 	if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
@@ -71,10 +71,10 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	else if( p_info->list.p_position->s_word == "THEN" ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
-			//	THEN ‚ÅI‚í‚éê‡B‚±‚Ìê‡‚Í‰½‚à‚µ‚È‚¢‚¾‚¯‚ÅƒGƒ‰[‚Å‚Í–³‚¢B
+			//	THEN ã§çµ‚ã‚ã‚‹å ´åˆã€‚ã“ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„ã ã‘ã§ã‚¨ãƒ©ãƒ¼ã§ã¯ç„¡ã„ã€‚
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
-			//	s”Ô†‚Ìê‡
+			//	è¡Œç•ªå·ã®å ´åˆ
 			if( p_info->list.p_position->s_word[0] == '*' ) {
 				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
 			}
@@ -85,7 +85,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 		}
 		else {
-			//	ƒXƒe[ƒgƒƒ“ƒg‚Ìê‡
+			//	ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			p_info->p_compiler->line_compile();
 			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_end_label, COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -99,15 +99,15 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_false_label, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( p_info->list.is_line_end() ) {
-		//	ELSE ‚Í–³‚¢
+		//	ELSE ã¯ç„¡ã„
 	}
 	if( !p_info->list.is_line_end() &&  p_info->list.p_position->s_word == "ELSE" ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_line_end() ) {
-			//	ELSE ‚ÅI‚í‚éê‡B‚±‚Ìê‡‚Í‰½‚à‚µ‚È‚¢‚¾‚¯‚ÅƒGƒ‰[‚Å‚Í–³‚¢B
+			//	ELSE ã§çµ‚ã‚ã‚‹å ´åˆã€‚ã“ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„ã ã‘ã§ã‚¨ãƒ©ãƒ¼ã§ã¯ç„¡ã„ã€‚
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
-			//	s”Ô†‚Ìê‡
+			//	è¡Œç•ªå·ã®å ´åˆ
 			if( p_info->list.p_position->s_word[0] == '*' ) {
 				asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "label_" + p_info->list.p_position->s_word.substr(1), COPERAND_TYPE::NONE, "" );
 			}
@@ -118,7 +118,7 @@ bool CIF::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 		}
 		else {
-			//	ƒXƒe[ƒgƒƒ“ƒg‚Ìê‡
+			//	ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã®å ´åˆ
 			p_info->p_compiler->line_compile();
 		}
 	}

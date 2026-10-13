@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -34,11 +34,11 @@ CEXPRESSION_NODE* CEXPRESSION_HEXCHR::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	Ž–‘OŒvŽZˆ—
+	//	äº‹å‰è¨ˆç®—å‡¦ç†
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::DEEP) && this->p_operand->is_constant ) {
-		//	’è”‚Ìê‡
+		//	å®šæ•°ã®å ´åˆ
 		if( this->p_operand->type == CEXPRESSION_TYPE::STRING ) {
-			//	•¶Žš—ñ‚Ìê‡
+			//	æ–‡å­—åˆ—ã®å ´åˆ
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::STRING;
 			n = (int) this->p_operand->s_value.size();
@@ -61,14 +61,14 @@ void CEXPRESSION_HEXCHR::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_operand == nullptr ) {
 		return;
 	}
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand->compile( p_info );
 
 	if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
-	p_info->assembler_list.activate_allocate_string();
+	p_info->assembler_list.activate_copy_string_from_buffer();
 	p_info->assembler_list.activate_free_string();
 	p_info->assembler_list.add_label( "blib_hexchr", "0x04093" );
 
@@ -88,7 +88,7 @@ void CEXPRESSION_HEXCHR::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "POP", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "copy_string" );
+	asm_line.set( "CALL", "", "copy_string_from_buffer" );
 	p_info->assembler_list.body.push_back( asm_line );
 	this->type = CEXPRESSION_TYPE::STRING;
 }

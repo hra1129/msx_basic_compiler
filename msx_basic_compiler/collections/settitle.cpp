@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: SetTitle
 // ====================================================================
 //	2023/Dec/30th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SETTITLE ƒ^ƒCƒgƒ‹ [, F]
+//  SETTITLE ã‚¿ã‚¤ãƒˆãƒ« [, è‰²]
 bool CSETTITLE::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -28,12 +28,13 @@ bool CSETTITLE::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "blib_settitle", "0x040d5" );
 	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_copy_string_to_buffer();
 
 	if( p_info->list.is_command_end() ) {
 		p_info->errors.add( MISSING_OPERAND, line_no );
 		return true;
 	}
-	//	‘æ1ˆø” ƒ^ƒCƒgƒ‹
+	//	ç¬¬1å¼•æ•° ã‚¿ã‚¤ãƒˆãƒ«
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
 		asm_line.set( "PUSH", "", "HL" );
@@ -45,54 +46,88 @@ bool CSETTITLE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.is_command_end() ) {
 		if( has_title ) {
-			//	SET TITLE <ƒ^ƒCƒgƒ‹> ‚Ìê‡B
+			//	SET TITLE <ã‚¿ã‚¤ãƒˆãƒ«> ã®å ´åˆã€‚
 			asm_line.set( "POP", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "DE", "0" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "BC" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "IX", "blib_settitle" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "call_blib" );
 			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "free_string" );
+			p_info->assembler_list.body.push_back( asm_line );
 			return true;
 		}
 		else {
-			//	ˆø”‚ª‰½‚àw’è‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍƒGƒ‰[
+			//	å¼•æ•°ãŒä½•ã‚‚æŒ‡å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 			p_info->errors.add( ILLEGAL_FUNCTION_CALL, line_no );
 			return true;
 		}
 	}
 	//	,
 	if( p_info->list.p_position->s_word != "," ) {
-		//	SET TITLE ‰ğß•s”\•¶š ‚Ìê‡‚ÍƒGƒ‰[
+		//	SET TITLE è§£é‡ˆä¸èƒ½æ–‡å­— ã®å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ2ˆø” F
+	//	ç¬¬2å¼•æ•° è‰²
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		if( has_title ) {
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "BC" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			asm_line.set( "LD", "", "DE", "str_0" );
+			asm_line.set( "EX", "", "DE", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		asm_line.set( "EX", "", "DE", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "blib_settitle" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "call_blib" );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( has_title ) {
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "free_string" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 	}
 	else {
-		//	SET BEEP <‰¹F>, ‰ğß•s”\•¶š ‚Ìê‡‚ÍƒGƒ‰[
+		//	SET BEEP <éŸ³è‰²>, è§£é‡ˆä¸èƒ½æ–‡å­— ã®å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 		p_info->errors.add( ILLEGAL_FUNCTION_CALL, line_no );
 		return true;
 	}

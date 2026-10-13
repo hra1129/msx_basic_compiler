@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Print
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -12,12 +12,25 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
 	int offset;
+	int string_count = 0;
 	bool has_parameter, is_semicolon;
 
-	//	‘®•¶š—ñ
+	//	æ›¸å¼æ–‡å­—åˆ—
 	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-		asm_line.set( "LD", "", "[work_buf]",  "HL" );
+		p_info->assembler_list.activate_copy_string_to_buffer();
+		p_info->assembler_list.activate_free_string();
+		asm_line.set( "PUSH", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "copy_string_to_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "[work_buf]", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "free_string" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 	}
@@ -28,24 +41,24 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 	offset = 2;
 	asm_line.set( "LD", "", "HL", "work_buf+2" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	‘®‚Æˆø”‚ÌŠÔ‚ÍƒZƒ~ƒRƒƒ“‚Ì‚İ
+	//	æ›¸å¼ã¨å¼•æ•°ã®é–“ã¯ã‚»ãƒŸã‚³ãƒ­ãƒ³ã®ã¿
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ";" ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return false;
 	}
 	p_info->list.p_position++;
 	has_parameter = false;
-	//	ˆø”
+	//	å¼•æ•°
 	for(;;) {
 		asm_line.set( "PUSH", "", "HL",  "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
-			//	DE‚É‰‰ZŒ‹‰ÊAHL‚ÉBUF‚ÌŠi”[æ
+			//	DEã«æ¼”ç®—çµæœã€HLã«BUFã®æ ¼ç´å…ˆ
 			asm_line.set( "POP", "", "DE",  "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "EX", "", "DE",  "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	Œ^‚É‰‚¶‚ÄŠi”[•û–@‚ªˆÙ‚È‚é
+			//	å‹ã«å¿œã˜ã¦æ ¼ç´æ–¹æ³•ãŒç•°ãªã‚‹
 			switch( exp.get_type() ) {
 			case CEXPRESSION_TYPE::INTEGER:
 				asm_line.set( "LD", "", "[HL]", "2" );
@@ -63,6 +76,9 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 				offset += 3;
 				break;
 			case CEXPRESSION_TYPE::STRING:
+				asm_line.set( "PUSH", "", "DE" );
+				p_info->assembler_list.body.push_back( asm_line );
+				string_count++;
 				asm_line.set( "LD", "", "[HL]", "3" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "INC", "", "HL",  "" );
@@ -138,7 +154,7 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	offset++;
 	if( offset > 258 ) {
-		//	ˆø”‚ª‘½‚·‚¬‚Ä BUF ‚ğˆì‚ê‚½ê‡
+		//	å¼•æ•°ãŒå¤šã™ãã¦ BUF ã‚’æº¢ã‚ŒãŸå ´åˆ
 		p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
 	}
 	p_info->assembler_list.add_label( "blib_using", "0x0404b" );
@@ -146,12 +162,18 @@ bool CPRINT::exec_using( CCOMPILE_INFO *p_info, bool is_file ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "","call_blib",  "" );
 	p_info->assembler_list.body.push_back( asm_line );
+	while( string_count-- > 0 ) {
+		asm_line.set( "POP", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "free_string" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
 	return true;
 }
 
 // --------------------------------------------------------------------
 //  PRINT
-//	PRINT ® [[;|,] ® | TAB(n) | SPC(n) ]
+//	PRINT å¼ [[;|,] å¼ | TAB(n) | SPC(n) ]
 bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -170,13 +192,13 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "work_prtflg", "0x0f416" );
 	p_info->assembler_list.add_label( "work_ptrfil", "0x0f864" );
 	if( p_info->list.p_position->s_word == "LPRINT" ) {
-		//	LPRINT ‚Ìê‡
+		//	LPRINT ã®å ´åˆ
 		asm_line.set( "LD", "", "A", "1" );
 		p_info->assembler_list.body.push_back( asm_line );
 		is_printer = true;
 	}
 	else {
-		//	PRINT ‚Ìê‡
+		//	PRINT ã®å ´åˆ
 		asm_line.set( "XOR", "", "A",  "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
@@ -190,7 +212,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return false;
 		}
-		//	ƒtƒ@ƒCƒ‹”Ô†‚Ìˆ—
+		//	ãƒ•ã‚¡ã‚¤ãƒ«ç•ªå·ã®å‡¦ç†
 		is_file = true;
 		p_info->list.p_position++;
 		if( !exp.compile( p_info ) ) {
@@ -199,7 +221,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		}
 		p_info->assembler_list.activate_file_number();
 		p_info->use_file_access = true;
-		asm_line.set( "CALL", "", "sub_file_number" );			//	PTRFIL (F864h) ‚É FILE_INFO ‚ÌƒAƒhƒŒƒX‚ğŠi”[A”ÍˆÍŠO‚È‚ç bad file number ‚ÌƒGƒ‰[
+		asm_line.set( "CALL", "", "sub_file_number" );			//	PTRFIL (F864h) ã« FILE_INFO ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ ¼ç´ã€ç¯„å›²å¤–ãªã‚‰ bad file number ã®ã‚¨ãƒ©ãƒ¼
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 
@@ -221,7 +243,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 	has_semicolon = false;
 	while( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "SPC(" ) {
-			//	SPC(n) ‚Ìê‡
+			//	SPC(n) ã®å ´åˆ
 			p_info->list.p_position++;
 			p_info->assembler_list.add_label( "blib_spc", "0x040f0" );
 			if( exp.compile( p_info ) ) {
@@ -252,12 +274,12 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			exp.release();
 		}
 		else if( p_info->list.p_position->s_word == "TAB(" ) {
-			//	TAB(n) ‚Ìê‡
+			//	TAB(n) ã®å ´åˆ
 			p_info->list.p_position++;
 			p_info->assembler_list.add_label( "blib_tab", "0x04048" );
 			exp.makeup_node( p_info );
 			if( is_file ) {
-				//	ƒtƒ@ƒCƒ‹‚Ìê‡A‰½‚ào‚³‚È‚¢‚Ì‚Å TAB() ŒÄ‚Ño‚µ‚ğo‚³‚È‚¢
+				//	ãƒ•ã‚¡ã‚¤ãƒ«ã®å ´åˆã€ä½•ã‚‚å‡ºã•ãªã„ã®ã§ TAB() å‘¼ã³å‡ºã—ã‚’å‡ºã•ãªã„
 			}
 			else {
 				exp.compile( p_info );
@@ -277,7 +299,7 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			exp.release();
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SYMBOL && p_info->list.p_position->s_word == "," ) {
-			//	, ‚Ìê‡
+			//	, ã®å ´åˆ
 			p_info->list.p_position++;
 			p_info->assembler_list.add_label( "blib_comma", "0x040f3" );
 			p_info->assembler_list.add_label( "work_csrx", "0x0f3dd" );
@@ -299,11 +321,11 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			has_semicolon = true;
 		}
 		else if( p_info->list.p_position->s_word == "USING" ) {
-			//	USING ‚Ìê‡
+			//	USING ã®å ´åˆ
 			p_info->list.p_position++;
 			if( !this->exec_using( p_info, is_file ) ) {
-				//	ƒGƒ‰[‚¾‚Á‚½ê‡
-				return true;			//	PRINT USING ‚Æ‚µ‚Äˆ—‚Í‚µ‚½‚Ì‚ÅAtrue
+				//	ã‚¨ãƒ©ãƒ¼ã ã£ãŸå ´åˆ
+				return true;			//	PRINT USING ã¨ã—ã¦å‡¦ç†ã¯ã—ãŸã®ã§ã€true
 			}
 			if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == ";" ) {
 				p_info->list.p_position++;
@@ -314,12 +336,12 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 			}
 		}
 		else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::SYMBOL && p_info->list.p_position->s_word == ";" ) {
-			//	; ‚Ìê‡
+			//	; ã®å ´åˆ
 			p_info->list.p_position++;
 			has_semicolon = true;
 		}
 		else if( exp.compile( p_info, CEXPRESSION_TYPE::UNKNOWN ) ) {
-			//	®‚Ìê‡
+			//	å¼ã®å ´åˆ
 			switch( exp.get_type() ) {
 			default:
 			case CEXPRESSION_TYPE::INTEGER:
@@ -371,14 +393,13 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		CSTRING value;
 		value.set( 2, image );
 
-		//	ÅŒã‚Ì‰üs
+		//	æœ€å¾Œã®æ”¹è¡Œ
 		s_label_crlf = p_info->constants.add( value );
 		asm_line.set( "LD", "", "HL", s_label_crlf );
 		p_info->assembler_list.body.push_back( asm_line );
 		if( is_file ) {
-			asm_line.set( "LD", "", "IX", "blib_file_puts" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "CALL", "","call_blib" );
+			p_info->assembler_list.activate_put_string( p_info );
+			asm_line.set( "CALL", "", "put_string" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {

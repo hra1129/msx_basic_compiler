@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: SetAdjust
 // ====================================================================
 //	2023/Dec/29th	t.hara
@@ -44,7 +44,7 @@ bool CSETADJUST::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ1ˆø” X
+	//	ç¬¬1å¼•æ•° X
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		asm_line.set( "PUSH", "", "HL" );
@@ -60,7 +60,7 @@ bool CSETADJUST::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ2ˆø” Y
+	//	ç¬¬2å¼•æ•° Y
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		asm_line.set( "POP", "", "DE" );
@@ -71,14 +71,14 @@ bool CSETADJUST::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 
-	//	ADJUST ‚© ADJUSTS ‚©
+	//	ADJUST ã‹ ADJUSTS ã‹
 	if( is_set_adjust ) {
-		//	ADJUST ‚Í RTC ‚Ö‘‚«‚Ş
+		//	ADJUST ã¯ RTC ã¸æ›¸ãè¾¼ã‚€
 		asm_line.set( "LD", "", "B", "1" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	ADJUST ‚Í RTC ‚Ö‘‚«‚Ü‚È‚¢
+		//	ADJUST ã¯ RTC ã¸æ›¸ãè¾¼ã¾ãªã„
 		asm_line.set( "LD", "", "B", "0" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}

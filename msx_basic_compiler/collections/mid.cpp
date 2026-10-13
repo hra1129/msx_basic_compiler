@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Mid$
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -6,14 +6,12 @@
 
 #include "mid.h"
 #include "../expressions/expression.h"
-#include "../expressions/expression_variable.h"
 
 // --------------------------------------------------------------------
-//  MID$( •Ï”–¼, ’uŠ·ŠJnˆÊ’u [, ’uŠ·ƒTƒCƒY] ) = ’uŠ·•¶š—ñ
+//  MID$( å¤‰æ•°å, ç½®æ›é–‹å§‹ä½ç½® [, ç½®æ›ã‚µã‚¤ã‚º] ) = ç½®æ›æ–‡å­—åˆ—
 bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
-
 	int line_no = p_info->list.get_line_no();
 
 	if( p_info->list.p_position->s_word != "MID$" ) {
@@ -28,33 +26,17 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	p_info->assembler_list.activate_get_writeable_string();
-	//	•Ï”‚ÌƒAƒhƒŒƒX‚ğ“¾‚ÄA‚»‚Ì“à—e‚ğƒRƒs[‚É’u‚«Š·‚¦‚é
-	std::vector< CBASIC_WORD >::const_iterator p_position_back = p_info->list.p_position;
 	CVARIABLE variable = p_info->p_compiler->get_variable_address();
-	asm_line.set( "LD", "", "E", "[HL]" );					//	DE = •Ï”‚ÉŠi”[‚³‚ê‚Ä‚¢‚é•¶š—ñ‚ÌƒAƒhƒŒƒX
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "D", "[HL]" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL", "" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );					//	•Ï”‚ÌƒAƒhƒŒƒX
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "EX", "", "DE", "HL" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "get_writeable_string", "" );	//	•Ï”‚É“ü‚Á‚Ä‚é•¶š—ñ‚ğA•K—v‚É‰‚¶‚ÄƒRƒs[‚·‚éi‘‚«‚İ‰Â”\‚È•¶š—ñ‚É•ÏŠ·‚·‚éj
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "POP", "", "DE" );						//	•Ï”‚ÌƒAƒhƒŒƒX‚ğæ“¾
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "EX", "", "DE", "HL" );					//	HL=•Ï”‚ÌƒAƒhƒŒƒX, DE=ƒRƒs[‚µ‚½•¶š—ñ‚ÌƒAƒhƒŒƒX
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "E" );					//	•Ï”‚Ì’†g‚ğAƒRƒs[‚µ‚½•¶š—ñ‚É’u‚«Š·‚¦‚é
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "HL", "" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "D" );
+	if( variable.type != CVARIABLE_TYPE::STRING ) {
+		p_info->errors.add( TYPE_MISMATCH, line_no );
+		return true;
+	}
+	p_info->assembler_list.activate_copy_string_to_buffer();
+	p_info->assembler_list.activate_legacy_string_buffer2();
+	p_info->assembler_list.activate_copy_string_from_buffer();
+	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_assign_string();
+	asm_line.set( "PUSH", "", "HL" );						// destination descriptor
 	p_info->assembler_list.body.push_back( asm_line );
 
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
@@ -62,17 +44,13 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-
-	if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
-		//	‘æ2ˆø”‚Ìˆ—
-		asm_line.set( "LD", "", "B", "L" );
-		p_info->assembler_list.body.push_back( asm_line );
-		exp.release();
-	}
-	else {
+	if( !exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
+	asm_line.set( "LD", "", "B", "L" );					// replacement position (1-based)
+	p_info->assembler_list.body.push_back( asm_line );
+	exp.release();
 
 	if( p_info->list.is_command_end() ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -80,28 +58,20 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
-		//	‘æ3ˆø”‚Ìˆ—
 		asm_line.set( "PUSH", "", "BC" );
 		p_info->assembler_list.body.push_back( asm_line );
-		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
-			asm_line.set( "POP", "", "BC" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "", "C", "L" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "PUSH", "", "BC" );
-			p_info->assembler_list.body.push_back( asm_line );
-			exp.release();
-		}
-		else {
+		if( !exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		asm_line.set( "POP", "", "BC" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "C", "L" );					// maximum replacement length
+		p_info->assembler_list.body.push_back( asm_line );
+		exp.release();
 	}
 	else {
-		//	‘æ3ˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
 		asm_line.set( "LD", "", "C", "255" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "PUSH", "", "BC" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 
@@ -110,64 +80,69 @@ bool CMID::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "=" ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	p_info->list.p_position++;
 
-	//	= ‚Ì‰E‘¤‚Ì®‚ğˆ—
-	exp.makeup_node( p_info );
-
-	bool is_compatible_mode = false;
-	if( p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE && exp.get_top_node() != nullptr && exp.get_top_node()->is_variable ) {
-		is_compatible_mode = true;
-		CEXPRESSION_VARIABLE *p = reinterpret_cast<CEXPRESSION_VARIABLE*>(exp.get_top_node());
-		p->no_copy = true;
-	}
-	if( ! exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
+	asm_line.set( "PUSH", "", "BC" );						// Preserve MID$ position and length
+	p_info->assembler_list.body.push_back( asm_line );
+	if( !exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
+	exp.release();
+
+	// Convert the source first so MID$ can safely replace a substring of itself.
+	asm_line.set( "PUSH", "", "HL" );						// source descriptor
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-
-	//	‚±‚±‚Ì“_‚ÅAu‘ã“üæ‚Ì•¶š—ñ•Ï”‚É“ü‚Á‚Ä‚é•¶š—ñ‚ÌƒAƒhƒŒƒXvu‘ã“üæ‚Ì•¶š—ñ”z—ñ•Ï”v
-	//	‚ÌƒAƒhƒŒƒX‚ª•Ï‚í‚Á‚Ä‚¢‚é‰Â”\«‚ª‚ ‚éB]‚Á‚ÄA‚±‚±‚Å‚Ü‚½•Ï”‚Ì“à—e‚ğæ‚è’¼‚·B
-	std::vector< CBASIC_WORD >::const_iterator p_position_next = p_info->list.p_position;
-	p_info->list.p_position = p_position_back;
-	variable = p_info->p_compiler->get_variable_address();
-	p_info->list.p_position = p_position_next;
-	asm_line.set( "LD", "", "E", "[HL]" );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "HL" );
+	asm_line.set( "CALL", "", "copy_string_to_buffer" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "D", "[HL]" );
-	p_info->assembler_list.body.push_back( asm_line );
-
 	asm_line.set( "POP", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "free_string" );
+	p_info->assembler_list.body.push_back( asm_line );
+
+	asm_line.set( "POP", "", "BC" );						// MID$ position and length
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );						// destination descriptor
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "PUSH", "", "BC" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "copy_string_to_buffer" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "POP", "", "BC" );
 	p_info->assembler_list.body.push_back( asm_line );
-	if( !is_compatible_mode ) {
-		asm_line.set( "PUSH", "", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-	}
-	asm_line.set( "EX", "", "DE", "HL" );
+	asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
 	p_info->assembler_list.body.push_back( asm_line );
 	p_info->assembler_list.add_label( "blib_mid_cmd", "0x0406c" );
 	asm_line.set( "LD", "", "IX", "blib_mid_cmd" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "call_blib" );
 	p_info->assembler_list.body.push_back( asm_line );
-	if( !is_compatible_mode ) {
-		p_info->assembler_list.activate_free_string();
-		asm_line.set( "POP", "", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "free_string" );
-		p_info->assembler_list.body.push_back( asm_line );
-	}
-	exp.release();
+
+	asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "copy_string_from_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "POP", "", "DE" );						// destination descriptor
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "assign_string" );
+	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

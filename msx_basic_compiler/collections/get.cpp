@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Get
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,9 +8,9 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  GET DATE <•¶Žš—ñ•Ï”–¼> [,A]
-//	GET TIME <•¶Žš—ñ•Ï”–¼> [,A]
-//	GET #<ƒtƒ@ƒCƒ‹”Ô†>, <ƒŒƒR[ƒh”Ô†>
+//  GET DATE <æ–‡å­—åˆ—å¤‰æ•°å> [,A]
+//	GET TIME <æ–‡å­—åˆ—å¤‰æ•°å> [,A]
+//	GET #<ãƒ•ã‚¡ã‚¤ãƒ«ç•ªå·>, <ãƒ¬ã‚³ãƒ¼ãƒ‰ç•ªå·>
 //
 bool CGET::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
@@ -24,7 +24,7 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
-		//	GET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+		//	GET ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
@@ -46,20 +46,12 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.activate_free_string();
 	p_info->assembler_list.activate_copy_string();
+	p_info->assembler_list.activate_copy_string_from_buffer();
+	p_info->assembler_list.activate_assign_string();
 
 	if( command_id < 2 ) {	//	TIME or DATE
 		variable = p_info->p_compiler->get_variable_address();
 		asm_line.set( "PUSH", "", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "E", "[HL]" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "INC", "", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "D", "[HL]" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "EX", "", "DE", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "free_string" );
 		p_info->assembler_list.body.push_back( asm_line );
 
 		if( p_info->list.is_command_end() ) {
@@ -96,17 +88,13 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 
-		asm_line.set( "CALL", "", "copy_string" );
+		asm_line.set( "CALL", "", "copy_string_from_buffer" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "POP", "", "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "E" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "INC", "", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "D" );
+		asm_line.set( "CALL", "", "assign_string" );
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
@@ -130,7 +118,7 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	ƒŒƒR[ƒh”Ô†
+	//	ãƒ¬ã‚³ãƒ¼ãƒ‰ç•ªå·
 	if( !exp.compile( p_info ) ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;

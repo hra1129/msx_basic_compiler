@@ -97,7 +97,7 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_exp.cpp \
 	expressions/expression_fix.cpp \
 	expressions/expression_fre.cpp \
-	expressions/expression_function.cpp \
+	expressions/expression_play.cpp \
 	expressions/expression_hex.cpp \
 	expressions/expression_hexchr.cpp \
 	expressions/expression_inkey.cpp \

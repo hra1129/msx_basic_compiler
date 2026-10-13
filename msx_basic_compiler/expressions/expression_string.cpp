@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -34,13 +34,13 @@ void CEXPRESSION_STRING::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
 		return;
 	}
-	//	‘æ‚Pˆø”‚ðˆ—
+	//	ç¬¬ï¼‘å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand1->compile( p_info );
 	this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand1->type );
 	asm_line.set( "PUSH", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 
-	//	‘æ‚Qˆø”‚ðˆ—
+	//	ç¬¬ï¼’å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand2->compile( p_info );
 	p_info->assembler_list.activate_string();
 	if( this->p_operand2->type == CEXPRESSION_TYPE::STRING ) {

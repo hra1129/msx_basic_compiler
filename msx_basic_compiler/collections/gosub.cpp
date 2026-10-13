@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Gosub
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -7,7 +7,7 @@
 #include "gosub.h"
 
 // --------------------------------------------------------------------
-//  GOSUB s”Ô†
+//  GOSUB è¡Œç•ªå·
 bool CGOSUB::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -17,12 +17,12 @@ bool CGOSUB::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
-		//	GOSUB ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+		//	GOSUB ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO ) {
-		//	s”Ô†Žw’è‚ª‚¨‚©‚µ‚¢ê‡‚Í Syntax error.
+		//	è¡Œç•ªå·æŒ‡å®šãŒãŠã‹ã—ã„å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}

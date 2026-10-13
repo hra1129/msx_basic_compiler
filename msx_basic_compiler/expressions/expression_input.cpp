@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/Dec/14th	t.hara
@@ -19,7 +19,7 @@ CEXPRESSION_NODE* CEXPRESSION_INPUT::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	INPŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
+	//	INPé–¢æ•°ã¯æœ€é©åŒ–ã§æ¶ˆæ»…ã™ã‚‹ã“ã¨ã¯ãªã„
 	return nullptr;
 }
 
@@ -27,7 +27,7 @@ CEXPRESSION_NODE* CEXPRESSION_INPUT::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_INPUT::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ğˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	if( this->p_operand == nullptr ) {
 		return;
 	}
@@ -37,15 +37,12 @@ void CEXPRESSION_INPUT::compile( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
-	p_info->assembler_list.activate_allocate_string();
+	p_info->assembler_list.activate_input_string_getchar();
 	this->type = CEXPRESSION_TYPE::STRING;
-	p_info->assembler_list.add_label( "blib_input", "0x0407e" );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "allocate_string", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::NONE, "blib_input" );
-	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_input_string_getchar", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 }

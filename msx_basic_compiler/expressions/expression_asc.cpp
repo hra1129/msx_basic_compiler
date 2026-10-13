@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -21,9 +21,9 @@ CEXPRESSION_NODE* CEXPRESSION_ASC::optimization( CCOMPILE_INFO *p_info ) {
 		this->p_operand = p;
 	}
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
-		//	’è”‚Ìê‡
+		//	å®šæ•°ã®å ´åˆ
 		if( this->p_operand->type == CEXPRESSION_TYPE::STRING ) {
-			//	•¶š—ñ‚Ìê‡
+			//	æ–‡å­—åˆ—ã®å ´åˆ
 			if( this->p_operand->s_value.size() != 0 ) {
 				CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 				p_term->type = CEXPRESSION_TYPE::INTEGER;
@@ -39,7 +39,7 @@ CEXPRESSION_NODE* CEXPRESSION_ASC::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_ASC::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ğˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	if( this->p_operand == nullptr ) {
 		return;
 	}
@@ -49,17 +49,34 @@ void CEXPRESSION_ASC::compile( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
+	p_info->assembler_list.activate_free_string();
+	if( p_info->assembler_list.add_subroutines( "asc_character" ) ) {
+		asm_line.set( "LABEL", "", "asc_character" );
+		p_info->assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFB", "", "0" );
+		p_info->assembler_list.variables_area.push_back( asm_line );
+	}
+	asm_line.set( "PUSH", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "INC", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "[HL]" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "[HL]" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[HL]" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "DEC", "", "HL" );
+	asm_line.set( "LD", "", "[asc_character]", "A" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "AF"  );
+	asm_line.set( "POP", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "free_string"  );
+	asm_line.set( "CALL", "", "free_string" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "POP", "", "AF" );
+	asm_line.set( "LD", "", "A", "[asc_character]" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "L", "A" );
 	p_info->assembler_list.body.push_back( asm_line );

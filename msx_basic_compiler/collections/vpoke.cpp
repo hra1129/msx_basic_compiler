@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Vpoke
 // ====================================================================
 //	2023/Aug/11th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  VPOKE <ÉAÉhÉåÉX>, <íl>
+//  VPOKE <„Ç¢„Éâ„É¨„Çπ>, <ÂÄ§>
 bool CVPOKE::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 
@@ -20,7 +20,7 @@ bool CVPOKE::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
 	std::string s_label1, s_label2;
-	//	ëÊ1à¯êî <ÉAÉhÉåÉX>
+	//	Á¨¨1ÂºïÊï∞ <„Ç¢„Éâ„É¨„Çπ>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -35,7 +35,7 @@ bool CVPOKE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî <íl>
+	//	Á¨¨2ÂºïÊï∞ <ÂÄ§>
 	if( exp.compile( p_info ) ) {
 
 		p_info->assembler_list.add_label( "bios_wrtvrm", "0x004d" );

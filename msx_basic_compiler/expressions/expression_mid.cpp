@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -38,8 +38,9 @@ CEXPRESSION_NODE* CEXPRESSION_MID::optimization( CCOMPILE_INFO *p_info ) {
 // --------------------------------------------------------------------
 void CEXPRESSION_MID::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
+	std::string s_mid_start;
 
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand1->compile( p_info );
 
 	if( this->p_operand1->type == CEXPRESSION_TYPE::STRING ) {
@@ -55,16 +56,23 @@ void CEXPRESSION_MID::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_operand3 != nullptr ) {
 		this->p_operand2->compile( p_info );
 		this->p_operand2->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand2->type );
-		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		s_mid_start = "blib_mid_start_" + std::to_string( p_info->assembler_list.body.size() );
+		asm_line.set( "LABEL", "", s_mid_start );
+		p_info->assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFB", "", "0" );
+		p_info->assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[" + s_mid_start + "]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 
 		this->p_operand3->compile( p_info );
-		this->p_operand3->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand2->type );
+		this->p_operand3->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand3->type );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "L" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[" + s_mid_start + "]" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "L" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
@@ -78,9 +86,22 @@ void CEXPRESSION_MID::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "blib_mid", "0x04033" );
 
 	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_copy_string_from_buffer();
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "HL", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::NONE, "blib_mid" );
 	p_info->assembler_list.body.push_back( asm_line );
@@ -96,7 +117,7 @@ void CEXPRESSION_MID::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "HL", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "copy_string", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "copy_string_from_buffer", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	this->type = CEXPRESSION_TYPE::STRING;
 }

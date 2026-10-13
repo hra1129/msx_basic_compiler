@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	MSX-BASIC compiler
 // ====================================================================
 //	2023/July/20th  t.hara 
@@ -12,9 +12,9 @@
 #define __ASSEMBLER_LINE_H__
 
 enum class CMNEMONIC_TYPE: int {
-	COMMENT,					//	ƒRƒƒ“ƒgs‚Ü‚½‚Í‹ós
-	LABEL,						//	ƒ‰ƒxƒ‹s  label:
-	CONSTANT,					//	’è”éŒ¾  constant_variable equ 0
+	COMMENT,					//	ã‚³ãƒ¡ãƒ³ãƒˆè¡Œã¾ãŸã¯ç©ºè¡Œ
+	LABEL,						//	ãƒ©ãƒ™ãƒ«è¡Œ  label:
+	CONSTANT,					//	å®šæ•°å®£è¨€  constant_variable equ 0
 	LD,
 	EX,
 	EXX,
@@ -91,9 +91,9 @@ enum class CCONDITION: int {
 };
 
 enum class COPERAND_TYPE: int {	//	ex.
-	NONE,						//	‚È‚µ
+	NONE,						//	ãªã—
 	CONSTANT,					//	1234h
-	MEMORY,						//	[1234h] ‚â [HL]
+	MEMORY,						//	[1234h] ã‚„ [HL]
 	REGISTER,					//	HL
 };
 

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: VPokes
 // ====================================================================
 //	2023/Aug/11th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  VPOKES <ÉAÉhÉåÉX>, <ï∂éöóÒéÆ>
+//  VPOKES <„Ç¢„Éâ„É¨„Çπ>, <ÊñáÂ≠óÂàóÂºè>
 bool CVPOKES::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 
@@ -19,7 +19,7 @@ bool CVPOKES::exec( CCOMPILE_INFO *p_info ) {
 
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
-	//	ëÊ1à¯êî <ÉAÉhÉåÉX>
+	//	Á¨¨1ÂºïÊï∞ <„Ç¢„Éâ„É¨„Çπ>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -34,17 +34,30 @@ bool CVPOKES::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî <íl>
+	//	Á¨¨2ÂºïÊï∞ <ÂÄ§>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		p_info->assembler_list.activate_free_string();
+		p_info->assembler_list.activate_copy_string_to_buffer();
 		p_info->assembler_list.add_label( "blib_vpokes", "0x0408d" );
-		asm_line.set( "POP", "", "DE", "" );
+		asm_line.set( "PUSH", "", "HL", "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "EX", "", "DE", "HL" );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "copy_string_to_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "BC", "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL", "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "PUSH", "", "BC", "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "blib_vpokes" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "call_blib" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "free_string" );
 		p_info->assembler_list.body.push_back( asm_line );

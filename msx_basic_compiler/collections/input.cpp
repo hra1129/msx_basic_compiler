@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Input
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  INPUT [ <•¶š—ñ>; ] <•Ï”–¼> [, <•Ï”–¼> ... ]
+//  INPUT [ <æ–‡å­—åˆ—>; ] <å¤‰æ•°å> [, <å¤‰æ•°å> ... ]
 bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 	std::string s;
 	int line_no = p_info->list.get_line_no();
@@ -48,17 +48,17 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 	int var_type;
 	std::string s_data;
 	while( !p_info->list.is_command_end() ) {
-		//	assembler_list ‚ÌŒ»İˆÊ’u‚ğŠo‚¦‚Ä‚¨‚­
+		//	assembler_list ã®ç¾åœ¨ä½ç½®ã‚’è¦šãˆã¦ãŠã
 		lines = p_info->assembler_list.body.size();
-		//	•Ï”–¼‚ğ•]‰¿‚·‚é
+		//	å¤‰æ•°åã‚’è©•ä¾¡ã™ã‚‹
 		CVARIABLE variable = p_info->p_compiler->get_variable_address();
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		for( ; p_info->assembler_list.body.size() > lines; ) {
-			//	ÅŒã‚Ì—v‘f‚ğ’Šo
+			//	æœ€å¾Œã®è¦ç´ ã‚’æŠ½å‡º
 			asm_line = p_info->assembler_list.body.back();
 			p_info->assembler_list.body.pop_back();
-			//	ƒoƒbƒtƒ@‚Ìæ“ª‚É‘}“ü
+			//	ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ã«æŒ¿å…¥
 			assembler_list_buffer.insert( assembler_list_buffer.begin(), asm_line );
 		}
 		switch( variable.type ) {

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -33,7 +33,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_DIV::optimization( CCOMPILE_INFO *p_info 
 	}
 
 	if( this->p_left->is_constant && this->p_right->is_constant ) {
-		//	¶‰E‚Ì€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
+		//	å·¦å³ã®é …ãŒä¸¡æ–¹ã¨ã‚‚å®šæ•°ã®å ´åˆ
 		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
 		CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
 
@@ -48,7 +48,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_DIV::optimization( CCOMPILE_INFO *p_info 
 		return p_term;
 	}
 	if( this->p_left->is_constant ) {
-		//	¶‚Ì€‚ª’è”
+		//	å·¦ã®é …ãŒå®šæ•°
 		CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
 		CEXPRESSION_NODE *p_right = this->p_right;
 		double r = p_left->get_value();
@@ -58,7 +58,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_DIV::optimization( CCOMPILE_INFO *p_info 
 		}
 	}
 	if( this->p_right->is_constant ) {
-		//	‰E‚Ì€‚ª’è”
+		//	å³ã®é …ãŒå®šæ•°
 		CEXPRESSION_TERM *p_right  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
 		CEXPRESSION_NODE *p_left = this->p_left;
 		double r = p_right->get_value();
@@ -86,15 +86,15 @@ void CEXPRESSION_OPERATOR_DIV::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
 		return;
 	}
-	//	æ‚É€‚ğˆ—
+	//	å…ˆã«é …ã‚’å‡¦ç†
 	this->p_left->compile( p_info );
 	p_info->assembler_list.push_hl( this->p_left->type );
 	this->p_right->compile( p_info );
 
-	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
+	//	ã“ã®æ¼”ç®—å­ã®æ¼”ç®—çµæœã®å‹ã‚’æ±ºã‚ã‚‹
 	this->type_adjust_2op( p_info, this->p_left, this->p_right );
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
-		//	®”‚Ìê‡
+		//	æ•´æ•°ã®å ´åˆ
 		p_info->assembler_list.add_label( "bios_idiv", "0x031e6" );
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -104,7 +104,7 @@ void CEXPRESSION_OPERATOR_DIV::compile( CCOMPILE_INFO *p_info ) {
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
 	}
 	else {
-		//	À”‚Ìê‡
+		//	å®Ÿæ•°ã®å ´åˆ
 		p_info->assembler_list.add_label( "bios_decdiv", "0x0289f" );
 		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_decdiv", COPERAND_TYPE::NONE, "" );

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -37,22 +37,22 @@ void CEXPRESSION_OPERATOR_LE::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
 		return;
 	}
-	//	êÊÇ…çÄÇèàóù
+	//	ÂÖà„Å´È†Ö„ÇíÂá¶ÁêÜ
 	this->p_left->compile( p_info );
 
 	p_info->assembler_list.push_hl( this->p_left->type );
 
 	this->p_right->compile( p_info );
 
-	//	Ç±ÇÃââéZéqÇÃââéZåãâ ÇÕïKÇ∏êÆêî
+	//	„Åì„ÅÆÊºîÁÆóÂ≠ê„ÅÆÊºîÁÆóÁµêÊûú„ÅØÂøÖ„ÅöÊï¥Êï∞
 	this->type = CEXPRESSION_TYPE::INTEGER;
 	if( this->p_left->type != this->p_right->type && (this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING) ) {
-		//	ç∂âEÇÃçÄÇ™àŸÇ»ÇÈå^Ç≈ÅAï–ï˚Ç™ï∂éöóÒå^Ç»ÇÁÉGÉâÅ[
+		//	Â∑¶Âè≥„ÅÆÈ†Ö„ÅåÁï∞„Å™„ÇãÂûã„Åß„ÄÅÁâáÊñπ„ÅåÊñáÂ≠óÂàóÂûã„Å™„Çâ„Ç®„É©„Éº
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING ) {
-		//	ï∂éöóÒÇÃèÍçá
+		//	ÊñáÂ≠óÂàó„ÅÆÂ†¥Âêà
 		p_info->assembler_list.activate_free_string();
 		s_label = p_info->get_auto_label();
 		p_info->assembler_list.add_label( "blib_strcmp", "0x04027" );
@@ -99,13 +99,13 @@ void CEXPRESSION_OPERATOR_LE::compile( CCOMPILE_INFO *p_info ) {
 	this->type = CEXPRESSION_TYPE::INTEGER;
 
 	if( compare_type == CEXPRESSION_TYPE::INTEGER ) {
-		//	Ç±ÇÃââéZéqÇ™êÆêîÇÃèÍçá
+		//	„Åì„ÅÆÊºîÁÆóÂ≠ê„ÅåÊï¥Êï∞„ÅÆÂ†¥Âêà
 		std::string s_label = p_info->get_auto_label();
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::XOR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::SBC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );	//	HL(âEçÄ) >= DE(ç∂çÄ) Ç™ê¨óßÇ∑ÇÈèÍçáÇÕ S=0 (P), ÇµÇ»Ç¢èÍçáÇÕ S=1 (M)
+		asm_line.set( CMNEMONIC_TYPE::SBC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );	//	HL(Âè≥È†Ö) >= DE(Â∑¶È†Ö) „ÅåÊàêÁ´ã„Åô„ÇãÂ†¥Âêà„ÅØ S=0 (P), „Åó„Å™„ÅÑÂ†¥Âêà„ÅØ S=1 (M)
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::M, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -113,24 +113,24 @@ void CEXPRESSION_OPERATOR_LE::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );		//	HL = 0 Ç‹ÇΩÇÕ HL = -1
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );		//	HL = 0 „Åæ„Åü„ÅØ HL = -1
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	Ç±ÇÃââéZéqÇ™é¿êîÇÃèÍçá
+		//	„Åì„ÅÆÊºîÁÆóÂ≠ê„ÅåÂÆüÊï∞„ÅÆÂ†¥Âêà
 		p_info->assembler_list.add_label( "bios_xdcomp", "0x02f5c" );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_xdcomp", COPERAND_TYPE::NONE, "" );	//	DAC <= ARG
 		p_info->assembler_list.body.push_back( asm_line );
-		//	A= 1 Å® ARG < DAC : A = 0Ç…ÇµÇΩÇ¢
-		//	A= 0 Å® ARG = DAC : A =-1Ç…ÇµÇΩÇ¢
-		//	A=-1 Å® ARG > DAC : A =-1Ç…ÇµÇΩÇ¢
+		//	A= 1 ‚Üí ARG < DAC : A = 0„Å´„Åó„Åü„ÅÑ
+		//	A= 0 ‚Üí ARG = DAC : A =-1„Å´„Åó„Åü„ÅÑ
+		//	A=-1 ‚Üí ARG > DAC : A =-1„Å´„Åó„Åü„ÅÑ
 		asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::SRA, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );		//	HL = 0 Ç‹ÇΩÇÕ HL = -1
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::REGISTER, "A" );		//	HL = 0 „Åæ„Åü„ÅØ HL = -1
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Pokew
 // ====================================================================
 //	2023/Aug/11th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  POKEW <ÉAÉhÉåÉX>, <íl>
+//  POKEW <„Ç¢„Éâ„É¨„Çπ>, <ÂÄ§>
 bool CPOKEW::exec( CCOMPILE_INFO *p_info ) {
 	int line_no = p_info->list.get_line_no();
 
@@ -19,7 +19,7 @@ bool CPOKEW::exec( CCOMPILE_INFO *p_info ) {
 
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
-	//	ëÊ1à¯êî <ÉAÉhÉåÉX>
+	//	Á¨¨1ÂºïÊï∞ <„Ç¢„Éâ„É¨„Çπ>
 	if( exp.compile( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER ) ) {
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -34,7 +34,7 @@ bool CPOKEW::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî <íl>
+	//	Á¨¨2ÂºïÊï∞ <ÂÄ§>
 	if( exp.compile( p_info ) ) {
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );

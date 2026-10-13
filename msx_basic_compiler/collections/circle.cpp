@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Circle
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  CIRCLE [STEP] (X, Y), ”¼Œa [,ƒJƒ‰[ƒR[ƒh[,ŠJnŠp“x[,I—¹Šp“x[,”ä—¦]]]]
+//  CIRCLE [STEP] (X, Y), åŠå¾„ [,ã‚«ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰[,é–‹å§‹è§’åº¦[,çµ‚äº†è§’åº¦[,æ¯”ç‡]]]]
 bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -39,14 +39,14 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "work_gxpos", "0x0FCB3" );
 	p_info->assembler_list.add_label( "work_gypos", "0x0FCB5" );
-	p_info->assembler_list.add_label( "work_aspect", "0x0F931" );		//	”ä—¦ single real
-	p_info->assembler_list.add_label( "work_cxoff", "0x0F945" );		//	…•½”¼Œa
-	p_info->assembler_list.add_label( "work_cyoff", "0x0F947" );		//	‚’¼”¼Œa
-	p_info->assembler_list.add_label( "work_cpcnt", "0x0F939" );		//	ŠJn“_ single real
-	p_info->assembler_list.add_label( "work_crcsum", "0x0F93D" );		//	I—¹“_ single real
+	p_info->assembler_list.add_label( "work_aspect", "0x0F931" );		//	æ¯”ç‡ single real
+	p_info->assembler_list.add_label( "work_cxoff", "0x0F945" );		//	æ°´å¹³åŠå¾„
+	p_info->assembler_list.add_label( "work_cyoff", "0x0F947" );		//	å‚ç›´åŠå¾„
+	p_info->assembler_list.add_label( "work_cpcnt", "0x0F939" );		//	é–‹å§‹ç‚¹ single real
+	p_info->assembler_list.add_label( "work_crcsum", "0x0F93D" );		//	çµ‚äº†ç‚¹ single real
 	p_info->assembler_list.add_label( "bios_setatr", "0x0011A" );
 
-	//	XÀ•W
+	//	Xåº§æ¨™
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		if (is_step) {
@@ -68,7 +68,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	YÀ•W
+	//	Yåº§æ¨™
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		if (is_step) {
@@ -96,7 +96,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	”¼Œa
+	//	åŠå¾„
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		asm_line.set( "LD", "", "[work_circle_radiusx]", "HL" );
@@ -110,7 +110,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
-		//	ƒJƒ‰[ƒR[ƒh‚ª‚ ‚éê‡
+		//	ã‚«ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ãŒã‚ã‚‹å ´åˆ
 		if( exp.compile( p_info ) ) {
 			has_parameter = true;
 			exp.release();
@@ -122,7 +122,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	if( !has_parameter ) {
-		//	ƒJƒ‰[ƒR[ƒhÈ—ª
+		//	ã‚«ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰çœç•¥
 		p_info->assembler_list.add_label( "work_forclr", "0x0F3E9" );
 		asm_line.set( "LD", "", "A", "[work_forclr]" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -133,7 +133,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
-		//	ŠJn“_‚ª‚ ‚éê‡
+		//	é–‹å§‹ç‚¹ãŒã‚ã‚‹å ´åˆ
 		if( exp.compile( p_info, CEXPRESSION_TYPE::SINGLE_REAL ) ) {
 			has_parameter = true;
 			exp.release();
@@ -148,7 +148,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	if( !has_parameter ) {
-		//	ŠJn“_È—ª
+		//	é–‹å§‹ç‚¹çœç•¥
 		asm_line.set( "LD", "", "HL", "0" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cpcnt + 0]", "HL" );
@@ -160,7 +160,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
-		//	I—¹“_‚ª‚ ‚éê‡
+		//	çµ‚äº†ç‚¹ãŒã‚ã‚‹å ´åˆ
 		if( exp.compile( p_info, CEXPRESSION_TYPE::SINGLE_REAL ) ) {
 			has_parameter = true;
 			exp.release();
@@ -175,7 +175,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	if( !has_parameter ) {
-		//	I—¹“_È—ª
+		//	çµ‚äº†ç‚¹çœç•¥
 		asm_line.set( "LD", "", "HL", "0" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_crcsum + 0]", "HL" );
@@ -187,7 +187,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	has_parameter = false;
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 		p_info->list.p_position++;
-		//	”ä—¦‚ª‚ ‚éê‡
+		//	æ¯”ç‡ãŒã‚ã‚‹å ´åˆ
 		if( exp.compile( p_info, CEXPRESSION_TYPE::SINGLE_REAL ) ) {
 			has_parameter = true;
 			exp.release();
@@ -203,7 +203,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	if( !has_parameter ) {
-		//	”ä—¦È—ª
+		//	æ¯”ç‡çœç•¥
 		asm_line.set( "LD", "", "HL", "0x1041" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_aspect + 0]", "HL" );

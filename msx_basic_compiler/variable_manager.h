@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Variable manager
 // ====================================================================
 //	2023/July/22  t.hara
@@ -15,34 +15,34 @@
 // --------------------------------------------------------------------
 class CVARIABLE_MANAGER {
 private:
-	//	ƒXƒe[ƒgƒƒ“ƒg‚ğ“Ç‚İ”ò‚Î‚·
+	//	ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã‚’èª­ã¿é£›ã°ã™
 	void skip_statement( class CCOMPILE_INFO *p_info );
 
-	//	DEFxxx ‚Ìî•ñ‚ğXV‚·‚é
+	//	DEFxxx ã®æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
 	void update( class CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type );
 
-	//	”z—ñ‚Ì—v‘f ( a, b, c ... ) ‚ğ•]‰¿‚µ‚ÄA—v‘f”‚ğ•Ô‚·
+	//	é…åˆ—ã®è¦ç´  ( a, b, c ... ) ã‚’è©•ä¾¡ã—ã¦ã€è¦ç´ æ•°ã‚’è¿”ã™
 	int evaluate_dimensions( class CCOMPILE_INFO *p_info );
 public:
-	//	•Ï”’Ç‰Áˆ—
+	//	å¤‰æ•°è¿½åŠ å‡¦ç†
 	CVARIABLE add_variable( class CCOMPILE_INFO *p_info );
 
-	//	ƒR[ƒh‚ğ‰ğß‚µ‚Ä•Ï”ƒŠƒXƒg‚ğì¬‚·‚é
+	//	ã‚³ãƒ¼ãƒ‰ã‚’è§£é‡ˆã—ã¦å¤‰æ•°ãƒªã‚¹ãƒˆã‚’ä½œæˆã™ã‚‹
 	bool analyze_defvars( class CCOMPILE_INFO *p_info );
 
-	//	Œ»İ‚ÌQÆˆÊ’u‚Ì•Ï”‚ğ¶¬‚µ‚Äî•ñ‚ğ•Ô‚·
+	//	ç¾åœ¨ã®å‚ç…§ä½ç½®ã®å¤‰æ•°ã‚’ç”Ÿæˆã—ã¦æƒ…å ±ã‚’è¿”ã™
 	CVARIABLE create_variable_info( class CCOMPILE_INFO *p_info, bool with_array = true );
 
-	//	Œ»İ‚ÌQÆˆÊ’u‚Ì•Ï”‚Ìî•ñ‚ğ•Ô‚·
+	//	ç¾åœ¨ã®å‚ç…§ä½ç½®ã®å¤‰æ•°ã®æƒ…å ±ã‚’è¿”ã™
 	CVARIABLE get_variable_info( class CCOMPILE_INFO *p_info, std::vector< class CEXPRESSION* > &exp_list, bool with_array = true );
 
-	//	Œ»İ‚ÌQÆˆÊ’u‚Ì”z—ñ•Ï”(—v‘f‚Å‚Í‚È‚­”z—ñ‘S‘Ì)‚Ìî•ñ‚ğ•Ô‚·
+	//	ç¾åœ¨ã®å‚ç…§ä½ç½®ã®é…åˆ—å¤‰æ•°(è¦ç´ ã§ã¯ãªãé…åˆ—å…¨ä½“)ã®æƒ…å ±ã‚’è¿”ã™
 	CVARIABLE get_array_info( class CCOMPILE_INFO *p_info );
 
-	//	”z—ñ—v‘f‚Ì®‚Ì”z—ñ exp_list ‚ğƒRƒ“ƒpƒCƒ‹‚·‚éƒR[ƒh‚ğ¶¬‚·‚éBHL ‚É•Ï”‚ÌƒAƒhƒŒƒX‚ª“ü‚Á‚Ä‚¢‚é‘O’ñ‚Å‚ ‚éB
+	//	é…åˆ—è¦ç´ ã®å¼ã®é…åˆ— exp_list ã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ã€‚HL ã«å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒå…¥ã£ã¦ã„ã‚‹å‰æã§ã‚ã‚‹ã€‚
 	void compile_array_elements( class CCOMPILE_INFO *p_info, std::vector< class CEXPRESSION* > &exp_list, CVARIABLE &variable );
 
-	//	“Áê•Ï”‚ğ’è‹`‚·‚é
+	//	ç‰¹æ®Šå¤‰æ•°ã‚’å®šç¾©ã™ã‚‹
 	CVARIABLE put_special_variable( class CCOMPILE_INFO *p_info, const std::string s_name, CVARIABLE_TYPE var_type, CVARIABLE_TYPE var_name_type = CVARIABLE_TYPE::UNKNOWN, bool is_array = false );
 };
 

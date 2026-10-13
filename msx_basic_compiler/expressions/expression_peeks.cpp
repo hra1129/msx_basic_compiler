@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -24,7 +24,7 @@ CEXPRESSION_NODE* CEXPRESSION_PEEKS::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand2;
 		this->p_operand2 = p;
 	}
-	//	PEEKSŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
+	//	PEEKSé–¢æ•°ã¯æœ€é©åŒ–ã§æ¶ˆæ»…ã™ã‚‹ã“ã¨ã¯ãªã„
 	return nullptr;
 }
 
@@ -39,16 +39,16 @@ void CEXPRESSION_PEEKS::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.activate_allocate_string();
 	p_info->assembler_list.add_label( "blib_peeks", "0x0408a" );
 
-	//	ƒAƒhƒŒƒX’l‚ðŒvŽZ
+	//	ã‚¢ãƒ‰ãƒ¬ã‚¹å€¤ã‚’è¨ˆç®—
 	this->p_operand1->compile( p_info );
 	this->p_operand1->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand1->type );
 	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 
-	//	•¶Žš—ñ’·‚ðŒvŽZ
+	//	æ–‡å­—åˆ—é•·ã‚’è¨ˆç®—
 	this->p_operand2->compile( p_info );
 	this->p_operand2->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand2->type );
-	//	•¶Žš—ñ’·‚É]‚Á‚Ä•¶Žš—ñ‚ðŠm•Û
+	//	æ–‡å­—åˆ—é•·ã«å¾“ã£ã¦æ–‡å­—åˆ—ã‚’ç¢ºä¿
 	asm_line.set( "LD", "", "A", "L" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "allocate_string", "" );

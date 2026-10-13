@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Sound
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SOUND <PSGÉåÉWÉXÉ^î‘çÜ>, <èëÇ´çûÇﬁíl>
+//  SOUND <PSG„É¨„Ç∏„Çπ„ÇøÁï™Âè∑>, <Êõ∏„ÅçËæº„ÇÄÂÄ§>
 bool CSOUND::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	bool has_parameter;
@@ -22,7 +22,7 @@ bool CSOUND::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "bios_wrtpsg", "0x00093" );
 
 	CEXPRESSION exp;
-	//	ëÊ1à¯êî <PSGÉåÉWÉXÉ^î‘çÜ>
+	//	Á¨¨1ÂºïÊï∞ <PSG„É¨„Ç∏„Çπ„ÇøÁï™Âè∑>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.type = CMNEMONIC_TYPE::PUSH;
@@ -44,7 +44,7 @@ bool CSOUND::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî <èëÇ´çûÇﬁíl>
+	//	Á¨¨2ÂºïÊï∞ <Êõ∏„ÅçËæº„ÇÄÂÄ§>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.type = CMNEMONIC_TYPE::LD;

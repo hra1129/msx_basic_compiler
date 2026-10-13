@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Copy
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -121,7 +121,7 @@ bool CCOPY::get_x1_y1_x2_y2( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	if( p_info->list.p_position->s_word == "TO" ) {
-		//	ÉyÅ[ÉWÇÃéwíËÇ™è»ó™Ç≥ÇÍÇƒÇ¢ÇÈèÍçá
+		//	„Éö„Éº„Ç∏„ÅÆÊåáÂÆö„ÅåÁúÅÁï•„Åï„Çå„Å¶„ÅÑ„ÇãÂ†¥Âêà
 		asm_line.set( "LD", "", "A", "[work_acpage]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_sy + 1]", "A" );
@@ -194,12 +194,12 @@ bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( p_info->list.is_command_end() ) {
-		//	ì]ëóêÊÅFï`âÊÉyÅ[ÉW
+		//	Ëª¢ÈÄÅÂÖàÔºöÊèèÁîª„Éö„Éº„Ç∏
 		asm_line.set( "LD", "", "A", "[work_acpage]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_dy + 1]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ÉçÉWÉJÉãÉIÉyÉåÅ[ÉVÉáÉì
+		//	„É≠„Ç∏„Ç´„É´„Ç™„Éö„É¨„Éº„Ç∑„Éß„É≥
 		p_info->p_compiler->put_logical_operation( true );
 		return true;
 	}
@@ -209,7 +209,7 @@ bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ì]ëóêÊÉyÅ[ÉW
+	//	Ëª¢ÈÄÅÂÖà„Éö„Éº„Ç∏
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "LD", "", "A", "L" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -223,22 +223,22 @@ bool CCOPY::get_x3_y3( CCOMPILE_INFO *p_info ) {
 		asm_line.set( "LD", "", "[work_dy + 1]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	//	ÉçÉWÉJÉãÉIÉyÉåÅ[ÉVÉáÉì
+	//	„É≠„Ç∏„Ç´„É´„Ç™„Éö„É¨„Éº„Ç∑„Éß„É≥
 	p_info->p_compiler->put_logical_operation( true );
 	return true;
 }
 
 // --------------------------------------------------------------------
-//  (1) COPY <ÉtÉ@ÉCÉãñº> TO <ÉtÉ@ÉCÉãñº>
-//  (2) COPY <ÉtÉ@ÉCÉãñº> TO <îzóÒïœêîñº>
-//  (3) COPY <ÉtÉ@ÉCÉãñº>[,<ï˚å¸>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+//  (1) COPY <„Éï„Ç°„Ç§„É´Âêç> TO <„Éï„Ç°„Ç§„É´Âêç>
+//  (2) COPY <„Éï„Ç°„Ç§„É´Âêç> TO <ÈÖçÂàóÂ§âÊï∞Âêç>
+//  (3) COPY <„Éï„Ç°„Ç§„É´Âêç>[,<ÊñπÂêë>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 //
-//  (4) COPY <îzóÒïœêîñº> TO <ÉtÉ@ÉCÉãñº>
-//  (5) COPY <îzóÒïœêîñº>[,<ï˚å¸>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+//  (4) COPY <ÈÖçÂàóÂ§âÊï∞Âêç> TO <„Éï„Ç°„Ç§„É´Âêç>
+//  (5) COPY <ÈÖçÂàóÂ§âÊï∞Âêç>[,<ÊñπÂêë>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 //
 //  (6) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
-//  (7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ÉtÉ@ÉCÉãñº>
-//  (8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <îzóÒïœêîñº>
+//  (7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <„Éï„Ç°„Ç§„É´Âêç>
+//  (8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ÈÖçÂàóÂ§âÊï∞Âêç>
 //
 bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 	CVARIABLE variable;
@@ -254,12 +254,12 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
 	if( p_info->list.is_command_end() ) {
-		//	COPY ÇæÇØÇ≈èIÇÌÇ¡ÇƒÇÈèÍçáÇÕÉGÉâÅ[
+		//	COPY „Å†„Åë„ÅßÁµÇ„Çè„Å£„Å¶„ÇãÂ†¥Âêà„ÅØ„Ç®„É©„Éº
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "(" ) {
-		//	( X1, Y1 )-[STEP]( X2, Y2 ), [ÉyÅ[ÉW] ÇæÇ¡ÇΩèÍçá
+		//	( X1, Y1 )-[STEP]( X2, Y2 ), [„Éö„Éº„Ç∏] „Å†„Å£„ÅüÂ†¥Âêà
 		if( !this->get_x1_y1_x2_y2( p_info ) ) {
 			return true;
 		}
@@ -270,7 +270,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		if( p_info->list.p_position->s_word == "(" ){
 			//	(6) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			if( !this->get_x3_y3( p_info ) ) {
-				//	ÉGÉâÅ[Ç™î≠ê∂ÇµÇΩÇÃÇ≈âΩÇ‡ÇπÇ∏Ç…ñﬂÇÈ
+				//	„Ç®„É©„Éº„ÅåÁô∫Áîü„Åó„Åü„ÅÆ„Åß‰Ωï„ÇÇ„Åõ„Åö„Å´Êàª„Çã
 				return true;
 			}
 			p_info->assembler_list.add_label( "blib_copy_pos_to_pos", "0x040b4" );
@@ -282,7 +282,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		}
 		variable = p_info->variable_manager.get_array_info( p_info );
 		if( variable.s_name == "" ) {
-			//	(7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ÉtÉ@ÉCÉãñº>
+			//	(7) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <„Éï„Ç°„Ç§„É´Âêç>
 			p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
 			asm_line.set( "LD", "", "HL", "[heap_next]" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -294,10 +294,26 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 				exp.release();
+				p_info->assembler_list.activate_free_string();
+				p_info->assembler_list.activate_copy_string_to_buffer();
 				p_info->assembler_list.add_label( "blib_copy_pos_to_file", "0x040bd" );
+				asm_line.set( "PUSH", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "copy_string_to_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "PUSH", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "LD", "", "IX", "blib_copy_pos_to_file" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "CALL", "", "call_blib" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "free_string" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			else {
@@ -306,7 +322,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			}
 		}
 		else {
-			//	(8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <îzóÒïœêîñº>
+			//	(8) COPY (X1,Y1)-[STEP](X2,Y2) [,<PAGE>] TO <ÈÖçÂàóÂ§âÊï∞Âêç>
 			asm_line.set( "LD", "", "HL", variable.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
 			p_info->assembler_list.add_label( "blib_copy_pos_to_array", "0x040b7" );
@@ -319,10 +335,10 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 
-	//	ëÊ1à¯êîÇâºÇ…îzóÒïœêîÇ∆å©Ç»ÇµÇƒèÓïÒÇìæÇƒÇ›ÇÈ
+	//	Á¨¨1ÂºïÊï∞„Çí‰ªÆ„Å´ÈÖçÂàóÂ§âÊï∞„Å®Ë¶ã„Å™„Åó„Å¶ÊÉÖÂ†±„ÇíÂæó„Å¶„Åø„Çã
 	variable = p_info->variable_manager.get_array_info( p_info );
 	if( variable.s_name == "" ) {
-		//	îzóÒïœêîÇ≈ÇÕÇ»Ç©Ç¡ÇΩèÍçáÅAÉtÉ@ÉCÉãñºÇ≈Ç»ÇØÇÍÇŒÇ»ÇÁÇ»Ç¢
+		//	ÈÖçÂàóÂ§âÊï∞„Åß„ÅØ„Å™„Åã„Å£„ÅüÂ†¥Âêà„ÄÅ„Éï„Ç°„Ç§„É´Âêç„Åß„Å™„Åë„Çå„Å∞„Å™„Çâ„Å™„ÅÑ
 		if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 			asm_line.set( "PUSH", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -337,7 +353,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( p_info->list.p_position->s_word == "," ) {
-			//	ï˚å¸ÇÃéwíËÇ™Ç†ÇÈèÍçá
+			//	ÊñπÂêë„ÅÆÊåáÂÆö„Åå„ÅÇ„ÇãÂ†¥Âêà
 			p_info->list.p_position++;
 			has_direction = true;
 			exp_direction.makeup_node( p_info );
@@ -353,9 +369,9 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( p_info->list.p_position->s_word == "(" ) {
-			//	(3) COPY <ÉtÉ@ÉCÉãñº>[,<ï˚å¸>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+			//	(3) COPY <„Éï„Ç°„Ç§„É´Âêç>[,<ÊñπÂêë>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			if( !this->get_x3_y3( p_info ) ) {
-				//	ÉGÉâÅ[Ç™î≠ê∂ÇµÇΩÇÃÇ≈âΩÇ‡ÇπÇ∏Ç…ñﬂÇÈ
+				//	„Ç®„É©„Éº„ÅåÁô∫Áîü„Åó„Åü„ÅÆ„Åß‰Ωï„ÇÇ„Åõ„Åö„Å´Êàª„Çã
 				return true;
 			}
 			asm_line.set( "LD", "", "HL", "[heap_next]" );
@@ -366,7 +382,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "[work_buf + 2]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	ï˚å¸
+			//	ÊñπÂêë
 			if( has_direction ) {
 				if( exp_direction.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 					exp_direction.release();
@@ -387,7 +403,20 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 			p_info->assembler_list.add_label( "blib_copy_file_to_pos", "0x051f5" );
+			p_info->assembler_list.activate_copy_string_to_buffer();
 			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "AF" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "AF" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "BC" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "IX", "blib_copy_file_to_pos" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -399,23 +428,39 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			return true;
 		}
-		//	TO îzóÒïœêîÅH
+		//	TO ÈÖçÂàóÂ§âÊï∞Ôºü
 		variable = p_info->variable_manager.get_array_info( p_info );
 		if( variable.s_name == "" ) {
 			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-				//	(1) COPY <ÉtÉ@ÉCÉãñº> TO <ÉtÉ@ÉCÉãñº>
+				//	(1) COPY <„Éï„Ç°„Ç§„É´Âêç> TO <„Éï„Ç°„Ç§„É´Âêç>
 				p_info->assembler_list.activate_free_string();
-				//	ï˚å¸ÇÃéwíËÇÕñ≥éãÇ∑ÇÈ
+				//	ÊñπÂêë„ÅÆÊåáÂÆö„ÅØÁÑ°Ë¶ñ„Åô„Çã
 				exp_direction.release();
+				p_info->assembler_list.activate_copy_string_to_buffer();
+				p_info->assembler_list.activate_legacy_string_buffer2();
 				p_info->assembler_list.add_label( "blib_copy_file_to_file", "0x040ab" );
 
+				asm_line.set( "PUSH", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "copy_string_to_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "POP", "", "DE" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "PUSH", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "PUSH", "", "DE" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "EX", "", "DE", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( "PUSH", "", "HL" );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
 				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( "PUSH", "", "DE" );
+				asm_line.set( "CALL", "", "copy_string_to_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "LD", "", "BC", "[heap_next]" );
 				p_info->assembler_list.body.push_back( asm_line );
@@ -444,19 +489,28 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			}
 		}
 		else {
-			//	(2) COPY <ÉtÉ@ÉCÉãñº> TO <îzóÒïœêîñº>
+			//	(2) COPY <„Éï„Ç°„Ç§„É´Âêç> TO <ÈÖçÂàóÂ§âÊï∞Âêç>
 			p_info->assembler_list.activate_free_string();
-			//	ï˚å¸ÇÃéwíËÇÕñ≥éãÇ∑ÇÈ
+			p_info->assembler_list.activate_copy_string_to_buffer();
+			//	ÊñπÂêë„ÅÆÊåáÂÆö„ÅØÁÑ°Ë¶ñ„Åô„Çã
 			exp_direction.release();
 			p_info->assembler_list.add_label( "blib_copy_file_to_array", "0x040b1" );
 
 			asm_line.set( "POP", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "PUSH", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "DE", variable.s_label );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "EX", "", "DE", "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "PUSH", "", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "IX", "blib_copy_file_to_array" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -469,13 +523,13 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	else {
-		//	îzóÒïœêîÇæÇ¡ÇΩ
+		//	ÈÖçÂàóÂ§âÊï∞„Å†„Å£„Åü
 		if( p_info->list.is_command_end() ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
 		if( p_info->list.p_position->s_word == "," ) {
-			//	ï˚å¸ÇÃéwíËÇ™Ç†ÇÈèÍçá
+			//	ÊñπÂêë„ÅÆÊåáÂÆö„Åå„ÅÇ„ÇãÂ†¥Âêà
 			p_info->list.p_position++;
 			has_direction = true;
 			exp_direction.makeup_node( p_info );
@@ -492,10 +546,10 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 		}
 		if( p_info->list.p_position->s_word == "(" ) {
 			if( !this->get_x3_y3( p_info ) ) {
-				//	ÉGÉâÅ[Ç™î≠ê∂ÇµÇΩÇÃÇ≈âΩÇ‡ÇπÇ∏Ç…ñﬂÇÈ
+				//	„Ç®„É©„Éº„ÅåÁô∫Áîü„Åó„Åü„ÅÆ„Åß‰Ωï„ÇÇ„Åõ„Åö„Å´Êàª„Çã
 				return true;
 			}
-			//	(5) COPY <îzóÒïœêîñº>[,<ï˚å¸>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
+			//	(5) COPY <ÈÖçÂàóÂ§âÊï∞Âêç>[,<ÊñπÂêë>] TO (X3,Y3) [,[<PAGE>][,<LOP>]]
 			p_info->assembler_list.add_label( "blib_copy_array_to_pos", "0x040ba" );
 			exp_direction.compile( p_info, CEXPRESSION_TYPE::INTEGER );
 			asm_line.set( "LD", "", "A", "L" );
@@ -508,18 +562,27 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			//	(4) COPY <îzóÒïœêîñº> TO <ÉtÉ@ÉCÉãñº>
+			//	(4) COPY <ÈÖçÂàóÂ§âÊï∞Âêç> TO <„Éï„Ç°„Ç§„É´Âêç>
 			if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-				//	ï˚å¸ÇÃéwíËÇÕñ≥éãÇ∑ÇÈ
+				//	ÊñπÂêë„ÅÆÊåáÂÆö„ÅØÁÑ°Ë¶ñ„Åô„Çã
 				exp_direction.release();
 				p_info->assembler_list.activate_free_string();
+				p_info->assembler_list.activate_copy_string_to_buffer();
 				p_info->assembler_list.add_label( "blib_copy_array_to_file", "0x040ae" );
 
-				asm_line.set( "EX", "", "DE", "HL" );
+				asm_line.set( "PUSH", "", "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "CALL", "", "copy_string_to_buffer" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "POP", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "PUSH", "", "BC" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "LD", "", "HL", variable.s_label );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( "PUSH", "", "DE" );
 				p_info->assembler_list.body.push_back( asm_line );
 				asm_line.set( "LD", "", "IX", "blib_copy_array_to_file" );
 				p_info->assembler_list.body.push_back( asm_line );

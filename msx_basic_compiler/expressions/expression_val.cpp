@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -29,7 +29,7 @@ void CEXPRESSION_VAL::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_operand == nullptr ) {
 		return;
 	}
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand->compile( p_info );
 
 	if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {

@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "MSX-BACON Release x64",
+			"type": "shell",
+			"command": "& 'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe' '.\\msx_basic_compiler\\msx_basic_compiler.sln' /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m /nologo /v:minimal",
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		}
+	]
+}

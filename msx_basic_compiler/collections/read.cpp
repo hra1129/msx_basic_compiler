@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Read
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  READ {•Ï”–¼}[,•Ï”–¼ ... ]
+//  READ {å¤‰æ•°å}[,å¤‰æ•°å ... ]
 bool CREAD::exec( CCOMPILE_INFO *p_info ) {
 	std::string s;
 	int line_no = p_info->list.get_line_no();
@@ -23,11 +23,11 @@ bool CREAD::exec( CCOMPILE_INFO *p_info ) {
 
 	while( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
-			//	•Ï”–¼‚Å‚Í–³‚¢‚Ì‚Å READ ‚Å‚Í‚È‚¢B
+			//	å¤‰æ•°åã§ã¯ç„¡ã„ã®ã§ READ ã§ã¯ãªã„ã€‚
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
-		//	•Ï”‚ð¶¬‚·‚é
+		//	å¤‰æ•°ã‚’ç”Ÿæˆã™ã‚‹
 		CVARIABLE variable = p_info->p_compiler->get_variable_address();
 		switch( variable.type ) {
 		case CVARIABLE_TYPE::STRING:		

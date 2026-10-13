@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -22,9 +22,9 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_MINUS::optimization( CCOMPILE_INFO *p_inf
 	}
 
 	if( this->p_right->is_constant ) {
-		//	€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
+		//	é …ãŒä¸¡æ–¹ã¨ã‚‚å®šæ•°ã®å ´åˆ
 		if( this->p_right->type != CEXPRESSION_TYPE::STRING ) {
-			//	”’l‚Ìê‡
+			//	æ•°å€¤ã®å ´åˆ
 			CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
 			p_term->set_double( -std::stod(p_right->s_value) );
 			return p_term;
@@ -40,10 +40,10 @@ void CEXPRESSION_OPERATOR_MINUS::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_right == nullptr ) {
 		return;
 	}
-	//	æ‚É€‚ğˆ—
+	//	å…ˆã«é …ã‚’å‡¦ç†
 	this->p_right->compile( p_info );
 
-	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
+	//	ã“ã®æ¼”ç®—å­ã®æ¼”ç®—çµæœã®å‹ã‚’æ±ºã‚ã‚‹
 	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
@@ -53,7 +53,7 @@ void CEXPRESSION_OPERATOR_MINUS::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "bios_vmovfm", "0x02f08" );
 	p_info->assembler_list.add_label( "bios_neg", "0x02e8d" );
 	p_info->assembler_list.add_label( "bios_frcsng", "0x0303a" );
-	if( this->p_right->type == CEXPRESSION_TYPE::INTEGER ) {	//	-32768 ‚Ì‚Æ‚«‚ÉƒoƒO‚é‚¯‚ÇEEE‚»‚ê‚Íd—l‚Å‚·
+	if( this->p_right->type == CEXPRESSION_TYPE::INTEGER ) {	//	-32768 ã®ã¨ãã«ãƒã‚°ã‚‹ã‘ã©ãƒ»ãƒ»ãƒ»ãã‚Œã¯ä»•æ§˜ã§ã™
 		asm_line.set( "EX", "", "DE", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "HL", "0" );

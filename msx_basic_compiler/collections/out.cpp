@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Out
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  OUT <I/OÉ|Å[Égî‘çÜ>, <èëÇ´çûÇﬁíl>
+//  OUT <I/O„Éù„Éº„ÉàÁï™Âè∑>, <Êõ∏„ÅçËæº„ÇÄÂÄ§>
 bool COUT::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	bool has_parameter;
@@ -20,7 +20,7 @@ bool COUT::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	CEXPRESSION exp;
-	//	ëÊ1à¯êî <I/OÉ|Å[Égî‘çÜ>
+	//	Á¨¨1ÂºïÊï∞ <I/O„Éù„Éº„ÉàÁï™Âè∑>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.type = CMNEMONIC_TYPE::PUSH;
@@ -42,7 +42,7 @@ bool COUT::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî <èëÇ´çûÇﬁíl>
+	//	Á¨¨2ÂºïÊï∞ <Êõ∏„ÅçËæº„ÇÄÂÄ§>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.type = CMNEMONIC_TYPE::POP;

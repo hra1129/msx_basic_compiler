@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Swap
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SWAP ’lŒğŠ·
+//  SWAP å€¤äº¤æ›
 bool CSWAP::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	std::string s_label;
@@ -19,7 +19,7 @@ bool CSWAP::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	‘æ1ˆø” <•Ï”–¼>
+	//	ç¬¬1å¼•æ•° <å¤‰æ•°å>
 	CVARIABLE variable1 = p_info->p_compiler->get_variable_address();
 	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "" );
 	p_info->assembler_list.body.push_back( asm_line );
@@ -30,7 +30,7 @@ bool CSWAP::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	‘æ2ˆø” <•Ï”–¼>
+	//	ç¬¬2å¼•æ•° <å¤‰æ•°å>
 	CVARIABLE variable2 = p_info->p_compiler->get_variable_address();
 
 	if( variable1.type != variable2.type ) {
@@ -40,7 +40,8 @@ bool CSWAP::exec( CCOMPILE_INFO *p_info ) {
 
 	s_label = p_info->get_auto_label();
 	if( variable1.type == CVARIABLE_TYPE::INTEGER || variable1.type == CVARIABLE_TYPE::STRING ) {
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "2" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT,
+			variable1.type == CVARIABLE_TYPE::STRING ? "3" : "2" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( variable1.type == CVARIABLE_TYPE::SINGLE_REAL ) {

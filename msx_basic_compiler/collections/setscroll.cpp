@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: SetScroll
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SETSCROLL êÖïΩÉXÉNÉçÅ[Éãà íu, êÇíºÉXÉNÉçÅ[Éãà íu, É}ÉXÉNÉÇÅ[Éh, ÉyÅ[ÉWÉÇÅ[Éh
+//  SETSCROLL Ê∞¥Âπ≥„Çπ„ÇØ„É≠„Éº„É´‰ΩçÁΩÆ, ÂûÇÁõ¥„Çπ„ÇØ„É≠„Éº„É´‰ΩçÁΩÆ, „Éû„Çπ„ÇØ„É¢„Éº„Éâ, „Éö„Éº„Ç∏„É¢„Éº„Éâ
 bool CSETSCROLL::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -30,9 +30,9 @@ bool CSETSCROLL::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( MISSING_OPERAND, line_no );
 		return true;
 	}
-	//	à¯êîÇÃèàóù
+	//	ÂºïÊï∞„ÅÆÂá¶ÁêÜ
 	if( exp.compile( p_info ) ) {
-		//	êÖïΩÉXÉNÉçÅ[Éã
+		//	Ê∞¥Âπ≥„Çπ„ÇØ„É≠„Éº„É´
 		exp.release();
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -46,7 +46,7 @@ bool CSETSCROLL::exec( CCOMPILE_INFO *p_info ) {
 	else {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-		//	êÇíºÉXÉNÉçÅ[Éã
+		//	ÂûÇÁõ¥„Çπ„ÇØ„É≠„Éº„É´
 		exp.release();
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -61,7 +61,7 @@ bool CSETSCROLL::exec( CCOMPILE_INFO *p_info ) {
 	else {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-		//	É}ÉXÉN
+		//	„Éû„Çπ„ÇØ
 		exp.release();
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -76,7 +76,7 @@ bool CSETSCROLL::exec( CCOMPILE_INFO *p_info ) {
 	else {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
-		//	ÉyÅ[ÉW
+		//	„Éö„Éº„Ç∏
 			exp.release();
 		}
 		else {

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: SetPage
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SETPAGE •\Ž¦ƒy[ƒW, •`‰æƒy[ƒW
+//  SETPAGE è¡¨ç¤ºãƒšãƒ¼ã‚¸, æç”»ãƒšãƒ¼ã‚¸
 bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -33,9 +33,9 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( MISSING_OPERAND, line_no );
 		return true;
 	}
-	//	ˆø”‚Ìˆ—
+	//	å¼•æ•°ã®å‡¦ç†
 	if( exp.compile( p_info ) ) {
-		//	•\Ž¦ƒy[ƒW
+		//	è¡¨ç¤ºãƒšãƒ¼ã‚¸
 		exp.release();
 		p_info->assembler_list.add_label( "work_dppage", "0x0faf5" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
@@ -58,7 +58,7 @@ bool CSETPAGE::exec( CCOMPILE_INFO *p_info ) {
 	}
 
 	if( exp.compile( p_info ) ) {
-		//	•`‰æƒy[ƒW
+		//	æç”»ãƒšãƒ¼ã‚¸
 		exp.release();
 		p_info->assembler_list.add_label( "work_acpage", "0x0faf6" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );

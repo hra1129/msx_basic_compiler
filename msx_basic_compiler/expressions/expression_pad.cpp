@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -19,7 +19,7 @@ CEXPRESSION_NODE* CEXPRESSION_PAD::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	PADŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
+	//	PADé–¢æ•°ã¯æœ€é©åŒ–ã§æ¶ˆæ»…ã™ã‚‹ã“ã¨ã¯ãªã„
 	return nullptr;
 }
 
@@ -30,7 +30,7 @@ void CEXPRESSION_PAD::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_operand == nullptr ) {
 		return;
 	}
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand->compile( p_info );
 	this->p_operand->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand->type );
 

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Data
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -32,14 +32,14 @@ std::string CDATA::hexdata( CCOMPILE_INFO *p_info, std::string s_data ) {
 	size_t i;
 	int d, dd;
 	for( i = 0; i < s_data.size(); i += 2 ) {
-		//	ãˆÊŒ…
+		//	ä¸Šä½æ¡
 		dd = this->hexchar( s_data[i+0] );
 		if( dd == -1 ) {
 			p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
 			return s_result;
 		}
 		d = dd << 4;
-		//	‰ºˆÊŒ…
+		//	ä¸‹ä½æ¡
 		dd = this->hexchar( s_data[i+1] );
 		if( dd == -1 ) {
 			p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
@@ -66,7 +66,7 @@ std::string CDATA::bindata( CCOMPILE_INFO *p_info, std::string s_data ) {
 	for( i = 0; i < s_data.size(); i += 8 ) {
 		d = 0;
 		for( j = 0; j < 8; j++ ) {
-			//	ãˆÊŒ…
+			//	ä¸Šä½æ¡
 			dd = this->hexchar( s_data[i+j] );
 			if( dd == -1 || dd >= 2 ) {
 				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
@@ -81,7 +81,7 @@ std::string CDATA::bindata( CCOMPILE_INFO *p_info, std::string s_data ) {
 }
 
 // --------------------------------------------------------------------
-//  DATA ƒf[ƒ^
+//  DATA ãƒ‡ãƒ¼ã‚¿
 bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -104,7 +104,7 @@ bool CDATA::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	RESTORE—p‚Ìs”Ô†ƒ‰ƒxƒ‹‚ðŠ„‚è•t‚¯‚é
+	//	RESTOREç”¨ã®è¡Œç•ªå·ãƒ©ãƒ™ãƒ«ã‚’å‰²ã‚Šä»˜ã‘ã‚‹
 	bool has_data_label = false;
 	for( auto i: p_info->assembler_list.data_lines ) {
 		if( line_no == i ) {

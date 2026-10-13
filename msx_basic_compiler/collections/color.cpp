@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Color
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -16,8 +16,8 @@ static void put_call( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-//  COLOR Fw’è
-//  COLOR <‘OŒiF>, <”wŒiF>, <ü•ÓF>
+//  COLOR è‰²æŒ‡å®š
+//  COLOR <å‰æ™¯è‰²>, <èƒŒæ™¯è‰²>, <å‘¨è¾ºè‰²>
 bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	bool has_parameter;
@@ -36,7 +36,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 
 	if( p_info->list.is_command_end() ) {
-		//	COLOR’P“ÆÀs‚Ìê‡
+		//	COLORå˜ç‹¬å®Ÿè¡Œã®å ´åˆ
 		p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 		asm_line.set( "LD", "", "IX", "bios_iniplt" );
@@ -48,14 +48,14 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "=" ) {
-		//	COLOR= ‚Ìê‡
+		//	COLOR= ã®å ´åˆ
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
 		if( p_info->list.p_position->s_word == "NEW" ) {
-			//	COLOR=NEW ‚Ìê‡
+			//	COLOR=NEW ã®å ´åˆ
 			p_info->assembler_list.add_label( "bios_iniplt", "0x00141" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 			asm_line.set( "LD", "","IX", "bios_iniplt" );
@@ -67,7 +67,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 		}
 		else if( p_info->list.p_position->s_word == "RESTORE" ) {
-			//	COLOR=RESTORE ‚Ìê‡
+			//	COLOR=RESTORE ã®å ´åˆ
 			p_info->assembler_list.add_label( "bios_rstplt", "0x00145" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 			asm_line.set( "LD", "","IX", "bios_rstplt" );
@@ -79,11 +79,11 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->list.p_position++;
 		}
 		else if( p_info->list.p_position->s_word == "(" ) {
-			//	COLOR=(P,R,G,B) ‚Ìê‡
+			//	COLOR=(P,R,G,B) ã®å ´åˆ
 			p_info->assembler_list.add_label( "bios_setplt", "0x0014D" );
 			p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 			p_info->list.p_position++;
-			//	ƒpƒŒƒbƒg”Ô†
+			//	ãƒ‘ãƒ¬ãƒƒãƒˆç•ªå·
 			if( exp.compile( p_info ) ) {
 				asm_line.set( "PUSH", "","HL" );
 				p_info->assembler_list.body.push_back( asm_line );
@@ -98,7 +98,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			p_info->list.p_position++;
-			//	R‚Ìİ’è’l
+			//	Rã®è¨­å®šå€¤
 			if( exp.compile( p_info ) ) {
 				asm_line.set( "PUSH", "", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
@@ -113,7 +113,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			p_info->list.p_position++;
-			//	G‚Ìİ’è’l
+			//	Gã®è¨­å®šå€¤
 			if( exp.compile( p_info ) ) {
 				asm_line.set( "PUSH", "", "HL");
 				p_info->assembler_list.body.push_back( asm_line );
@@ -128,7 +128,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			p_info->list.p_position++;
-			//	B‚Ìİ’è’l
+			//	Bã®è¨­å®šå€¤
 			if( exp.compile( p_info ) ) {
 				exp.release();
 			}
@@ -141,24 +141,24 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			p_info->list.p_position++;
-			//	BIOSƒR[ƒ‹
-			asm_line.set( "LD", "","A", "L" );		//	Â‚ğ A ‚ÖŠi”[
+			//	BIOSã‚³ãƒ¼ãƒ«
+			asm_line.set( "LD", "","A", "L" );		//	é’ã‚’ A ã¸æ ¼ç´
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "","D", "A" );		//	Â‚ğ D ‚ÖŠi”[
+			asm_line.set( "LD", "","D", "A" );		//	é’ã‚’ D ã¸æ ¼ç´
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "POP", "","HL" );			//	—Î‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	ç·‘ã‚’å¾©å…ƒ
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "","A", "L" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "","E", "A" );		//	—Î‚ğ E ‚ÖŠi”[
+			asm_line.set( "LD", "","E", "A" );		//	ç·‘ã‚’ E ã¸æ ¼ç´
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "POP", "","HL" );			//	Ô‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	èµ¤ã‚’å¾©å…ƒ
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "","A", "L" );		//	Ô‚ğ A ‚ÖŠi”[
+			asm_line.set( "LD", "","A", "L" );		//	èµ¤ã‚’ A ã¸æ ¼ç´
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "AND", "","A", "0x07" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -170,11 +170,11 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RRCA" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "OR", "","A", "D" );		//	ÔEÂ‚ğ A ‚Ö
+			asm_line.set( "OR", "","A", "D" );		//	èµ¤ãƒ»é’ã‚’ A ã¸
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "POP", "","HL" );			//	ƒpƒŒƒbƒg”Ô†‚ğ•œŒ³
+			asm_line.set( "POP", "","HL" );			//	ãƒ‘ãƒ¬ãƒƒãƒˆç•ªå·ã‚’å¾©å…ƒ
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "","D", "L" );		//	ƒpƒŒƒbƒg”Ô†‚ğ D ‚Ö
+			asm_line.set( "LD", "","D", "L" );		//	ãƒ‘ãƒ¬ãƒƒãƒˆç•ªå·ã‚’ D ã¸
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "","IX", "bios_setplt" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -189,7 +189,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 
-	//	‘æ1ˆø” <‘OŒiF>
+	//	ç¬¬1å¼•æ•° <å‰æ™¯è‰²>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "LD", "", "A", "L" );
@@ -201,7 +201,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word != "," ) {
 		if( has_parameter ) {
-			//	‘æ1ˆø”‚Ì‚İ‚Ìê‡
+			//	ç¬¬1å¼•æ•°ã®ã¿ã®å ´åˆ
 			put_call( p_info );
 		}
 		else {
@@ -210,7 +210,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ2ˆø” <”wŒiF>
+	//	ç¬¬2å¼•æ•° <èƒŒæ™¯è‰²>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "LD", "", "A", "L" );
@@ -222,7 +222,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.is_command_end() ) {
 		if( !has_parameter ) {
-			//	COLOR x, ‚Ì‚æ‚¤‚É‘æ“ñˆø”‚Ü‚Å‚Å‘æ“ñˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
+			//	COLOR x, ã®ã‚ˆã†ã«ç¬¬äºŒå¼•æ•°ã¾ã§ã§ç¬¬äºŒå¼•æ•°ãŒçœç•¥ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 			p_info->errors.add( MISSING_OPERAND, p_info->list.get_line_no() );
 		}
 		else {
@@ -235,7 +235,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ3ˆø” <ü•ÓF>
+	//	ç¬¬3å¼•æ•° <å‘¨è¾ºè‰²>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "LD", "", "A", "L" );
@@ -247,7 +247,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.is_command_end() ) {
 		if( !has_parameter ) {
-			//	COLOR x, ‚Ì‚æ‚¤‚É‘æ“ñˆø”‚Ü‚Å‚Å‘æ“ñˆø”‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
+			//	COLOR x, ã®ã‚ˆã†ã«ç¬¬äºŒå¼•æ•°ã¾ã§ã§ç¬¬äºŒå¼•æ•°ãŒçœç•¥ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 			p_info->errors.add( MISSING_OPERAND, p_info->list.get_line_no() );
 		}
 		else {
@@ -255,7 +255,7 @@ bool CCOLOR::exec( CCOMPILE_INFO *p_info ) {
 		}
 		return true;
 	}
-	//	COLOR a, b, c d ‚Ì‚æ‚¤‚É‘æOˆø”‚ÌŸ‚É•Ï‚È•¶š‚ª‚ ‚éê‡
+	//	COLOR a, b, c d ã®ã‚ˆã†ã«ç¬¬ä¸‰å¼•æ•°ã®æ¬¡ã«å¤‰ãªæ–‡å­—ãŒã‚ã‚‹å ´åˆ
 	p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 	return true;
 }

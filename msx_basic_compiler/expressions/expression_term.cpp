@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -54,7 +54,7 @@ double CEXPRESSION_TERM::get_value( void ) {
 	int s, e;
 	const char *p = this->s_value.c_str();
 
-	//	•„†
+	//	ç¬¦å·
 	while( isspace( *p & 255 ) ) {
 		p++;
 	}
@@ -71,14 +71,14 @@ double CEXPRESSION_TERM::get_value( void ) {
 	else {
 		s = 1;
 	}
-	//	®”•”
+	//	æ•´æ•°éƒ¨
 	i = 0;
 	while( isdigit( *p & 255 ) ) {
 		i = (i * 10) + (*p - '0');
 		p++;
 	}
 	if( *p == 0 ) return s * i;
-	//	¬”•”
+	//	å°æ•°éƒ¨
 	r = 0;
 	if( *p == '.' ) {
 		p++;
@@ -93,13 +93,13 @@ double CEXPRESSION_TERM::get_value( void ) {
 		r = r / d;
 	}
 	if( *p == 0 ) return s * (i + r);
-	//	w”•”‹L†
+	//	æŒ‡æ•°éƒ¨è¨˜å·
 	if( *p != 'E' && *p != 'e' && *p != 'D' && *p != 'd' ) {
 		return s * (i + r);
 	}
 	p++;
 	if( *p == 0 ) return s * (i + r);
-	//	w”•”
+	//	æŒ‡æ•°éƒ¨
 	e = std::atoi( p );
 	return s * (i + r) * pow( 10., e );
 }
@@ -107,7 +107,7 @@ double CEXPRESSION_TERM::get_value( void ) {
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_TERM::optimization( CCOMPILE_INFO *p_info ) {
 	
-	//	term ‚ÍA‚±‚êˆÈãÅ“K‰»‚Å‚«‚È‚¢
+	//	term ã¯ã€ã“ã‚Œä»¥ä¸Šæœ€é©åŒ–ã§ããªã„
 	return nullptr;
 }
 

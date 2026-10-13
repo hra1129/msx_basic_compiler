@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: FOr
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  FOR <•Ï”> = <®1> TO <®2> [STEP <®3>]
+//  FOR <å¤‰æ•°> = <å¼1> TO <å¼2> [STEP <å¼3>]
 bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	std::string s;
 	std::string s_label;
@@ -29,7 +29,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	ƒ‹[ƒv—p•Ï”‚ğ¶¬‚·‚éi FOR I ‚Ì I j
+	//	ãƒ«ãƒ¼ãƒ—ç”¨å¤‰æ•°ã‚’ç”Ÿæˆã™ã‚‹ï¼ˆ FOR I ã® I ï¼‰
 	CVARIABLE variable_loop = p_info->p_compiler->get_variable_address_wo_array();
 	if( variable_loop.type == CVARIABLE_TYPE::STRING ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
@@ -37,23 +37,23 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	–ß‚èˆÊ’uAI’[’lA‘•ª’l‚Ì•Û—p
+	//	æˆ»ã‚Šä½ç½®ã€çµ‚ç«¯å€¤ã€å¢—åˆ†å€¤ã®ä¿æŒç”¨
 	variable_loopl.s_name = variable_loop.s_name + "_LABEL";
 	variable_loope.s_name = variable_loop.s_name + "_FOR_END";
 	variable_loops.s_name = variable_loop.s_name + "_FOR_STEP";
 	variable_loopl = p_info->variable_manager.put_special_variable( p_info, variable_loopl.s_name, CVARIABLE_TYPE::INTEGER, variable_loop.type );
 	variable_loope = p_info->variable_manager.put_special_variable( p_info, variable_loope.s_name, variable_loop.type );
 	variable_loops = p_info->variable_manager.put_special_variable( p_info, variable_loops.s_name, variable_loop.type );
-	//	‘ã“üˆ—
+	//	ä»£å…¥å‡¦ç†
 	if( !p_info->list.check_word( &(p_info->errors), "=", SYNTAX_ERROR ) ) {
-		// ƒGƒ‰[‚ÍAcheck_word ‚Ì’†‚Å“o˜^‚³‚ê‚é
+		// ã‚¨ãƒ©ãƒ¼ã¯ã€check_word ã®ä¸­ã§ç™»éŒ²ã•ã‚Œã‚‹
 		return true;
 	}
 	else if( p_info->list.is_command_end() ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	//	‰E•Ó‚Ìˆ—
+	//	å³è¾ºã®å‡¦ç†
 	CEXPRESSION_TYPE exp_type;
 	switch( variable_loop.type ) {
 	default:
@@ -69,7 +69,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	//	uTO ®v‚Ìˆ—
+	//	ã€ŒTO å¼ã€ã®å‡¦ç†
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "TO" ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
@@ -87,14 +87,14 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	//	uSTEP ®v‚Ìˆ—
+	//	ã€ŒSTEP å¼ã€ã®å‡¦ç†
 	asm_line.set( "LD", "", "HL", variable_loops.s_label );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word != "STEP" ) {
-			//	STEPˆÈŠO‚Íó‚¯•t‚¯‚È‚¢
+			//	STEPä»¥å¤–ã¯å—ã‘ä»˜ã‘ãªã„
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
@@ -109,7 +109,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	else {
-		//	È—ª‚³‚ê‚Ä‚¢‚éê‡ 1 ‚É‚È‚é
+		//	çœç•¥ã•ã‚Œã¦ã„ã‚‹å ´åˆ 1 ã«ãªã‚‹
 		switch( variable_loop.type ) {
 		default:
 		case CVARIABLE_TYPE::INTEGER:
@@ -141,24 +141,24 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 		}
 		p_info->p_compiler->write_variable_value( variable_loops );
 	}
-	//	”ò‚Ñæƒ‰ƒxƒ‹¶¬
+	//	é£›ã³å…ˆãƒ©ãƒ™ãƒ«ç”Ÿæˆ
 	s_body = p_info->get_auto_label();
 	s_next = p_info->get_auto_label();
-	//	–ß‚èƒAƒhƒŒƒX‚Ìİ’è
+	//	æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹ã®è¨­å®š
 	asm_line.set( "LD", "", "HL", s_next );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[" + variable_loopl.s_label + "]", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	BODY‚ÖƒWƒƒƒ“ƒv
+	//	BODYã¸ã‚¸ãƒ£ãƒ³ãƒ—
 	asm_line.set( "JR", "", s_body, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	NEXT‚Ìˆ—
+	//	NEXTã®å‡¦ç†
 	asm_line.set( "LABEL", "", s_next );
 	p_info->assembler_list.body.push_back( asm_line );
 	switch( variable_loop.type ) {
 		default:
 		case CVARIABLE_TYPE::INTEGER:
-			//	<•Ï”> = <•Ï”> + <STEP>
+			//	<å¤‰æ•°> = <å¤‰æ•°> + <STEP>
 			asm_line.set( "LD", "", "HL", "[" + variable_loop.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "DE", "[" + variable_loops.s_label + "]" );
@@ -167,7 +167,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "[" + variable_loop.s_label + "]", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<•Ï”> ‚Æ <I’l> ‚ğ”äŠr
+			//	<å¤‰æ•°> ã¨ <çµ‚å€¤> ã‚’æ¯”è¼ƒ
 			s_skip_label = p_info->get_auto_label();
 			asm_line.set( "LD", "", "A", "D" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -177,7 +177,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª³‚Ìê‡
+			//	<STEP> ãŒæ­£ã®å ´åˆ
 			s_pop = p_info->get_auto_label();
 			asm_line.set( "SBC", "", "HL", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -187,7 +187,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RET" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª•‰‚Ìê‡
+			//	<STEP> ãŒè² ã®å ´åˆ
 			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CCF" );
@@ -202,7 +202,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			break;
 		case CVARIABLE_TYPE::SINGLE_REAL:
-			//	<•Ï”> = <•Ï”> + <STEP>
+			//	<å¤‰æ•°> = <å¤‰æ•°> + <STEP>
 			p_info->assembler_list.add_label( "bios_decadd", "0x0269a" );
 			p_info->assembler_list.add_label( "bios_vmovfm", "0x02f08" );
 			p_info->assembler_list.add_label( "bios_vmovam", "0x02eef" );
@@ -231,7 +231,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LDIR", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<•Ï”> ‚Æ <I’l> ‚ğ”äŠr
+			//	<å¤‰æ•°> ã¨ <çµ‚å€¤> ã‚’æ¯”è¼ƒ
 			s_skip_label = p_info->get_auto_label();
 			asm_line.set( "LD", "", "BC", "[" + variable_loope.s_label + "]" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -243,7 +243,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª³‚Ìê‡
+			//	<STEP> ãŒæ­£ã®å ´åˆ
 			s_pop = p_info->get_auto_label();
 			asm_line.set( "CALL", "", "bios_fcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -253,7 +253,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª•‰‚Ìê‡
+			//	<STEP> ãŒè² ã®å ´åˆ
 			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "bios_fcomp", "" );
@@ -268,7 +268,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			break;
 		case CVARIABLE_TYPE::DOUBLE_REAL:
-			//	<•Ï”> = <•Ï”> + <STEP>
+			//	<å¤‰æ•°> = <å¤‰æ•°> + <STEP>
 			p_info->assembler_list.add_label( "bios_decadd", "0x0269a" );
 			p_info->assembler_list.add_label( "bios_vmovfm", "0x02f08" );
 			p_info->assembler_list.add_label( "bios_vmovam", "0x02eef" );
@@ -297,7 +297,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LDIR", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<•Ï”> ‚Æ <I’l> ‚ğ”äŠr
+			//	<å¤‰æ•°> ã¨ <çµ‚å€¤> ã‚’æ¯”è¼ƒ
 			s_skip_label = p_info->get_auto_label();
 			asm_line.set( "LD", "", "HL", variable_loope.s_label );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -309,7 +309,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "JR", "C", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª³‚Ìê‡
+			//	<STEP> ãŒæ­£ã®å ´åˆ
 			s_pop = p_info->get_auto_label();
 			asm_line.set( "CALL", "", "bios_xdcomp", "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -319,7 +319,7 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "RET", "", "", "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	<STEP> ‚ª•‰‚Ìê‡
+			//	<STEP> ãŒè² ã®å ´åˆ
 			asm_line.set( "LABEL", "", s_skip_label, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "CALL", "", "bios_xdcomp", "" );
@@ -335,10 +335,10 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 			break;
 	}
 
-	//	BODY‚Ìƒ‰ƒxƒ‹
+	//	BODYã®ãƒ©ãƒ™ãƒ«
 	asm_line.set( "LABEL", "", s_body, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	FOR•¶‚Ìƒ‹[ƒv•Ï”‚ğÏ‚ñ‚Å‚¨‚­
+	//	FORæ–‡ã®ãƒ«ãƒ¼ãƒ—å¤‰æ•°ã‚’ç©ã‚“ã§ãŠã
 	p_info->for_variable_array.push_back( variable_loop );
 	return true;
 }

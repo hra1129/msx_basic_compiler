@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Pset
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -23,7 +23,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
-		//	PSET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+		//	PSET ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
@@ -41,7 +41,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	s_label1 = p_info->get_auto_label();
 	s_label2 = p_info->get_auto_label();
 
-	//	XÀ•W
+	//	Xåº§æ¨™
 	exp_x.makeup_node( p_info );
 	//	,
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
@@ -49,7 +49,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	YÀ•W
+	//	Yåº§æ¨™
 	exp_y.makeup_node( p_info );
 	//	)
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != ")"){
@@ -58,14 +58,14 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
-		//	PSET(x,y) ‚Ìê‡
-		//	ƒƒWƒJƒ‹ƒIƒyƒŒ[ƒVƒ‡ƒ“‚Í PSETŒÅ’è
+		//	PSET(x,y) ã®å ´åˆ
+		//	ãƒ­ã‚¸ã‚«ãƒ«ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã¯ PSETå›ºå®š
 		p_info->assembler_list.add_label( "work_logopr", "0x0fB02" );
 		asm_line.set( "XOR", "", "A", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_logopr]", "A" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	F‚Í PSET ‚È‚ç‘OŒiF‚ÉAPRESET ‚È‚ç”wŒiF‚É‚È‚é
+		//	è‰²ã¯ PSET ãªã‚‰å‰æ™¯è‰²ã«ã€PRESET ãªã‚‰èƒŒæ™¯è‰²ã«ãªã‚‹
 		if( is_preset ) {
 			p_info->assembler_list.add_label( "work_bakclr", "0x0F3EA" );
 			asm_line.set( "LD", "", "A", "[work_bakclr]" );
@@ -77,7 +77,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "bios_setatr" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	XÀ•W
+		//	Xåº§æ¨™
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -86,7 +86,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	YÀ•W
+		//	Yåº§æ¨™
 		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -113,7 +113,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5`
+		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5ï½
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EI" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -126,9 +126,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	F
+	//	è‰²
 	if( p_info->list.is_command_end() ) {
-		//	PSET(x,y), ‚ÅI‚í‚Á‚Ä‚é‚Ì‚ÅƒGƒ‰[
+		//	PSET(x,y), ã§çµ‚ã‚ã£ã¦ã‚‹ã®ã§ã‚¨ãƒ©ãƒ¼
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
@@ -137,9 +137,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "bios_setatr" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ƒƒWƒJƒ‹ƒIƒyƒŒ[ƒVƒ‡ƒ“
+		//	ãƒ­ã‚¸ã‚«ãƒ«ã‚ªãƒšãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
 		p_info->p_compiler->put_logical_operation();
-		//	XÀ•W
+		//	Xåº§æ¨™
 		if( !exp_x.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -148,7 +148,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	YÀ•W
+		//	Yåº§æ¨™
 		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
@@ -175,7 +175,7 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "IX", "subrom_setc" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5`
+		asm_line.set( "CALL", "", "bios_extrom" );		//	SCREEN5ï½
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "EI" );
 		p_info->assembler_list.body.push_back( asm_line );

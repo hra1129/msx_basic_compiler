@@ -58,6 +58,10 @@ public:
 	void activate_free_array( void );
 	void activate_free_sarray( void );
 	void activate_copy_string( void );
+	void activate_copy_string_from_buffer( void );
+	void activate_copy_string_to_buffer( void );
+	void activate_legacy_string_buffer2( void );
+	void activate_assign_string( void );
 	void activate_get_writeable_string( void );
 	void activate_allocate_heap( void );
 	void activate_free_heap( void );
@@ -73,6 +77,7 @@ public:
 	void activate_check_sarray( class CCONSTANT_INFO *p_constants );
 	void activate_calc_array_top( void );
 	void activate_sub_input( void );
+	void activate_input_string_getchar( void );
 	void activate_bload_r( void );
 	void activate_bload( void );
 	void activate_paint( void );

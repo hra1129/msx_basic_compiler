@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Key
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,14 +8,14 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  KEY ƒtƒ@ƒ“ƒNƒVƒ‡ƒ“ƒL[§Œä
+//  KEY ãƒ•ã‚¡ãƒ³ã‚¯ã‚·ãƒ§ãƒ³ã‚­ãƒ¼åˆ¶å¾¡
 bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
 	int line_no = p_info->list.get_line_no();
 	std::vector< CBASIC_WORD >::const_iterator p_position;
 
-	//	KEY(n) {ON|OFF|STOP} ‚Í ON KEY ‚Ì‚Æ‚±‚ë‚Åˆ—‚·‚é‚Ì‚ÅA‚±‚±‚Ì‘ÎÛŠO‚Ì–½—ß‚¾‚Á‚½‚ç–ß‚¹‚é‚æ‚¤‚ÉŠo‚¦‚Ä‚¨‚­
+	//	KEY(n) {ON|OFF|STOP} ã¯ ON KEY ã®ã¨ã“ã‚ã§å‡¦ç†ã™ã‚‹ã®ã§ã€ã“ã“ã®å¯¾è±¡å¤–ã®å‘½ä»¤ã ã£ãŸã‚‰æˆ»ã›ã‚‹ã‚ˆã†ã«è¦šãˆã¦ãŠã
 	p_position = p_info->list.p_position;
 	if( p_info->list.p_position->s_word != "KEY" ) {
 		return false;
@@ -27,7 +27,7 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 	}
 
 	if( p_info->list.p_position->s_word == "(" ) {
-		//	KEY(n) ‚Í‚±‚±‚Ì‘ÎÛŠOB
+		//	KEY(n) ã¯ã“ã“ã®å¯¾è±¡å¤–ã€‚
 		p_info->list.p_position = p_position;
 		return false;
 	}
@@ -53,6 +53,7 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 	}
 	else if( exp.compile( p_info ) ) {
 		p_info->assembler_list.activate_free_string();
+		p_info->assembler_list.activate_copy_string_to_buffer();
 		exp.release();
 		p_info->assembler_list.add_label( "blib_set_function_key", "0x040e1" );
 		asm_line.set( "PUSH", "", "HL" );
@@ -67,9 +68,17 @@ bool CKEY::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		exp.release();
+		asm_line.set( "PUSH", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "copy_string_to_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "POP", "", "BC" );
+		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "POP", "", "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "PUSH", "", "HL" );
+		asm_line.set( "PUSH", "", "BC" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "ix", "blib_set_function_key" );
 		p_info->assembler_list.body.push_back( asm_line );

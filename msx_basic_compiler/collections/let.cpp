@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Let
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  [LET] {•Ï”–¼}[(”z—ñ—v‘f, ”z—ñ—v‘f ...)] = ®
+//  [LET] {å¤‰æ•°å}[(é…åˆ—è¦ç´ , é…åˆ—è¦ç´  ...)] = å¼
 bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	std::string s;
 	int line_no = p_info->list.get_line_no();
@@ -19,7 +19,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	if( p_info->list.p_position->s_word == "LET" ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
-			//	LET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+			//	LET ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
@@ -27,10 +27,10 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	
 	if( p_info->list.p_position->s_word == "SPRITE" ) {
-		//	SPRITE$(n)‚Ö‚Ì‘ã“ü
+		//	SPRITE$(n)ã¸ã®ä»£å…¥
 		p_info->list.p_position++;
 		if( !p_info->list.is_command_end() && p_info->list.p_position->s_word != "$" ) {
-			p_info->list.p_position--;		//	SPRITE ON ‚©‚à‚µ‚ê‚È‚¢‚©‚çAƒGƒ‰[‚Ío‚³‚È‚¢B
+			p_info->list.p_position--;		//	SPRITE ON ã‹ã‚‚ã—ã‚Œãªã„ã‹ã‚‰ã€ã‚¨ãƒ©ãƒ¼ã¯å‡ºã•ãªã„ã€‚
 			return false;
 		}
 		p_info->list.p_position++;
@@ -39,7 +39,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
-			//	Š‡ŒÊ‚Ì’†‚Ì®
+			//	æ‹¬å¼§ã®ä¸­ã®å¼
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -58,12 +58,28 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		}
 		if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 			p_info->assembler_list.add_label( "blib_setsprite", "0x04042" );
-			//	‘ã“ü‚·‚é•¶š—ñ
+			p_info->assembler_list.activate_free_string();
+			p_info->assembler_list.activate_copy_string_to_buffer();
+			//	ä»£å…¥ã™ã‚‹æ–‡å­—åˆ—
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "ix", COPERAND_TYPE::CONSTANT, "blib_setsprite" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "free_string" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
 		}
@@ -73,7 +89,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "TIME" ) {
-		//	TIMEƒVƒXƒeƒ€•Ï”‚Ö‚Ì‘ã“ü
+		//	TIMEã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°ã¸ã®ä»£å…¥
 		p_info->list.p_position++;
 		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -95,7 +111,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "VDP" ) {
-		//	VDPƒVƒXƒeƒ€•Ï”‚Ö‚Ì‘ã“ü
+		//	VDPã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°ã¸ã®ä»£å…¥
 		p_info->list.p_position++;
 		if( !p_info->list.check_word( &(p_info->errors), "(" ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -122,9 +138,9 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "L" );	//	®‚Ì•]‰¿Œ‹‰Ê‚ğ B ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "L" );	//	å¼ã®è©•ä¾¡çµæœã‚’ B ã¸
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );		//	ƒŒƒWƒXƒ^”Ô†‚ğ A ‚Ö
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );		//	ãƒ¬ã‚¸ã‚¹ã‚¿ç•ªå·ã‚’ A ã¸
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "L" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -142,7 +158,7 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	}
 	if( p_info->list.p_position->s_word == "MAXFILES" ) {
 		p_info->use_file_access = true;
-		//	ƒtƒ@ƒCƒ‹‚ÌãŒÀ”‚ğİ’è
+		//	ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¸Šé™æ•°ã‚’è¨­å®š
 		p_info->list.p_position++;
 		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -164,26 +180,26 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	else if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
-		//	•Ï”–¼‚Å‚Í–³‚¢‚Ì‚Å LET ‚Å‚Í‚È‚¢B
+		//	å¤‰æ•°åã§ã¯ç„¡ã„ã®ã§ LET ã§ã¯ãªã„ã€‚
 		if( has_let ) {
-			//	LET ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+			//	LET ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
 		return false;
 	}
-	//	•Ï”‚ğ¶¬‚·‚é
+	//	å¤‰æ•°ã‚’ç”Ÿæˆã™ã‚‹
 	CVARIABLE variable = p_info->p_compiler->get_variable_address();
 	asm_line.set( "PUSH", "", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-	//	‘ã“üˆ—
+	//	ä»£å…¥å‡¦ç†
 	if( !p_info->list.check_word( &(p_info->errors), "=", SYNTAX_ERROR ) ) {
-		// ƒGƒ‰[‚ÍAcheck_word ‚Ì’†‚Å“o˜^‚³‚ê‚é
+		// ã‚¨ãƒ©ãƒ¼ã¯ã€check_word ã®ä¸­ã§ç™»éŒ²ã•ã‚Œã‚‹
 	}
 	else if( p_info->list.is_command_end() ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 	}
-	//	‰E•Ó‚Ìˆ—
+	//	å³è¾ºã®å‡¦ç†
 	CEXPRESSION_TYPE exp_type;
 	switch( variable.type ) {
 	default:

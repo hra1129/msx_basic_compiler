@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -28,11 +28,11 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info 
 	}
 
 	if( this->p_left->is_constant && this->p_right->is_constant ) {
-		//	¶‰E‚Ì€‚ª—¼•û‚Æ‚à’è”‚Ìê‡
+		//	å·¦å³ã®é …ãŒä¸¡æ–¹ã¨ã‚‚å®šæ•°ã®å ´åˆ
 		if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
-			//	•¶š—ñ‚Ìê‡
+			//	æ–‡å­—åˆ—ã®å ´åˆ
 			if( this->p_left->type != this->p_right->type ) {
-				//	•¶š—ñ‚Æ‰½‚©‚ğ + ‚µ‚Ä‚¢‚éê‡AƒGƒ‰[‚È‚Ì‚Å‰½‚à‚µ‚È‚¢
+				//	æ–‡å­—åˆ—ã¨ä½•ã‹ã‚’ + ã—ã¦ã„ã‚‹å ´åˆã€ã‚¨ãƒ©ãƒ¼ãªã®ã§ä½•ã‚‚ã—ãªã„
 				return nullptr;
 			}
 			CEXPRESSION_TERM *p_term  = new CEXPRESSION_TERM();
@@ -41,7 +41,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info 
 			return p_term;
 		}
 		else {
-			//	”’l‚Ìê‡
+			//	æ•°å€¤ã®å ´åˆ
 			CEXPRESSION_TERM *p_left  = reinterpret_cast<CEXPRESSION_TERM*> (this->p_left);
 			CEXPRESSION_TERM *p_right = reinterpret_cast<CEXPRESSION_TERM*> (this->p_right);
 			double r = p_left->get_value() + p_right->get_value();
@@ -62,22 +62,22 @@ void CEXPRESSION_OPERATOR_ADD::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
 		return;
 	}
-	//	æ‚É€‚ğˆ—
+	//	å…ˆã«é …ã‚’å‡¦ç†
 	this->p_left->compile( p_info );
 	p_info->assembler_list.push_hl( this->p_left->type );
 	this->p_right->compile( p_info );
 
-	//	‚±‚Ì‰‰Zq‚Ì‰‰ZŒ‹‰Ê‚ÌŒ^‚ğŒˆ‚ß‚é
+	//	ã“ã®æ¼”ç®—å­ã®æ¼”ç®—çµæœã®å‹ã‚’æ±ºã‚ã‚‹
 	this->type_adjust_2op( p_info, this->p_left, this->p_right );
 	if( this->type == CEXPRESSION_TYPE::INTEGER ) {
-		//	®”‚Ìê‡
+		//	æ•´æ•°ã®å ´åˆ
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else if( this->type == CEXPRESSION_TYPE::STRING ) {
-		//	•¶š—ñ‚Ìê‡
+		//	æ–‡å­—åˆ—ã®å ´åˆ
 		this->activate_str_add( p_info );
 		p_info->assembler_list.activate_copy_string();
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
@@ -86,7 +86,7 @@ void CEXPRESSION_OPERATOR_ADD::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	À”‚Ìê‡
+		//	å®Ÿæ•°ã®å ´åˆ
 		p_info->assembler_list.add_label( "bios_decadd", "0x0269a" );
 		p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_decadd", COPERAND_TYPE::NONE, "" );
@@ -97,10 +97,9 @@ void CEXPRESSION_OPERATOR_ADD::compile( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-//	•¶š—ñ‚Ì˜AŒ‹ [kbuf] © [DE]+[HL]
+//	æ–‡å­—åˆ—ã®é€£çµ [HL] â† [DE]+[HL]
 void CEXPRESSION_OPERATOR_ADD::activate_str_add( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
-	std::string s_label;
 
 	if( !p_info->assembler_list.add_subroutines( "str_add" ) ) {
 		return;
@@ -108,99 +107,144 @@ void CEXPRESSION_OPERATOR_ADD::activate_str_add( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.activate_free_string();
 	p_info->assembler_list.activate_allocate_string();
 	p_info->assembler_list.add_label( "bios_errhand", "0x0406F" );
-	p_info->assembler_list.add_label( "work_buf", "0x0f55e" );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str_add_left", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str_add_right", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str_add_result", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str_add_destination", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "str_add", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_left]", COPERAND_TYPE::REGISTER, "DE" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_right]", COPERAND_TYPE::REGISTER, "HL" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	//	’·‚³‚ğ‡Z‚µ‚Ä 255‚ğ‰z‚¦‚È‚¢‚©’²‚×‚é
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::MEMORY, "[HL]" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_left]" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[DE]" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "C" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_right]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "B" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::C, COPERAND_TYPE::CONSTANT, "_str_add_error", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	//	+ ‰‰Zq‚Ì‰E•Ó‚ğ•Û‘¶
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	//	+ ‰‰Zq‚Ì¶•Ó‚ğæ‚É KBUF ‚Ö
-	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::CONSTANT, "[HL]" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "work_buf+1" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "0" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_s1", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_s1", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::MEMORY, "[HL]" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_s2", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_s2", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_buf]", COPERAND_TYPE::REGISTER, "A" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "[work_buf]" );
-	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "allocate_string", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_result]", COPERAND_TYPE::REGISTER, "HL" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "work_buf" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_result]" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "[HL]" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_destination]", COPERAND_TYPE::REGISTER, "DE" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "_str_add_copy_left", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_left]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_copy_right", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "A" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "0" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[str_add_destination]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "C" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "0" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_destination]", COPERAND_TYPE::REGISTER, "DE" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "_str_add_copy_right", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_right]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::Z, COPERAND_TYPE::CONSTANT, "_str_add_release_inputs", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "A" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "0" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::MEMORY, "[HL]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[str_add_destination]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "C" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::CONSTANT, "0" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LDIR, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[str_add_destination]", COPERAND_TYPE::REGISTER, "DE" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "_str_add_release_inputs", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_left]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_right]" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
+	p_info->assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[str_add_result]" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "_str_add_error", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::NONE, "15" );			//	String too long
+	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::NONE, "15" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "bios_errhand", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_errhand", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.subroutines.push_back( asm_line );
 }

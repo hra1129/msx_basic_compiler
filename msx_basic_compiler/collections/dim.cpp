@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Dim
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -7,7 +7,7 @@
 #include "dim.h"
 
 // --------------------------------------------------------------------
-//  DIM ”z—ñ•Ï”éŒ¾
+//  DIM é…åˆ—å¤‰æ•°å®£è¨€
 bool CDIM::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -19,9 +19,9 @@ bool CDIM::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	while( !p_info->list.is_command_end() ) {
-		//	•Ï”–¼
+		//	å¤‰æ•°å
 		CVARIABLE variable = p_info->variable_manager.create_variable_info( p_info, true );
-		//	Ÿ‚Ì”z—ñ‚Ö
+		//	æ¬¡ã®é…åˆ—ã¸
 		if( p_info->list.is_command_end() ) {
 			break;
 		}

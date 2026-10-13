@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Color sprite
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,8 +8,8 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  COLOR SPRITE( <ƒXƒvƒ‰ƒCƒgƒvƒŒ[ƒ“”Ô†> ) = <F>
-//  COLOR SPRITE$( <ƒXƒvƒ‰ƒCƒgƒvƒŒ[ƒ“”Ô†> ) = <F>
+//  COLOR SPRITE( <ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ç•ªå·> ) = <è‰²>
+//  COLOR SPRITE$( <ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ç•ªå·> ) = <è‰²>
 bool CCOLOR_SPRITE::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -51,7 +51,7 @@ bool CCOLOR_SPRITE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	ƒXƒvƒ‰ƒCƒgƒvƒŒ[ƒ“”Ô†
+	//	ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ç•ªå·
 	if( exp.compile( p_info ) ) {
 		asm_line.set( "PUSH", "", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -76,16 +76,25 @@ bool CCOLOR_SPRITE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	F
+	//	è‰²
 	if( is_string ) {
 		if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
-			//	F•¶Žš—ñ
+			//	è‰²æ–‡å­—åˆ—
 			p_info->assembler_list.activate_free_string();
+			p_info->assembler_list.activate_copy_string_to_buffer();
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "CALL", "", "copy_string_to_buffer" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "BC" );
+			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "POP", "", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "LD", "", "A", "E" );
+			asm_line.set( "PUSH", "", "BC" );
 			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "PUSH", "", "HL" );
+			asm_line.set( "LD", "", "A", "E" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "IX", "blib_colorsprite_str" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -104,7 +113,7 @@ bool CCOLOR_SPRITE::exec( CCOMPILE_INFO *p_info ) {
 	}
 	else {
 		if( exp.compile( p_info ) ) {
-			//	F
+			//	è‰²
 			asm_line.set( "POP", "", "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( "LD", "", "A", "E" );

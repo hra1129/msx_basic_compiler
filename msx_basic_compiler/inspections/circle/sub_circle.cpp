@@ -1,4 +1,4 @@
-	this->add_label( "bios_frcsng", "0x02FB2" );
+ï»¿	this->add_label( "bios_frcsng", "0x02FB2" );
 	this->add_label( "bios_decmul", "0x027e6" );
 	this->add_label( "bios_frcint", "0x02f8a" );
 	this->add_label( "blib_get_sin_table", "0x040de" );
@@ -125,7 +125,7 @@
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_cpcnt + 1]", "A" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", "	Convert End angle to 0`255." );
+	asm_line.set( "COMMENT", "", "	Convert End angle to 0ï½255." );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "work_crcsum" );
 	this->subroutines.push_back( asm_line );
@@ -197,7 +197,7 @@
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_circle_cyoff1]", "HL" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", "	ƒÆ = 0[deg]¨45[deg]" );
+	asm_line.set( "COMMENT", "", "	Î¸ = 0[deg]â†’45[deg]" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "A", "[work_csclxy]" );
 	this->subroutines.push_back( asm_line );
@@ -326,7 +326,7 @@
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "CALL", "", "_sub_circle_quadrant_process" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", "		Quadrant 3 (270[deg]`360[deg])" );
+	asm_line.set( "COMMENT", "", "		Quadrant 3 (270[deg]ï½360[deg])" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_sub_circle_quadrant3_process" );
 	this->subroutines.push_back( asm_line );
@@ -1022,7 +1022,7 @@
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "BC", "[work_circle_centerx]" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", " I“_Y1" );
+	asm_line.set( "COMMENT", "", " çµ‚ç‚¹Y1" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "DE", "[work_circle_centery]" );
 	this->subroutines.push_back( asm_line );
@@ -1132,13 +1132,13 @@
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", "	Get cos(THETA): A = THETA (0:0[deg]`256:360[deg]) ¨ A = cos(THETA)" );
+	asm_line.set( "COMMENT", "", "	Get cos(THETA): A = THETA (0:0[deg]ï½256:360[deg]) â†’ A = cos(THETA)" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_sub_circle_cos" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "SUB", "", "A", "64" );
 	this->subroutines.push_back( asm_line );
-	asm_line.set( "COMMENT", "", "	sinƒÆ‚ğ•Ô‚·: A = THETA (0:0[deg]`256:360[deg]) ¨ A = sin(THETA)" );
+	asm_line.set( "COMMENT", "", "	sinÎ¸ã‚’è¿”ã™: A = THETA (0:0[deg]ï½256:360[deg]) â†’ A = sin(THETA)" );
 	this->subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "_sub_circle_sin" );
 	this->subroutines.push_back( asm_line );

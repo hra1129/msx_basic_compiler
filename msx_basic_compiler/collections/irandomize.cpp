@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: IRandomize
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  IRANDOMIZE <ƒV[ƒh’l>
+//  IRANDOMIZE <ã‚·ãƒ¼ãƒ‰å€¤>
 bool CIRANDOMIZE::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -21,7 +21,7 @@ bool CIRANDOMIZE::exec( CCOMPILE_INFO *p_info ) {
 		exp.release();
 	}
 	else {
-		//	IRANDOMIZE ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í TIME ‚ðƒV[ƒh‚Æ‚µ‚ÄŽg‚¤
+		//	IRANDOMIZE ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ TIME ã‚’ã‚·ãƒ¼ãƒ‰ã¨ã—ã¦ä½¿ã†
 		p_info->assembler_list.add_label( "work_jiffy", "0x0fc9e" );
 		asm_line.set( "LD", "", "HL", "[work_jiffy]" );
 		p_info->assembler_list.body.push_back( asm_line );

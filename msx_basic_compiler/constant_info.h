@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Constant information
 // ====================================================================
 //	2023/Aug/5th  t.hara
@@ -79,13 +79,13 @@ public:
 // --------------------------------------------------------------------
 class CCONSTANT_INFO {
 public:
-	//	‹ó•¶š—ñ‚Ìƒ‰ƒxƒ‹
+	//	ç©ºæ–‡å­—åˆ—ã®ãƒ©ãƒ™ãƒ«
 	std::string s_blank_string;
 
-	//	’è‹`Ï‚İ‚Ì”’l’è”‚ÌƒŠƒXƒg
+	//	å®šç¾©æ¸ˆã¿ã®æ•°å€¤å®šæ•°ã®ãƒªã‚¹ãƒˆ
 	std::map< std::string, CCONSTANT > dictionary;
 
-	//	’è‹`Ï‚İ‚Ì•¶š—ñ’è”‚ÌƒŠƒXƒg
+	//	å®šç¾©æ¸ˆã¿ã®æ–‡å­—åˆ—å®šæ•°ã®ãƒªã‚¹ãƒˆ
 	std::map< std::string, CCONSTANT > string_list;
 	unsigned int string_label = 0;
 
@@ -163,14 +163,24 @@ public:
 		}
 
 		for( auto it = string_list.begin(); it != string_list.end(); it++ ) {
+			std::string data_label = it->first + "_data";
 			sprintf( s_name, "0x%02X", (int)it->second.s_value.length & 255 );
-			s = s_name;
-			for( i = 0; i < (int)it->second.s_value.length; i++ ) {
-				sprintf( s_name, ", 0x%02X", (int)it->second.s_value.image[i] & 255 );
-				s = s + s_name;
-			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.const_string_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_name, COPERAND_TYPE::NONE, "" );
+			asm_list.const_string_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, data_label, COPERAND_TYPE::NONE, "" );
+			asm_list.const_string_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, data_label, COPERAND_TYPE::NONE, "" );
+			asm_list.const_string_area.push_back( asm_line );
+			s.clear();
+			for( i = 0; i < (int)it->second.s_value.length; i++ ) {
+				sprintf( s_name, "%s0x%02X", (i == 0 ? "" : ", "), (int)it->second.s_value.image[i] & 255 );
+				s += s_name;
+			}
+			if( s.empty() ) {
+				s = "0";
+			}
 			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s, COPERAND_TYPE::NONE, "" );
 			asm_list.const_string_area.push_back( asm_line );
 		}

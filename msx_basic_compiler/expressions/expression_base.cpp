@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -35,7 +35,7 @@ CEXPRESSION_NODE* CEXPRESSION_BASE::optimization( CCOMPILE_INFO *p_info ) {
 		this->p_operand = p;
 	}
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
-		//	’è”‚Ìê‡
+		//	å®šæ•°ã®å ´åˆ
 		if( this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
 			int id = std::stoi( this->p_operand->s_value );
 			if( id < 0 || id > 64 ) {
@@ -67,7 +67,7 @@ CEXPRESSION_NODE* CEXPRESSION_BASE::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_BASE::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	if( this->p_operand == nullptr ) {
 		return;
 	}

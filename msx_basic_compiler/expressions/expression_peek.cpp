@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -19,7 +19,7 @@ CEXPRESSION_NODE* CEXPRESSION_PEEK::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	PEEKŠÖ”‚ÍÅ“K‰»‚ÅÁ–Å‚·‚é‚±‚Æ‚Í‚È‚¢
+	//	PEEKé–¢æ•°ã¯æœ€é©åŒ–ã§æ¶ˆæ»…ã™ã‚‹ã“ã¨ã¯ãªã„
 	return nullptr;
 }
 
@@ -31,7 +31,7 @@ void CEXPRESSION_PEEK::compile( CCOMPILE_INFO *p_info ) {
 		return;
 	}
 	if( this->p_operand->is_constant && this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
-		//	ˆø”‚ª’è”‚Ìê‡
+		//	å¼•æ•°ãŒå®šæ•°ã®å ´åˆ
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::MEMORY, "[" + this->p_operand->s_value + "]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::MEMORY, "A" );
@@ -40,7 +40,7 @@ void CEXPRESSION_PEEK::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	æ‚Éˆø”‚ðˆ—
+		//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 		this->p_operand->compile( p_info );
 		this->p_operand->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand->type );
 

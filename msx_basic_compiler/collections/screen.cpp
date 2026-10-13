@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Screen
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  SCREEN ‰æ–Êƒ‚[ƒhw’è
+//  SCREEN ç”»é¢ãƒ¢ãƒ¼ãƒ‰æŒ‡å®š
 //  SCREEN <mode>, <SpriteSize>, <KeyClick>, <BaudRate>, <PrinterType>, <InterlaceMode>
 bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 	bool has_parameter;
@@ -23,20 +23,20 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
-	//	‘æ1ˆø” <mode>
+	//	ç¬¬1å¼•æ•° <mode>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 
 		p_info->assembler_list.add_label( "work_grpacx", "0xFCB7" );
 		p_info->assembler_list.add_label( "work_grpacy", "0xFCB9" );
 		p_info->assembler_list.add_label( "work_romver", "0x0002D" );
-		p_info->assembler_list.add_label( "bios_chgmod", "0x0005F" );		//	ƒpƒŒƒbƒg‚Ì‰Šú‰»–³‚µ
-		p_info->assembler_list.add_label( "bios_chgmodp", "0x001B5" );		//	ƒpƒŒƒbƒg‚Ì‰Šú‰»‚ ‚è
+		p_info->assembler_list.add_label( "bios_chgmod", "0x0005F" );		//	ãƒ‘ãƒ¬ãƒƒãƒˆã®åˆæœŸåŒ–ç„¡ã—
+		p_info->assembler_list.add_label( "bios_chgmodp", "0x001B5" );		//	ãƒ‘ãƒ¬ãƒƒãƒˆã®åˆæœŸåŒ–ã‚ã‚Š
 		p_info->assembler_list.add_label( "bios_extrom", "0x0015F" );
 		s_label1 = p_info->get_auto_label();
 		s_label2 = p_info->get_auto_label();
-		//	MSX2ˆÈã‚Å‚Í BASIC ‚Ì SCREEN –½—ß‚Å‰æ–Êƒ‚[ƒh‚ğØ‚è‘Ö‚¦‚é‚ÆƒpƒŒƒbƒg‚ğ‰Šú‰»‚·‚é‚½‚ßAchgmodp ‚Ì•û‚ğŒÄ‚Ô•K—v‚ª‚ ‚é
-		//	chgmodp ‚ÍASUB-ROM ‚É‘¶İ‚·‚é‚½‚ßAMSX1 ‚Å‚Í chgmod ‚ğŒÄ‚Ô•K—v‚ ‚èB
+		//	MSX2ä»¥ä¸Šã§ã¯ BASIC ã® SCREEN å‘½ä»¤ã§ç”»é¢ãƒ¢ãƒ¼ãƒ‰ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ã¨ãƒ‘ãƒ¬ãƒƒãƒˆã‚’åˆæœŸåŒ–ã™ã‚‹ãŸã‚ã€chgmodp ã®æ–¹ã‚’å‘¼ã¶å¿…è¦ãŒã‚ã‚‹
+		//	chgmodp ã¯ã€SUB-ROM ã«å­˜åœ¨ã™ã‚‹ãŸã‚ã€MSX1 ã§ã¯ chgmod ã‚’å‘¼ã¶å¿…è¦ã‚ã‚Šã€‚
 		asm_line.set( "LD", "", "A", "[work_romver]" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
@@ -73,7 +73,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ2ˆø” <SpriteSize>
+	//	ç¬¬2å¼•æ•° <SpriteSize>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "work_rg1sv", "0x0f3e0" );
@@ -111,7 +111,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ3ˆø” <KeyClick>
+	//	ç¬¬3å¼•æ•° <KeyClick>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "work_cliksw", "0x0f3db" );
@@ -142,7 +142,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ4ˆø” <BaudRate>
+	//	ç¬¬4å¼•æ•° <BaudRate>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "work_cs1200", "0x0f3fc" );
@@ -234,7 +234,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ5ˆø” <PrinterType>
+	//	ç¬¬5å¼•æ•° <PrinterType>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "work_ntmsxp", "0x0f417" );
@@ -265,7 +265,7 @@ bool CSCREEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ6ˆø” <InterlaceMode>
+	//	ç¬¬6å¼•æ•° <InterlaceMode>
 	has_parameter = false;
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "work_rg9sv", "0x0ffe8" );

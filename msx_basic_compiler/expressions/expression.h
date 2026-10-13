@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -14,20 +14,20 @@
 class CEXPRESSION_NODE {
 public:
 	// ----------------------------------------------------------------
-	//	‚±‚Ì®‚ÌŒ^
+	//	ã“ã®å¼ã®å‹
 	CEXPRESSION_TYPE type;
 
 	// ----------------------------------------------------------------
-	//	‚±‚Ì®‚Í’è”‚©B’è”‚Å‚ ‚ê‚ÎAs_value ‚É‚»‚Ì’lB
+	//	ã“ã®å¼ã¯å®šæ•°ã‹ã€‚å®šæ•°ã§ã‚ã‚Œã°ã€s_value ã«ãã®å€¤ã€‚
 	bool is_constant;
 	std::string s_value;
 
 	// ----------------------------------------------------------------
-	//	‚±‚Ì®‚Í•Ï”‚©B
+	//	ã“ã®å¼ã¯å¤‰æ•°ã‹ã€‚
 	bool is_variable;
 
 	// ----------------------------------------------------------------
-	//	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	CEXPRESSION_NODE() {
 		this->type = CEXPRESSION_TYPE::UNKNOWN;
 		this->is_constant = false;
@@ -35,30 +35,30 @@ public:
 	}
 
 	// ----------------------------------------------------------------
-	//	‰ğ•ú
+	//	è§£æ”¾
 	virtual void release( void ) {
 	}
 
 	// ----------------------------------------------------------------
-	//	ƒfƒXƒgƒ‰ƒNƒ^
+	//	ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~CEXPRESSION_NODE() {
 		this->release();
 	}
 
 	// ----------------------------------------------------------------
-	//	ƒRƒ“ƒpƒCƒ‹‚ÌŒ^•ÏŠ·ˆ—
+	//	ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚ã®å‹å¤‰æ›å‡¦ç†
 	static void convert_type( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target, CEXPRESSION_TYPE current );
 
 	// ----------------------------------------------------------------
-	//	‰‰Zq‚ÌƒIƒyƒ‰ƒ“ƒh‚ÌŒ^‘µ‚¦(2€‰‰Zq—p)
+	//	æ¼”ç®—å­ã®ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã®å‹æƒãˆ(2é …æ¼”ç®—å­ç”¨)
 	void type_adjust_2op( CCOMPILE_INFO *p_info, CEXPRESSION_NODE *p_left, CEXPRESSION_NODE *p_right );
 
 	// ----------------------------------------------------------------
-	//	ƒRƒ“ƒpƒCƒ‹ˆ—
+	//	ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«å‡¦ç†
 	virtual void compile( CCOMPILE_INFO *p_info ) = 0;
 
 	// ----------------------------------------------------------------
-	//	‰‰Z®ƒcƒŠ[‚Ì’†‚Å–‘O‚É‰‰Z‰Â”\‚Èƒ‚ƒm‚Í‰‰Z‚µ‚Ä‚µ‚Ü‚¤
+	//	æ¼”ç®—å¼ãƒ„ãƒªãƒ¼ã®ä¸­ã§äº‹å‰ã«æ¼”ç®—å¯èƒ½ãªãƒ¢ãƒã¯æ¼”ç®—ã—ã¦ã—ã¾ã†
 	virtual CEXPRESSION_NODE *optimization( CCOMPILE_INFO *p_info ) = 0;
 };
 
@@ -66,49 +66,49 @@ public:
 class CEXPRESSION {
 private:
 	// ----------------------------------------------------------------
-	//	‰‰Z®ƒcƒŠ[‚ÌÀ‘Ì
+	//	æ¼”ç®—å¼ãƒ„ãƒªãƒ¼ã®å®Ÿä½“
 	CEXPRESSION_NODE *p_top_node;
 
 	// ----------------------------------------------------------------
-	//	Ÿ‚ªw’è‚Ì’PŒê‚Å–³‚¯‚ê‚Îw’è‚ÌƒGƒ‰[‚É‚·‚é
+	//	æ¬¡ãŒæŒ‡å®šã®å˜èªã§ç„¡ã‘ã‚Œã°æŒ‡å®šã®ã‚¨ãƒ©ãƒ¼ã«ã™ã‚‹
 	bool check_word( CCOMPILE_INFO *p_info, std::string s, int error_id = CERROR_ID::SYNTAX_ERROR );
 
 	// ----------------------------------------------------------------
-	//	‰‰Z®ƒcƒŠ[‚Ì’†‚Å–‘O‚É‰‰Z‰Â”\‚Èƒ‚ƒm‚Í‰‰Z‚µ‚Ä‚µ‚Ü‚¤
+	//	æ¼”ç®—å¼ãƒ„ãƒªãƒ¼ã®ä¸­ã§äº‹å‰ã«æ¼”ç®—å¯èƒ½ãªãƒ¢ãƒã¯æ¼”ç®—ã—ã¦ã—ã¾ã†
 	void optimization( void );
 
 	// ----------------------------------------------------------------
-	//	‰‰Zq‚Ìƒm[ƒh¶¬ˆ—
-	CEXPRESSION_NODE *makeup_node_term( CCOMPILE_INFO *p_info );						//	ŠÖ”, FNŠÖ”, ( ) Š‡ŒÊ
-	CEXPRESSION_NODE *makeup_node_operator_power( CCOMPILE_INFO *p_info );				//	^ —İæ
-	CEXPRESSION_NODE *makeup_node_operator_minus_plus( CCOMPILE_INFO *p_info );			//	- + •„†
-	CEXPRESSION_NODE *makeup_node_operator_mul_div( CCOMPILE_INFO *p_info );			//	* / æZAœZ
-	CEXPRESSION_NODE *makeup_node_operator_intdiv( CCOMPILE_INFO *p_info );				//	 ®”œZ
-	CEXPRESSION_NODE *makeup_node_operator_mod( CCOMPILE_INFO *p_info );				//	MOD —]‚è
-	CEXPRESSION_NODE *makeup_node_operator_add_sub( CCOMPILE_INFO *p_info );			//	+ - ‰ÁŒ¸Z
-	CEXPRESSION_NODE *makeup_node_operator_compare( CCOMPILE_INFO *p_info );			//	= <> >< < <= =< > >= => ”äŠr
-	CEXPRESSION_NODE *makeup_node_operator_not( CCOMPILE_INFO *p_info );				//	NOT ”½“]
-	CEXPRESSION_NODE *makeup_node_operator_and( CCOMPILE_INFO *p_info );				//	AND ˜_—Ï
-	CEXPRESSION_NODE *makeup_node_operator_or( CCOMPILE_INFO *p_info );					//	OR ˜_—˜a
-	CEXPRESSION_NODE *makeup_node_operator_xor( CCOMPILE_INFO *p_info );				//	XOR ”r‘¼“I˜_—˜a
-	CEXPRESSION_NODE *makeup_node_operator_imp( CCOMPILE_INFO *p_info );				//	IMP •ïŠÜ
-	CEXPRESSION_NODE *makeup_node_operator_eqv( CCOMPILE_INFO *p_info );				//	EQV “¯’l
+	//	æ¼”ç®—å­ã®ãƒãƒ¼ãƒ‰ç”Ÿæˆå‡¦ç†
+	CEXPRESSION_NODE *makeup_node_term( CCOMPILE_INFO *p_info );						//	é–¢æ•°, FNé–¢æ•°, ( ) æ‹¬å¼§
+	CEXPRESSION_NODE *makeup_node_operator_power( CCOMPILE_INFO *p_info );				//	^ ç´¯ä¹—
+	CEXPRESSION_NODE *makeup_node_operator_minus_plus( CCOMPILE_INFO *p_info );			//	- + ç¬¦å·
+	CEXPRESSION_NODE *makeup_node_operator_mul_div( CCOMPILE_INFO *p_info );			//	* / ä¹—ç®—ã€é™¤ç®—
+	CEXPRESSION_NODE *makeup_node_operator_intdiv( CCOMPILE_INFO *p_info );				//	ï¿¥ æ•´æ•°é™¤ç®—
+	CEXPRESSION_NODE *makeup_node_operator_mod( CCOMPILE_INFO *p_info );				//	MOD ä½™ã‚Š
+	CEXPRESSION_NODE *makeup_node_operator_add_sub( CCOMPILE_INFO *p_info );			//	+ - åŠ æ¸›ç®—
+	CEXPRESSION_NODE *makeup_node_operator_compare( CCOMPILE_INFO *p_info );			//	= <> >< < <= =< > >= => æ¯”è¼ƒ
+	CEXPRESSION_NODE *makeup_node_operator_not( CCOMPILE_INFO *p_info );				//	NOT åè»¢
+	CEXPRESSION_NODE *makeup_node_operator_and( CCOMPILE_INFO *p_info );				//	AND è«–ç†ç©
+	CEXPRESSION_NODE *makeup_node_operator_or( CCOMPILE_INFO *p_info );					//	OR è«–ç†å’Œ
+	CEXPRESSION_NODE *makeup_node_operator_xor( CCOMPILE_INFO *p_info );				//	XOR æ’ä»–çš„è«–ç†å’Œ
+	CEXPRESSION_NODE *makeup_node_operator_imp( CCOMPILE_INFO *p_info );				//	IMP åŒ…å«
+	CEXPRESSION_NODE *makeup_node_operator_eqv( CCOMPILE_INFO *p_info );				//	EQV åŒå€¤
 
 public:
 	// ----------------------------------------------------------------
-	//	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	CEXPRESSION() {
 		this->p_top_node = nullptr;
 	}
 
 	// ----------------------------------------------------------------
-	//	ƒfƒXƒgƒ‰ƒNƒ^
+	//	ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~CEXPRESSION() {
 		this->release();
 	}
 
 	// ----------------------------------------------------------------
-	//	‰ğ•ú
+	//	è§£æ”¾
 	void release( void ) {
 		if( this->p_top_node != nullptr ) {
 			delete (this->p_top_node);
@@ -117,12 +117,12 @@ public:
 	}
 
 	// ----------------------------------------------------------------
-	//	ƒ\[ƒXƒR[ƒh‚ğ‰ğß‚µ‚ÄA‰‰Z®ƒcƒŠ[‚ğŒ`¬‚·‚é
+	//	ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã‚’è§£é‡ˆã—ã¦ã€æ¼”ç®—å¼ãƒ„ãƒªãƒ¼ã‚’å½¢æˆã™ã‚‹
 	void makeup_node( CCOMPILE_INFO *p_info );
 
 	// ----------------------------------------------------------------
-	//	‰‰Z®ƒcƒŠ[‚©‚çƒAƒZƒ“ƒuƒŠƒR[ƒh‚ğ¶¬‚·‚é
-	//	®‚ªÈ—ª‚³‚ê‚Ä‚¢‚½ê‡‚ÍAfalse ‚ğ•Ô‚·
+	//	æ¼”ç®—å¼ãƒ„ãƒªãƒ¼ã‹ã‚‰ã‚¢ã‚»ãƒ³ãƒ–ãƒªã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹
+	//	å¼ãŒçœç•¥ã•ã‚Œã¦ã„ãŸå ´åˆã¯ã€false ã‚’è¿”ã™
 	bool compile( CCOMPILE_INFO *p_info, CEXPRESSION_TYPE target = CEXPRESSION_TYPE::INTEGER );
 
 	// ----------------------------------------------------------------
@@ -131,7 +131,7 @@ public:
 	}
 
 	// ----------------------------------------------------------------
-	//	‰‰ZŒ‹‰Ê‚ÌŒ^‚ğ•Ô‚·
+	//	æ¼”ç®—çµæœã®å‹ã‚’è¿”ã™
 	CEXPRESSION_TYPE get_type( void ) const {
 		if( this->p_top_node == nullptr ) {
 			return CEXPRESSION_TYPE::UNKNOWN;

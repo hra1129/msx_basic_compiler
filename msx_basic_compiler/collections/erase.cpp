@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+﻿// --------------------------------------------------------------------
 //	Compiler collection: Erase
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -7,7 +7,7 @@
 #include "erase.h"
 
 // --------------------------------------------------------------------
-//  ERASE �z��폜
+//  ERASE 配列削除
 bool CERASE::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CVARIABLE variable;
@@ -29,7 +29,7 @@ bool CERASE::exec( CCOMPILE_INFO *p_info ) {
 		}
 		variable = p_info->variable_manager.get_array_info( p_info );
 
-		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[" + variable.s_label + "]" );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
 		p_info->assembler_list.body.push_back( asm_line );
 
 		if( variable.type == CVARIABLE_TYPE::STRING ) {

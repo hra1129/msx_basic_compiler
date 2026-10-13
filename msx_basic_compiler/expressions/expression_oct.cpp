@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -20,11 +20,11 @@ CEXPRESSION_NODE* CEXPRESSION_OCT::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	Ž–‘OŒvŽZˆ—
+	//	äº‹å‰è¨ˆç®—å‡¦ç†
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
-		//	’è”‚Ìê‡
+		//	å®šæ•°ã®å ´åˆ
 		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
-			//	”’l‚Ìê‡
+			//	æ•°å€¤ã®å ´åˆ
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::STRING;
 			int i = (int) std::stod( this->p_operand->s_value );
@@ -48,12 +48,12 @@ CEXPRESSION_NODE* CEXPRESSION_OCT::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_OCT::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand->compile( p_info );
 	this->convert_type( p_info, CEXPRESSION_TYPE::EXTENDED_INTEGER, this->p_operand->type );
 
 	p_info->assembler_list.activate_str();		//	fout_adjust
-	p_info->assembler_list.activate_copy_string();
+	p_info->assembler_list.activate_copy_string_from_buffer();
 	p_info->assembler_list.add_label( "work_valtyp", "0x0f663" );
 	p_info->assembler_list.add_label( "work_dac", "0x0f7f6" );
 	p_info->assembler_list.add_label( "bios_fouto", "0x0371e" );
@@ -68,7 +68,7 @@ void CEXPRESSION_OCT::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "fout_adjust", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "copy_string", COPERAND_TYPE::NONE, "" );
+	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "copy_string_from_buffer", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	this->type = CEXPRESSION_TYPE::STRING;
 }

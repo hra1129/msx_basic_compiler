@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler
 // ====================================================================
 //	2023/July/23rd	t.hara
@@ -45,7 +45,7 @@
 #include "collections/name.h"
 #include "collections/next.h"
 #include "collections/mid.h"
-#include "collections/on_goto.h"			//	on gosub ‚à‚±‚Ì’†
+#include "collections/on_goto.h"			//	on gosub ã‚‚ã“ã®ä¸­
 #include "collections/on_interval.h"
 #include "collections/on_key.h"
 #include "collections/on_sprite.h"
@@ -110,7 +110,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CCIRCLE );
 	this->collection.push_back( new CCLEAR );
 	this->collection.push_back( new CCOMMENT );
-	this->collection.push_back( new CCOLOR_SPRITE );	//	COLOR ‚æ‚è‚àã‚É‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
+	this->collection.push_back( new CCOLOR_SPRITE );	//	COLOR ã‚ˆã‚Šã‚‚ä¸Šã«ãªã‘ã‚Œã°ãªã‚‰ãªã„
 	this->collection.push_back( new CCOLOR );
 	this->collection.push_back( new CCOPY );
 	this->collection.push_back( new CDATA );
@@ -147,7 +147,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CONSPRITE );
 	this->collection.push_back( new CONSTRIG );
 	this->collection.push_back( new CONSTOP );
-	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB ‚ÍAON`GOSUB ‚æ‚èŒã
+	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB ã¯ã€ONï½GOSUB ã‚ˆã‚Šå¾Œ
 	this->collection.push_back( new COPEN );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPAINT );
@@ -205,10 +205,10 @@ void CCOMPILER::line_compile( bool is_top ) {
 			continue;
 		}
 		do_exec = false;
-		//	Š„‚è‚İˆ——p‚Ìƒ‹[ƒ`ƒ“‚ğŒÄ‚Ño‚·
+		//	å‰²ã‚Šè¾¼ã¿å‡¦ç†ç”¨ã®ãƒ«ãƒ¼ãƒãƒ³ã‚’å‘¼ã³å‡ºã™
 		asm_line.set( "CALL", "", "interrupt_process", "" );
 		this->info.assembler_list.body.push_back( asm_line );
-		//	–½—ß‚Ìˆ—‚ğ¶¬‚·‚é
+		//	å‘½ä»¤ã®å‡¦ç†ã‚’ç”Ÿæˆã™ã‚‹
 		for( auto p: this->collection ) {
 			do_exec = p->exec( &(this->info) );
 			if( do_exec ) {
@@ -216,7 +216,7 @@ void CCOMPILER::line_compile( bool is_top ) {
 			}
 		}
 		if( !do_exec ) {
-			//	‰½‚àˆ—‚³‚ê‚È‚©‚Á‚½ê‡ASyntax error ‚É‚µ‚Ä‚»‚ÌƒXƒe[ƒgƒƒ“ƒg‚ğ“Ç‚İ”ò‚Î‚·
+			//	ä½•ã‚‚å‡¦ç†ã•ã‚Œãªã‹ã£ãŸå ´åˆã€Syntax error ã«ã—ã¦ãã®ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã‚’èª­ã¿é£›ã°ã™
 			this->info.list.update_current_line_no();
 			this->info.errors.add( SYNTAX_ERROR, this->info.list.get_line_no() );
 			if( !this->info.list.is_line_end() && this->info.list.p_position->s_word == "ELSE" ) {
@@ -230,7 +230,7 @@ void CCOMPILER::line_compile( bool is_top ) {
 }
 
 // --------------------------------------------------------------------
-//	’…–ÚˆÊ’u‚Ì•Ï”–¼‚É‰‚¶‚ÄA‚»‚Ì•Ï”‚ÌƒAƒhƒŒƒX‚ğæ“¾‚·‚éƒR[ƒh‚ğ¶¬‚·‚é
+//	ç€ç›®ä½ç½®ã®å¤‰æ•°åã«å¿œã˜ã¦ã€ãã®å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—ã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹
 CVARIABLE CCOMPILER::get_variable_address() {
 	CASSEMBLER_LINE asm_line;
 	CVARIABLE variable;
@@ -238,19 +238,19 @@ CVARIABLE CCOMPILER::get_variable_address() {
 
 	variable = this->info.variable_manager.get_variable_info( &this->info, exp_list );
 	if( variable.dimension == 0 ) {
-		//	’P“Æ•Ï”‚Ìê‡
+		//	å˜ç‹¬å¤‰æ•°ã®å ´åˆ
 		asm_line.set( "LD", "", "HL", variable.s_label );
 		this->info.assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	”z—ñ•Ï”‚Ìê‡
+		//	é…åˆ—å¤‰æ•°ã®å ´åˆ
 		this->info.variable_manager.compile_array_elements( &this->info, exp_list, variable );
 	}
 	return variable;
 }
 
 // --------------------------------------------------------------------
-//	’…–ÚˆÊ’u‚Ì•Ï”–¼‚É‰‚¶‚ÄA‚»‚Ì•Ï”‚ÌƒAƒhƒŒƒX‚ğæ“¾‚·‚éƒR[ƒh‚ğ¶¬‚·‚é (”z—ñ‚ÍœŠO)
+//	ç€ç›®ä½ç½®ã®å¤‰æ•°åã«å¿œã˜ã¦ã€ãã®å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—ã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ (é…åˆ—ã¯é™¤å¤–)
 CVARIABLE CCOMPILER::get_variable_address_wo_array( void ) {
 	CASSEMBLER_LINE asm_line;
 	CVARIABLE variable;
@@ -269,13 +269,13 @@ void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
 	switch( variable.type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:
-		//	•Ï”‚ÌƒAƒhƒŒƒX‚ğ POP
+		//	å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ POP
 		asm_line.set( "POP", "", "DE", "" );
 		this->info.assembler_list.body.push_back( asm_line );
-		//	Ši”[‚·‚é’l‚ğ DE, •Ï”‚ÌƒAƒhƒŒƒX‚ğ HL ‚Ö
+		//	æ ¼ç´ã™ã‚‹å€¤ã‚’ DE, å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ HL ã¸
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.body.push_back( asm_line );
-		//	•Ï”‚Ö DE ‚Ì’l‚ğŠi”[
+		//	å¤‰æ•°ã¸ DE ã®å€¤ã‚’æ ¼ç´
 		asm_line.set( "LD", "", "[HL]", "E" );
 		this->info.assembler_list.body.push_back( asm_line );
 		asm_line.set( "INC", "", "HL", "" );
@@ -285,7 +285,7 @@ void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
 		break;
 	case CVARIABLE_TYPE::SINGLE_REAL:
 		this->info.assembler_list.activate_ld_de_single_real();
-		//	•Ï”‚ÌƒAƒhƒŒƒX‚ğ POP
+		//	å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ POP
 		asm_line.set( "POP", "", "DE", "" );
 		this->info.assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "ld_de_single_real", "" );
@@ -293,35 +293,20 @@ void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
 		break;
 	case CVARIABLE_TYPE::DOUBLE_REAL:
 		this->info.assembler_list.activate_ld_de_double_real();
-		//	•Ï”‚ÌƒAƒhƒŒƒX‚ğ POP
+		//	å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ POP
 		asm_line.set( "POP", "", "DE", "" );
 		this->info.assembler_list.body.push_back( asm_line );
 		asm_line.set( "CALL", "", "ld_de_double_real", "" );
 		this->info.assembler_list.body.push_back( asm_line );
 		break;
 	case CVARIABLE_TYPE::STRING:
-		//	•¶š—ñ‚Ì‰‰ZŒ‹‰Ê [HL] ‚ğ HEAP ‚ÉƒRƒs[
-		this->info.assembler_list.activate_free_string();
-		//	•Ï”‚ÌƒAƒhƒŒƒX‚ğ POP
+		this->info.assembler_list.activate_assign_string();
+		//	å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ POP
 		asm_line.set( "POP", "", "DE", "" );
 		this->info.assembler_list.body.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "C", "[HL]" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "E" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "[HL]" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "D" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "L", "C" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "H", "B" );
-		this->info.assembler_list.body.push_back( asm_line );
-		asm_line.set( "CALL", "", "free_string", "" );
+		asm_line.set( "CALL", "", "assign_string", "" );
 		this->info.assembler_list.body.push_back( asm_line );
 		break;
 	}
@@ -332,7 +317,7 @@ void CCOMPILER::exec_header( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
 	char s_buffer[32];
 
-	//	ƒwƒbƒ_[ƒRƒƒ“ƒg
+	//	ãƒ˜ãƒƒãƒ€ãƒ¼ã‚³ãƒ¡ãƒ³ãƒˆ
 	asm_line.set( "COMMENT", "", "------------------------------------------------------------------------", "" );
 	this->info.assembler_list.header.push_back( asm_line );
 	asm_line.set( "COMMENT", "", "Compiled by MSX-BACON from " + s_name, "" );
@@ -341,7 +326,7 @@ void CCOMPILER::exec_header( std::string s_name ) {
 	this->info.assembler_list.header.push_back( asm_line );
 	asm_line.set( "COMMENT", "", "", "" );
 	this->info.assembler_list.header.push_back( asm_line );
-	//	BSAVEƒwƒbƒ_[
+	//	BSAVEãƒ˜ãƒƒãƒ€ãƒ¼
 	asm_line.set( "COMMENT", "", "BSAVE header -----------------------------------------------------------", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "DEFB", "", "0xfe", "" );
@@ -364,12 +349,12 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_himem", "0x0FC4A" );
 	this->info.assembler_list.add_label( "work_maxfil", "0x0f85f" );
 	this->info.assembler_list.add_label( "work_txttab", "0x0F676" );
-	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT ‚ğŒÄ‚Ô‚Æ [VARTAB]¨[STREND], [STREND] ` [STREND] + [VALTYP] ‚ğ 00h ‚Å“h‚è‚Â‚Ô‚·‚½‚ßA‰Šú‰»‚ª•K—vB
+	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT ã‚’å‘¼ã¶ã¨ [VARTAB]â†’[STREND], [STREND] ï½ [STREND] + [VALTYP] ã‚’ 00h ã§å¡—ã‚Šã¤ã¶ã™ãŸã‚ã€åˆæœŸåŒ–ãŒå¿…è¦ã€‚
 	this->info.assembler_list.add_label( "work_usrtab", "0x0F39A" );
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
-	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 16" );	//	FCB + (ƒTƒCƒY 1byte + •¶š—ñ•Ï”ƒAƒhƒŒƒX 2byte) * 16
+	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 17" );	// FCB + 16 entries and one terminating entry
 
-	//	‰Šú‰»ˆ— (BACONLIB‘¶İŠm”F)
+	//	åˆæœŸåŒ–å‡¦ç† (BACONLIBå­˜åœ¨ç¢ºèª)
 	asm_line.set( "LABEL", "", "start_address", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "0x8001" );
@@ -410,13 +395,13 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "JP", "NZ", "bios_syntax_error", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	Às‚Ì“x‚Ì blib ‰Šú‰»
+	//	å®Ÿè¡Œã®åº¦ã® blib åˆæœŸåŒ–
 	this->info.assembler_list.add_label( "blib_init_ncalbas", "0x0404e" );
 	asm_line.set( "LD", "", "IX", "blib_init_ncalbas" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "call_blib", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	‰Šú‰»ˆ— (H.TIMIƒtƒbƒN)
+	//	åˆæœŸåŒ–å‡¦ç† (H.TIMIãƒ•ãƒƒã‚¯)
 	asm_line.set( "LD", "", "HL", "work_h_timi" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "DE", "h_timi_backup" );
@@ -429,12 +414,12 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "setup_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	‰Šú‰»ˆ— (ƒvƒƒOƒ‰ƒ€‹N“®)
+	//	åˆæœŸåŒ–å‡¦ç† (ãƒ—ãƒ­ã‚°ãƒ©ãƒ èµ·å‹•)
 	asm_line.set( "LD", "", "DE", "program_start" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "JP", "", "program_run", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	‰Šú‰»ˆ— (h.timiƒtƒbƒN)
+	//	åˆæœŸåŒ–å‡¦ç† (h.timiãƒ•ãƒƒã‚¯)
 	asm_line.set( "LABEL", "", "setup_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "h_timi_handler" );
@@ -447,7 +432,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	‰Šú‰»ˆ— (h.erroƒtƒbƒN)
+	//	åˆæœŸåŒ–å‡¦ç† (h.erroãƒ•ãƒƒã‚¯)
 	asm_line.set( "LABEL", "", "setup_h_erro", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "HL", "work_h_erro" );
@@ -484,7 +469,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	asm_line.set( "LABEL", "", "program_start", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 
-	//	BLIBƒ`ƒFƒbƒJ[
+	//	BLIBãƒã‚§ãƒƒã‚«ãƒ¼
 	this->info.assembler_list.add_label( "bios_syntax_error", "0x4055" );
 	this->info.assembler_list.add_label( "bios_calslt", "0x001C" );
 	this->info.assembler_list.add_label( "bios_enaslt", "0x0024" );
@@ -547,7 +532,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	‰Šú‰»ˆ——p•Ï”
+	//	åˆæœŸåŒ–å‡¦ç†ç”¨å¤‰æ•°
 	asm_line.set( "LABEL", "", "heap_next", "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( "DEFW", "", "0", "" );
@@ -573,7 +558,7 @@ void CCOMPILER::exec_compile_body( void ) {
 	this->info.list.reset_position();
 	while( !this->info.list.is_end() ) {
 		if( this->info.list.is_line_end() && !this->info.list.is_end() ) {
-			//	V‚µ‚¢s‚È‚Ì‚ÅAƒ‰ƒxƒ‹‚Ì‘}“ü‚ğƒ`ƒFƒbƒN‚·‚é
+			//	æ–°ã—ã„è¡Œãªã®ã§ã€ãƒ©ãƒ™ãƒ«ã®æŒ¿å…¥ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 			this->insert_label();
 		}
 		this->line_compile( true );
@@ -597,7 +582,7 @@ void CCOMPILER::exec_terminator( void ) {
 		this->info.assembler_list.activate_all_close();
 	}
 
-	//	ƒvƒƒOƒ‰ƒ€‚ÌI—¹ˆ—
+	//	ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®çµ‚äº†å‡¦ç†
 	asm_line.set( "LABEL", "", "program_termination" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "sub_termination" );
@@ -612,7 +597,7 @@ void CCOMPILER::exec_terminator( void ) {
 	asm_line.set( "LABEL", "", "sub_termination" );
 	this->info.assembler_list.body.push_back( asm_line );
 	if( this->info.use_file_access ) {
-		//	‘S‚Ä‚Ìƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é
+		//	å…¨ã¦ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹
 		asm_line.set( "CALL", "", "sub_all_close" );
 		this->info.assembler_list.body.push_back( asm_line );
 	}
@@ -641,13 +626,13 @@ void CCOMPILER::exec_terminator( void ) {
 	asm_line.set( "INC", "", "HL" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[HL]", "D" );
-	//	ƒvƒƒOƒ‰ƒ€‚ÌI—¹ˆ— (H.TIMI•œŒ³)
+	//	ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®çµ‚äº†å‡¦ç† (H.TIMIå¾©å…ƒ)
 	asm_line.set( "CALL", "", "restore_h_erro", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	ƒvƒƒOƒ‰ƒ€‚ÌI—¹ˆ— (H.TIMI•œŒ³)
+	//	ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®çµ‚äº†å‡¦ç† (H.TIMIå¾©å…ƒ)
 	asm_line.set( "CALL", "", "restore_h_timi", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	ƒvƒƒOƒ‰ƒ€‚ÌI—¹ˆ—
+	//	ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®çµ‚äº†å‡¦ç†
 	asm_line.set( "LD", "", "HL", "0x8001" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "[work_txttab]", "HL" );
@@ -673,7 +658,7 @@ void CCOMPILER::exec_terminator( void ) {
 // --------------------------------------------------------------------
 void CCOMPILER::exec_data( void ) {
 
-	//	ƒf[ƒ^QÆ—p‚Ìƒ‰ƒxƒ‹
+	//	ãƒ‡ãƒ¼ã‚¿å‚ç…§ç”¨ã®ãƒ©ãƒ™ãƒ«
 	if( this->info.list.data_line_no.size() == 0 ) {
 		return;
 	}
@@ -692,11 +677,20 @@ void CCOMPILER::exec_data( void ) {
 void CCOMPILER::exec_sub_run( void ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	RUN—pƒTƒuƒ‹[ƒ`ƒ“
+	//	RUNç”¨ã‚µãƒ–ãƒ«ãƒ¼ãƒãƒ³
 	asm_line.set( "LABEL", "", "program_run", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.assembler_list.is_registered_subroutine( "play_workspace" ) ) {
+		this->info.assembler_list.add_label( "bios_gicini", "0x0090" );
+		asm_line.set( "PUSH", "", "DE" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "CALL", "", "bios_gicini" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "DE" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 
-	//	ƒtƒ@ƒCƒ‹‚ğ‘S‚Ä close ‚·‚é
+	//	ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å…¨ã¦ close ã™ã‚‹
 	if( this->info.use_file_access ) {
 		asm_line.set( "LD", "", "HL", "[svaria_file_info]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -706,7 +700,7 @@ void CCOMPILER::exec_sub_run( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JR", "Z", "file_init_skip" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "DE", "" );							//	DE‚É‚Í run ‚Ì”ò‚Ñæ‚ª“ü‚Á‚Ä‚é‚Ì‚Å”j‰ó‚µ‚Ä‚Í‚È‚ç‚È‚¢
+		asm_line.set( "PUSH", "", "DE", "" );							//	DEã«ã¯ run ã®é£›ã³å…ˆãŒå…¥ã£ã¦ã‚‹ã®ã§ç ´å£Šã—ã¦ã¯ãªã‚‰ãªã„
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "CALL", "", "sub_all_close" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -720,7 +714,7 @@ void CCOMPILER::exec_sub_run( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 
-	//	ƒƒ‚ƒŠ‚ğ‰Šú‰»
+	//	ãƒ¡ãƒ¢ãƒªã‚’åˆæœŸåŒ–
 	asm_line.set( "LD", "", "HL", "heap_start" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "[heap_next]", "HL" );
@@ -731,7 +725,7 @@ void CCOMPILER::exec_sub_run( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "PUSH", "", "DE", "" );								//	run ‚Ì”ò‚Ñæ‚ğ–ß‚èƒAƒhƒŒƒX‚Æ‚µ‚ÄƒXƒ^ƒbƒN‚ÖÏ‚Ş
+	asm_line.set( "PUSH", "", "DE", "" );								//	run ã®é£›ã³å…ˆã‚’æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹ã¨ã—ã¦ã‚¹ã‚¿ãƒƒã‚¯ã¸ç©ã‚€
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LD", "", "DE", std::to_string( this->info.options.stack_size ) );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -747,19 +741,19 @@ void CCOMPILER::exec_sub_run( void ) {
 	asm_line.set( "DI" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	if( this->info.use_on_sprite ) {
-		//	ON SPRITE ‚Ì”ò‚Ñæ‰Šú‰»
+		//	ON SPRITE ã®é£›ã³å…ˆåˆæœŸåŒ–
 		asm_line.set( "LD", "", "HL", "_code_ret" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "[svari_on_sprite_line]", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
-		//	ON INTERVAL ‚Ì”ò‚Ñæ‰Šú‰»
+		//	ON INTERVAL ã®é£›ã³å…ˆåˆæœŸåŒ–
 		asm_line.set( "LD", "", "[svari_on_interval_line]", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_key ) {
-		//	ON KEY ‚Ì”ò‚Ñæ‰Šú‰»
+		//	ON KEY ã®é£›ã³å…ˆåˆæœŸåŒ–
 		asm_line.set( "LD", "", "[svari_on_key01_line]", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "HL", "svari_on_key01_line" );
@@ -771,22 +765,22 @@ void CCOMPILER::exec_sub_run( void ) {
 		asm_line.set( "LDIR" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
-	//	‰Šú‰»ˆ— (H.ERROƒtƒbƒN)
+	//	åˆæœŸåŒ–å‡¦ç† (H.ERROãƒ•ãƒƒã‚¯)
 	asm_line.set( "CALL", "", "setup_h_erro", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "EI" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	//	RUN—pƒTƒuƒ‹[ƒ`ƒ“‚Ì’†‚Å•Ï”—Ìˆæ‚ğƒNƒŠƒA‚·‚é
+	//	RUNç”¨ã‚µãƒ–ãƒ«ãƒ¼ãƒãƒ³ã®ä¸­ã§å¤‰æ•°é ˜åŸŸã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
 	int variable_area_bytes = this->info.variables.var_area_size + this->info.variables.vars_area_count + this->info.variables.vara_area_count;
 	if( variable_area_bytes == 0 ) {
-		//	•Ï”‚ğˆêØg‚Á‚Ä‚È‚¢‚Ì‚Å‰Šú‰»•s—v
+		//	å¤‰æ•°ã‚’ä¸€åˆ‡ä½¿ã£ã¦ãªã„ã®ã§åˆæœŸåŒ–ä¸è¦
 	}
 	else {
 		asm_line.set( "LD", "", "HL", "var_area_start" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "DE", "var_area_start + 1" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "BC", "varsa_area_end - var_area_start - 1" );
+		asm_line.set( "LD", "", "BC", "string_temp_area_end - var_area_start - 1" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "[HL]", "0" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -794,24 +788,24 @@ void CCOMPILER::exec_sub_run( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.variables.vars_area_count == 0 ) {
-		//	•¶š—ñ•Ï”‚ğˆêØg‚Á‚Ä‚È‚¢‚Ì‚Å‰Šú‰»•s—v
+		//	æ–‡å­—åˆ—å¤‰æ•°ã‚’ä¸€åˆ‡ä½¿ã£ã¦ãªã„ã®ã§åˆæœŸåŒ–ä¸è¦
 	}
 	else if( this->info.variables.vars_area_count == 1 ) {
 		asm_line.set( "LD", "", "HL", this->info.constants.s_blank_string );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[vars_area_start]", "HL" );
+		asm_line.set( "LD", "", "DE", "vars_area_start" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "BC", "3" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LDIR" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	else {
 		asm_line.set( "LD", "", "HL", this->info.constants.s_blank_string );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[vars_area_start]", "HL" );
+		asm_line.set( "LD", "", "DE", "vars_area_start" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "vars_area_start" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "DE", "vars_area_start + 2" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "BC", "vars_area_end - vars_area_start - 2" );
+		asm_line.set( "LD", "", "BC", "vars_area_end - vars_area_start" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LDIR" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -828,7 +822,7 @@ void CCOMPILER::exec_sub_run( void ) {
 		asm_line.set( "DJNZ", "", "_sub_input_clear" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
-	//	ƒtƒ@ƒCƒ‹—p‚Ìî•ñƒGƒŠƒA‚ğŠm•Û
+	//	ãƒ•ã‚¡ã‚¤ãƒ«ç”¨ã®æƒ…å ±ã‚¨ãƒªã‚¢ã‚’ç¢ºä¿
 	if( this->info.use_file_access ) {
 		asm_line.set( "CALL", "", "sub_init_files" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -847,12 +841,12 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 	CASSEMBLER_LINE asm_line;
 
 	if( this->info.is_interrupt_use() ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³
 		asm_line.set( "LABEL", "", "interrupt_process", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_sprite ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“ ( ON SPRITE )
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON SPRITE )
 		asm_line.set( "LD", "", "A", "[svarb_on_sprite_running]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "OR", "", "A", "A" );
@@ -885,7 +879,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_stop ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“ ( ON STOP )
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON STOP )
 		asm_line.set( "LD", "", "A", "[svarb_on_stop_exec]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "OR", "", "A", "A" );
@@ -908,7 +902,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“ ( ON INTERVAL )
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON INTERVAL )
 		asm_line.set( "LD", "", "A", "[svarb_on_interval_exec]" );		//	0:Through, 1:Execute
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "A", "" );
@@ -925,7 +919,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CP", "", "A", "2" );								//	Š„‚è‚İ•Û—¯‚È‚ç‰ğœ‚·‚é
+		asm_line.set( "CP", "", "A", "2" );								//	å‰²ã‚Šè¾¼ã¿ä¿ç•™ãªã‚‰è§£é™¤ã™ã‚‹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JR", "NZ", "_skip_on_interval", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -937,7 +931,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_strig ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“ ( ON STRIG )
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON STRIG )
 		asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "DE", "svari_on_strig0_line" );
@@ -947,21 +941,21 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		//	-- STRIG(n)
 		asm_line.set( "LABEL", "", "_on_strig_loop1", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- svarf_on_strig0_mode[+00] ‚ğŠm”F‚·‚é
+		//	-- svarf_on_strig0_mode[+00] ã‚’ç¢ºèªã™ã‚‹
 		asm_line.set( "LD", "", "A", "[HL]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "INC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "A", "" );									//	1:ON ‚©H
+		asm_line.set( "DEC", "", "A", "" );									//	1:ON ã‹ï¼Ÿ
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0:OFF/STOP ‚È‚çˆ—‚ğƒXƒLƒbƒv‚·‚é
+		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0:OFF/STOP ãªã‚‰å‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- svarf_on_strig0_mode[+01] ‚ğŠm”F‚·‚é
+		//	-- svarf_on_strig0_mode[+01] ã‚’ç¢ºèªã™ã‚‹
 		asm_line.set( "OR", "", "A", "[HL]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_skip_strig1", "" );						// 0x00 ‚È‚çˆ—‚ğƒXƒLƒbƒv‚·‚é
+		asm_line.set( "JR", "Z", "_skip_strig1", "" );						// 0x00 ãªã‚‰å‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- svarf_on_strig0_mode[+02] ‚ğŠm”F‚·‚é
+		//	-- svarf_on_strig0_mode[+02] ã‚’ç¢ºèªã™ã‚‹
 		asm_line.set( "INC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "INC", "", "A", "" );
@@ -970,7 +964,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0xFF ‚È‚çˆ—‚ğƒXƒLƒbƒv‚·‚é
+		asm_line.set( "JR", "NZ", "_skip_strig1", "" );						// 0xFF ãªã‚‰å‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "A", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -980,9 +974,9 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- svari_on_strig0_line ‚ğ CALL ‚·‚é
-		asm_line.set( "PUSH", "", "HL", "" );								// svarf_on_strig0_mode + 01 ‚ğ•Û‘¶
-		this->info.assembler_list.subroutines.push_back( asm_line );		//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 1’iv
+		//	-- svari_on_strig0_line ã‚’ CALL ã™ã‚‹
+		asm_line.set( "PUSH", "", "HL", "" );								// svarf_on_strig0_mode + 01 ã‚’ä¿å­˜
+		this->info.assembler_list.subroutines.push_back( asm_line );		//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 1æ®µã€
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "E", "[HL]" );
@@ -993,13 +987,13 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "HL", "" );				// svari_on_strig0_line •Û‘¶
-		this->info.assembler_list.subroutines.push_back( asm_line );																//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 2’iv
+		asm_line.set( "PUSH", "", "HL", "" );				// svari_on_strig0_line ä¿å­˜
+		this->info.assembler_list.subroutines.push_back( asm_line );																//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 2æ®µã€
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "BC", "" );				//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 3’iv
+		asm_line.set( "PUSH", "", "BC", "" );				//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 3æ®µã€
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "jp_hl", "" );				//	Š„‚è‚İ‚Ì”ò‚Ñæ
+		asm_line.set( "CALL", "", "jp_hl", "" );				//	å‰²ã‚Šè¾¼ã¿ã®é£›ã³å…ˆ
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "", "BC", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1007,7 +1001,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- Ÿ‚Ö
+		//	-- æ¬¡ã¸
 		asm_line.set( "LABEL", "", "_skip_strig1", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "INC", "", "DE", "" );
@@ -1024,7 +1018,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_key ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“ (ON KEY)
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ (ON KEY)
 		asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "DE", "svari_on_key01_line" );
@@ -1043,7 +1037,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "[HL]", "0" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "HL", "" );	//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 1’iv
+		asm_line.set( "PUSH", "", "HL", "" );	//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 1æ®µã€
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1057,9 +1051,9 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "EX", "", "DE", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "DE", "" );	//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 2’iv
+		asm_line.set( "PUSH", "", "DE", "" );	//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 2æ®µã€
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "BC", "" );	//	”ò‚Ñæ‚Ö”ò‚Ô‘O‚ÉuSTACK 3’iv
+		asm_line.set( "PUSH", "", "BC", "" );	//	é£›ã³å…ˆã¸é£›ã¶å‰ã«ã€ŒSTACK 3æ®µã€
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "CALL", "", "jp_hl", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1085,7 +1079,7 @@ void CCOMPILER::exec_sub_interrupt_process( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.is_interrupt_use() ) {
-		//	Š„‚è‚İƒtƒ‰ƒOˆ—ƒ‹[ƒ`ƒ“I‚í‚è
+		//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³çµ‚ã‚ã‚Š
 		asm_line.set( "RET" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LABEL", "", "interrupt_process_end", "" );
@@ -1104,7 +1098,7 @@ void CCOMPILER::sub_return_line_num( void ) {
 	asm_line.set( "LABEL", "",  "_return_line_num",  "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
-	//	Œ³‚Ì–ß‚èƒAƒhƒŒƒX‚ğæ“¾
+	//	å…ƒã®æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—
 	asm_line.set( "POP", "",  "HL",  "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "",  "BC",  "" );
@@ -1138,7 +1132,7 @@ void CCOMPILER::sub_return_line_num( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CP", "", "A", "2" );								//	Š„‚è‚İ•Û—¯‚È‚ç‰ğœ‚·‚é
+		asm_line.set( "CP", "", "A", "2" );								//	å‰²ã‚Šè¾¼ã¿ä¿ç•™ãªã‚‰è§£é™¤ã™ã‚‹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JR", "NZ", "_return_line_num_on_interval_return" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1150,7 +1144,7 @@ void CCOMPILER::sub_return_line_num( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "",  "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ‚©‚ç‚Ì–ß‚èƒAƒhƒŒƒX
+		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ã‹ã‚‰ã®æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JP", "", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1172,7 +1166,7 @@ void CCOMPILER::sub_return_line_num( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "",  "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ‚©‚ç‚Ì–ß‚èƒAƒhƒŒƒX
+		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ã‹ã‚‰ã®æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JP", "", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1188,23 +1182,23 @@ void CCOMPILER::sub_return_line_num( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "POP", "",  "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ‚©‚ç‚Ì–ß‚èƒAƒhƒŒƒX
+		asm_line.set( "POP", "",  "BC" );	//	interrupt_process ã‹ã‚‰ã®æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JP", "", "HL" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LABEL", "",  "_return_line_num_on_stop_skip" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
-	//	on strig ‚Ü‚½‚Í on key Š„‚è‚İ‚©‚ç–ß‚é RETURN ‚¾‚Á‚½ê‡‚ÍAŠ„‚è‚İˆ—ƒ‹[ƒ`ƒ“ŒÄ‚Ño‚µ‚ÌƒXƒ^ƒbƒN‚à”pŠü‚·‚é
+	//	on strig ã¾ãŸã¯ on key å‰²ã‚Šè¾¼ã¿ã‹ã‚‰æˆ»ã‚‹ RETURN ã ã£ãŸå ´åˆã¯ã€å‰²ã‚Šè¾¼ã¿å‡¦ç†ãƒ«ãƒ¼ãƒãƒ³å‘¼ã³å‡ºã—ã®ã‚¹ã‚¿ãƒƒã‚¯ã‚‚å»ƒæ£„ã™ã‚‹
 	asm_line.set( "POP", "",  "HL",  "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "",  "DE",  "" );	//	Š„‚è‚İŒÄ‚Ño‚µ‘O‚ÌƒXƒ^ƒbƒN 1’i
+	asm_line.set( "POP", "",  "DE",  "" );	//	å‰²ã‚Šè¾¼ã¿å‘¼ã³å‡ºã—å‰ã®ã‚¹ã‚¿ãƒƒã‚¯ 1æ®µ
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "",  "DE",  "" );	//	Š„‚è‚İŒÄ‚Ño‚µ‘O‚ÌƒXƒ^ƒbƒN 2’i
+	asm_line.set( "POP", "",  "DE",  "" );	//	å‰²ã‚Šè¾¼ã¿å‘¼ã³å‡ºã—å‰ã®ã‚¹ã‚¿ãƒƒã‚¯ 2æ®µ
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "",  "DE",  "" );	//	Š„‚è‚İŒÄ‚Ño‚µ‘O‚ÌƒXƒ^ƒbƒN 3’i
+	asm_line.set( "POP", "",  "DE",  "" );	//	å‰²ã‚Šè¾¼ã¿å‘¼ã³å‡ºã—å‰ã®ã‚¹ã‚¿ãƒƒã‚¯ 3æ®µ
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "POP", "",  "DE",  "" );	//	interrupt_process ‚©‚ç‚Ì–ß‚èƒAƒhƒŒƒX
+	asm_line.set( "POP", "",  "DE",  "" );	//	interrupt_process ã‹ã‚‰ã®æˆ»ã‚Šã‚¢ãƒ‰ãƒ¬ã‚¹
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "JP", "", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1214,17 +1208,17 @@ void CCOMPILER::sub_return_line_num( void ) {
 void CCOMPILER::exec_sub_h_timi( void ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	H.TIMIˆ—ƒ‹[ƒ`ƒ“
+	//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³
 	asm_line.set( "COMMENT", "", "H.TIMI PROCESS -----------------", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "LABEL", "", "h_timi_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	if( this->info.is_interrupt_use() ) {
-		asm_line.set( "PUSH", "", "AF", "" );		// VDP S#0 ‚Ì’l (AƒŒƒWƒXƒ^) ‚ğ•Û‘¶
+		asm_line.set( "PUSH", "", "AF", "" );		// VDP S#0 ã®å€¤ (Aãƒ¬ã‚¸ã‚¹ã‚¿) ã‚’ä¿å­˜
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_sprite ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON SPRITE ˆ— )
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON SPRITE å‡¦ç† )
 		asm_line.set( "COMMENT", "", "ON SPRITE PROCESS -----------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "B", "A" );
@@ -1237,7 +1231,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "B" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- ƒXƒvƒ‰ƒCƒgÕ“Ëƒtƒ‰ƒt‚ª—§‚Á‚Ä‚¢‚é‚©H
+		//	-- ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆè¡çªãƒ•ãƒ©ãƒ•ãŒç«‹ã£ã¦ã„ã‚‹ã‹ï¼Ÿ
 		asm_line.set( "AND", "", "A", "0x20" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "[svarb_on_sprite_exec]", "A" );
@@ -1246,7 +1240,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_stop ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON STOP ˆ— )
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON STOP å‡¦ç† )
 		asm_line.set( "COMMENT", "", "ON STOP PROCESS -------------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[svarb_on_stop_mode]" );	//	0:OFF, 1:ON, 2:STOP
@@ -1255,7 +1249,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JR", "Z", "_end_of_stop", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- CTRL+STOP ‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©H
+		//	-- CTRL+STOP ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹ï¼Ÿ
 		asm_line.set( "LD", "", "A", "[svarb_on_stop_last]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "D", "A" );
@@ -1308,7 +1302,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON INTERVAL ˆ— )
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON INTERVAL å‡¦ç† )
 		asm_line.set( "COMMENT", "", "ON INTERVAL PROCESS ---------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );	//	0:OFF, 1:ON, 2:STOP
@@ -1317,7 +1311,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "JR", "Z", "_end_of_interval", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- ƒfƒNƒŠƒƒ“ƒgƒJƒEƒ“ƒ^[‚ğŒ¸Z
+		//	-- ãƒ‡ã‚¯ãƒªãƒ¡ãƒ³ãƒˆã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã‚’æ¸›ç®—
 		asm_line.set( "LD", "", "HL", "[svari_on_interval_counter]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "L" );
@@ -1338,7 +1332,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "A", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "NZ", "_end_of_interval", "" );					//	STOP ‚È‚ç•Û—¯
+		asm_line.set( "JR", "NZ", "_end_of_interval", "" );					//	STOP ãªã‚‰ä¿ç•™
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "INC", "", "A", "" );									//	1:Execute
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1352,7 +1346,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_strig ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON STRIG ˆ— )
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON STRIG å‡¦ç† )
 		asm_line.set( "COMMENT", "", "ON STRIG PROCESS -----------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		this->info.assembler_list.add_label( "bios_gttrig", "0x00D8" );
@@ -1369,13 +1363,13 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "OR", "", "A", "A" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_skip_strig2", "" );					//	0:OFF ‚È‚çAˆ—‚ğƒXƒLƒbƒv
+		asm_line.set( "JR", "Z", "_skip_strig2", "" );					//	0:OFF ãªã‚‰ã€å‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[HL]" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "INC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "A" );							//	1‚Â‘O‚Ì GTTRIGó‘Ô‚ğXV
+		asm_line.set( "LD", "", "[HL]", "A" );							//	1ã¤å‰ã® GTTRIGçŠ¶æ…‹ã‚’æ›´æ–°
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "DEC", "", "HL", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1406,7 +1400,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_key ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“ ( ON KEY ˆ— )
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ ( ON KEY å‡¦ç† )
 		asm_line.set( "COMMENT", "", "ON KEY PROCESS -------------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "IN", "", "A", "[0xAA]" );
@@ -1508,15 +1502,15 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		asm_line.set( "CALL", "", "_on_key_sub", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
-	//	H.TIMIˆ—ƒ‹[ƒ`ƒ“I—¹ˆ—
+	//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³çµ‚äº†å‡¦ç†
 	if( this->info.is_interrupt_use() ) {
 		asm_line.set( "POP", "", "AF", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
-	asm_line.set( "JP", "", "h_timi_backup", "" );		// VDP S#0 ‚Ì’l (AƒŒƒWƒXƒ^) ‚ğ•œ‹A
+	asm_line.set( "JP", "", "h_timi_backup", "" );		// VDP S#0 ã®å€¤ (Aãƒ¬ã‚¸ã‚¹ã‚¿) ã‚’å¾©å¸°
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	if( this->info.use_on_key ) {
-		//	H.TIMIˆ—ƒ‹[ƒ`ƒ“‚Ì’†‚ÌƒTƒuƒ‹[ƒ`ƒ“
+		//	H.TIMIå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³ã®ä¸­ã®ã‚µãƒ–ãƒ«ãƒ¼ãƒãƒ³
 		asm_line.set( "LABEL", "", "_on_key_sub", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 		asm_line.set( "LD", "", "A", "[HL]" );
@@ -1560,7 +1554,7 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 void CCOMPILER::exec_sub_restore_h_timi( void ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	H.TIMI•œŒ³ˆ—ƒ‹[ƒ`ƒ“
+	//	H.TIMIå¾©å…ƒå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³
 	asm_line.set( "LABEL", "", "restore_h_timi", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "DI" );
@@ -1578,7 +1572,7 @@ void CCOMPILER::exec_sub_restore_h_timi( void ) {
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
-	//	H.TIMI‘Ò”ğƒGƒŠƒA
+	//	H.TIMIå¾…é¿ã‚¨ãƒªã‚¢
 	asm_line.set( "LABEL", "", "h_timi_backup", "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( "DEFB", "", "0, 0, 0, 0, 0", "" );
@@ -1591,7 +1585,7 @@ void CCOMPILER::exec_sub_on_error( void ) {
 
 	this->info.assembler_list.add_label( "work_errflg", "0x0f414" );
 
-	//	H.ERRO•œŒ³ˆ—ƒ‹[ƒ`ƒ“
+	//	H.ERROå¾©å…ƒå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³
 	asm_line.set( "LABEL", "", "restore_h_erro", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "DI" );
@@ -1611,7 +1605,7 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
-	//	H.ERROˆ—ƒ‹[ƒ`ƒ“
+	//	H.ERROå‡¦ç†ãƒ«ãƒ¼ãƒãƒ³
 	asm_line.set( "LABEL", "", "h_erro_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL" );
@@ -1635,7 +1629,7 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	asm_line.set( "JP", "", "work_h_erro" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
-	//	H.ERRO‘Ò”ğƒGƒŠƒA
+	//	H.ERROå¾…é¿ã‚¨ãƒªã‚¢
 	asm_line.set( "LABEL", "", "h_erro_backup", "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( "DEFB", "", "0, 0, 0, 0, 0", "" );
@@ -1645,6 +1639,46 @@ void CCOMPILER::exec_sub_on_error( void ) {
 // --------------------------------------------------------------------
 void CCOMPILER::exec_subroutines( void ) {
 	CASSEMBLER_LINE asm_line;
+	if( this->info.assembler_list.is_registered_subroutine( "play_workspace" ) ) {
+		auto basic_type = []( CVARIABLE_TYPE type ) {
+			switch( type ) {
+			case CVARIABLE_TYPE::INTEGER: return 2;
+			case CVARIABLE_TYPE::STRING: return 3;
+			case CVARIABLE_TYPE::SINGLE_REAL: return 4;
+			case CVARIABLE_TYPE::DOUBLE_REAL: return 8;
+			default: return 0;
+			}
+		};
+		asm_line.set( "LABEL", "", "play_default_types" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		for( auto type: this->info.variables.def_types ) {
+			asm_line.set( "DEFB", "", std::to_string( basic_type( type ) ) );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+		}
+		asm_line.set( "DEFW", "", "heap_end" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		asm_line.set( "LABEL", "", "play_variable_table" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		for( const auto &entry: this->info.variables.dictionary ) {
+			const CVARIABLE &variable = entry.second;
+			if( variable.s_name.empty() || variable.s_name[0] < 'A' || variable.s_name[0] > 'Z' ||
+				basic_type( variable.type ) == 0 ) {
+				continue;
+			}
+			std::string name = variable.s_name;
+			if( name.back() == '%' || name.back() == '!' || name.back() == '#' || name.back() == '$' ) {
+				name.pop_back();
+			}
+			asm_line.set( "DEFB", "", std::to_string( static_cast<unsigned char>( name[0] ) ) + "," +
+				std::to_string( name.size() > 1 ? static_cast<unsigned char>( name[1] ) : 0 ) + "," +
+				std::to_string( basic_type( variable.type ) + (variable.dimension != 0 ? 128 : 0) ) );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+			asm_line.set( "DEFW", "", variable.s_label );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+		}
+		asm_line.set( "DEFB", "", "0" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+	}
 
 	this->exec_sub_run();
 	this->exec_sub_interrupt_process();
@@ -1662,12 +1696,12 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 	this->info.p_compiler = this;
 
-	//	DEFINT, DEFSNG, DEFDBL, DEFSTR ‚ğˆ—‚·‚éB
-	//	À‘•‚ğƒVƒ“ƒvƒ‹‚É‚·‚é‚½‚ß‚ÉA“r’†‚Å•Ï‚í‚é‚±‚Æ‚Í‘z’è‚µ‚È‚¢B
+	//	DEFINT, DEFSNG, DEFDBL, DEFSTR ã‚’å‡¦ç†ã™ã‚‹ã€‚
+	//	å®Ÿè£…ã‚’ã‚·ãƒ³ãƒ—ãƒ«ã«ã™ã‚‹ãŸã‚ã«ã€é€”ä¸­ã§å¤‰ã‚ã‚‹ã“ã¨ã¯æƒ³å®šã—ãªã„ã€‚
 	this->info.list.reset_position();
 	this->info.variable_manager.analyze_defvars( &(this->info) );
 
-	//	‹ó•¶š—ñ‚ğ•¶š—ñƒv[ƒ‹‚É’Ç‰Á
+	//	ç©ºæ–‡å­—åˆ—ã‚’æ–‡å­—åˆ—ãƒ—ãƒ¼ãƒ«ã«è¿½åŠ 
 	CSTRING value;
 	value.set( "" );
 	this->info.constants.s_blank_string = this->info.constants.add( value );
@@ -1681,7 +1715,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->exec_terminator();
 	this->exec_data();
 
-	//	Š„‚è‚İƒtƒ‰ƒO
+	//	å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°
 	if( this->info.use_on_interval ) {
 		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
 		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_exec", CVARIABLE_TYPE::UNSIGNED_BYTE );
@@ -1759,18 +1793,32 @@ bool CCOMPILER::exec( std::string s_name ) {
 	if( this->info.use_file_access ) {
 		this->info.variable_manager.put_special_variable( &( this->info ), "file_info", CVARIABLE_TYPE::INTEGER, CVARIABLE_TYPE::INTEGER, true );
 	}
-	//	•Ï”ƒ_ƒ“ƒv
+	//	å¤‰æ•°ãƒ€ãƒ³ãƒ—
 	this->info.constants.dump( this->info.assembler_list, this->info.options );
 	this->info.variables.dump( this->info.assembler_list, this->info.options );
+	asm_line.set( "LABEL", "", "string_temp_area", "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	int string_temp_count = this->info.options.stack_size / 3;
+	if( string_temp_count < 8 ) {
+		string_temp_count = 8;
+	}
+	for( int i = 0; i < string_temp_count; i++ ) {
+		asm_line.set( "DEFB", "", "0" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "0" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+	asm_line.set( "LABEL", "", "string_temp_area_end", "" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
 
 	this->exec_subroutines();
 
 	if( this->info.errors.list.size() ) {
-		//	ƒGƒ‰[‚ª‚ ‚éê‡I—¹‚·‚é
+		//	ã‚¨ãƒ©ãƒ¼ãŒã‚ã‚‹å ´åˆçµ‚äº†ã™ã‚‹
 		return false;
 	}
 
-	//	Å“K‰»
+	//	æœ€é©åŒ–
 	if( this->info.options.optimize_level != COPTIMIZE_LEVEL::NONE ) {
 		this->optimize();
 	}
@@ -1790,11 +1838,11 @@ void CCOMPILER::optimize( void ) {
 }
 
 // --------------------------------------------------------------------
-//	‰ßè‚Éo‚µ‰ß‚¬‚½ call interrupt_process ‚ğíŒ¸‚·‚é
+//	éå‰°ã«å‡ºã—éããŸ call interrupt_process ã‚’å‰Šæ¸›ã™ã‚‹
 void CCOMPILER::optimize_interrupt_process( void ) {
 	std::vector< CASSEMBLER_LINE >::iterator p, p_search, p_next;
 
-	//	’Pƒ‚É˜A‘±Às‚³‚ê‚Ä‚¢‚éê‡
+	//	å˜ç´”ã«é€£ç¶šå®Ÿè¡Œã•ã‚Œã¦ã„ã‚‹å ´åˆ
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::CALL && p->condition == CCONDITION::NONE && p->operand1.type == COPERAND_TYPE::CONSTANT && p->operand1.s_value == "INTERRUPT_PROCESS" ) {
 			for( p_search = p + 1; p_search != this->info.assembler_list.body.end(); ) {
@@ -1812,7 +1860,7 @@ void CCOMPILER::optimize_interrupt_process( void ) {
 
 	//		call interrupt_process
 	//	; comment
-	//	‚Ìê‡Binterrupt_process ‚Í•K—v‚È‚¢B
+	//	ã®å ´åˆã€‚interrupt_process ã¯å¿…è¦ãªã„ã€‚
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::CALL && p->condition == CCONDITION::NONE && p->operand1.type == COPERAND_TYPE::CONSTANT && p->operand1.s_value == "INTERRUPT_PROCESS" ) {
 			p_search = p + 1;
@@ -1827,15 +1875,15 @@ void CCOMPILER::optimize_interrupt_process( void ) {
 }
 
 // --------------------------------------------------------------------
-//	‰ßè‚Éo‚µ‰ß‚¬‚½ push/pop ‚ğíŒ¸‚·‚é
+//	éå‰°ã«å‡ºã—éããŸ push/pop ã‚’å‰Šæ¸›ã™ã‚‹
 void CCOMPILER::optimize_push_pop( void ) {
-	std::vector< CASSEMBLER_LINE >::iterator p, p_next, p_next2, p_back, pp;
+	std::vector< CASSEMBLER_LINE >::iterator p, p_next, p_back;
 	std::string s_word;
 	std::string s_rp1;
 	int count;
 	bool replace_ok;
 
-	//	push rp; pop rp ‚ğíœ‚·‚é
+	//	push rp; pop rp ã‚’å‰Šé™¤ã™ã‚‹
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER ) {
 			p_next = p + 1;
@@ -1854,7 +1902,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	push rp
 	//	ld rp2, xx
 	//	pop rp
-	//	«
+	//	â†“
 	//	ld rp2, xx
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER ) {
@@ -1877,7 +1925,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	LD HL, xxx
 	//	PUSH HL
 	//	LD HL, xxx
-	//	«
+	//	â†“
 	//	LD HL, xxx
 	//	PUSH HL
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -1898,7 +1946,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	LD HL, xxx
 	//	EX DE, HL
 	//  POP HL
-	//	«
+	//	â†“
 	//	LD DE, xxx
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.s_value == "HL" ) {
@@ -1924,13 +1972,14 @@ void CCOMPILER::optimize_push_pop( void ) {
 	}
 
 	//	PUSH HL
-	//	LD HL, xxx ‚Ü‚½‚Í [xxx]
+	//	LD HL, xxx ã¾ãŸã¯ [xxx]
 	//	POP DE
 	//	ADD HL, DE
-	//	«
-	//	LD DE, xxx ‚Ü‚½‚Í [xxx]
+	//	â†“
+	//	LD DE, xxx ã¾ãŸã¯ [xxx]
+
 	//	ADD HL, DE
-	//	¦DE ‚Ì‘ã‚í‚è‚É BC ‚Å‚à—Ç‚¢
+	//	â€»DE ã®ä»£ã‚ã‚Šã« BC ã§ã‚‚è‰¯ã„
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::PUSH && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" ) {
 			p_next = p + 1;
@@ -1947,18 +1996,18 @@ void CCOMPILER::optimize_push_pop( void ) {
 			if( p_next->type != CMNEMONIC_TYPE::ADD || p_next->operand1.s_value != "HL" || p_next->operand2.s_value != p_back->operand1.s_value ) continue;
 
 			p_next = p + 1;
-			p_next->operand1.s_value = p_back->operand1.s_value;	//	LD HL, xxx ¨ LD DE, xxx
+			p_next->operand1.s_value = p_back->operand1.s_value;	//	LD HL, xxx â†’ LD DE, xxx
 
 			p_next = p - 1;
-			this->info.assembler_list.body.erase( p + 2 );			//	POP DE íœ
-			this->info.assembler_list.body.erase( p );			//	PUSH HL íœ
+			this->info.assembler_list.body.erase( p + 2 );			//	POP DE å‰Šé™¤
+			this->info.assembler_list.body.erase( p );			//	PUSH HL å‰Šé™¤
 			p = p_next;
 		}
 	}
 
 	//	PUSH rp1
 	//	POP rp2
-	//	«
+	//	â†“
 	//	LD  rp2l, rp1l
 	//	LD  rp2h, rp1h
 	std::string s_reg1, s_reg2, s_reg10, s_reg20, s_reg11, s_reg21;
@@ -1981,7 +2030,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 
 	//	LD HL, constant
 	//	LD A, L
-	//	«
+	//	â†“
 	//	LD A, constant
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "HL" && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
@@ -2003,15 +2052,15 @@ void CCOMPILER::optimize_push_pop( void ) {
 	}
 
 	//	LD A, 0
-	//	«
+	//	â†“
 	//	XOR A, A
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type != CMNEMONIC_TYPE::LD || p->operand1.type != COPERAND_TYPE::REGISTER || p->operand1.s_value != "A" || p->operand2.type != COPERAND_TYPE::CONSTANT ) {
 			continue;
 		}
-		//	LD A,0 ‚ÌŸˆÈ~‚ÉAƒtƒ‰ƒO‚ğg‚¤–½—ß‚æ‚è‚à‘O‚ÉAƒtƒ‰ƒO‚ğ•Ï‰»‚³‚¹‚é–½—ß‚ª‚ ‚é‚©H
+		//	LD A,0 ã®æ¬¡ä»¥é™ã«ã€ãƒ•ãƒ©ã‚°ã‚’ä½¿ã†å‘½ä»¤ã‚ˆã‚Šã‚‚å‰ã«ã€ãƒ•ãƒ©ã‚°ã‚’å¤‰åŒ–ã•ã›ã‚‹å‘½ä»¤ãŒã‚ã‚‹ã‹ï¼Ÿ
 		replace_ok = false;
-		for( p_next = p + 1; p != this->info.assembler_list.body.end(); p_next++ ) {
+		for( p_next = p + 1; p_next != this->info.assembler_list.body.end(); p_next++ ) {
 			if( is_flag_change( p_next ) ) {
 				replace_ok = true;
 				break;
@@ -2032,8 +2081,8 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	1: PUSH HL
 	//  2: LD HL, constant2
 	//  3: POP  DE
-	//  4: EX   DE, HL				; DE © constant2; HL © constant1
-	//	«
+	//  4: EX   DE, HL				; DE â† constant2; HL â† constant1
+	//	â†“
 	//	   LD HL, constant1
 	//     LD DE, constant2
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -2054,7 +2103,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::EX || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != "DE" ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p_next = p + 2;									//	LD HL, constant2
 			p_next->operand1.s_value = "DE";
 			p_next = p + 4;
@@ -2072,7 +2121,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	LD [HL], E
 	//	INC HL
 	//	LD [HL], D
-	//	«
+	//	â†“
 	//	LD HL, constant2
 	//	LD [constant1], HL
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -2093,7 +2142,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand1.s_value != "[HL]" || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != "D" ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p_next = p + 2;
 			this->info.assembler_list.body.erase( p_next );	//	LD [HL], E
 			p_next = p + 2;
@@ -2109,13 +2158,12 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p_next->operand2.s_value = "HL";
 		}
 	}
-
 	//	LD   HL, constant1
 	//	PUSH HL
 	//	CALL subroutine
 	//	POP  HL
 	//	call free_string
-	//	«
+	//	â†“
 	//	LD   HL, constant1
 	//	CALL subroutine
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -2136,7 +2184,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 			if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::CALL || p_next->operand1.type != COPERAND_TYPE::CONSTANT || p_next->operand1.s_value != "FREE_STRING" ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p_next = p + 1;
 			this->info.assembler_list.body.erase( p_next );	//	PUSH HL
 			p_next = p + 2;
@@ -2151,7 +2199,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 	//	LD   [memory1], HL
 	//	LD   HL, constant1
 	//	LD   [memory2], HL
-	//	«
+	//	â†“
 	//	LD   HL, constant1
 	//	LD   [memory1], HL
 	//	LD   [memory2], HL
@@ -2173,30 +2221,30 @@ void CCOMPILER::optimize_push_pop( void ) {
 				p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::MEMORY || p_next->operand2.type != COPERAND_TYPE::REGISTER || p_next->operand2.s_value != s_reg ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p_next = p + 2;
 			this->info.assembler_list.body.erase( p_next );	//	LD   HL, constant1
 		}
 	}
 	//	LD   rp1, xxx
 	//	LD   rp1, yyy
-	//	«
+	//	â†“
 	//	LD   rp1, yyy
-	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
+	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); ) {
 		if( p->type != CMNEMONIC_TYPE::LD || p->operand1.type != COPERAND_TYPE::REGISTER ) {
+			p++;
 			continue;
 		}
 		p_next = p + 1;
-		if( p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != p->operand1.s_value ) {
+		if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::LD || p_next->operand1.type != COPERAND_TYPE::REGISTER || p_next->operand1.s_value != p->operand1.s_value ) {
+			p++;
 			continue;
 		}
-		p_next = p;
-		p--;
-		this->info.assembler_list.body.erase( p_next );
+		p = this->info.assembler_list.body.erase( p );
 	}
 	//	LD   rp1L, constant1
 	//	LD   rp1H, constant2
-	//	«
+	//	â†“
 	//	LD   rp1, constant1 | (constant2 << 8)
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
@@ -2217,7 +2265,7 @@ void CCOMPILER::optimize_push_pop( void ) {
 			if( !is_pair_register( rp1h, rp1l ) ) {
 				continue;
 			}
-			p->operand1.s_value = get_pair_register( rp1h );				//	LD rp1l, constant1 ¨ LD rp1, constant1
+			p->operand1.s_value = get_pair_register( rp1h );				//	LD rp1l, constant1 â†’ LD rp1, constant1
 			if( is_pair_low_register( rp1l ) ) {
 				p->operand2.s_value = "(" + p->operand2.s_value + ") | ((" + p_next->operand2.s_value + ") << 8)";
 			}
@@ -2227,11 +2275,10 @@ void CCOMPILER::optimize_push_pop( void ) {
 			this->info.assembler_list.body.erase( p + 1 );
 		}
 	}
-
 	//	PUSH HL
 	//	LD HL, xxx
 	//	POP DE
-	//	«
+	//	â†“
 	//	EX DE, HL
 	//	LD HL, xxx
 	//
@@ -2253,12 +2300,11 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p->operand2.s_value = "HL";
 		}
 	}
-
 	//	PUSH HL
 	//	LD HL, xxx
 	//	INC HL
 	//	POP DE
-	//	«
+	//	â†“
 	//	EX DE, HL
 	//	LD HL, xxx
 	//	INC HL
@@ -2285,53 +2331,63 @@ void CCOMPILER::optimize_push_pop( void ) {
 			p->operand2.s_value = "HL";
 		}
 	}
-
 	//	LD rp1, constant
 	//	PUSH rp1
 	//	  :
 	//	POP rp1
-	//	«
+	//	â†“
+	//	LD rp1, constant
 	//	  :
 	//	LD rp1, constant
-	//	¦ : ‚Ì‚Æ‚±‚ë‚Éƒ‰ƒxƒ‹‚ª‚ ‚éê‡‚Í”ñŠY“–
-	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
-		if( p->type != CMNEMONIC_TYPE::LD || p->operand1.type != COPERAND_TYPE::REGISTER || p->operand2.type != COPERAND_TYPE::CONSTANT ) {
+	//	â€» ãƒ©ãƒ™ãƒ«ãƒ»åˆ¶å¾¡ç§»è¡Œã‚’ã¾ãŸãŒãªã„ã€‚é€”ä¸­ã§ã‚‚ rp1 ã‚’å‚ç…§ã™ã‚‹ãŸã‚æœ€åˆã® LD ã¯æ®‹ã™ã€‚
+	for( size_t i = 0; i < this->info.assembler_list.body.size(); ) {
+		CASSEMBLER_LINE& line = this->info.assembler_list.body[i];
+		if( line.type != CMNEMONIC_TYPE::LD || line.operand1.type != COPERAND_TYPE::REGISTER || line.operand2.type != COPERAND_TYPE::CONSTANT || i + 1 >= this->info.assembler_list.body.size() ) {
+			i++;
 			continue;
 		}
-		s_rp1 = p->operand1.s_value;
-		p_next = p + 1;
-		if( p_next == this->info.assembler_list.body.end() || p_next->type != CMNEMONIC_TYPE::PUSH || p_next->operand1.s_value != s_rp1 ) {
+		s_rp1 = line.operand1.s_value;
+		if( this->info.assembler_list.body[i + 1].type != CMNEMONIC_TYPE::PUSH || this->info.assembler_list.body[i + 1].operand1.s_value != s_rp1 ) {
+			i++;
 			continue;
 		}
-		count = 0;	//	ŠÔ‚É‹²‚Ü‚Á‚Ä‚¢‚é push, pop ‚Ì”
-		for( pp = p_next + 1; pp != this->info.assembler_list.body.end(); pp++ ) {
-			if( pp->type == CMNEMONIC_TYPE::LABEL ) {
+		count = 0;	//	é–“ã«æŒŸã¾ã£ã¦ã„ã‚‹ push, pop ã®æ•°
+		bool replaced = false;
+		for( size_t j = i + 2; j < this->info.assembler_list.body.size(); j++ ) {
+			CASSEMBLER_LINE& candidate = this->info.assembler_list.body[j];
+			if( candidate.type == CMNEMONIC_TYPE::LABEL ||
+				candidate.type == CMNEMONIC_TYPE::CALL || candidate.type == CMNEMONIC_TYPE::RST ||
+				candidate.type == CMNEMONIC_TYPE::JP || candidate.type == CMNEMONIC_TYPE::JR ||
+				candidate.type == CMNEMONIC_TYPE::DJNZ || candidate.type == CMNEMONIC_TYPE::RET ) {
 				break;
 			}
-			if( pp->type == CMNEMONIC_TYPE::PUSH ) {
+			if( candidate.type == CMNEMONIC_TYPE::PUSH ) {
 				count++;
 				continue;
 			}
-			if( pp->type == CMNEMONIC_TYPE::POP ) {
+			if( candidate.type == CMNEMONIC_TYPE::POP ) {
 				if( count ) {
 					count--;
 					continue;
 				}
-				if( pp->operand1.s_value != s_rp1 ) {
+				if( candidate.operand1.s_value != s_rp1 ) {
 					break;
 				}
-				pp->set( "LD", "", s_rp1, p->operand2.s_value );
-				this->info.assembler_list.body.erase( p_next );
-				p_next = p;
-				p--;
-				this->info.assembler_list.body.erase( p_next );
+				candidate.set( "LD", "", s_rp1, line.operand2.s_value );
+				this->info.assembler_list.body.erase( this->info.assembler_list.body.begin() + i + 1 );
+				i = 0;
+				replaced = true;
+				break;
 			}
+		}
+		if( !replaced ) {
+			i++;
 		}
 	}
 }
 
 // --------------------------------------------------------------------
-//	‰ßè‚Éo‚µ‰ß‚¬‚½ ldir ‚ğíŒ¸‚·‚é
+//	éå‰°ã«å‡ºã—éããŸ ldir ã‚’å‰Šæ¸›ã™ã‚‹
 void CCOMPILER::optimize_ldir( void ) {
 	std::vector< CASSEMBLER_LINE >::iterator p, p_next[4];
 	std::string s_reg[3];
@@ -2342,7 +2398,7 @@ void CCOMPILER::optimize_ldir( void ) {
 	//	LD   DE, constant1
 	//	LD   BC, constant2
 	//	LDIR
-	//	«
+	//	â†“
 	//	remove
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::LD && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand2.type == COPERAND_TYPE::CONSTANT ) {
@@ -2368,9 +2424,9 @@ void CCOMPILER::optimize_ldir( void ) {
 				p_next[3]->type != CMNEMONIC_TYPE::LDIR ) {
 				continue;
 			}
-			//	ƒŒƒWƒXƒ^–¼ƒ`ƒFƒbƒN
+			//	ãƒ¬ã‚¸ã‚¹ã‚¿åãƒã‚§ãƒƒã‚¯
 			if( s_reg[0] == s_reg[1] || s_reg[0] == s_reg[2] || s_reg[1] == s_reg[2] ) {
-				//	3‚Â‚ÌƒŒƒWƒXƒ^‚É“¯‚¶‚à‚Ì‚ª‚ ‚ê‚Î”ñŠY“–
+				//	3ã¤ã®ãƒ¬ã‚¸ã‚¹ã‚¿ã«åŒã˜ã‚‚ã®ãŒã‚ã‚Œã°éè©²å½“
 				continue;
 			}
 			for( i = 0; i < 3; i++ ) {
@@ -2389,14 +2445,14 @@ void CCOMPILER::optimize_ldir( void ) {
 				}
 			}
 			if( i != 3 ) {
-				//	16bitƒŒƒWƒXƒ^‚Å‚È‚¢‚©A”ñ‘ÎÛ‚Ì 16bit ƒŒƒWƒXƒ^‚Ìê‡‚Í”ñŠY“–
+				//	16bitãƒ¬ã‚¸ã‚¹ã‚¿ã§ãªã„ã‹ã€éå¯¾è±¡ã® 16bit ãƒ¬ã‚¸ã‚¹ã‚¿ã®å ´åˆã¯éè©²å½“
 				continue;
 			}
 			if( p_next[ n_hl ]->operand2.s_value != p_next[ n_de ]->operand2.s_value ) {
-				//	HL != DE ‚È‚ç”ñŠY“–
+				//	HL != DE ãªã‚‰éè©²å½“
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p--;
 			this->info.assembler_list.body.erase( p_next[3] );
 			this->info.assembler_list.body.erase( p_next[2] );
@@ -2407,7 +2463,7 @@ void CCOMPILER::optimize_ldir( void ) {
 
 	//	XOR  A, A
 	//	INC  A
-	//	«
+	//	â†“
 	//	LD   A, 1
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
 		if( p->type == CMNEMONIC_TYPE::XOR && p->operand1.type == COPERAND_TYPE::REGISTER && p->operand1.s_value == "A" && p->operand2.type == COPERAND_TYPE::REGISTER && p->operand2.s_value == "A"  ) {
@@ -2417,7 +2473,7 @@ void CCOMPILER::optimize_ldir( void ) {
 				p_next[1]->type != CMNEMONIC_TYPE::INC || p_next[1]->operand1.type != COPERAND_TYPE::REGISTER || p_next[1]->operand1.s_value != "A" ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			this->info.assembler_list.body.erase( p_next[1] );
 			p->type				= CMNEMONIC_TYPE::LD;
 			p->operand2.type	= COPERAND_TYPE::CONSTANT;
@@ -2429,7 +2485,7 @@ void CCOMPILER::optimize_ldir( void ) {
 	//	LD   A, 8
 	//  LD   [WORK_VALTYP], A
 	//  CALL BIOS_FRCINT/BIOS_FRCSNG
-	//	«
+	//	â†“
 	//  CALL BIOS_FRCINT/BIOS_FRCSNG
 	//
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -2450,7 +2506,7 @@ void CCOMPILER::optimize_ldir( void ) {
 				p_next[3]->type != CMNEMONIC_TYPE::CALL || p_next[3]->condition != CCONDITION::NONE || p_next[3]->operand1.type != COPERAND_TYPE::CONSTANT || (p_next[3]->operand1.s_value != "BIOS_FRCINT" && p_next[3]->operand1.s_value != "BIOS_FRCSNG") ) {
 				continue;
 			}
-			//	ƒ}ƒbƒ`‚µ‚½‚Ì‚Å’uŠ·
+			//	ãƒãƒƒãƒã—ãŸã®ã§ç½®æ›
 			p--;
 			this->info.assembler_list.body.erase( p_next[2] );
 			this->info.assembler_list.body.erase( p_next[1] );
@@ -2465,7 +2521,7 @@ void CCOMPILER::optimize_calculation( void ) {
 
 	//	LD   HL, constant
 	//	INC  HL
-	//	«
+	//	â†“
 	//  LD   HL, constant + 1
 	//
 	for( p = this->info.assembler_list.body.begin(); p != this->info.assembler_list.body.end(); p++ ) {
@@ -2475,7 +2531,7 @@ void CCOMPILER::optimize_calculation( void ) {
 			if( p_next->type != CMNEMONIC_TYPE::INC || p_next->operand1.s_value != p->operand1.s_value ) {
 				continue;
 			}
-			//	ŠY“–
+			//	è©²å½“
 			this->info.assembler_list.body.erase( p_next );
 			if( is_integer( p->operand2.s_value ) ) {
 				p->operand2.s_value = std::to_string( std::stoi( p->operand2.s_value ) + 1 );

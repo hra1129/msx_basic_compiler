@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Variable information
 // ====================================================================
 //	2023/Aug/5th  t.hara
@@ -26,9 +26,9 @@ enum class CVARIABLE_TYPE {
 class CVARIABLE {
 public:
 	CVARIABLE_TYPE	type;
-	std::string		s_name;		//	•Ï”‚Ì–¼‘O
-	std::string		s_label;	//	•Ï”—Ìˆæ‚Ìƒ‰ƒxƒ‹–¼ ( dictionary ‚ÌƒCƒ“ƒfƒbƒNƒX )
-	int				dimension;	//	-1: —v‘f”•s–¾‚Ì”z—ñ, 0: ’Êí•Ï”, 1: 1ŸŒ³”z—ñ, 2: 2ŸŒ³”z—ñ, ....
+	std::string		s_name;		//	å¤‰æ•°ã®åå‰
+	std::string		s_label;	//	å¤‰æ•°é ˜åŸŸã®ãƒ©ãƒ™ãƒ«å ( dictionary ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ )
+	int				dimension;	//	-1: è¦ç´ æ•°ä¸æ˜ã®é…åˆ—, 0: é€šå¸¸å¤‰æ•°, 1: 1æ¬¡å…ƒé…åˆ—, 2: 2æ¬¡å…ƒé…åˆ—, ....
 
 	CVARIABLE(): type( CVARIABLE_TYPE::DOUBLE_REAL ), s_name(""), dimension(0) {
 	}
@@ -38,13 +38,13 @@ public:
 class CVARIABLE_INFO {
 public:
 
-	//	DEFxxx ‚Ìî•ñ
+	//	DEFxxx ã®æƒ…å ±
 	std::vector< CVARIABLE_TYPE > def_types;
 
-	//	g—p‚³‚ê‚Ä‚¢‚é•Ï”‚ÌƒŠƒXƒg
+	//	ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹å¤‰æ•°ã®ãƒªã‚¹ãƒˆ
 	std::map< std::string, CVARIABLE > dictionary;
 
-	//	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	CVARIABLE_INFO() {
 		this->def_types.resize( 26 );
 		for( auto &p: def_types ) {
@@ -63,7 +63,7 @@ public:
 		var_area_size = 0;
 		vars_area_count = 0;
 		vara_area_count = 0;
-		//	”z—ñ‚Å‚È‚¢®”E’P¸“xE”{¸“x•Ï”
+		//	é…åˆ—ã§ãªã„æ•´æ•°ãƒ»å˜ç²¾åº¦ãƒ»å€ç²¾åº¦å¤‰æ•°
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "var_area_start", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
@@ -100,7 +100,7 @@ public:
 		asm_line.set( "LABEL", "", "var_area_end" );
 		asm_list.variables_area.push_back( asm_line );
 
-		//	”z—ñ‚Å‚È‚¢•¶š—ñ
+		//	é…åˆ—ã§ãªã„æ–‡å­—åˆ—
 		asm_line.set( "LABEL", "", "vars_area_start" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
@@ -109,14 +109,16 @@ public:
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	ƒAƒhƒŒƒX
+			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+			asm_list.variables_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
 			vars_area_count++;
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "vars_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 
-		//	”z—ñ‚Ì®”E’P¸“xE”{¸“x•Ï”
+		//	é…åˆ—ã®æ•´æ•°ãƒ»å˜ç²¾åº¦ãƒ»å€ç²¾åº¦å¤‰æ•°
 		asm_line.set( "LABEL", "", "vara_area_start" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
@@ -125,14 +127,16 @@ public:
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	ƒAƒhƒŒƒX
+			asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
+			asm_list.variables_area.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
 			vara_area_count++;
 		}
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "vara_area_end", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 
-		//	”z—ñ‚Ì•¶š—ñ
+		//	é…åˆ—ã®æ–‡å­—åˆ—
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "varsa_area_start", COPERAND_TYPE::NONE, "" );
 		asm_list.variables_area.push_back( asm_line );
 		for( auto it = dictionary.begin(); it != dictionary.end(); it++ ) {
@@ -141,7 +145,7 @@ public:
 			}
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, it->first, COPERAND_TYPE::NONE, "" );
 			asm_list.variables_area.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	ƒAƒhƒŒƒX
+			asm_line.set( CMNEMONIC_TYPE::DEFW, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "0", COPERAND_TYPE::NONE, "" );		//	ã‚¢ãƒ‰ãƒ¬ã‚¹
 			asm_list.variables_area.push_back( asm_line );
 			vara_area_count++;
 		}

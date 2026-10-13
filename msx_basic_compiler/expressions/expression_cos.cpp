@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -21,11 +21,11 @@ CEXPRESSION_NODE* CEXPRESSION_COS::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
-	//	–‘OŒvZˆ—
+	//	äº‹å‰è¨ˆç®—å‡¦ç†
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
-		//	’è”‚Ìê‡
+		//	å®šæ•°ã®å ´åˆ
 		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
-			//	”’l‚Ìê‡
+			//	æ•°å€¤ã®å ´åˆ
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 			p_term->set_double( cos( std::stod( this->p_operand->s_value ) ) );
@@ -39,7 +39,7 @@ CEXPRESSION_NODE* CEXPRESSION_COS::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_COS::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ğˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	if( this->p_operand == nullptr ) {
 		return;
 	}

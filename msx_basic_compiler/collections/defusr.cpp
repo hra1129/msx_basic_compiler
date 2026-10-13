@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: DefUsr
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  DEFUSR<”Ô†>=<ƒAƒhƒŒƒX>
+//  DEFUSR<ç•ªå·>=<ã‚¢ãƒ‰ãƒ¬ã‚¹>
 bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -20,13 +20,13 @@ bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "USR" ) {
-		//	DEF ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+		//	DEF ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	p_info->list.p_position++;
 	if( p_info->list.is_command_end() ) {
-		//	DEF ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í Syntax error.
+		//	DEF ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
@@ -39,12 +39,12 @@ bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 		usr_num = 0;
 	}
 	if( usr_num < 0 || usr_num > 9 ) {
-		//	DEFUSRn ‚Ì n ‚ª 0`9 ‚Å‚È‚¢ê‡‚Í Syntax error.
+		//	DEFUSRn ã® n ãŒ 0ï½ž9 ã§ãªã„å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "=" ) {
-		//	DEFUSRn ‚ÌŒã‚É = ‚ª–³‚¢ê‡‚Í Syntax error.
+		//	DEFUSRn ã®å¾Œã« = ãŒç„¡ã„å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
@@ -54,7 +54,7 @@ bool CDEFUSR::exec( CCOMPILE_INFO *p_info ) {
 		exp.release();
 	}
 	else {
-		//	DEFUSRn= ‚ÌŒã‚ÉŽ®‚ª–³‚¢ê‡‚Í Syntax error.
+		//	DEFUSRn= ã®å¾Œã«å¼ãŒç„¡ã„å ´åˆã¯ Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -31,12 +31,12 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_OR::optimization( CCOMPILE_INFO *p_info )
 	}
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING || this->p_right->type == CEXPRESSION_TYPE::STRING ) {
-		//	ƒGƒ‰[‚È‚Ì‚Å‰½‚à‚µ‚È‚¢
+		//	ã‚¨ãƒ©ãƒ¼ãªã®ã§ä½•ã‚‚ã—ãªã„
 		return nullptr;
 	}
-	//	Ž–‘OŒvŽZˆ—
+	//	äº‹å‰è¨ˆç®—å‡¦ç†
 	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_left->is_constant && this->p_right->is_constant ) {
-		//	—¼•û’è”‚Ìê‡
+		//	ä¸¡æ–¹å®šæ•°ã®å ´åˆ
 		p_term = new CEXPRESSION_TERM();
 
 		d1 = std::stol( this->p_left->s_value );
@@ -55,7 +55,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_OR::optimization( CCOMPILE_INFO *p_info )
 		return p_term;
 	}
 	else if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_left->is_constant ) {
-		//	¶‚¾‚¯’è”‚Ìê‡
+		//	å·¦ã ã‘å®šæ•°ã®å ´åˆ
 		d1 = std::stol( this->p_left->s_value );
 		if( d1 < -32768 || d1 > 65535 ) {
 			p_info->errors.add( OVERFLOW_ERROR, p_info->list.get_line_no() );
@@ -74,7 +74,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_OR::optimization( CCOMPILE_INFO *p_info )
 		}
 	}
 	else if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_right->is_constant ) {
-		//	‰E‚¾‚¯’è”‚Ìê‡
+		//	å³ã ã‘å®šæ•°ã®å ´åˆ
 		d1 = std::stol( this->p_right->s_value );
 		if( d1 < -32768 || d1 > 65535 ) {
 			p_info->errors.add( OVERFLOW_ERROR, p_info->list.get_line_no() );
@@ -102,16 +102,16 @@ void CEXPRESSION_OPERATOR_OR::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
 		return;
 	}
-	//	æ‚É€‚ðˆ—
+	//	å…ˆã«é …ã‚’å‡¦ç†
 	this->p_left->compile( p_info );
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING ) {
-		//	‚±‚Ì‰‰ŽZŽq‚Í•¶Žš—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
+		//	ã“ã®æ¼”ç®—å­ã¯æ–‡å­—åˆ—åž‹ã«ã¯é©ç”¨ã§ããªã„
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_left->type != CEXPRESSION_TYPE::INTEGER ) {
-		//	¶‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		//	å·¦å´ã®é …ãŒæ•´æ•°åž‹ã§ãªã‘ã‚Œã°ã€æ•´æ•°åž‹ã«å¤‰æ›ã™ã‚‹
 		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
@@ -120,16 +120,16 @@ void CEXPRESSION_OPERATOR_OR::compile( CCOMPILE_INFO *p_info ) {
 	this->p_right->compile( p_info );
 
 	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
-		//	‚±‚Ì‰‰ŽZŽq‚Í•¶Žš—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
+		//	ã“ã®æ¼”ç®—å­ã¯æ–‡å­—åˆ—åž‹ã«ã¯é©ç”¨ã§ããªã„
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
-		//	‰E‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		//	å³å´ã®é …ãŒæ•´æ•°åž‹ã§ãªã‘ã‚Œã°ã€æ•´æ•°åž‹ã«å¤‰æ›ã™ã‚‹
 		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
 	}
 
-	//	‚±‚Ì‰‰ŽZŽq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
+	//	ã“ã®æ¼”ç®—å­ã®çµæžœã¯å¿…ãšæ•´æ•°åž‹
 	this->type = CEXPRESSION_TYPE::INTEGER;
 
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );

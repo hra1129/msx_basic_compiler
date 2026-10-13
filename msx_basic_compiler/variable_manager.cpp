@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Variable manager
 // ====================================================================
 //	2023/July/22  t.hara
@@ -32,13 +32,13 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 	p_info->list.p_position++;
 	while( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word.size() != 1 ) {
-			//	DEFINT AA ‚Ì‚æ‚¤‚ÈA2•¶šˆÈã‚Ìw’è‚¾‚Á‚½ê‡‚ÍƒGƒ‰[
+			//	DEFINT AA ã®ã‚ˆã†ãªã€2æ–‡å­—ä»¥ä¸Šã®æŒ‡å®šã ã£ãŸå ´åˆã¯ã‚¨ãƒ©ãƒ¼
 			p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
 			this->skip_statement( p_info );
 			return;
 		}
 		if( !isalpha( p_info->list.p_position->s_word[0] & 255 ) ) {
-			//	DEFINT 1 ‚Ì‚æ‚¤‚ÈAƒAƒ‹ƒtƒ@ƒxƒbƒgˆÈŠO‚Ìw’è‚Ìê‡‚ÍƒGƒ‰[
+			//	DEFINT 1 ã®ã‚ˆã†ãªã€ã‚¢ãƒ«ãƒ•ã‚¡ãƒ™ãƒƒãƒˆä»¥å¤–ã®æŒ‡å®šã®å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 			p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
 			this->skip_statement( p_info );
 			return;
@@ -47,13 +47,13 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 		end_char = start_char;
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() || p_info->list.p_position->s_word == "," ) {
-			//	DEFINT A ‚Ì‚æ‚¤‚È’P“Æw’è‚Ìê‡
+			//	DEFINT A ã®ã‚ˆã†ãªå˜ç‹¬æŒ‡å®šã®å ´åˆ
 		}
 		else if( p_info->list.p_position->s_word == "-" ) {
-			//	DEFINT A-Z ‚Ì‚æ‚¤‚È”ÍˆÍw’è‚ÌêÂ
+			//	DEFINT A-Z ã®ã‚ˆã†ãªç¯„å›²æŒ‡å®šã®å ´é’
 			p_info->list.p_position++;
 			if( p_info->list.is_command_end() || p_info->list.p_position->s_word.size() != 1 || !isalpha( p_info->list.p_position->s_word[0] & 255 ) ) {
-				//	DEFINT A- ‚â DEFINT A-AA ‚â DEFINT A-9 ‚Ì‚æ‚¤‚È•s³‚È‹Lq‚Ìê‡‚ÍƒGƒ‰[
+				//	DEFINT A- ã‚„ DEFINT A-AA ã‚„ DEFINT A-9 ã®ã‚ˆã†ãªä¸æ­£ãªè¨˜è¿°ã®å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 				p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
 				this->skip_statement( p_info );
 				return;
@@ -61,17 +61,17 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 			end_char = toupper( p_info->list.p_position->s_word[0] & 255 );
 			p_info->list.p_position++;
 		}
-		//	”ÍˆÍ‚ğƒ`ƒFƒbƒN
+		//	ç¯„å›²ã‚’ãƒã‚§ãƒƒã‚¯
 		if( start_char > end_char ) {
-			//	DEFINT Z-A ‚Ì‚æ‚¤‚È‹t„w’è‚Ìê‡‚ÍƒGƒ‰[
+			//	DEFINT Z-A ã®ã‚ˆã†ãªé€†å·¡æŒ‡å®šã®å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 			p_info->errors.add( "The range specification for " + s_def + " is abnormal.", p_info->list.get_line_no() );
 			return;
 		}
-		//	”ÍˆÍ‚ğ“o˜^
+		//	ç¯„å›²ã‚’ç™»éŒ²
 		for( i = start_char; i <= end_char; i++ ) {
 			p_info->variables.def_types[ i - 'A' ] = new_type;
 		}
-		//	Ÿ‚Ì”ÍˆÍw’è‚Ì , ‚Í“Ç‚İ”ò‚Î‚·
+		//	æ¬¡ã®ç¯„å›²æŒ‡å®šã® , ã¯èª­ã¿é£›ã°ã™
 		if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "," ) {
 			p_info->list.p_position++;
 		}
@@ -79,8 +79,8 @@ void CVARIABLE_MANAGER::update( CCOMPILE_INFO *p_info, CVARIABLE_TYPE new_type )
 }
 
 // --------------------------------------------------------------------
-//	DEFINT, DEFSNG, DEFDBL, DEFSTR ‚ğ’²‚×‚ÄŒ^¯•Êq–³‚µ‚Ì•Ï”‚ª
-//	‚Ç‚ÌŒ^‚É‚È‚é‚©‚ğŠm’è‚³‚¹‚é
+//	DEFINT, DEFSNG, DEFDBL, DEFSTR ã‚’èª¿ã¹ã¦å‹è­˜åˆ¥å­ç„¡ã—ã®å¤‰æ•°ãŒ
+//	ã©ã®å‹ã«ãªã‚‹ã‹ã‚’ç¢ºå®šã•ã›ã‚‹
 bool CVARIABLE_MANAGER::analyze_defvars( CCOMPILE_INFO *p_info ) {
 
 	while( !p_info->list.is_end() ) {
@@ -104,7 +104,7 @@ bool CVARIABLE_MANAGER::analyze_defvars( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-//	{•Ï”–¼}[%|!|#|$][(...)]
+//	{å¤‰æ•°å}[%|!|#|$][(...)]
 CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 	CVARIABLE variable;
 	std::string s_name;
@@ -112,15 +112,15 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 	int dimensions = 0;
 
 	line_no = p_info->list.p_position->line_no;
-	//	•Ï”–¼‚ğæ“¾‚·‚é
+	//	å¤‰æ•°åã‚’å–å¾—ã™ã‚‹
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
-	//	3•¶šˆÈã‚Ìê‡A2•¶š‚ÉØ‚è‹l‚ß‚é
+	//	3æ–‡å­—ä»¥ä¸Šã®å ´åˆã€2æ–‡å­—ã«åˆ‡ã‚Šè©°ã‚ã‚‹
 	if( s_name.size() > 2 ) {
 		s_name = std::string( "" ) + s_name[0] + s_name[1];
 	}
-	//	Œ^¯•Êq‚Ì‘¶İ‚ğ’²‚×‚é
+	//	å‹è­˜åˆ¥å­ã®å­˜åœ¨ã‚’èª¿ã¹ã‚‹
 	if( !p_info->list.is_command_end() && p_info->list.p_position->s_word == "%" ) {
 		variable.type = CVARIABLE_TYPE::INTEGER;
 		s_name = s_name + "%";
@@ -142,7 +142,7 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 	else {
-		//	Œ^¯•Êq‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡‚ÍADEFxxx ‚Ìw’è‚É]‚¤
+		//	å‹è­˜åˆ¥å­ãŒçœç•¥ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€DEFxxx ã®æŒ‡å®šã«å¾“ã†
 		variable.type = p_info->variables.def_types[ s_name[0] ];
 		switch( variable.type ) {
 		default:
@@ -156,16 +156,16 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return variable;
 	}
-	//	”z—ñ‚©H
+	//	é…åˆ—ã‹ï¼Ÿ
 	if( p_info->list.p_position->s_word == "(" ) {
 		s_name = s_name + "(";
-		variable.dimension = this->evaluate_dimensions( p_info );		//	—v‘f”Ô†‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş
+		variable.dimension = this->evaluate_dimensions( p_info );		//	è¦ç´ ç•ªå·ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 		dimensions = variable.dimension;
 	}
 
 	variable.s_name = s_name;
 	if( p_info->variables.dictionary.count( s_name ) ) {
-		//	Šù‚É”F’m‚µ‚Ä‚¢‚é•Ï”‚Ìê‡A”z—ñ‚ÌŸŒ³”‚ğƒ`ƒFƒbƒN
+		//	æ—¢ã«èªçŸ¥ã—ã¦ã„ã‚‹å¤‰æ•°ã®å ´åˆã€é…åˆ—ã®æ¬¡å…ƒæ•°ã‚’ãƒã‚§ãƒƒã‚¯
 		variable = p_info->variables.dictionary[ s_name ];
 		if( dimensions != variable.dimension ) {
 			p_info->errors.add( REDIMENSIONED_ARRAY, line_no );
@@ -173,14 +173,14 @@ CVARIABLE CVARIABLE_MANAGER::add_variable( CCOMPILE_INFO *p_info ) {
 		}
 	}
 	else {
-		//	‰‚ß‚Ä“oê‚·‚é•Ï”‚Ìê‡A«‘‚É“o˜^‚µ‚Ä”F’m
+		//	åˆã‚ã¦ç™»å ´ã™ã‚‹å¤‰æ•°ã®å ´åˆã€è¾æ›¸ã«ç™»éŒ²ã—ã¦èªçŸ¥
 		p_info->variables.dictionary[ s_name ] = variable;
 	}
 	return variable;
 }
 
 // --------------------------------------------------------------------
-//	”z—ñ‚Ì—v‘f‚Éw’è‚³‚ê‚Ä‚¢‚é®‚ğ•]‰¿‚µ‚ÄƒXƒ^ƒbƒN‚ÉÏ‚Ş
+//	é…åˆ—ã®è¦ç´ ã«æŒ‡å®šã•ã‚Œã¦ã„ã‚‹å¼ã‚’è©•ä¾¡ã—ã¦ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 int CVARIABLE_MANAGER::evaluate_dimensions( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	int dimension = 0;
@@ -208,7 +208,7 @@ int CVARIABLE_MANAGER::evaluate_dimensions( CCOMPILE_INFO *p_info ) {
 }
 
 // --------------------------------------------------------------------
-//	Œ»İ‚ÌQÆˆÊ’u‚Ì”z—ñ•Ï”‚Ìî•ñ‚ğ•Ô‚·
+//	ç¾åœ¨ã®å‚ç…§ä½ç½®ã®é…åˆ—å¤‰æ•°ã®æƒ…å ±ã‚’è¿”ã™
 CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	std::string s_name;
 	std::string s_label;
@@ -218,15 +218,15 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		return variable;
 	}
-	//	•Ï”–¼‚ğæ“¾
+	//	å¤‰æ•°åã‚’å–å¾—
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 && p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
-		//	•Ï”–¼Å‘å 2•¶š§ŒÀ
+		//	å¤‰æ•°åæœ€å¤§ 2æ–‡å­—åˆ¶é™
 		s_name.resize( 2 );
 	}
-	//	Œ^¯•Êq
+	//	å‹è­˜åˆ¥å­
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "%" ) {
 			var_type = CVARIABLE_TYPE::INTEGER;
@@ -251,7 +251,7 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	else {
 		var_type = p_info->variables.def_types[ s_name[0] - 'A' ];
 	}
-	//	•Ï”ƒ‰ƒxƒ‹‚ğ¶¬
+	//	å¤‰æ•°ãƒ©ãƒ™ãƒ«ã‚’ç”Ÿæˆ
 	switch( var_type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:		s_label = "varia";	break;
@@ -260,7 +260,7 @@ CVARIABLE CVARIABLE_MANAGER::get_array_info( class CCOMPILE_INFO *p_info ) {
 	case CVARIABLE_TYPE::STRING:		s_label = "varsa";	break;
 	}
 	s_label = s_label + "_" + s_name;
-	//	•Ï”‚ğ“o˜^‚·‚é
+	//	å¤‰æ•°ã‚’ç™»éŒ²ã™ã‚‹
 	variable.s_name = s_name;
 	variable.s_label = s_label;
 	variable.type = var_type;
@@ -287,15 +287,15 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		return variable;
 	}
-	//	•Ï”–¼‚ğæ“¾
+	//	å¤‰æ•°åã‚’å–å¾—
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 && p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
-		//	•Ï”–¼Å‘å 2•¶š§ŒÀ
+		//	å¤‰æ•°åæœ€å¤§ 2æ–‡å­—åˆ¶é™
 		s_name.resize( 2 );
 	}
-	//	Œ^¯•Êq
+	//	å‹è­˜åˆ¥å­
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "%" ) {
 			var_type = CVARIABLE_TYPE::INTEGER;
@@ -321,16 +321,16 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 		var_type = p_info->variables.def_types[ s_name[0] - 'A' ];
 	}
 	if( with_array ) {
-		//	”z—ñ•Ï”‚©H
+		//	é…åˆ—å¤‰æ•°ã‹ï¼Ÿ
 		if( !p_info->list.is_command_end() ) {
 			if( p_info->list.p_position->s_word == "(" || p_info->list.p_position->s_word == "[" ) {
-				//	”z—ñ•Ï”‚Ìê‡
+				//	é…åˆ—å¤‰æ•°ã®å ´åˆ
 				is_array = true;
 				p_info->list.p_position++;
 			}
 		}
 	}
-	//	•Ï”ƒ‰ƒxƒ‹‚ğ¶¬
+	//	å¤‰æ•°ãƒ©ãƒ™ãƒ«ã‚’ç”Ÿæˆ
 	switch( var_type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:		s_label = "vari"; break;
@@ -342,29 +342,29 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 		s_label = s_label + "a";
 	}
 	s_label = s_label + "_" + s_name;
-	//	•Ï”‚ğ“o˜^‚·‚é
+	//	å¤‰æ•°ã‚’ç™»éŒ²ã™ã‚‹
 	variable.s_name = s_name;
 	variable.s_label = s_label;
 	variable.type = var_type;
 	variable.dimension = 0;
 	if( is_array ) {
-		//	”z—ñ‚Ì—v‘f”‚ğ’²‚×‚é
+		//	é…åˆ—ã®è¦ç´ æ•°ã‚’èª¿ã¹ã‚‹
 		std::vector< CBASIC_WORD >::const_iterator p_position = p_info->list.p_position;
 		for(;;) {
-			//	®‚ğ•]‰¿
+			//	å¼ã‚’è©•ä¾¡
 			p_exp = new CEXPRESSION();
 			p_exp->makeup_node( p_info );
 			exp_list.push_back( p_exp );
 			p_exp = nullptr;
-			//	ŸŒ³”XV
+			//	æ¬¡å…ƒæ•°æ›´æ–°
 			dimension++;
-			//	ƒGƒ‰[ƒ`ƒFƒbƒN‚ÆI—¹”»’è
+			//	ã‚¨ãƒ©ãƒ¼ãƒã‚§ãƒƒã‚¯ã¨çµ‚äº†åˆ¤å®š
 			if( p_info->list.is_command_end() ) {
 				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 				break;
 			}
 			if( p_info->list.p_position->s_word == ")" || p_info->list.p_position->s_word == "]" ) {
-				//	ˆÈ~A®‚ª–³‚¯‚ê‚Î”²‚¯‚é
+				//	ä»¥é™ã€å¼ãŒç„¡ã‘ã‚Œã°æŠœã‘ã‚‹
 				p_info->list.p_position++;
 				break;
 			}
@@ -382,7 +382,7 @@ CVARIABLE CVARIABLE_MANAGER::get_variable_info( class CCOMPILE_INFO *p_info, std
 	else {
 		variable = p_info->variables.dictionary[ s_label ];
 		if( variable.dimension == 0 ) {
-			//	‰¼“o˜^‚Ìê‡A¡‰ñ‚ÌŒŸoŒ‹‰Ê‚Åã‘‚«
+			//	ä»®ç™»éŒ²ã®å ´åˆã€ä»Šå›ã®æ¤œå‡ºçµæœã§ä¸Šæ›¸ã
 			p_info->variables.dictionary[ s_label ].dimension = dimension;
 			variable.dimension = dimension;
 		}
@@ -399,20 +399,20 @@ void CVARIABLE_MANAGER::compile_array_elements( class CCOMPILE_INFO *p_info, std
 	int i, area_size; 
 	int element_size = 2;
 
-	//	‚ ‚Æ‚Åu©“®Šm•Ûv‚ÌÛ‚Ìƒƒ‚ƒŠƒTƒCƒY‚ğŒvZ‚·‚é‚½‚ß‚É•K—v‚É‚È‚éu—v‘f‚ÌƒTƒCƒYv‚ğŒvZ
+	//	ã‚ã¨ã§ã€Œè‡ªå‹•ç¢ºä¿ã€ã®éš›ã®ãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚ºã‚’è¨ˆç®—ã™ã‚‹ãŸã‚ã«å¿…è¦ã«ãªã‚‹ã€Œè¦ç´ ã®ã‚µã‚¤ã‚ºã€ã‚’è¨ˆç®—
 	switch( variable.type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:		element_size = 2; break;
 	case CVARIABLE_TYPE::SINGLE_REAL:	element_size = 4; break;
 	case CVARIABLE_TYPE::DOUBLE_REAL:	element_size = 8; break;
-	case CVARIABLE_TYPE::STRING:		element_size = 2; break;
+	case CVARIABLE_TYPE::STRING:		element_size = 3; break;
 	}
-	//	©“®Šm•Û”z—ñ‚¾‚Á‚½ê‡‚Ì•K—v‚Èƒƒ‚ƒŠ”‚ğŒvZ‚·‚é
+	//	è‡ªå‹•ç¢ºä¿é…åˆ—ã ã£ãŸå ´åˆã®å¿…è¦ãªãƒ¡ãƒ¢ãƒªæ•°ã‚’è¨ˆç®—ã™ã‚‹
 	area_size = element_size * 11;
 	for( i = 1; i < variable.dimension; i++ ) {
 		area_size *= 11;
 	}
-	//	”z—ñÀ‘ÌƒAƒhƒŒƒX‚ª NULL ‚È‚çA”z—ñ•Ï”‚Ì©“®Šm•Û‚ğÀ{
+	//	é…åˆ—å®Ÿä½“ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒ NULL ãªã‚‰ã€é…åˆ—å¤‰æ•°ã®è‡ªå‹•ç¢ºä¿ã‚’å®Ÿæ–½
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, variable.s_label );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::CONSTANT, std::to_string( variable.dimension ) );
@@ -429,26 +429,38 @@ void CVARIABLE_MANAGER::compile_array_elements( class CCOMPILE_INFO *p_info, std
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "check_array", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	//	”z—ñ•Ï”‚Ì—v‘f‚Ìæ“ªƒAƒhƒŒƒX‚ğ‹‚ßA‚©‚Â—v‘f”‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş
+	//	é…åˆ—å¤‰æ•°ã®è¦ç´ ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ±‚ã‚ã€ã‹ã¤è¦ç´ æ•°ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 	p_info->assembler_list.activate_calc_array_top();
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "calc_array_top", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	p_info->assembler_list.add_label( "bios_umult", "0x0314a" );
 	for( i = variable.dimension - 1; i >= 0; i-- ) {
-		//	—v‘f i ‚ğŒvZ‚·‚é
+		//	è¦ç´  i ã‚’è¨ˆç®—ã™ã‚‹
 		exp_list[i]->compile( p_info, CEXPRESSION_TYPE::INTEGER );
 		if( i < variable.dimension - 1 ) {
-			// ÅŒã‚Ì‰‰ZŒ‹‰Ê‚ğæ‚èo‚· ( Z * y_max )
+			// æœ€å¾Œã®æ¼”ç®—çµæœã‚’å–ã‚Šå‡ºã™ ( Z * y_max )
 			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
-			//	—v‘f i ‚Ì‰‰ZŒ‹‰Ê‚Æ‰ÁZ‚·‚é
+			//	è¦ç´  i ã®æ¼”ç®—çµæœã¨åŠ ç®—ã™ã‚‹
 			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		if( i == 0 ) {
-			//	—v‘f‚P‚Â•ª‚ÌƒTƒCƒY‚É‡‚í‚¹‚ÄA2”{E4”{E8”{‚·‚é
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
-			p_info->assembler_list.body.push_back( asm_line );
+			//	è¦ç´ ï¼‘ã¤åˆ†ã®ã‚µã‚¤ã‚ºã«åˆã‚ã›ã¦ã€2å€ãƒ»4å€ãƒ»8å€ã™ã‚‹
+			if( element_size == 3 ) {
+				asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+				p_info->assembler_list.body.push_back( asm_line );
+				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
+			else {
+				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+			}
 			if( element_size >= 4 ) {
 				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
@@ -457,14 +469,14 @@ void CVARIABLE_MANAGER::compile_array_elements( class CCOMPILE_INFO *p_info, std
 				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			// ”z—ñ—v‘f‚Ìæ“ªƒAƒhƒŒƒX‚ğƒXƒ^ƒbƒN‚©‚çæ‚èo‚µ‚Ä‰ÁZ
+			// é…åˆ—è¦ç´ ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰å–ã‚Šå‡ºã—ã¦åŠ ç®—
 			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else {
-			//	—v‘f i - 1 ‚ÌÅ‘å”‚ğƒXƒ^ƒbƒN‚©‚çæ‚èo‚·
+			//	è¦ç´  i - 1 ã®æœ€å¤§æ•°ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰å–ã‚Šå‡ºã™
 			asm_line.set( CMNEMONIC_TYPE::LD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::REGISTER, "L" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD,   CCONDITION::NONE, COPERAND_TYPE::REGISTER, "B", COPERAND_TYPE::REGISTER, "H" );
@@ -496,15 +508,15 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 	if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
 		return variable;
 	}
-	//	•Ï”–¼‚ğæ“¾
+	//	å¤‰æ•°åã‚’å–å¾—
 	s_name = p_info->list.p_position->s_word;
 	transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
 	p_info->list.p_position++;
 	if( s_name.size() > 2 ) {
-		//	•Ï”–¼Å‘å 2•¶š§ŒÀ
+		//	å¤‰æ•°åæœ€å¤§ 2æ–‡å­—åˆ¶é™
 		s_name.resize( 2 );
 	}
-	//	Œ^¯•Êq
+	//	å‹è­˜åˆ¥å­
 	if( !p_info->list.is_command_end() ) {
 		if( p_info->list.p_position->s_word == "%" ) {
 			var_type = CVARIABLE_TYPE::INTEGER;
@@ -537,20 +549,20 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		element_size = 8;
 		break;
 	default:
-		element_size = 2;
+		element_size = (var_type == CVARIABLE_TYPE::STRING) ? 3 : 2;
 		break;
 	}
 	if( with_array ) {
-		//	”z—ñ•Ï”‚©H
+		//	é…åˆ—å¤‰æ•°ã‹ï¼Ÿ
 		if( !p_info->list.is_command_end() ) {
 			if( p_info->list.p_position->s_word == "(" || p_info->list.p_position->s_word == "[" ) {
-				//	”z—ñ•Ï”‚Ìê‡
+				//	é…åˆ—å¤‰æ•°ã®å ´åˆ
 				is_array = true;
 				p_info->list.p_position++;
 			}
 		}
 	}
-	//	•Ï”ƒ‰ƒxƒ‹‚ğ¶¬
+	//	å¤‰æ•°ãƒ©ãƒ™ãƒ«ã‚’ç”Ÿæˆ
 	switch( var_type ) {
 	default:
 	case CVARIABLE_TYPE::INTEGER:		s_label = "vari";	break;
@@ -562,20 +574,20 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		s_label = s_label + "a";
 	}
 	s_label = s_label + "_" + s_name;
-	//	•Ï”‚ğ“o˜^‚·‚é
+	//	å¤‰æ•°ã‚’ç™»éŒ²ã™ã‚‹
 	variable.s_name = s_name;
 	variable.s_label = s_label;
 	variable.type = var_type;
 	variable.dimension = 0;
 	if( is_array ) {
-		//	”z—ñ‚Ì—v‘f”‚ğ’²‚×‚é
+		//	é…åˆ—ã®è¦ç´ æ•°ã‚’èª¿ã¹ã‚‹
 		while( !p_info->list.is_command_end() ) {
-			//	—v‘f‚ğæ‚è‚Ş
+			//	è¦ç´ ã‚’å–ã‚Šè¾¼ã‚€
 			p_exp = new CEXPRESSION();
 			p_exp->makeup_node( p_info );
 			exp_list.push_back( p_exp );
 			dimension++;
-			//	‚à‚¤I‚í‚è‚©H
+			//	ã‚‚ã†çµ‚ã‚ã‚Šã‹ï¼Ÿ
 			if( p_info->list.is_command_end() ) {
 				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 				break;
@@ -602,7 +614,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		}
 	}
 	if( is_array ) {
-		//	•Ï”—Ìˆæ‚Éƒƒ‚ƒŠƒAƒhƒŒƒX‚ªŠi”[‚³‚ê‚Ä‚¢‚ê‚ÎARedimensioned array error (Err10) 
+		//	å¤‰æ•°é ˜åŸŸã«ãƒ¡ãƒ¢ãƒªã‚¢ãƒ‰ãƒ¬ã‚¹ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚Œã°ã€Redimensioned array error (Err10)
 		p_info->assembler_list.add_label( "bios_errhand_redim", "0x0405e" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[" + variable.s_label + "]" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -612,7 +624,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, "bios_errhand_redim", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ƒTƒCƒYŒvZ‚ÌÅ‰‚ÌŒW” 1 ‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş
+		//	ã‚µã‚¤ã‚ºè¨ˆç®—ã®æœ€åˆã®ä¿‚æ•° 1 ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 		if( dimension == 0 ) {
 			asm_line.set( "LD", "", "DE", "1" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -620,24 +632,24 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.add_label( "bios_imult", "0x03193" );
 		for( i = 0; i < dimension; i++ ) {
 			if( i > 0 ) {
-				//	ˆê‚Â‘O‚Ì‰‰ZŒ‹‰Ê‚ğƒXƒ^ƒbƒN‚É‘Ò”ğ
+				//	ä¸€ã¤å‰ã®æ¼”ç®—çµæœã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«å¾…é¿
 				asm_line.set( "PUSH", "", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			//	—v‘f”‚ÌŒvZ®‚ğ•]‰¿
+			//	è¦ç´ æ•°ã®è¨ˆç®—å¼ã‚’è©•ä¾¡
 			p_exp = exp_list[i];
 			p_exp->compile( p_info );
 			delete p_exp;
 			exp_list[i] = nullptr;
-			//	ŒvZ‚µ‚½—v‘f”‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş
+			//	è¨ˆç®—ã—ãŸè¦ç´ æ•°ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 			asm_line.set( "INC", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			if( i > 0 ) {
-				//	ˆê‚Â‘O‚Ì‰‰ZŒ‹‰Ê‚ğƒXƒ^ƒbƒN‚©‚ç•œ‹A
+				//	ä¸€ã¤å‰ã®æ¼”ç®—çµæœã‚’ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰å¾©å¸°
 				asm_line.set( "POP", "", "DE" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			asm_line.set( "PUSH", "", "HL" );							//	—v‘f”‚ğÏ‚Ş (CALC_ARRAY_TOP‚Ì‚½‚ß)
+			asm_line.set( "PUSH", "", "HL" );							//	è¦ç´ æ•°ã‚’ç©ã‚€ (CALC_ARRAY_TOPã®ãŸã‚)
 			p_info->assembler_list.body.push_back( asm_line );
 			if( i > 0 ) {
 				//	HL = HL * DE
@@ -645,10 +657,22 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 				p_info->assembler_list.body.push_back( asm_line );
 			}
 		}
-		//	•K—v‚Èƒƒ‚ƒŠƒTƒCƒY‚É•ÏŠ·‚·‚é
-		asm_line.set( "ADD", "", "HL", "HL" );
-		p_info->assembler_list.body.push_back( asm_line );
-		if( element_size > 2 ) {
+		//	å¿…è¦ãªãƒ¡ãƒ¢ãƒªã‚µã‚¤ã‚ºã«å¤‰æ›ã™ã‚‹
+		if( element_size == 3 ) {
+			asm_line.set( "PUSH", "", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "ADD", "", "HL", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "POP", "", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "ADD", "", "HL", "DE" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else {
+			asm_line.set( "ADD", "", "HL", "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		if( element_size > 2 && element_size != 3 ) {
 			asm_line.set( "ADD", "", "HL", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
@@ -660,7 +684,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ƒƒ‚ƒŠ‚ğŠm•Û‚·‚é
+		//	ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿ã™ã‚‹
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "C", COPERAND_TYPE::NONE, "L" );
@@ -670,10 +694,10 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.activate_allocate_heap();
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "allocate_heap", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	•Ï”—Ìˆæ‚ÉŠm•Û‚µ‚½ƒƒ‚ƒŠ‚ÌƒAƒhƒŒƒX‚ğŠi”[
+		//	å¤‰æ•°é ˜åŸŸã«ç¢ºä¿ã—ãŸãƒ¡ãƒ¢ãƒªã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ ¼ç´
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[" + variable.s_label + "]", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	Šm•Û‚µ‚½ƒƒ‚ƒŠ‚ÉƒTƒCƒY‚ğŠi”[
+		//	ç¢ºä¿ã—ãŸãƒ¡ãƒ¢ãƒªã«ã‚µã‚¤ã‚ºã‚’æ ¼ç´
 		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
@@ -688,7 +712,7 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ƒTƒCƒY‚ğ DE ‚É•Û‘¶‚µ‚Ä‚¨‚­ (•¶š—ñ‚Ìê‡‚Ì‚İ)
+		//	ã‚µã‚¤ã‚ºã‚’ DE ã«ä¿å­˜ã—ã¦ãŠã (æ–‡å­—åˆ—ã®å ´åˆã®ã¿)
 		if( var_type == CVARIABLE_TYPE::STRING ) {
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::REGISTER, "C" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -697,14 +721,14 @@ CVARIABLE CVARIABLE_MANAGER::create_variable_info( class CCOMPILE_INFO *p_info, 
 			asm_line.set( CMNEMONIC_TYPE::DEC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
-		//	Šm•Û‚µ‚½ƒƒ‚ƒŠ‚ÉŸŒ³”‚ğŠi”[
+		//	ç¢ºä¿ã—ãŸãƒ¡ãƒ¢ãƒªã«æ¬¡å…ƒæ•°ã‚’æ ¼ç´
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, std::to_string( dimension ) );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "A" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		//	Šm•Û‚µ‚½ƒƒ‚ƒŠ‚É—v‘f”‚ğŠi”[
+		//	ç¢ºä¿ã—ãŸãƒ¡ãƒ¢ãƒªã«è¦ç´ æ•°ã‚’æ ¼ç´
 		if( dimension > 1 ) {
 			s_label = p_info->get_auto_label();
 			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
@@ -758,7 +782,7 @@ CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, 
 	if( var_name_type == CVARIABLE_TYPE::UNKNOWN ) {
 		var_name_type = var_type;
 	}
-	//	•Ï”ƒ‰ƒxƒ‹‚ğ¶¬
+	//	å¤‰æ•°ãƒ©ãƒ™ãƒ«ã‚’ç”Ÿæˆ
 	switch( var_name_type ) {
 	default:
 	case CVARIABLE_TYPE::UNSIGNED_BYTE:	s_label = "svarb";	break;
@@ -771,7 +795,7 @@ CVARIABLE CVARIABLE_MANAGER::put_special_variable( class CCOMPILE_INFO *p_info, 
 		s_label = s_label + "a";
 	}
 	s_label = s_label + "_" + s_name;
-	//	•Ï”‚ğ“o˜^‚·‚é
+	//	å¤‰æ•°ã‚’ç™»éŒ²ã™ã‚‹
 	variable.s_name = s_name;
 	variable.s_label = s_label;
 	variable.type = var_type;

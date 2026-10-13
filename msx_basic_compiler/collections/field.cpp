@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Field
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  FIELD #n, ƒTƒCƒY AS •¶š—ñ•Ï”–¼ [, ƒTƒCƒY AS •¶š—ñ•Ï”–¼ ...]
+//  FIELD #n, ã‚µã‚¤ã‚º AS æ–‡å­—åˆ—å¤‰æ•°å [, ã‚µã‚¤ã‚º AS æ–‡å­—åˆ—å¤‰æ•°å ...]
 //
 bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
@@ -33,7 +33,7 @@ bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.activate_field();
 	p_info->use_file_access = true;
 
-	//	#n ‚Ì n
+	//	#n ã® n
 	if( !exp.compile( p_info ) ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
@@ -41,7 +41,7 @@ bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( "CALL", "", "sub_file_number" );
 	p_info->assembler_list.body.push_back( asm_line );
 	exp.release();
-	asm_line.set( "LD", "", "DE", "37" );					//	FCB ‚ğƒXƒLƒbƒv‚·‚é‚½‚ß‚ÌƒIƒtƒZƒbƒg
+	asm_line.set( "LD", "", "DE", "37" );					//	FCB ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹ãŸã‚ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "ADD", "", "HL", "DE" );
 	p_info->assembler_list.body.push_back( asm_line );
@@ -53,10 +53,10 @@ bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		p_info->list.p_position++;
-		asm_line.set( "PUSH", "", "HL" );						//	(1) FILE INFO “à‚Ì•Ï”ƒAƒhƒŒƒXƒŠƒXƒg‚ÌƒAƒhƒŒƒX‚ğ•Û‘¶
+		asm_line.set( "PUSH", "", "HL" );						//	(1) FILE INFO å†…ã®å¤‰æ•°ã‚¢ãƒ‰ãƒ¬ã‚¹ãƒªã‚¹ãƒˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ä¿å­˜
 		p_info->assembler_list.body.push_back( asm_line );
-		//	ƒTƒCƒY
-		if( !exp.compile( p_info ) ) {							//	ƒTƒCƒY‚Ì”’l‚ğ•]‰¿‚µ‚Ä HL ‚ÉŠi”[
+		//	ã‚µã‚¤ã‚º
+		if( !exp.compile( p_info ) ) {							//	ã‚µã‚¤ã‚ºã®æ•°å€¤ã‚’è©•ä¾¡ã—ã¦ HL ã«æ ¼ç´
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
@@ -68,40 +68,39 @@ bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 		}
 		p_info->list.p_position++;
 
-		asm_line.set( "LD", "", "A", "L" );						//	A = •¶š”
+		asm_line.set( "LD", "", "A", "L" );						//	A = æ–‡å­—æ•°
 		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "POP", "", "DE" );						//	[1] FILE INFO “à‚Ì•Ï”ƒAƒhƒŒƒXƒŠƒXƒg‚ÌƒAƒhƒŒƒX‚ğ•œ‹A
+		asm_line.set( "POP", "", "DE" );						//	[1] FILE INFO å†…ã®å¤‰æ•°ã‚¢ãƒ‰ãƒ¬ã‚¹ãƒªã‚¹ãƒˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å¾©å¸°
 		p_info->assembler_list.body.push_back( asm_line );
-		//	•Ï”
+		//	å¤‰æ•°
 		if( p_info->list.is_command_end() ) {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
 		if( p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
-			//	•Ï”–¼‚Å‚Í–³‚¢
+			//	å¤‰æ•°åã§ã¯ç„¡ã„
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;
 		}
-		CVARIABLE variable = p_info->p_compiler->get_variable_address();				//	HL = •Ï”‚ÌƒAƒhƒŒƒX
+		CVARIABLE variable = p_info->p_compiler->get_variable_address();				//	HL = å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 		if( variable.dimension != 0 || variable.type != CVARIABLE_TYPE::STRING ) {
 			p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 			return true;
 		}
-		//	FILE INFO ‚ÉƒTƒCƒYE•Ï”ƒAƒhƒŒƒX‚ğ‘‚«‚Ş
-		asm_line.set( "CALL", "", "sub_field" );					//	HL = •Ï”‚ÌƒAƒhƒŒƒX, DE = •Ï”ƒAƒhƒŒƒXƒŠƒXƒg‚ÌƒAƒhƒŒƒX
+		//	FILE INFO ã«ã‚µã‚¤ã‚ºãƒ»å¤‰æ•°ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æ›¸ãè¾¼ã‚€
+		asm_line.set( "CALL", "", "sub_field" );					//	HL = å¤‰æ•°ã®ã‚¢ãƒ‰ãƒ¬ã‚¹, DE = å¤‰æ•°ã‚¢ãƒ‰ãƒ¬ã‚¹ãƒªã‚¹ãƒˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 		p_info->assembler_list.body.push_back( asm_line );
+		var_count++;
 
 	} while( !p_info->list.is_command_end() && var_count < 16 );
 
-	if( var_count < 16 ) {
-		//	16ŒÂ–¢–‚¾‚Á‚½ê‡‚ÍA’[––ƒR[ƒh‚ğƒZƒbƒg‚·‚é
-		asm_line.set( "LD", "", "[HL]", "0" );
-		p_info->assembler_list.body.push_back( asm_line );
-	}
-	else if( !p_info->list.is_command_end() ) {
-		//	16ŒÂ‚¾‚Á‚½‚çAFIELD–½—ß‚Ì‹Lq‚ªI‚í‚Á‚Ä‚é‚±‚Æ‚àŠm‚©‚ß‚éBI‚í‚Á‚Ä‚È‚¯‚ê‚ÎASUBSCRIPT_OUT_OF_RANGE ‚ğo‚·B
+	if( !p_info->list.is_command_end() ) {
+		//	16å€‹ã ã£ãŸã‚‰ã€FIELDå‘½ä»¤ã®è¨˜è¿°ãŒçµ‚ã‚ã£ã¦ã‚‹ã“ã¨ã‚‚ç¢ºã‹ã‚ã‚‹ã€‚çµ‚ã‚ã£ã¦ãªã‘ã‚Œã°ã€SUBSCRIPT_OUT_OF_RANGE ã‚’å‡ºã™ã€‚
 		p_info->errors.add( SUBSCRIPT_OUT_OF_RANGE, p_info->list.get_line_no() );
 		return true;
 	}
+	// Terminate the field list, including when all 16 entries are used.
+	asm_line.set( "LD", "", "[HL]", "0" );
+	p_info->assembler_list.body.push_back( asm_line );
 	return true;
 }

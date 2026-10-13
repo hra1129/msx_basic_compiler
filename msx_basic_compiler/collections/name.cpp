@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Name
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  NAME "ƒƒCƒ‹ƒhƒJ[ƒh" AS "ƒƒCƒ‹ƒhƒJ[ƒh"
+//  NAME "ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰" AS "ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰"
 bool CNAME::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -20,8 +20,10 @@ bool CNAME::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_copy_string_to_buffer();
+	p_info->assembler_list.activate_legacy_string_buffer2();
 
-	//	‘æ1ˆø” ƒƒCƒ‹ƒhƒJ[ƒh
+	//	ç¬¬1å¼•æ•° ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		asm_line.set( "PUSH", "", "HL", "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -36,7 +38,7 @@ bool CNAME::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	‘æ2ˆø” ƒƒCƒ‹ƒhƒJ[ƒh
+	//	ç¬¬2å¼•æ•° ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
 	}
@@ -45,13 +47,27 @@ bool CNAME::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->assembler_list.add_label( "blib_name", "0x040a2" );
+	asm_line.set( "PUSH", "", "HL", "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "CALL", "", "copy_string_to_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "POP", "", "BC", "" );
+	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "POP", "", "DE", "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "PUSH", "", "BC", "" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "PUSH", "", "DE", "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "EX", "", "DE", "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "HL", "" );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( "PUSH", "", "DE", "" );
+	asm_line.set( "CALL", "", "copy_string_to_buffer" );
+	p_info->assembler_list.body.push_back( asm_line );
+	asm_line.set( "LD", "", "DE", "legacy_string_buffer2" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( "LD", "", "IX", "blib_name" );
 	p_info->assembler_list.body.push_back( asm_line );

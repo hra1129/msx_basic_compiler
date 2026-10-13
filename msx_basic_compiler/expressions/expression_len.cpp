@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -27,7 +27,7 @@ CEXPRESSION_NODE* CEXPRESSION_LEN::optimization( CCOMPILE_INFO *p_info ) {
 void CEXPRESSION_LEN::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	æ‚Éˆø”‚ðˆ—
+	//	å…ˆã«å¼•æ•°ã‚’å‡¦ç†
 	this->p_operand->compile( p_info );
 
 	if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
@@ -43,9 +43,9 @@ void CEXPRESSION_LEN::compile( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "AF", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "L", COPERAND_TYPE::MEMORY, "A" );
+	asm_line.set( "LD", "", "L", "A" );
 	p_info->assembler_list.body.push_back( asm_line );
-	asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "H", COPERAND_TYPE::MEMORY, "0" );
+	asm_line.set( "LD", "", "H", "0" );
 	p_info->assembler_list.body.push_back( asm_line );
 
 	this->type = CEXPRESSION_TYPE::INTEGER;

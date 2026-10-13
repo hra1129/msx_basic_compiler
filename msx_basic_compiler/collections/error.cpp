@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Sound
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  ERROR <ÉGÉâÅ[î‘çÜ>
+//  ERROR <„Ç®„É©„ÉºÁï™Âè∑>
 bool CERROR::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -19,7 +19,7 @@ bool CERROR::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	CEXPRESSION exp;
-	//	ëÊ1à¯êî <ÉGÉâÅ[î‘çÜ>
+	//	Á¨¨1ÂºïÊï∞ <„Ç®„É©„ÉºÁï™Âè∑>
 	if( exp.compile( p_info ) ) {
 		p_info->assembler_list.add_label( "bios_errhand", "0x0406F" );
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::REGISTER, "L" );

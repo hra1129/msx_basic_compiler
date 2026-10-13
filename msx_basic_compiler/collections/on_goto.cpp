@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: On Goto/Gosub
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  ON <®> {GOTO|GOSUB} <”ò‚Ñæ0>, <”ò‚Ñæ1>, ...
+//  ON <å¼> {GOTO|GOSUB} <é£›ã³å…ˆ0>, <é£›ã³å…ˆ1>, ...
 bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	CEXPRESSION exp;
@@ -22,14 +22,14 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	p_info->list.p_position++;
-	//	<®> ‚ª‘¶İ‚µ‚È‚¢ê‡‚ÍƒGƒ‰[
+	//	<å¼> ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ã‚¨ãƒ©ãƒ¼
 	if( p_info->list.is_command_end() ) {
 		p_info->list.p_position = p_position;
 		return false;
 	}
-	//	<®> ‚ğ‰ğß‚·‚é (¦‚±‚Ì“_‚ÅA‚Ü‚¾ ON <®> {GOTO|GOSUB} ‚©‚Í–¢Šm’è
+	//	<å¼> ã‚’è§£é‡ˆã™ã‚‹ (â€»ã“ã®æ™‚ç‚¹ã§ã€ã¾ã  ON <å¼> {GOTO|GOSUB} ã‹ã¯æœªç¢ºå®š
 	exp.makeup_node( p_info );
-	//	ON <®> {GOTO|GOSUB} ”»’f
+	//	ON <å¼> {GOTO|GOSUB} åˆ¤æ–­
 	if( p_info->list.is_command_end() ) {
 		p_info->list.p_position = p_position;
 		return false;
@@ -46,21 +46,21 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 
-	//	s”Ô†‚ª‚¢‚­‚Â‚ ‚é‚©WŒv‚·‚é
+	//	è¡Œç•ªå·ãŒã„ãã¤ã‚ã‚‹ã‹é›†è¨ˆã™ã‚‹
 	for( ;; ) {
 		if( p_info->list.is_command_end() ) {
-			//	s”Ô†‚ª‚ ‚é‚×‚«‚Æ‚±‚ë‚É‰½‚à‚È‚¢ê‡i”ò‚Ñæ‚ªˆê‚Â‚à‚È‚¢ê‡‚àŠÜ‚Şj
+			//	è¡Œç•ªå·ãŒã‚ã‚‹ã¹ãã¨ã“ã‚ã«ä½•ã‚‚ãªã„å ´åˆï¼ˆé£›ã³å…ˆãŒä¸€ã¤ã‚‚ãªã„å ´åˆã‚‚å«ã‚€ï¼‰
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			break;
 		}
 		if( p_info->list.p_position->s_word == "," ) {
-			//	s”Ô†‚ªÈ—ª‚³‚ê‚Ä‚¢‚éê‡
-			line_no_list.push_back( "#" );		//	# ‚ÍÈ—ª‚ğ¦‚·ƒ}ƒWƒbƒNƒiƒ“ƒo[
+			//	è¡Œç•ªå·ãŒçœç•¥ã•ã‚Œã¦ã„ã‚‹å ´åˆ
+			line_no_list.push_back( "#" );		//	# ã¯çœç•¥ã‚’ç¤ºã™ãƒã‚¸ãƒƒã‚¯ãƒŠãƒ³ãƒãƒ¼
 			p_info->list.p_position++;
 			continue;
 		}
 		if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
-			//	s”Ô†‚ª‚ ‚Á‚½ê‡
+			//	è¡Œç•ªå·ãŒã‚ã£ãŸå ´åˆ
 			line_no_list.push_back( p_info->list.p_position->s_word );
 			p_info->list.p_position++;
 		}
@@ -69,7 +69,7 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 			break;
 		}
 		if( p_info->list.is_command_end() ) {
-			//	I‚í‚Á‚½ê‡
+			//	çµ‚ã‚ã£ãŸå ´åˆ
 			break;
 		}
 		if( p_info->list.p_position->s_word != "," ) {
@@ -79,13 +79,13 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 
-	//	<®> ‚ğƒRƒ“ƒpƒCƒ‹‚·‚é
+	//	<å¼> ã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
 	if( !exp.compile( p_info ) ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
 
-	//	•]‰¿Œ‹‰Ê‚ÅƒWƒƒƒ“ƒv
+	//	è©•ä¾¡çµæœã§ã‚¸ãƒ£ãƒ³ãƒ—
 	std::string s_through_label, s_table_label;
 	s_through_label = p_info->get_auto_label();
 	s_table_label = p_info->get_auto_label();
@@ -117,7 +117,7 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "HL" );
 	p_info->assembler_list.body.push_back( asm_line );
 	if( is_gosub ) {
-		//	GOSUB ‚Ìê‡
+		//	GOSUB ã®å ´åˆ
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, s_through_label );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
@@ -126,11 +126,11 @@ bool CONGOTO::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	GOTO ‚Ìê‡
+		//	GOTO ã®å ´åˆ
 		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
-	//	s”Ô†ƒe[ƒuƒ‹
+	//	è¡Œç•ªå·ãƒ†ãƒ¼ãƒ–ãƒ«
 	p_info->assembler_list.add_label( "bios_syntax_error", "0x04055" );
 	asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_table_label, COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );

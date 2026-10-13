@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Return
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -19,12 +19,12 @@ bool CRETURN::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( p_info->list.is_line_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO ) {
-		//	RETURN ‚¾‚¯‚ÅI‚í‚Á‚Ä‚éê‡‚Í RET ‚¾‚¯B
+		//	RETURN ã ã‘ã§çµ‚ã‚ã£ã¦ã‚‹å ´åˆã¯ RET ã ã‘ã€‚
 		asm_line.set( CMNEMONIC_TYPE::RET, CCONDITION::NONE, COPERAND_TYPE::NONE, "", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	s”Ô†‚ª‘±‚¢‚Ä‚éê‡‚ÍA–ß‚è”Ô’n‚ðŽÌ‚Ä‚ÄŽw’è‚Ìs‚ÉƒWƒƒƒ“ƒv‚·‚éB
+		//	è¡Œç•ªå·ãŒç¶šã„ã¦ã‚‹å ´åˆã¯ã€æˆ»ã‚Šç•ªåœ°ã‚’æ¨ã¦ã¦æŒ‡å®šã®è¡Œã«ã‚¸ãƒ£ãƒ³ãƒ—ã™ã‚‹ã€‚
 		p_info->use_return_line_no = true;
 
 		if( p_info->list.p_position->s_word[0] == '*' ) {

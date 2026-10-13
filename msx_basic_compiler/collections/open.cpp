@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+Ôªø// --------------------------------------------------------------------
 //	Compiler collection: Open
 // ====================================================================
 //	2024/Mar/26th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  OPEN <ÉtÉ@ÉCÉãñº> [FOR {INPUT|OUTPUT|APPEND}] AS #<ÉtÉ@ÉCÉãî‘çÜ> [LEN=<ÉåÉRÅ[Éhí∑>]
+//  OPEN <„Éï„Ç°„Ç§„É´Âêç> [FOR {INPUT|OUTPUT|APPEND}] AS #<„Éï„Ç°„Ç§„É´Áï™Âè∑> [LEN=<„É¨„Ç≥„Éº„ÉâÈï∑>]
 bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	int line_no = p_info->list.get_line_no();
@@ -20,7 +20,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	CEXPRESSION exp;
-	//	ëÊ1à¯êî <ÉtÉ@ÉCÉãñº>
+	//	Á¨¨1ÂºïÊï∞ <„Éï„Ç°„Ç§„É´Âêç>
 	p_info->use_file_access = true;
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		asm_line.set( "PUSH", "", "HL" );
@@ -35,7 +35,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}
-	//	FOR Å`
+	//	FOR ÔΩû
 	if( p_info->list.p_position->s_word == "FOR" ) {
 		p_info->list.p_position++;
 		if( p_info->list.is_command_end() ) {
@@ -68,7 +68,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	ëÊ2à¯êî #<ÉtÉ@ÉCÉãî‘çÜ>
+	//	Á¨¨2ÂºïÊï∞ #<„Éï„Ç°„Ç§„É´Áï™Âè∑>
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "#" ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
@@ -80,7 +80,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 	}
 	exp.release();
 	if( for_type != 3 ) {
-		//	FOR INPUT, OUTPUT, APPEND ÇÃèÍçáÇÕÇ±Ç±Ç≈ämíË
+		//	FOR INPUT, OUTPUT, APPEND „ÅÆÂ†¥Âêà„ÅØ„Åì„Åì„ÅßÁ¢∫ÂÆö
 		asm_line.set( "EX", "", "DE", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "POP", "", "HL" );
@@ -104,9 +104,9 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 	}
-	//	FORÇÃéwíËÇ™ñ≥Ç¢èÍçáÇÕÅA#n ÇÃå„Ç… LEN ÇÃéwíËÇ™Ç†ÇÈÇ©ämîFÇ∑ÇÈ
+	//	FOR„ÅÆÊåáÂÆö„ÅåÁÑ°„ÅÑÂ†¥Âêà„ÅØ„ÄÅ#n „ÅÆÂæå„Å´ LEN „ÅÆÊåáÂÆö„Åå„ÅÇ„Çã„ÅãÁ¢∫Ë™ç„Åô„Çã
 	if( p_info->list.is_command_end() ) {
-		//	AS #n Ç≈èIÇÌÇ¡ÇƒÇ¢ÇÈÇÃÇ≈ LEN = 256 Ç∆îªífÇ∑ÇÈ
+		//	AS #n „ÅßÁµÇ„Çè„Å£„Å¶„ÅÑ„Çã„ÅÆ„Åß LEN = 256 „Å®Âà§Êñ≠„Åô„Çã
 		asm_line.set( "EX", "", "DE", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "POP", "", "HL" );
@@ -115,7 +115,7 @@ bool COPEN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 	}
 	else {
-		//	LEN = n Ç™Ç†ÇÈÇ©É`ÉFÉbÉNÇ∑ÇÈ
+		//	LEN = n „Åå„ÅÇ„Çã„Åã„ÉÅ„Çß„ÉÉ„ÇØ„Åô„Çã
 		if( p_info->list.p_position->s_word != "LEN" ) {
 			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 			return true;

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Run
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  RUN [s”Ô†]
+//  RUN [è¡Œç•ªå·]
 bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -21,7 +21,7 @@ bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( p_info->list.is_command_end() ) {
-		//	RUN ’P“Æ‚ÌŽÀs‚Ìê‡
+		//	RUN å˜ç‹¬ã®å®Ÿè¡Œã®å ´åˆ
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "program_start" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "program_run", COPERAND_TYPE::NONE, "" );
@@ -29,7 +29,7 @@ bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	if( p_info->list.p_position->type == CBASIC_WORD_TYPE::LINE_NO ) {
-		//	RUN {s”Ô†} ‚ÌŽÀs‚Ìê‡
+		//	RUN {è¡Œç•ªå·} ã®å®Ÿè¡Œã®å ´åˆ
 		if( p_info->list.p_position->s_word[0] == '*' ) {
 			s_label = "label_" + p_info->list.p_position->s_word.substr(1);
 		}
@@ -43,9 +43,27 @@ bool CRUN::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		return true;
 	}
-	//	RUN ƒtƒ@ƒCƒ‹–¼ ‚ÌŽÀs‚Ìê‡
+	//	RUN ãƒ•ã‚¡ã‚¤ãƒ«å ã®å®Ÿè¡Œã®å ´åˆ
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		exp.release();
+		p_info->assembler_list.activate_copy_string_to_buffer();
+		p_info->assembler_list.activate_free_string();
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "copy_string_to_buffer", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		p_info->errors.add( SYNTAX_ERROR, line_no );
+		return true;
 	}
 	p_info->assembler_list.activate_bload_r();
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_bload_r", COPERAND_TYPE::NONE, "" );

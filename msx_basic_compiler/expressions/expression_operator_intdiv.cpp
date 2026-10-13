@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Expression
 // ====================================================================
 //	2023/July/29th	t.hara
@@ -35,16 +35,16 @@ void CEXPRESSION_OPERATOR_INTDIV::compile( CCOMPILE_INFO *p_info ) {
 	if( this->p_left == nullptr || this->p_right == nullptr ) {
 		return;
 	}
-	//	æ‚É€‚ðˆ—
+	//	å…ˆã«é …ã‚’å‡¦ç†
 	this->p_left->compile( p_info );
 
 	if( this->p_left->type == CEXPRESSION_TYPE::STRING ) {
-		//	‚±‚Ì‰‰ŽZŽq‚Í•¶Žš—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
+		//	ã“ã®æ¼”ç®—å­ã¯æ–‡å­—åˆ—åž‹ã«ã¯é©ç”¨ã§ããªã„
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_left->type != CEXPRESSION_TYPE::INTEGER ) {
-		//	¶‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		//	å·¦å´ã®é …ãŒæ•´æ•°åž‹ã§ãªã‘ã‚Œã°ã€æ•´æ•°åž‹ã«å¤‰æ›ã™ã‚‹
 		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_left->type );
 	}
 
@@ -53,20 +53,20 @@ void CEXPRESSION_OPERATOR_INTDIV::compile( CCOMPILE_INFO *p_info ) {
 	this->p_right->compile( p_info );
 
 	if( this->p_right->type == CEXPRESSION_TYPE::STRING ) {
-		//	‚±‚Ì‰‰ŽZŽq‚Í•¶Žš—ñŒ^‚É‚Í“K—p‚Å‚«‚È‚¢
+		//	ã“ã®æ¼”ç®—å­ã¯æ–‡å­—åˆ—åž‹ã«ã¯é©ç”¨ã§ããªã„
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}
 	if( this->p_right->type != CEXPRESSION_TYPE::INTEGER ) {
-		//	‰E‘¤‚Ì€‚ª®”Œ^‚Å‚È‚¯‚ê‚ÎA®”Œ^‚É•ÏŠ·‚·‚é
+		//	å³å´ã®é …ãŒæ•´æ•°åž‹ã§ãªã‘ã‚Œã°ã€æ•´æ•°åž‹ã«å¤‰æ›ã™ã‚‹
 		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_right->type );
 	}
 
-	//	‚±‚Ì‰‰ŽZŽq‚ÌŒ‹‰Ê‚Í•K‚¸®”Œ^
+	//	ã“ã®æ¼”ç®—å­ã®çµæžœã¯å¿…ãšæ•´æ•°åž‹
 	this->type = CEXPRESSION_TYPE::INTEGER;
 	p_info->assembler_list.add_label( "bios_idiv", "0x031e6" );
 
-	//	‚±‚Ì‰‰ŽZŽq‚ª®”‚Ìê‡
+	//	ã“ã®æ¼”ç®—å­ãŒæ•´æ•°ã®å ´åˆ
 	asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_idiv", COPERAND_TYPE::NONE, "" );

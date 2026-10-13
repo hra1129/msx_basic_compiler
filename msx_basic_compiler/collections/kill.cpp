@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------
+ï»¿// --------------------------------------------------------------------
 //	Compiler collection: Kill
 // ====================================================================
 //	2023/July/25th	t.hara
@@ -8,7 +8,7 @@
 #include "../expressions/expression.h"
 
 // --------------------------------------------------------------------
-//  KILL "ƒƒCƒ‹ƒhƒJ[ƒh"
+//  KILL "ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰"
 bool CKILL::exec( CCOMPILE_INFO *p_info ) {
 	CEXPRESSION exp;
 	CASSEMBLER_LINE asm_line;
@@ -20,10 +20,15 @@ bool CKILL::exec( CCOMPILE_INFO *p_info ) {
 	}
 	p_info->list.p_position++;
 	p_info->assembler_list.activate_free_string();
+	p_info->assembler_list.activate_copy_string_to_buffer();
 
-	//	‘æ1ˆø” ƒƒCƒ‹ƒhƒJ[ƒh
+	//	ç¬¬1å¼•æ•° ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰
 	if( exp.compile( p_info, CEXPRESSION_TYPE::STRING ) ) {
 		asm_line.set( "PUSH", "", "HL", "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "legacy_string_buffer" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "copy_string_to_buffer" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
 	}

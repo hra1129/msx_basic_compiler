@@ -8,7 +8,7 @@
 #include <string>
 #include "compiler.h"
 
-static const char *s_version = "v0.0";
+static const char *s_version = "v0.9";
 
 // --------------------------------------------------------------------
 static void usage( const char *p_name ) {
