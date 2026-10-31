@@ -1,6 +1,7 @@
 ﻿  assembler_line.cpp
   assembler_list.cpp
   basic_list.cpp
+C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\basic_list.cpp(380,7): warning C4101: 's': ローカル変数は 1 度も使われていません。
   beep.cpp
   bload.cpp
   bsave.cpp
@@ -101,7 +102,7 @@
   expression_exp.cpp
   expression_fix.cpp
   expression_fre.cpp
-  expression_function.cpp
+  expression_play.cpp
   コンパイル中...
   expression_hex.cpp
   expression_hexchr.cpp
@@ -173,7 +174,7 @@
   string_value.cpp
   variable_manager.cpp
   コード生成しています。
-  Previous IPDB was built with incompatible compiler, fall back to full compilation.
-  All 2479 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Previous IPDB not found, fall back to full compilation.
+  All 2682 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   コード生成が終了しました。
-  msx_basic_compiler.vcxproj -> D:\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe
+  msx_basic_compiler.vcxproj -> C:\Users\hra\Documents\github\HRA_product\msx_basic_compiler\msx_basic_compiler\Release\msx_bacon.exe

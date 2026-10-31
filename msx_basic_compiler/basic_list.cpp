@@ -11,6 +11,18 @@
 #include <cmath>
 #include <memory>
 
+// --------------------------------------------------------------------
+//	FILE* を std::unique_ptr で保持するためのデリータ
+//	decltype( &fclose ) を使うと、属性付きの関数ポインタ型がテンプレート
+//	引数になって警告 [-Wignored-attributes] になるので、関数オブジェクトにする
+struct CFILE_CLOSER {
+	void operator ()( FILE *p_file ) const {
+		if( p_file != nullptr ) {
+			fclose( p_file );
+		}
+	}
+};
+
 struct CBASIC_RESERVED_WORD {
 	std::vector< int > code;
 	std::string s_name;
@@ -71,7 +83,7 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0xE5 },				"INSTR" },
 	{ { 0x9E },				"LLIST" },
 	{ { 0xB6 },				"MERGE" },
-	{ { 0xCD },				"MOTOR" },
+	{ { 0xCE },				"MOTOR" },
 	{ { 0xBF },				"PAINT" },
 	{ { -1 },				"PEEKW"	},
 	{ { -1 },				"POKEW"	},
@@ -147,8 +159,8 @@ static const std::vector< CBASIC_RESERVED_WORD > reserved_words = {
 	{ { 0xFF, 0x86 },		"ABS" },
 	{ { 0xF6 },				"AND" },
 	{ { 0xFF, 0x95 },		"ASC" },
-	{ { 0xFF, 0x38 },		"ATN" },
-	{ { 0xFF, 0x9E },		"CNT" },
+	{ { 0xFF, 0x8E },		"ATN" },
+	{ { 0xFF, 0x9E },		"CINT" },
 	{ { 0x9F },				"CLS" },
 	{ { 0xD7 },				"CMD" },
 	{ { 0xFF, 0x8C },		"COS" },
@@ -304,6 +316,64 @@ bool CBASIC_LIST::skip_white_space( void ) {
 }
 
 // --------------------------------------------------------------------
+//	中間コード中のスペース (0x20) のみを読み飛ばす
+//	中間コードでは 0x1A は数値トークン (1桁の数値 9) なので、
+//	skip_white_space() の対象に含めてはならない
+bool CBASIC_LIST::skip_space( void ) {
+	int n = 0;
+
+	while( this->p_file_image != this->file_image.end() && this->p_file_image[0] == ' ' ) {
+		this->p_file_image++;
+		n++;
+	}
+	return( n != 0 );
+}
+
+// --------------------------------------------------------------------
+//	中間コードの BCD 形式浮動小数点数を 10進数文字列に変換する
+//	bytes は単精度で 4、倍精度で 8。
+//	格納形式: 1byte目 = 符号(0x80) | (指数部 + 64)、以降は仮数部の
+//	10進数値を BCD で格納 (値は 0.仮数部 x 10^指数部)。
+//	科学表記 (d.dddEe) で返すことで、ASCII経路で再読込した時に
+//	元の BCD イメージと一致する。
+std::string CBASIC_LIST::get_bcd_real( int bytes ) {
+	int image[8];
+	int i;
+	int exponent;
+	std::string s_digits;
+	std::string s_word;
+
+	for( i = 0; i < bytes; i++ ) {
+		image[i] = this->get_1byte();
+	}
+	s_digits = "";
+	for( i = 1; i < bytes; i++ ) {
+		s_digits = s_digits + (char)( '0' + ( image[i] >> 4 ) );
+		s_digits = s_digits + (char)( '0' + ( image[i] & 0x0F ) );
+	}
+	//	末尾の 0 は BCD イメージ上のパディングと区別できないので除去する
+	while( s_digits.size() > 1 && s_digits[ s_digits.size() - 1 ] == '0' ) {
+		s_digits.erase( s_digits.size() - 1 );
+	}
+	if( s_digits == "0" ) {
+		return "0.0";
+	}
+	exponent = ( image[0] & 0x7F ) - 64;
+	s_word = ( image[0] & 0x80 ) ? "-" : "";
+	s_word = s_word + s_digits[0];
+	s_word = s_word + ".";
+	if( s_digits.size() > 1 ) {
+		s_word = s_word + s_digits.substr( 1 );
+	}
+	else {
+		s_word = s_word + "0";
+	}
+	s_word = s_word + "E";
+	s_word = s_word + std::to_string( exponent - 1 );
+	return s_word;
+}
+
+// --------------------------------------------------------------------
 int CBASIC_LIST::get_integer( void ) {
 	int number = 0;
 
@@ -321,12 +391,52 @@ std::string CBASIC_LIST::get_word( void ) {
 	std::string s_word;
 	char s[32];
 
-	//	スペースは読み飛ばす
-	this->skip_white_space();
+	//	スペースは読み飛ばす (中間コードでは 0x1A も数値トークンなので、
+	//	空白として読み飛ばせるのは 0x20 のみ)
+	this->skip_space();
 	if( this->p_file_image == this->file_image.end() ) {
 		return s_word;
 	}
-	if( *(this->p_file_image) == 0x0B || *( this->p_file_image ) == 0x0C || *( this->p_file_image ) == 0x1C ) {
+	if( *( this->p_file_image ) == 0x0B ) {
+		//	8進数 (&O) の値だった場合 (2byte の値)
+		//	10進数文字列にすると大きな値が実数扱いになってしまうため、
+		//	ASCII形式と同じ &O 表記で返す
+		this->p_file_image++;
+		number = this->get_2bytes();
+		s_word = "&O";
+		if( number == 0 ) {
+			s_word = s_word + "0";
+		}
+		else {
+			std::string s_digits = "";
+			while( number != 0 ) {
+				s_digits = (char)( '0' + ( number & 7 ) ) + s_digits;
+				number >>= 3;
+			}
+			s_word = s_word + s_digits;
+		}
+		return s_word;
+	}
+	if( *( this->p_file_image ) == 0x0C ) {
+		//	16進数 (&H) の値だった場合 (2byte の値)
+		//	8進数と同様に、ASCII形式と同じ &H 表記で返す
+		this->p_file_image++;
+		number = this->get_2bytes();
+		s_word = "&H";
+		if( number == 0 ) {
+			s_word = s_word + "0";
+		}
+		else {
+			std::string s_digits = "";
+			while( number != 0 ) {
+				s_digits = (char)( "0123456789ABCDEF"[ number & 15 ] ) + s_digits;
+				number >>= 4;
+			}
+			s_word = s_word + s_digits;
+		}
+		return s_word;
+	}
+	if( *( this->p_file_image ) == 0x1C ) {
 		//	2byte の値だった場合
 		this->p_file_image++;
 		s_word = std::to_string( this->get_2bytes() );
@@ -353,25 +463,15 @@ std::string CBASIC_LIST::get_word( void ) {
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x1D ) {
-		//	単精度浮動小数点数だった場合
+		//	単精度浮動小数点数だった場合 (4bytes の BCD 形式)
 		this->p_file_image++;
-		s_word = "";
-		for( i = 0; i < 4 && this->p_file_image != this->file_image.end(); i++ ) {
-			sprintf( s, "%02X", this->p_file_image[0] );
-			s_word = s_word + s;
-			this->p_file_image++;
-		}
+		s_word = this->get_bcd_real( 4 );
 		return s_word;
 	}
 	if( *( this->p_file_image ) == 0x1F ){
-		//	倍精度浮動小数点数だった場合
+		//	倍精度浮動小数点数だった場合 (8bytes の BCD 形式)
 		this->p_file_image++;
-		s_word = "";
-		for( i = 0; i < 4 && this->p_file_image != this->file_image.end(); i++ ) {
-			sprintf( s, "%02X", this->p_file_image[0] );
-			s_word = s_word + s;
-			this->p_file_image++;
-		}
+		s_word = this->get_bcd_real( 8 );
 		return s_word;
 	}
 	if( *( this->p_file_image ) == '"' ) {
@@ -389,16 +489,22 @@ std::string CBASIC_LIST::get_word( void ) {
 		return s_word;
 	}
 	if( this->p_file_image[0] == '&' ) {
-		this->skip_white_space();
-		if( this->p_file_image[0] == 'B' ) {
+		//	&B の場合は中間コード化されず文字列のまま格納されている
+		this->p_file_image++;
+		this->skip_space();
+		if( this->p_file_image != this->file_image.end() && this->p_file_image[0] == 'B' ) {
 			//	2進数だった場合
-			number = 0;
+			//	10進数文字列にすると 32768 以上の値が実数扱いになってしまうため、
+			//	ASCII形式と同じ &B 表記で返す
 			this->p_file_image++;
-			while( *(this->p_file_image) == '0' || *(this->p_file_image) == '1' ) {
-				number = (number << 1) | ( *(this->p_file_image) - '0' );
+			s_word = "&B";
+			while( this->p_file_image != this->file_image.end() && ( *(this->p_file_image) == '0' || *(this->p_file_image) == '1' ) ) {
+				s_word = s_word + (char)*(this->p_file_image);
 				this->p_file_image++;
 			}
-			s_word = std::to_string( number );
+			if( s_word == "&B" ) {
+				s_word = "&";
+			}
 			return s_word;
 		}
 		else {
@@ -799,7 +905,7 @@ bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 		text_code.push_back( s );
 		//	行内の解釈
 		while( this->p_file_image != this->file_image.end() && (this->p_file_image[0] != 0) ) {
-			if( this->skip_white_space() ) {
+			if( this->skip_space() ) {
 				s = " ";
 				text_code.push_back( s );
 			}
@@ -833,7 +939,7 @@ bool CBASIC_LIST::load_binary( CERROR_LIST &errors ) {
 				else if( s_word == "'" || s_word == "REM" ) {
 					s = s_word + " ";
 					text_code.push_back( s );
-					this->skip_white_space();
+					this->skip_space();
 					s_word = this->get_comment();
 					s = s_word;
 					text_code.push_back( s );
@@ -966,7 +1072,7 @@ bool CBASIC_LIST::load_ascii( CERROR_LIST &errors ) {
 
 // --------------------------------------------------------------------
 bool CBASIC_LIST::load( const std::string &s_file_name, CERROR_LIST &errors ) {
-	std::unique_ptr< FILE, decltype( &fclose ) > p_in( fopen( s_file_name.c_str(), "rb" ), &fclose );
+	std::unique_ptr< FILE, CFILE_CLOSER > p_in( fopen( s_file_name.c_str(), "rb" ) );
 	bool result;
 
 	if( !p_in ) {

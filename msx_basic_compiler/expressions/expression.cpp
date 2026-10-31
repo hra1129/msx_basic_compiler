@@ -77,6 +77,7 @@
 #include "expression_sgn.h"
 #include "expression_sin.h"
 #include "expression_space.h"
+#include "expression_sqr.h"
 #include "expression_stick.h"
 #include "expression_strig.h"
 #include "expression_tan.h"
@@ -1035,6 +1036,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 		}
+	else if( s_operator == "SQR" ) {
+		CEXPRESSION_SQR *p_term = new CEXPRESSION_SQR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "STICK" ) {
 		CEXPRESSION_STICK *p_term = new CEXPRESSION_STICK;
 		p_result = p_term;

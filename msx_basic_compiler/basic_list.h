@@ -47,6 +47,8 @@ private:
 	bool check_binary_program( void ) const;
 	bool load_file( FILE *p_file );
 	bool skip_white_space( void );
+	bool skip_space( void );
+	std::string get_bcd_real( int bytes );
 	int get_integer( void );
 	int get_1byte( void );
 	int get_2bytes( void );

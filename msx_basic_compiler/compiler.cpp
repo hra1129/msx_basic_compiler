@@ -2392,7 +2392,7 @@ void CCOMPILER::optimize_ldir( void ) {
 	std::vector< CASSEMBLER_LINE >::iterator p, p_next[4];
 	std::string s_reg[3];
 	int i;
-	int n_hl, n_de, n_bc, n;
+	int n_hl = 0, n_de = 0, n_bc = 0, n = 0;
 
 	//	LD   HL, constant1
 	//	LD   DE, constant1

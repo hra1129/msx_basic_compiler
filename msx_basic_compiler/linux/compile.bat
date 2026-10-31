@@ -1,2 +1,2 @@
-wsl ./compile.sh
+wsl make -j
 pause
