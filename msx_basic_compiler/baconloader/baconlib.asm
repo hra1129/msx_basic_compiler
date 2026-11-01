@@ -44,8 +44,10 @@ nwrvrm		:= 0x0177
 fout		:= 0x3425
 pufout		:= 0x3426
 errhand		:= 0x406F					; BIOS の BASICエラー処理ルーチン E にエラーコード。戻ってこない。
+newstt		:= 0x4601					; BIOS の BASICステートメント実行ルーチン。HL にテキストアドレス。
 ramad1		:= 0xF342
 bdos		:= 0xf37d
+usrtab		:= 0xF39A
 linl40		:= 0xF3AE
 linl32		:= 0xF3AF
 linlen		:= 0xF3B0
@@ -95,12 +97,16 @@ high		:= 0xF408
 ntmsxp		:= 0xF417
 buf			:= 0xF55E
 valtyp		:= 0xF663
+txttab		:= 0xF676
+vartab		:= 0xF6C2
 parm2		:= 0xF750
 fbuffr		:= 0xF7C5
 dectm2		:= 0xF7F2
 deccnt		:= 0xF7F4
 dac			:= 0xF7F6
 rndx		:= 0xF857
+maxfil		:= 0xF85F
+filtab		:= 0xF860
 ptrfil		:= 0xF864
 savend		:= 0xF87D
 fnkstr		:= 0xF87F					; ファンクションキーの文字列 16文字 x 10個
@@ -112,12 +118,15 @@ vcba		:= 0xFB41
 dfpage		:= 0xFAF5
 acpage		:= 0xFAF6
 linwrk		:= 0xFC18
+himem		:= 0xFC4A
 scrmod		:= 0xFCAF
 oldscr		:= 0xFCB0
 runbnf		:= 0xFCBE
 savent		:= 0xFCBF
 mainrom		:= 0xFCC1
 exptbl		:= 0xFCC1
+h_timi		:= 0xFD9F
+h_erro		:= 0xFFB1
 rg8sav		:= 0xFFE7
 rg9sav		:= 0xFFE8
 rg10sav		:= 0xFFE9
@@ -390,6 +399,30 @@ blib_entries::
 			jp		sub_play
 	blib_play_status:
 			jp		sub_play_status
+	blib_startup:
+			jp		sub_startup
+	blib_startup_main:
+			jp		sub_startup_main
+	blib_setup_h_timi:
+			jp		sub_setup_h_timi
+	blib_setup_h_erro:
+			jp		sub_setup_h_erro
+	blib_restore_hooks:
+			jp		sub_restore_hooks
+	blib_h_erro_cleanup:
+			jp		sub_h_erro_cleanup
+	blib_termination:
+			jp		sub_termination
+	blib_eof:
+			jp		sub_eof
+	blib_dskf:
+			jp		sub_dskf
+	blib_allocate_heap:
+			jp		sub_allocate_heap
+	blib_free_heap:
+			jp		sub_free_heap
+	blib_check_array:
+			jp		sub_check_array
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -495,6 +528,357 @@ sub_init_ncalbas::
 			inc		a
 		_dosver_exit:
 			ret
+			endscope
+
+; =============================================================================
+;	STARTUP / TERMINATION
+;	コンパイルされたプログラムの起動処理と終了処理。
+;	プログラム固有のアドレスは、プログラム側のパラメータブロック
+;	(startup_params) から取得する。パラメータブロックの並びは次の通りで、
+;	コンパイラ側の並びと一致させること。
+;		+0	word	heap_start		ヒープ先頭
+;		+2	word	USR0 ベクタの待避先アドレス
+;		+4	word	_BASIC_START	疑似 BASIC 行
+;		+6	word	H.TIMI ハンドラ
+;		+8	word	H.TIMI フックの待避先アドレス
+;		+10	word	H.ERRO ハンドラ
+;		+12	word	H.ERRO フックの待避先アドレス
+;		+14	word	program_start	プログラム先頭
+;		+16	word	program_run		RUN 用サブルーチン
+;		+18	word	_basic_end		終了時の疑似 BASIC 行
+;		+20	word	sub_all_close	全ファイルクローズ (0 の場合はファイルアクセス無し)
+; =============================================================================
+
+; =============================================================================
+;	STARTUP PHASE 1
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none (疑似 BASIC 行の NEWSTT 実行へ移るため戻ってこない)
+;	break:
+;		all
+;	comment:
+;		TXTTAB/VARTAB の設定と USR0 ベクタの待避を行い、疑似 BASIC 行
+;		(:MAXFILES=0:DEFUSR=...:A=USR(0)) を NEWSTT で実行する。
+;		NEWSTT はメイン ROM 側のルーチンなので ncalbas 経由で呼ぶ。
+; =============================================================================
+			scope	sub_startup
+sub_startup::
+			push	hl
+			pop		ix					; IX = startup_params
+			; TXTTAB を疑似プログラム (0x8001) へ向ける
+			ld		hl, 0x8001
+			ld		[txttab], hl
+			ld		hl, 0
+			ld		[0x8001], hl
+			ld		[0x8002], hl
+			; USR0 ベクタを待避する
+			ld		hl, [usrtab]
+			ld		e, [ix+2]
+			ld		d, [ix+3]			; DE = 待避先アドレス
+			ex		de, hl				; HL = 待避先アドレス, DE = ベクタ値
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			; VARTAB をヒープ先頭へ向ける
+			ld		l, [ix+0]
+			ld		h, [ix+1]			; HL = heap_start
+			ld		[vartab], hl
+			; ncalbas を初期化して NEWSTT を呼ぶ
+			ld		l, [ix+4]
+			ld		h, [ix+5]			; HL = _BASIC_START
+			push	hl
+			call	sub_init_ncalbas
+			ld		hl, newstt
+			ld		[ncalbas_address], hl
+			pop		hl					; HL = _BASIC_START
+			jp		ncalbas
+			endscope
+
+; =============================================================================
+;	STARTUP PHASE 2
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		DE ... program_start のアドレス (呼び出し側が program_run へ渡す)
+;	break:
+;		all
+;	comment:
+;		疑似 BASIC 行の USR(0) から呼ばれる。USR0 ベクタの復帰、MAXFILES の
+;		設定、スタックの切り替え、ncalbas の初期化、H.TIMI フックの待避と
+;		設定を行い、DE = program_start を返して呼び出し側へ戻る。
+;		※ ライブラリ内から直接 program_run へジャンプしてはならない。
+;		   call_blib の CALSLT がページ1をメイン ROM へ復帰させるのは
+;		   ライブラリから RET で戻った時だけであり、直接ジャンプすると
+;		   ページ1がライブラリスロットのまま残ってしまう。
+; =============================================================================
+			scope	sub_startup_main
+sub_startup_main::
+			push	hl
+			pop		ix					; IX = startup_params
+			; USR0 ベクタを復帰する
+			ld		l, [ix+2]
+			ld		h, [ix+3]			; HL = 待避先アドレス
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]				; DE = 待避したベクタ値
+			ex		de, hl				; HL = ベクタ値
+			ld		[usrtab], hl
+			; MAXFILES = 1
+			ld		a, 1
+			ld		[maxfil], a
+			; 呼び出し側の SP を待避してから、スタックを HIMEM へ切り替える
+			; (RET で戻るために、呼び出し側のスタックへ戻す必要がある)
+			ld		hl, 0
+			add		hl, sp				; HL = 呼び出し側の SP
+			ld		sp, [himem]
+			push	hl					; 呼び出し側の SP
+			; sub_init_ncalbas は全レジスタを破壊するので、
+			; この後で使うアドレスを先にスタックへ待避する
+			ld		l, [ix+16]
+			ld		h, [ix+17]
+			push	hl					; program_run
+			ld		l, [ix+14]
+			ld		h, [ix+15]
+			push	hl					; program_start
+			ld		l, [ix+6]
+			ld		h, [ix+7]
+			push	hl					; H.TIMI ハンドラ
+			ld		l, [ix+8]
+			ld		h, [ix+9]
+			push	hl					; H.TIMI 待避先アドレス
+			; ncalbas の初期化
+			call	sub_init_ncalbas
+			; H.TIMI フックを待避する
+			pop		de					; DE = H.TIMI 待避先アドレス
+			ld		hl, h_timi
+			ld		bc, 5
+			ldir
+			; H.TIMI フックを設定する
+			di
+			pop		hl					; HL = H.TIMI ハンドラ
+			ld		[h_timi+1], hl
+			ld		a, 0xC3				; JP 命令
+			ld		[h_timi], a
+			; DE = program_start を返して呼び出し側へ戻る
+			; (ページ1の復帰は call_blib の CALSLT に任せること。上記コメント参照)
+			pop		de					; DE = program_start
+			pop		hl					; HL = program_run (呼び出し側が使うので破棄する)
+			pop		hl					; HL = 呼び出し側の SP
+			ld		sp, hl
+			ret
+			endscope
+
+; =============================================================================
+;	SETUP H.TIMI HOOK
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		A, H, L, IX
+; =============================================================================
+			scope	sub_setup_h_timi
+sub_setup_h_timi::
+			push	hl
+			pop		ix					; IX = startup_params
+			ld		l, [ix+6]
+			ld		h, [ix+7]			; HL = H.TIMI ハンドラ
+			ld		[h_timi+1], hl
+			ld		a, 0xC3				; JP 命令
+			ld		[h_timi], a
+			ret
+			endscope
+
+; =============================================================================
+;	SETUP H.ERRO HOOK
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		A, B, C, D, E, H, L, IX, F
+; =============================================================================
+			scope	sub_setup_h_erro
+sub_setup_h_erro::
+			push	hl
+			pop		ix					; IX = startup_params
+			; H.ERRO フックを待避する
+			ld		hl, h_erro
+			ld		e, [ix+12]
+			ld		d, [ix+13]			; DE = H.ERRO 待避先アドレス
+			ld		bc, 5
+			ldir
+			; H.ERRO フックを設定する
+			ld		l, [ix+10]
+			ld		h, [ix+11]			; HL = H.ERRO ハンドラ
+			ld		[h_erro+1], hl
+			ld		a, 0xC3				; JP 命令
+			ld		[h_erro], a
+			ret
+			endscope
+
+; =============================================================================
+;	RESTORE H.ERRO HOOK (IX input version)
+;	input:
+;		IX ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		B, C, D, E, H, L, F
+; =============================================================================
+			scope	sub_restore_h_erro_ix
+sub_restore_h_erro_ix::
+			di
+			ld		l, [ix+12]
+			ld		h, [ix+13]			; HL = H.ERRO 待避先アドレス
+			ld		de, h_erro
+			ld		bc, 5
+			ldir
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	RESTORE H.TIMI HOOK (IX input version)
+;	input:
+;		IX ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		B, C, D, E, H, L, F
+; =============================================================================
+			scope	sub_restore_h_timi_ix
+sub_restore_h_timi_ix::
+			di
+			ld		l, [ix+8]
+			ld		h, [ix+9]			; HL = H.TIMI 待避先アドレス
+			ld		de, h_timi
+			ld		bc, 5
+			ldir
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	RESTORE HOOKS
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		B, C, D, E, H, L, IX, F
+;	comment:
+;		H.ERRO, H.TIMI の順にフックを復元する。
+; =============================================================================
+			scope	sub_restore_hooks
+sub_restore_hooks::
+			push	hl
+			pop		ix					; IX = startup_params
+			call	sub_restore_h_erro_ix
+			jp		sub_restore_h_timi_ix
+			endscope
+
+; =============================================================================
+;	TERMINATION BODY
+;	input:
+;		IX ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		ファイルの全クローズ (必要な場合のみ)、MAXFILES と FILTAB の復帰、
+;		H.ERRO / H.TIMI フックの復元、TXTTAB の復帰を行う。
+; =============================================================================
+			scope	sub_termination_body
+sub_termination_body::
+			push	ix					; sub_all_close は IX を破壊するので待避する
+			; 全てのファイルを閉じる
+			ld		l, [ix+20]
+			ld		h, [ix+21]			; HL = sub_all_close (0 = ファイルアクセス無し)
+			ld		a, l
+			or		a, h
+			jr		z, _no_close
+			ld		de, _no_close		; 戻りアドレスを積んでからジャンプする
+			push	de
+			jp		hl
+	_no_close:
+			pop		ix					; IX = startup_params を復帰する
+			; MAXFILES = 0, FILTAB を復帰する
+			xor		a, a				; Cy = 0 (続く SBC のため)
+			ld		[maxfil], a
+			ld		hl, [himem]
+			ld		de, 267
+			sbc		hl, de
+			ld		[filtab], hl
+			ld		l, e
+			ld		h, d
+			inc		de
+			inc		de
+			ld		[hl], e
+			inc		hl
+			; ※ 元の生成コードでは、続く LD [HL],D がコンパイラ側の不具合で
+			;    出力されていなかった。動作を従来通り維持するため、ここでも
+			;    あえて出力しない。
+			; H.ERRO / H.TIMI フックを復元する
+			call	sub_restore_h_erro_ix
+			call	sub_restore_h_timi_ix
+			; TXTTAB を復帰する
+			ld		hl, 0x8001
+			ld		[txttab], hl
+			ret
+			endscope
+
+; =============================================================================
+;	H.ERRO CLEANUP
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		プログラム側の H.ERRO ハンドラから呼ばれる。フックを復元してから
+;		終了処理を行う (終了処理の中でもフック復元を行うが、従来の生成
+;		コードでもハンドラ側で先に復元していたため、その順序を維持する)。
+; =============================================================================
+			scope	sub_h_erro_cleanup
+sub_h_erro_cleanup::
+			push	hl
+			pop		ix					; IX = startup_params
+			call	sub_restore_h_timi_ix
+			call	sub_restore_h_erro_ix
+			jp		sub_termination_body
+			endscope
+
+; =============================================================================
+;	TERMINATION
+;	input:
+;		HL ... startup_params のアドレス
+;	output:
+;		none (疑似 BASIC 行の NEWSTT 実行へ移るため戻ってこない)
+;	break:
+;		all
+;	comment:
+;		終了処理を行い、スタックを HIMEM へ切り替えて、終了時の疑似 BASIC 行
+;		(:END:...) を NEWSTT で実行する。NEWSTT は ncalbas 経由で呼ぶ。
+; =============================================================================
+			scope	sub_termination
+sub_termination::
+			push	hl
+			pop		ix					; IX = startup_params
+			ld		l, [ix+18]
+			ld		h, [ix+19]			; HL = _basic_end
+			push	hl
+			call	sub_termination_body
+			pop		de					; DE = _basic_end
+			; スタックを HIMEM へ切り替えて NEWSTT を呼ぶ
+			ld		sp, [himem]
+			ld		hl, newstt
+			ld		[ncalbas_address], hl
+			ex		de, hl				; HL = _basic_end
+			jp		ncalbas
 			endscope
 
 ; =============================================================================
@@ -8074,6 +8458,791 @@ sub_play_status::
 			endscope
 
 ; =============================================================================
+;	EOF( n )
+;	input:
+;		[ptrfil] .... file info (FCB) のアドレス
+;	output:
+;		HL .......... -1: EOF, 0: EOFでない
+;	break:
+;		all
+;	comment:
+;		位置とサイズは FCB のランダムレコード番号 (FCB+33) とファイルサイズ (FCB+16) から得る。
+;		順次ファイル (レコードサイズ 1) ではバイト単位で比較し、次のバイトが 1Ah の場合も EOF とする。
+;		ランダムファイルではレコード単位の位置をバイト単位へ換算して比較する。
+; =============================================================================
+			scope	sub_eof
+sub_eof::
+			ld		hl, [ptrfil]
+			ld		a, [hl]
+			or		a, a
+			jp		z, err_file_not_open
+			dec		a
+			cp		a, 8
+			jp		nc, err_sequential_io_only		; ディスクファイル以外
+			; 位置 (FCB+33, 4bytes) を buf+0 へ、サイズ (FCB+16, 4bytes) を buf+4 へ写す
+			push	hl
+			ld		de, 33
+			add		hl, de
+			ld		de, buf
+			ld		bc, 4
+			ldir
+			pop		hl
+			push	hl
+			ld		de, 16
+			add		hl, de
+			ld		de, buf + 4
+			ld		bc, 4
+			ldir
+			pop		hl
+			; レコードサイズ (FCB+14) を DE へ
+			ld		de, 14
+			add		hl, de
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ld		a, d
+			or		a, e
+			jp		z, err_bad_file_mode			; レコードサイズ 0 は異常
+			ld		a, e
+			cp		a, 1
+			jr		nz, _random
+			ld		a, d
+			or		a, a
+			jr		nz, _random
+			; 順次ファイル: 位置 = バイト位置そのもの
+			ld		hl, buf
+			ld		de, buf + 8
+			ld		bc, 4
+			ldir
+			jr		_compare
+	_random:
+			; ランダムファイル: バイト位置 = 位置 (レコード単位) × レコードサイズ (32ビット演算)
+			ld		hl, buf + 8
+			ld		b, 4
+			xor		a, a
+	_zero:
+			ld		[hl], a
+			inc		hl
+			djnz	_zero
+			ld		b, 16
+	_mloop:
+			srl		d
+			rr		e				; 乗数 (DE) を右シフト、押し出されたビットが Cy へ
+			jr		nc, _noadd
+			push	bc
+			push	de
+			ld		hl, buf				; 被乗数 (buf+0..3)
+			ld		de, buf + 8			; 結果 (buf+8..11)
+			ld		b, 4
+			or		a, a
+	_madd:
+			ld		a, [de]
+			adc		a, [hl]
+			ld		[de], a
+			inc		hl
+			inc		de
+			djnz	_madd
+			pop		de
+			pop		bc
+	_noadd:
+			; 被乗数を左シフト (buf+0..3)
+			push	bc
+			ld		hl, buf
+			ld		b, 4
+			or		a, a
+	_mshl:
+			ld		a, [hl]
+			rla
+			ld		[hl], a
+			inc		hl
+			djnz	_mshl
+			pop		bc
+			djnz	_mloop
+	_compare:
+			; バイト位置 (buf+8) と サイズ (buf+4) を 32ビット比較: 位置 >= サイズ なら EOF
+			ld		hl, buf + 4
+			ld		de, buf + 8
+			ld		b, 4
+			or		a, a
+	_cmp:
+			ld		a, [de]
+			sbc		a, [hl]
+			inc		hl
+			inc		de
+			djnz	_cmp
+			jr		nc, _is_eof
+			; 順次ファイルの場合のみ、次のバイトが 1Ah かどうかを調べる
+			ld		hl, [ptrfil]
+			ld		de, 14
+			add		hl, de
+			ld		a, [hl]
+			cp		a, 1
+			jr		nz, _not_eof
+			inc		hl
+			ld		a, [hl]
+			or		a, a
+			jr		nz, _not_eof
+			; 1バイト先読みする
+			ld		hl, [ptrfil]
+			ld		de, buf + 16
+			ld		bc, 1
+			call	sub_fread				; A=状態, HL=読んだレコード数
+			ld		a, l
+			or		a, a
+			jr		z, _is_eof				; 読めなかった = 実質 EOF
+			; 読んだ分だけ位置を戻す (FCB+33 を 32ビットで -1)
+			ld		hl, [ptrfil]
+			ld		de, 33
+			add		hl, de
+			ld		a, [hl]
+			sub		a, 1
+			ld		[hl], a
+			jr		nc, _restored
+			inc		hl
+			ld		a, [hl]
+			sbc		a, 0
+			ld		[hl], a
+			jr		nc, _restored
+			inc		hl
+			ld		a, [hl]
+			sbc		a, 0
+			ld		[hl], a
+			jr		nc, _restored
+			inc		hl
+			ld		a, [hl]
+			sbc		a, 0
+			ld		[hl], a
+	_restored:
+			ld		a, [buf + 16]
+			cp		a, 0x1A
+			jr		z, _is_eof
+	_not_eof:
+			ld		hl, 0
+			ret
+	_is_eof:
+			ld		hl, -1
+			ret
+			endscope
+
+; =============================================================================
+;	DSKF( n )
+;	input:
+;		HL .......... ドライブ番号 (0=カレント, 1=A:, 2=B:, ...)
+;	output:
+;		HL .......... 空き容量 (KB単位)
+;	break:
+;		all
+;	comment:
+;		BDOS の _ALLOC で空きクラスタ数・クラスタあたりのセクタ数・セクタサイズを得て、
+;		空き容量 = 空きクラスタ数 × セクタ/クラスタ × セクタサイズ / 1024 を計算する。
+;		セクタサイズが 2 の冪でない (取得できない) 場合は 512 とみなす。
+; =============================================================================
+			scope	sub_dskf
+sub_dskf::
+			ld		e, l
+			ld		c, _ALLOC
+			call	bdos				; A=セクタ/クラスタ, HL=空きクラスタ数, DE=総クラスタ数, IX=セクタサイズ
+			or		a, a
+			jr		z, _zero			; 取得失敗
+			ld		b, a				; B = セクタ/クラスタ
+			push	hl				; 空きクラスタ数を保存
+			push	ix
+			pop		hl				; HL = セクタサイズ
+			; セクタサイズの log2 を E へ (2 の冪でない場合は 512 = log2 9 とする)
+			ld		e, 0
+	_sslog:
+			ld		a, l
+			dec		a
+			or		a, h
+			jr		z, _ssdone			; HL == 1
+			ld		a, l
+			rrca
+			jr		c, _ssbad			; 奇数 (かつ 1 でない) = 2 の冪でない
+			srl		h
+			rr		l
+			inc		e
+			ld		a, e
+			cp		a, 13
+			jr		c, _sslog
+	_ssbad:
+			ld		e, 9
+	_ssdone:
+			; セクタ/クラスタの log2 を C へ
+			ld		c, 0
+	_spclog:
+			ld		a, b
+			cp		a, 2
+			jr		c, _shift
+			srl		b
+			inc		c
+			jr		_spclog
+	_shift:
+			; 合計シフト量 = log2(セクタ/クラスタ) + log2(セクタサイズ) - 10 (KB 換算)
+			ld		a, c
+			add		a, e
+			sub		a, 10
+			ld		c, a
+			pop		hl				; HL = 空きクラスタ数
+			ld		de, 0				; DE:HL = 32ビット値
+			ld		a, c
+			or		a, a
+			jr		z, _done
+			bit		7, a
+			jr		nz, _shr
+			; 左シフト (DE:HL) × A 回
+			ld		b, a
+	_shlloop:
+			sla		l
+			rl		h
+			rl		e
+			rl		d
+			djnz	_shlloop
+			jr		_done
+	_shr:
+			; 右シフト (DE:HL) × (-A) 回
+			neg
+			ld		b, a
+	_shrloop:
+			srl		d
+			rr		e
+			rr		h
+			rr		l
+			djnz	_shrloop
+	_done:
+			ret
+	_zero:
+			ld		hl, 0
+			ret
+			endscope
+
+; =============================================================================
+;	HEAP / STRING CORE (Batch 5: A2)
+;	コンパイルされたプログラム側の allocate_heap / free_heap / check_array は
+;	ラッパとなり、実体はここに置く。プログラム固有のアドレスは、プログラム側の
+;	コンテキストブロック (heap_params) へのポインタで受け取る。
+;	コンテキストブロックの並び (コンパイラ側と一致させること):
+;		+0	word	heap_next のアドレス
+;		+2	word	heap_end のアドレス
+;		+4	word	heap_start (値)
+;		+6	word	string_temp_area (値)
+;		+8	word	string_temp_area_end (値)
+;		+10	word	vars_area_start (値)
+;		+12	word	vars_area_end (値)
+;		+14	word	vara_area_start (値)
+;		+16	word	vara_area_end (値)
+;		+18	word	varsa_area_start (値)
+;		+20	word	varsa_area_end (値)
+;		+22	word	heap_move_size のアドレス
+;		+24	word	heap_remap_address のアドレス
+;		+26	word	heap_remap_end のアドレス
+;		+28	word	check_array 用スロットセルのアドレス
+;	公開エントリ (blib_allocate_heap / blib_free_heap / blib_check_array) は
+;	HL = heap_params で呼ばれる。内部エントリ (_allocate_heap_body) は
+;	IX = heap_params を前提とする。
+;	どのルーチンもプログラム側へ直接ジャンプしないこと。終了は必ず RET で、
+;	call_blib の CALSLT フレームを正常に戻すこと。エラー終了はライブラリ内の
+;	error_handler (err_out_of_memory) 経由とし、プログラム側の bios_errhand へは
+;	直接飛ばない (ページ1がライブラリに切り替わっているため)。
+; =============================================================================
+
+; =============================================================================
+;	ALLOCATE HEAP
+;	public input:
+;		HL ... heap_params のアドレス
+;		BC ... 確保するサイズ
+;	public output:
+;		HL ... 確保したアドレス
+;	internal input (_allocate_heap_body):
+;		IX ... heap_params のアドレス
+;		BC ... 確保するサイズ
+;	break:
+;		A, B, C, D, E, H, L, F (従来の allocate_heap と同じ)
+; =============================================================================
+			scope	sub_allocate_heap
+sub_allocate_heap::
+			push	hl
+			pop		ix					; IX = heap_params
+_allocate_heap_body::
+			; HL = [heap_next]
+			push	de
+			ld		e, [ix+0]
+			ld		d, [ix+1]			; DE = heap_next のアドレス
+			ex		de, hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]				; DE = [heap_next]
+			ex		de, hl				; HL = [heap_next]
+			pop		de
+			push	hl
+			add		hl, bc
+			jr		c, _allocate_heap_error
+			; DE = [heap_end]
+			push	hl
+			ld		l, [ix+2]
+			ld		h, [ix+3]			; HL = heap_end のアドレス
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]				; DE = [heap_end]
+			pop		hl
+			rst		0x20
+			jr		nc, _allocate_heap_error
+			; [heap_next] = HL
+			push	de
+			ld		e, [ix+0]
+			ld		d, [ix+1]
+			ex		de, hl				; HL = heap_next のアドレス, DE = 新しい heap_next
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			ex		de, hl				; HL = 新しい heap_next
+			pop		de
+			pop		hl
+			push	hl
+			dec		bc
+			ld		e, l
+			ld		d, h
+			inc		de
+			ld		[hl], 0
+			ld		a, c
+			or		a, b
+			jr		z, _allocate_heap_done
+			ldir
+	_allocate_heap_done:
+			pop		hl
+			ret
+	_allocate_heap_error:
+			jp		err_out_of_memory	; E = 7 (Out of memory)
+			endscope
+
+; =============================================================================
+;	FREE HEAP
+;	public input:
+;		HL ... heap_params のアドレス
+;		DE ... 解放するメモリのアドレス
+;		BC ... 解放するメモリのサイズ
+;	output:
+;		none
+;	break:
+;		A, B, C, D, E, H, L, F (従来の free_heap と同じ)
+;	comment:
+;		従来の生成コードと同一のアルゴリズム。プログラム固有アドレスへの
+;		アクセスは全て IX (heap_params) 経由に置換してある。
+; =============================================================================
+			scope	sub_free_heap
+sub_free_heap::
+			push	hl
+			pop		ix					; IX = heap_params
+			ex		de, hl				; HL = 解放するアドレス
+			; ブロック転送の情報をメモリに保存する
+			push	hl
+			add		hl, bc				; HL = heap_remap_address の値
+			; [heap_move_size] = BC
+			push	hl
+			push	de
+			ld		l, [ix+22]
+			ld		h, [ix+23]			; HL = heap_move_size のアドレス
+			ld		[hl], c
+			inc		hl
+			ld		[hl], b
+			pop		de
+			pop		hl
+			; [heap_remap_address] = HL
+			push	de
+			ld		e, [ix+24]
+			ld		d, [ix+25]
+			ex		de, hl				; HL = heap_remap_address のアドレス, DE = 値
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			ex		de, hl				; HL = 値
+			pop		de
+			; ブロック転送のサイズやアドレスを計算する
+			ex		de, hl
+			; HL = [heap_next]
+			push	de
+			ld		e, [ix+0]
+			ld		d, [ix+1]
+			ex		de, hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl				; HL = [heap_next]
+			pop		de
+			; [heap_remap_end] = HL
+			push	de
+			ld		e, [ix+26]
+			ld		d, [ix+27]
+			ex		de, hl
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			ex		de, hl
+			pop		de
+			or		a, a
+			sbc		hl, de
+			ld		c, l
+			ld		b, h
+			pop		hl
+			ex		de, hl
+			ld		a, c
+			or		a, b
+			jr		z, _free_heap_loop0
+			; ブロック転送する
+			ldir
+	_free_heap_loop0:
+			; [heap_next] = DE
+			push	hl
+			ld		l, [ix+0]
+			ld		h, [ix+1]
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			pop		hl
+			jp		_free_heap_new_roots
+			; (以下 _free_heap_loop1 / _free_heap_loop2 は従来の生成コードでも
+			;   JP で飛び越される到達不能コードだが、従来通りに訳出して残す)
+			ld		l, [ix+10]
+			ld		h, [ix+11]			; HL = vars_area_start
+	_free_heap_loop1:
+			ld		e, [ix+20]
+			ld		d, [ix+21]			; DE = varsa_area_end
+			rst		0x20
+			jr		nc, _free_heap_loop1_end
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			push	hl
+			; HL = [heap_remap_address]
+			push	de
+			ld		e, [ix+24]
+			ld		d, [ix+25]
+			ex		de, hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl
+			pop		de
+			ex		de, hl
+			rst		0x20
+			jr		c, _free_heap_loop1_next
+			; DE = [heap_move_size]
+			push	hl
+			ld		l, [ix+22]
+			ld		h, [ix+23]
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			pop		hl
+			sbc		hl, de
+			pop		de
+			ex		de, hl
+			dec		hl
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			push	hl
+	_free_heap_loop1_next:
+			pop		hl
+			inc		hl
+			jr		_free_heap_loop1
+	_free_heap_loop1_end:
+			ld		l, [ix+18]
+			ld		h, [ix+19]			; HL = varsa_area_start
+	_free_heap_loop2:
+			ld		e, [ix+20]
+			ld		d, [ix+21]			; DE = varsa_area_end
+			rst		0x20
+			ret		nc
+			ld		e, [hl]
+			ld		a, e
+			inc		hl
+			ld		d, [hl]
+			or		a, d
+			inc		hl
+			jr		z, _free_heap_loop2
+			push	hl
+			; 実体のアドレスに変換する
+			ex		de, hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			inc		hl
+			ld		c, [hl]
+			inc		hl
+			ld		b, 0
+			add		hl, bc
+			add		hl, bc
+			ex		de, hl
+			sbc		hl, bc
+			sbc		hl, bc
+			rr		h
+			rr		l
+			ld		c, l
+			ld		b, h
+			ex		de, hl
+			; 文字列配列変数１つ分
+	_free_heap_sarray_elements:
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			push	hl
+			; HL = [heap_remap_address]
+			push	de
+			ld		e, [ix+24]
+			ld		d, [ix+25]
+			ex		de, hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl
+			pop		de
+			ex		de, hl
+			rst		0x20
+			jr		c, _free_heap_loop2_next
+			; DE = [heap_move_size]
+			push	hl
+			ld		l, [ix+22]
+			ld		h, [ix+23]
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			pop		hl
+			sbc		hl, de
+			pop		de
+			ex		de, hl
+			dec		hl
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			push	hl
+	_free_heap_loop2_next:
+			pop		hl
+			inc		hl
+			dec		bc
+			ld		a, c
+			or		a, b
+			jr		nz, _free_heap_sarray_elements
+			pop		hl
+			jr		_free_heap_loop2
+			; 移動したヒープを指す文字列記述子と配列ポインタを更新する
+	_free_heap_new_roots:
+			ld		l, [ix+6]
+			ld		h, [ix+7]
+			inc		hl					; HL = string_temp_area + 1
+	_free_heap_temp_roots:
+			ld		e, [ix+8]
+			ld		d, [ix+9]			; DE = string_temp_area_end
+			rst		0x20
+			jr		nc, _free_heap_string_roots_start
+			call	_remap_heap_root
+			ld		de, 3
+			add		hl, de
+			jr		_free_heap_temp_roots
+	_free_heap_string_roots_start:
+			ld		l, [ix+10]
+			ld		h, [ix+11]
+			inc		hl					; HL = vars_area_start + 1
+	_free_heap_string_roots:
+			ld		e, [ix+12]
+			ld		d, [ix+13]			; DE = vars_area_end
+			rst		0x20
+			jr		nc, _free_heap_numeric_arrays
+			call	_remap_heap_root
+			ld		de, 3
+			add		hl, de
+			jr		_free_heap_string_roots
+	_free_heap_numeric_arrays:
+			ld		l, [ix+14]
+			ld		h, [ix+15]
+			inc		hl					; HL = vara_area_start + 1
+	_free_heap_numeric_array_roots:
+			ld		e, [ix+16]
+			ld		d, [ix+17]			; DE = vara_area_end
+			rst		0x20
+			jr		nc, _free_heap_string_arrays
+			call	_remap_heap_root
+			ld		de, 3
+			add		hl, de
+			jr		_free_heap_numeric_array_roots
+	_free_heap_string_arrays:
+			ld		l, [ix+18]
+			ld		h, [ix+19]			; HL = varsa_area_start
+	_free_heap_string_array_roots:
+			ld		e, [ix+20]
+			ld		d, [ix+21]			; DE = varsa_area_end
+			rst		0x20
+			jr		nc, _free_heap_roots_done
+			push	hl
+			call	_remap_heap_root
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ld		a, e
+			or		a, d
+			jr		z, _free_heap_string_array_next
+			ex		de, hl
+			ld		c, [hl]
+			inc		hl
+			ld		b, [hl]
+			inc		hl
+			ld		a, [hl]
+			inc		hl
+			push	hl
+			ld		e, a
+			ld		d, 0
+			ex		de, hl
+			add		hl, hl
+			ex		de, hl
+			inc		de
+			ld		h, b
+			ld		l, c
+			or		a, a
+			sbc		hl, de
+			ld		b, h
+			ld		c, l
+			pop		hl
+			dec		de
+			add		hl, de
+	_free_heap_string_array_elements:
+			ld		a, b
+			or		a, c
+			jr		z, _free_heap_string_array_next
+			inc		hl
+			call	_remap_heap_root
+			inc		hl
+			inc		hl
+			dec		bc
+			dec		bc
+			dec		bc
+			jr		_free_heap_string_array_elements
+	_free_heap_string_array_next:
+			pop		hl
+			inc		hl
+			inc		hl
+			jr		_free_heap_string_array_roots
+	_free_heap_roots_done:
+			ret
+			; HL の指すワードが移動範囲内なら heap_move_size だけ引いて書き戻す
+	_remap_heap_root:
+			push	hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ld		a, e
+			or		a, d
+			jr		z, _remap_heap_root_skip
+			ex		de, hl
+			; DE = [heap_remap_address]
+			push	hl
+			ld		l, [ix+24]
+			ld		h, [ix+25]
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			pop		hl
+			rst		0x20
+			jr		c, _remap_heap_root_skip
+			; DE = [heap_remap_end]
+			push	hl
+			ld		l, [ix+26]
+			ld		h, [ix+27]
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			pop		hl
+			rst		0x20
+			jr		nc, _remap_heap_root_skip
+			; DE = [heap_move_size]
+			push	hl
+			ld		l, [ix+22]
+			ld		h, [ix+23]
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			pop		hl
+			or		a, a
+			sbc		hl, de
+			push	hl
+			pop		de
+			pop		hl
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			dec		hl
+			ret
+	_remap_heap_root_skip:
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	CHECK ARRAY
+;	public input:
+;		HL ... heap_params のアドレス
+;		D ..... 次元数
+;		BC .... 確保するサイズ
+;		heap_params +28 のセルに、対象の配列変数格納アドレスが入っている
+;	output:
+;		HL ... 配列変数格納アドレス (従来の check_array と同じ)
+;	break:
+;		従来の check_array と同じ
+;	comment:
+;		従来の生成コードと同一のアルゴリズム。メモリ確保は内部エントリ
+;		(_allocate_heap_body) を使う (IX = heap_params は設定済み)。
+; =============================================================================
+			scope	sub_check_array
+sub_check_array::
+			push	hl
+			pop		ix					; IX = heap_params
+			; 対象アドレスをスロットセルから取得する (D = 次元数を壊さないこと)
+			push	de
+			ld		l, [ix+28]
+			ld		h, [ix+29]			; HL = スロットセルのアドレス
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl				; HL = 配列変数格納アドレス
+			pop		de					; DE = 次元数などを復帰
+			ld		a, [hl]
+			inc		hl
+			or		a, [hl]
+			dec		hl
+			ret		nz
+			push	de
+			push	hl
+			push	bc
+			call	_allocate_heap_body
+			pop		bc
+			pop		de
+			pop		af
+			ex		de, hl
+			push	hl
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			ex		de, hl
+			dec		bc
+			dec		bc
+			ld		[hl], c
+			inc		hl
+			ld		[hl], b
+			inc		hl
+			ld		[hl], a
+			inc		hl
+			ld		b, a
+			ld		de, 11
+	_check_array_loop:
+			ld		[hl], e
+			inc		hl
+			ld		[hl], d
+			inc		hl
+			djnz	_check_array_loop
+			pop		hl
+			ret
+			endscope
+
+
+; =============================================================================
 			scope	error_handler
 err_syntax::
 			ld		e, 2
@@ -8091,6 +9260,8 @@ err_sequential_io_only		:= $+1
 			ld		bc, 0x3A1E
 err_bad_file_mode			:= $+1
 			ld		bc, 0x3D1E
+err_file_not_open			:= $+1
+			ld		bc, 0x3B1E
 err_out_of_memory			:= $+1
 			ld		bc, 0x071E
 err_subscript				:= $+1

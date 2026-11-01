@@ -32,13 +32,38 @@ bool CRESTORE::exec( CCOMPILE_INFO *p_info ) {
 		}
 		return true;
 	}
-	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO || p_info->list.p_position->s_word[0] == '*' ) {
+	if( p_info->list.p_position->type != CBASIC_WORD_TYPE::LINE_NO ) {
 		//	行番号で無い何かが指定されている場合
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
-	//	行番号が指定されている場合
-	target_line_no = std::stoi( p_info->list.p_position->s_word );
+	if( p_info->list.p_position->s_word[0] == '*' ) {
+		//	*ラベルが指定されている場合、そのラベルが定義されている行番号へ読み替える
+		//	定義位置のラベルは「行の先頭」または「: の直後」に現れる。GOTO 等からの参照と区別するため、その条件で探す。
+		std::string s_target_label = p_info->list.p_position->s_word;
+		target_line_no = -1;
+		{
+			std::vector< CBASIC_WORD > word_list = p_info->list.get_word_list();
+			for( size_t i = 0; i < word_list.size(); i++ ) {
+				if( word_list[i].type != CBASIC_WORD_TYPE::LINE_NO || word_list[i].s_word != s_target_label ) {
+					continue;
+				}
+				if( i == 0 || word_list[i - 1].line_no != word_list[i].line_no || word_list[i - 1].s_word == ":" ) {
+					target_line_no = word_list[i].line_no;
+					break;
+				}
+			}
+		}
+		if( target_line_no < 0 ) {
+			//	ラベルが見つからない場合
+			p_info->errors.add( UNDIFINED_LINE_NUMBER, line_no );
+			return true;
+		}
+	}
+	else {
+		//	行番号が指定されている場合
+		target_line_no = std::stoi( p_info->list.p_position->s_word );
+	}
 	target_is_found = false;
 	p_info->list.p_position++;
 	for( auto i: p_info->list.data_line_no ) {

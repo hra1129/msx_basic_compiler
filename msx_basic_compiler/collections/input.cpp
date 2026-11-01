@@ -26,7 +26,27 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 
-	if( p_info->list.p_position->type == CBASIC_WORD_TYPE::STRING ) {
+	bool is_file_input = false;
+	if( p_info->list.p_position->s_word == "#" ) {
+		//	INPUT #<ファイル番号>, <変数名> [, <変数名> ...]
+		is_file_input = true;
+		p_info->list.p_position++;
+		p_info->assembler_list.activate_file_number();
+		p_info->use_file_access = true;
+		if( !exp.compile( p_info ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		exp.release();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_file_number", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		p_info->list.p_position++;
+	}
+	else if( p_info->list.p_position->type == CBASIC_WORD_TYPE::STRING ) {
 		CSTRING value;
 		value.set( p_info->list.p_position->s_word );
 		p_info->assembler_list.activate_puts();
@@ -92,6 +112,14 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 
 	s_data = s_data + ", 0";
 
+	if( is_file_input ) {
+		p_info->assembler_list.activate_sub_input_file();
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_input_file", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::DEFB, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_data, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		return true;
+	}
 	p_info->assembler_list.activate_sub_input();
 	asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "sub_input", COPERAND_TYPE::NONE, "" );
 	p_info->assembler_list.body.push_back( asm_line );

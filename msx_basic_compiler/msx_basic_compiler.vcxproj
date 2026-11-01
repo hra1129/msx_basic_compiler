@@ -256,6 +256,8 @@
     <ClCompile Include="expressions\expression_cvd.cpp" />
     <ClCompile Include="expressions\expression_cvi.cpp" />
     <ClCompile Include="expressions\expression_cvs.cpp" />
+    <ClCompile Include="expressions\expression_dskf.cpp" />
+    <ClCompile Include="expressions\expression_eof.cpp" />
     <ClCompile Include="expressions\expression_exp.cpp" />
     <ClCompile Include="expressions\expression_fix.cpp" />
     <ClCompile Include="expressions\expression_fre.cpp" />
@@ -270,6 +272,8 @@
     <ClCompile Include="expressions\expression_irnd.cpp" />
     <ClCompile Include="expressions\expression_left.cpp" />
     <ClCompile Include="expressions\expression_len.cpp" />
+    <ClCompile Include="expressions\expression_loc.cpp" />
+    <ClCompile Include="expressions\expression_lof.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
     <ClCompile Include="expressions\expression_mid.cpp" />
     <ClCompile Include="expressions\expression_mkd.cpp" />
@@ -427,6 +431,8 @@
     <ClInclude Include="expressions\expression_cvd.h" />
     <ClInclude Include="expressions\expression_cvi.h" />
     <ClInclude Include="expressions\expression_cvs.h" />
+    <ClInclude Include="expressions\expression_dskf.h" />
+    <ClInclude Include="expressions\expression_eof.h" />
     <ClInclude Include="expressions\expression_exp.h" />
     <ClInclude Include="expressions\expression_fix.h" />
     <ClInclude Include="expressions\expression_fre.h" />
@@ -441,6 +447,8 @@
     <ClInclude Include="expressions\expression_irnd.h" />
     <ClInclude Include="expressions\expression_left.h" />
     <ClInclude Include="expressions\expression_len.h" />
+    <ClInclude Include="expressions\expression_loc.h" />
+    <ClInclude Include="expressions\expression_lof.h" />
     <ClInclude Include="expressions\expression_log.h" />
     <ClInclude Include="expressions\expression_mid.h" />
     <ClInclude Include="expressions\expression_mkd.h" />

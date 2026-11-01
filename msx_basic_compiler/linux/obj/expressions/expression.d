@@ -37,13 +37,15 @@ obj/expressions/expression.o: ../expressions/expression.cpp \
  ../expressions/expression_cos.h ../expressions/expression_csng.h \
  ../expressions/expression_csrlin.h ../expressions/expression_cvd.h \
  ../expressions/expression_cvi.h ../expressions/expression_cvs.h \
+ ../expressions/expression_dskf.h ../expressions/expression_eof.h \
  ../expressions/expression_exp.h ../expressions/expression_fix.h \
  ../expressions/expression_fre.h ../expressions/expression_hex.h \
  ../expressions/expression_hexchr.h ../expressions/expression_inkey.h \
  ../expressions/expression_inp.h ../expressions/expression_input.h \
  ../expressions/expression_int.h ../expressions/expression_instr.h \
  ../expressions/expression_irnd.h ../expressions/expression_left.h \
- ../expressions/expression_len.h ../expressions/expression_log.h \
+ ../expressions/expression_len.h ../expressions/expression_loc.h \
+ ../expressions/expression_lof.h ../expressions/expression_log.h \
  ../expressions/expression_mid.h ../expressions/expression_mkd.h \
  ../expressions/expression_mki.h ../expressions/expression_mks.h \
  ../expressions/expression_msxver.h ../expressions/expression_oct.h \
@@ -111,6 +113,8 @@ obj/expressions/expression.o: ../expressions/expression.cpp \
 ../expressions/expression_cvd.h:
 ../expressions/expression_cvi.h:
 ../expressions/expression_cvs.h:
+../expressions/expression_dskf.h:
+../expressions/expression_eof.h:
 ../expressions/expression_exp.h:
 ../expressions/expression_fix.h:
 ../expressions/expression_fre.h:
@@ -124,6 +128,8 @@ obj/expressions/expression.o: ../expressions/expression.cpp \
 ../expressions/expression_irnd.h:
 ../expressions/expression_left.h:
 ../expressions/expression_len.h:
+../expressions/expression_loc.h:
+../expressions/expression_lof.h:
 ../expressions/expression_log.h:
 ../expressions/expression_mid.h:
 ../expressions/expression_mkd.h:

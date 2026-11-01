@@ -78,6 +78,8 @@ public:
 	void activate_calc_array_top( void );
 	void activate_sub_input( void );
 	void activate_input_string_getchar( void );
+	void activate_input_string_getfile( void );
+	void activate_sub_input_file( void );
 	void activate_bload_r( void );
 	void activate_bload( void );
 	void activate_paint( void );

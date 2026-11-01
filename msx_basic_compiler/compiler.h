@@ -41,6 +41,9 @@ private:
 	void optimize_remove_interrupt_process( void );
 	void optimize_ldir( void );
 	void optimize_calculation( void );
+	void optimize_blib_stub( void );
+	void optimize_tail_call( void );
+	void optimize_jump( void );
 
 	void sub_return_line_num( void );
 
@@ -188,6 +191,7 @@ public:
 	CVARIABLE get_variable_address_wo_array( void );
 	//	変数へ値を格納する処理
 	void write_variable_value( CVARIABLE &variable );
+	void write_variable_value_direct( CVARIABLE &variable );
 	//	body の最適化
 	void optimize( void );
 

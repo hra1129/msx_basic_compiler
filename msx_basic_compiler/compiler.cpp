@@ -5,6 +5,8 @@
 // --------------------------------------------------------------------
 
 #include "compiler.h"
+#include <map>
+#include <set>
 #include "collections/beep.h"
 #include "collections/bload.h"
 #include "collections/bsave.h"
@@ -313,6 +315,44 @@ void CCOMPILER::write_variable_value( CVARIABLE &variable ) {
 }
 
 // --------------------------------------------------------------------
+//	[B4] 右辺評価が終わった後、その結果を通常変数へ直接ストアする。
+//	write_variable_value と違い、代入先アドレスは評価前に PUSH しない。
+//	評価結果の置き場所は write_variable_value の前提と同じ
+//	(整数は HL、実数は HL = 値へのポインタ)。
+//	右辺が純粋な式の場合にだけ let.cpp から呼ばれる。
+void CCOMPILER::write_variable_value_direct( CVARIABLE &variable ) {
+	CASSEMBLER_LINE asm_line;
+
+	switch( variable.type ) {
+	default:
+	case CVARIABLE_TYPE::INTEGER:
+		//	変数へ HL の値を直接格納
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[" + variable.s_label + "]", COPERAND_TYPE::REGISTER, "HL" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::SINGLE_REAL:
+		this->info.assembler_list.activate_ld_de_single_real();
+		//	格納先アドレスを DE へ
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, variable.s_label );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "ld_de_single_real", "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::DOUBLE_REAL:
+		this->info.assembler_list.activate_ld_de_double_real();
+		//	格納先アドレスを DE へ
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::CONSTANT, variable.s_label );
+		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "ld_de_double_real", "" );
+		this->info.assembler_list.body.push_back( asm_line );
+		break;
+	case CVARIABLE_TYPE::STRING:
+		//	文字列型は直接ストアの対象外 (let.cpp 側で従来形に振り分けられる)
+		break;
+	}
+}
+
+// --------------------------------------------------------------------
 void CCOMPILER::exec_header( std::string s_name ) {
 	CASSEMBLER_LINE asm_line;
 	char s_buffer[32];
@@ -355,103 +395,32 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 17" );	// FCB + 16 entries and one terminating entry
 
 	//	初期化処理 (BACONLIB存在確認)
+	//	起動処理の本体は BACONLIB 側 (blib_startup / blib_startup_main) へ移した。
+	//	ここには、パラメータブロック (startup_params) のアドレスを渡すスタブだけを残す。
+	//	署名検査はライブラリを呼ぶ前に必要なので、従来通りプログラム側で行う。
+	this->info.assembler_list.add_label( "blib_startup", "0x04105" );
+	this->info.assembler_list.add_label( "blib_startup_main", "0x04108" );
 	asm_line.set( "LABEL", "", "start_address", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "0x8001" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_txttab]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "0" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[0x8001]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[0x8002]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[work_usrtab + 0]" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[svari_usr0_backup]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "heap_start" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_vartab]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "_BASIC_START" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "bios_newstt" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LABEL", "", "_BASIC_START_RET", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[svari_usr0_backup]" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_usrtab + 0]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "1" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_maxfil]", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "CALL", "", "check_blib", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "JP", "NZ", "bios_syntax_error", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	実行の度の blib 初期化
-	this->info.assembler_list.add_label( "blib_init_ncalbas", "0x0404e" );
-	asm_line.set( "LD", "", "IX", "blib_init_ncalbas" );
+	asm_line.set( "LD", "", "HL", "startup_params" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "call_blib", "" );
+	asm_line.set( "LD", "", "IX", "blib_startup" );
 	this->info.assembler_list.body.push_back( asm_line );
-	//	初期化処理 (H.TIMIフック)
-	asm_line.set( "LD", "", "HL", "work_h_timi" );
+	asm_line.set( "JP", "", "call_blib", "" );			//	blib_startup からは戻ってこない
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "h_timi_backup" );
+	asm_line.set( "LABEL", "", "_BASIC_START_RET", "" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "5" );
+	asm_line.set( "LD", "", "HL", "startup_params" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LDIR" );
+	asm_line.set( "LD", "", "IX", "blib_startup_main" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "DI" );
+	asm_line.set( "CALL", "", "call_blib", "" );		//	blib_startup_main は DE = program_start を返して戻ってくる
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "setup_h_timi", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	初期化処理 (プログラム起動)
-	asm_line.set( "LD", "", "DE", "program_start" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "JP", "", "program_run", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	初期化処理 (h.timiフック)
-	asm_line.set( "LABEL", "", "setup_h_timi", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "h_timi_handler" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_h_timi + 1]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "0xC3" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_h_timi]", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "RET" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	初期化処理 (h.erroフック)
-	asm_line.set( "LABEL", "", "setup_h_erro", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "work_h_erro" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "h_erro_backup" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "5" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LDIR" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "h_erro_handler" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_h_erro + 1]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "A", "0xC3" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_h_erro]", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "RET" );
+	asm_line.set( "JP", "", "program_run", "" );		//	call_blib の復帰でページ1がメインROMへ戻ってから program_run へ (DE = program_start)
 	this->info.assembler_list.body.push_back( asm_line );
 
 	asm_line.set( "LABEL", "", "jp_hl", "" );
@@ -583,62 +552,51 @@ void CCOMPILER::exec_terminator( void ) {
 	}
 
 	//	プログラムの終了処理
+	//	終了処理の本体は BACONLIB 側 (blib_termination) へ移した。
+	//	ここには、パラメータブロック (startup_params) のアドレスを渡すスタブだけを残す。
+	this->info.assembler_list.add_label( "blib_termination", "0x04117" );
 	asm_line.set( "LABEL", "", "program_termination" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "CALL", "", "sub_termination" );
+	asm_line.set( "LD", "", "HL", "startup_params" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "SP", "[work_himem]" );
+	asm_line.set( "LD", "", "IX", "blib_termination" );
 	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "_basic_end" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "JP", "", "bios_newstt", "" );
+	asm_line.set( "JP", "", "call_blib", "" );			//	blib_termination からは戻ってこない
 	this->info.assembler_list.body.push_back( asm_line );
 
-	asm_line.set( "LABEL", "", "sub_termination" );
-	this->info.assembler_list.body.push_back( asm_line );
+	//	起動／終了処理用パラメータブロック
+	//	BACONLIB 側の blib_startup / blib_startup_main / blib_termination 等が
+	//	プログラム固有のアドレスをここから取得する。並び順はライブラリ側と一致させること。
+	asm_line.set( "LABEL", "", "startup_params" );
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "heap_start" );			//	+0	ヒープ先頭
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "svari_usr0_backup" );	//	+2	USR0 ベクタの待避先
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "_BASIC_START" );			//	+4	疑似 BASIC 行
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "h_timi_handler" );		//	+6	H.TIMI ハンドラ
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "h_timi_backup" );		//	+8	H.TIMI フックの待避先
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "h_erro_handler" );		//	+10	H.ERRO ハンドラ
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "h_erro_backup" );		//	+12	H.ERRO フックの待避先
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "program_start" );		//	+14	プログラム先頭
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "program_run" );			//	+16	RUN 用サブルーチン
+	this->info.assembler_list.variables_area.push_back( asm_line );
+	asm_line.set( "DEFW", "", "_basic_end" );			//	+18	終了時の疑似 BASIC 行
+	this->info.assembler_list.variables_area.push_back( asm_line );
 	if( this->info.use_file_access ) {
-		//	全てのファイルを閉じる
-		asm_line.set( "CALL", "", "sub_all_close" );
-		this->info.assembler_list.body.push_back( asm_line );
+		asm_line.set( "DEFW", "", "sub_all_close" );	//	+20	全ファイルクローズ (ファイルアクセス有りの場合のみ)
 	}
-	asm_line.set( "XOR", "", "A", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_maxfil]", "A" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "[work_himem]" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "267" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "SBC", "", "HL", "DE" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_filtab]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "L", "E" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "H", "D" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "DE" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "DE" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "E" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "INC", "", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[HL]", "D" );
-	//	プログラムの終了処理 (H.TIMI復元)
-	asm_line.set( "CALL", "", "restore_h_erro", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	プログラムの終了処理 (H.TIMI復元)
-	asm_line.set( "CALL", "", "restore_h_timi", "" );
-	this->info.assembler_list.body.push_back( asm_line );
-	//	プログラムの終了処理
-	asm_line.set( "LD", "", "HL", "0x8001" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "LD", "", "[work_txttab]", "HL" );
-	this->info.assembler_list.body.push_back( asm_line );
-	asm_line.set( "RET" );
-	this->info.assembler_list.body.push_back( asm_line );
+	else {
+		asm_line.set( "DEFW", "", "0" );				//	+20	ファイルアクセス無し
+	}
+	this->info.assembler_list.variables_area.push_back( asm_line );
+
 	asm_line.set( "LABEL", "", "_basic_end", "" );
 	this->info.assembler_list.body.push_back( asm_line );
 	asm_line.set( "DEFB", "", "':', 0x92, ':', 0x94, ':', 0x81, 0x00", "" );
@@ -766,7 +724,13 @@ void CCOMPILER::exec_sub_run( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	//	初期化処理 (H.ERROフック)
-	asm_line.set( "CALL", "", "setup_h_erro", "" );
+	//	H.ERRO フックの設定本体は BACONLIB 側 (blib_setup_h_erro) へ移した。
+	this->info.assembler_list.add_label( "blib_setup_h_erro", "0x0410e" );
+	asm_line.set( "LD", "", "HL", "startup_params" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "IX", "blib_setup_h_erro" );
+	this->info.assembler_list.subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "call_blib", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "EI" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1554,23 +1518,8 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 void CCOMPILER::exec_sub_restore_h_timi( void ) {
 	CASSEMBLER_LINE asm_line;
 
-	//	H.TIMI復元処理ルーチン
-	asm_line.set( "LABEL", "", "restore_h_timi", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DI" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "h_timi_backup" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "work_h_timi" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "5" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LDIR" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "EI" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "RET" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	H.TIMI復元処理ルーチンの本体は BACONLIB 側 (blib_restore_hooks) へ移した。
+	//	ここには待避エリアだけを残す (アドレスは startup_params 経由でライブラリへ渡る)。
 
 	//	H.TIMI待避エリア
 	asm_line.set( "LABEL", "", "h_timi_backup", "" );
@@ -1585,27 +1534,16 @@ void CCOMPILER::exec_sub_on_error( void ) {
 
 	this->info.assembler_list.add_label( "work_errflg", "0x0f414" );
 
-	//	H.ERRO復元処理ルーチン
-	asm_line.set( "LABEL", "", "restore_h_erro", "" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "DI" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "HL", "h_erro_backup" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "DE", "work_h_erro" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LD", "", "BC", "5" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "LDIR" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "EI" );
-	this->info.assembler_list.subroutines.push_back( asm_line );
+	//	何もしない戻り先 (ON 系ハンドラの初期飛び先)
 	asm_line.set( "LABEL", "", "_code_ret", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "RET" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 
 	//	H.ERRO処理ルーチン
+	//	フック復元と終了処理の本体は BACONLIB 側 (blib_h_erro_cleanup) へ移した。
+	//	ハンドラ自体はフックから直接呼ばれるため、プログラム側に残す。
+	this->info.assembler_list.add_label( "blib_h_erro_cleanup", "0x04114" );
 	asm_line.set( "LABEL", "", "h_erro_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "HL" );
@@ -1614,11 +1552,11 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "BC" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "restore_h_timi" );
+	asm_line.set( "LD", "", "HL", "startup_params" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "restore_h_erro" );
+	asm_line.set( "LD", "", "IX", "blib_h_erro_cleanup" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
-	asm_line.set( "CALL", "", "sub_termination" );
+	asm_line.set( "CALL", "", "call_blib" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "POP", "", "BC" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
@@ -1813,6 +1751,59 @@ bool CCOMPILER::exec( std::string s_name ) {
 
 	this->exec_subroutines();
 
+	//	ヒープ系コア (allocate_heap / free_heap / check_array) の実体は BACONLIB 側へ
+	//	移した (Batch 5: A2)。それらを使うプログラムには、プログラム固有アドレスを
+	//	まとめたコンテキストブロック (heap_params) を付ける。並び順はライブラリ側
+	//	(baconlib.asm の HEAP / STRING CORE のコメント) と一致させること。
+	//	このブロックは program_run のゼロクリア範囲 (var_area_start ～
+	//	string_temp_area_end) の外側 (variables_area の末尾) に置く。
+	if( this->info.assembler_list.is_registered_subroutine( "allocate_heap" ) ||
+		this->info.assembler_list.is_registered_subroutine( "free_heap" ) ||
+		this->info.assembler_list.is_registered_subroutine( "check_array" ) ) {
+		//	ライブラリ側 free_heap のワーク (従来は activate_free_heap が確保していた)
+		asm_line.set( "LABEL", "", "heap_remap_end", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "0", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "LABEL", "", "heap_params", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_next" );			//	+0
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_end" );			//	+2
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_start" );			//	+4
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "string_temp_area" );		//	+6
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "string_temp_area_end" );	//	+8
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "vars_area_start" );		//	+10
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "vars_area_end" );		//	+12
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "vara_area_start" );		//	+14
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "vara_area_end" );		//	+16
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "varsa_area_start" );		//	+18
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "varsa_area_end" );		//	+20
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_move_size" );		//	+22
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_remap_address" );	//	+24
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "heap_remap_end" );		//	+26
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		if( this->info.assembler_list.is_registered_subroutine( "check_array" ) ) {
+			asm_line.set( "DEFW", "", "check_array_slot" );	//	+28
+		}
+		else {
+			asm_line.set( "DEFW", "", "0" );				//	+28 (check_array 未使用)
+		}
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+
 	if( this->info.errors.list.size() ) {
 		//	エラーがある場合終了する
 		return false;
@@ -1834,6 +1825,11 @@ void CCOMPILER::optimize( void ) {
 		this->optimize_calculation();
 		this->optimize_push_pop();
 		this->optimize_ldir();
+	}
+	this->optimize_blib_stub();
+	for( i = 0; i < 3; i++ ) {
+		this->optimize_tail_call();
+		this->optimize_jump();
 	}
 }
 
@@ -2539,6 +2535,399 @@ void CCOMPILER::optimize_calculation( void ) {
 			else {
 				p->operand2.s_value = '(' + p->operand2.s_value + ") + 1";
 			}
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+//	最適化の補助: コメント行を読み飛ばして次の行のインデックスを返す。
+//	該当が無ければ list.size() を返す。
+static size_t optimize_next_code_index( const std::vector< CASSEMBLER_LINE > &list, size_t index ) {
+	for( index++; index < list.size(); index++ ) {
+		if( list[ index ].type != CMNEMONIC_TYPE::COMMENT ) {
+			break;
+		}
+	}
+	return index;
+}
+
+// --------------------------------------------------------------------
+//	同じ blib エントリを 2 回以上呼び出している場合、
+//	LD IX, entry / CALL call_blib (7 バイト) の繰り返しを
+//	共有トランポリン 1 個 (7 バイト) と CALL (3 バイト) に置き換える。
+//	JP call_blib の形 (末尾呼び出し) も同様に JP トランポリンにする。
+void CCOMPILER::optimize_blib_stub( void ) {
+	std::vector< CASSEMBLER_LINE > *lists[ 2 ] = { &( this->info.assembler_list.body ), &( this->info.assembler_list.subroutines ) };
+	std::map< std::string, int > use_count;
+	std::map< std::string, std::string > stub_name;
+	std::set< std::string > entry_names;
+	std::set< std::string > defined_names;
+	size_t li, i, j;
+	CASSEMBLER_LINE asm_line;
+
+	//	blib エントリ名 (define_labels の equ 定数) と定義済みラベル名を集める
+	for( auto &line : this->info.assembler_list.define_labels ) {
+		if( line.type == CMNEMONIC_TYPE::CONSTANT ) {
+			entry_names.insert( line.operand1.s_value );
+			defined_names.insert( line.operand1.s_value );
+		}
+	}
+	{
+		std::vector< CASSEMBLER_LINE > *all_lists[] = {
+			&( this->info.assembler_list.header ), &( this->info.assembler_list.body ),
+			&( this->info.assembler_list.subroutines ), &( this->info.assembler_list.datas ),
+			&( this->info.assembler_list.const_single_area ), &( this->info.assembler_list.const_double_area ),
+			&( this->info.assembler_list.const_string_area ), &( this->info.assembler_list.variables_area ),
+			&( this->info.assembler_list.footer )
+		};
+		for( auto *p_list : all_lists ) {
+			for( auto &line : *p_list ) {
+				if( line.type == CMNEMONIC_TYPE::LABEL ) {
+					defined_names.insert( line.operand1.s_value );
+				}
+			}
+		}
+	}
+
+	//	LD IX, entry の直後 (コメントを除く) が CALL/JP call_blib である箇所を数える
+	//	※オペランドの型ではなく s_value で照合する。enum 版 set() は渡された型を
+	//	使わず、大文字化前の文字列から型を再判定するため、小文字で渡された
+	//	オペランドは型が誤って記録される場合がある (s_value は常に大文字化される)。
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		for( i = 0; i < list.size(); i++ ) {
+			if( list[ i ].type != CMNEMONIC_TYPE::LD || list[ i ].condition != CCONDITION::NONE ||
+				list[ i ].operand1.s_value != "IX" ||
+				entry_names.count( list[ i ].operand2.s_value ) == 0 ) {
+				continue;
+			}
+			j = optimize_next_code_index( list, i );
+			if( j >= list.size() ) {
+				continue;
+			}
+			if( ( list[ j ].type == CMNEMONIC_TYPE::CALL || list[ j ].type == CMNEMONIC_TYPE::JP ) &&
+				list[ j ].condition == CCONDITION::NONE &&
+				list[ j ].operand1.s_value == "CALL_BLIB" ) {
+				use_count[ list[ i ].operand2.s_value ]++;
+			}
+		}
+	}
+
+	//	2 回以上使われるエントリにトランポリン名を割り当てる
+	//	(1 回だけのエントリは 7 バイトのままの方が小さいので対象外)
+	for( auto &pair : use_count ) {
+		if( pair.second < 2 ) {
+			continue;
+		}
+		std::string s_name = pair.first + "_STUB";
+		while( defined_names.count( s_name ) != 0 ) {
+			s_name += "_STUB";
+		}
+		defined_names.insert( s_name );
+		stub_name[ pair.first ] = s_name;
+	}
+	if( stub_name.empty() ) {
+		return;
+	}
+
+	//	呼び出し箇所を書き換え、LD IX 行を取り除く
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		std::vector< size_t > erase_indexes;
+		for( i = 0; i < list.size(); i++ ) {
+			if( list[ i ].type != CMNEMONIC_TYPE::LD || list[ i ].condition != CCONDITION::NONE ||
+				list[ i ].operand1.s_value != "IX" ||
+				stub_name.count( list[ i ].operand2.s_value ) == 0 ) {
+				continue;
+			}
+			j = optimize_next_code_index( list, i );
+			if( j >= list.size() ) {
+				continue;
+			}
+			if( ( list[ j ].type == CMNEMONIC_TYPE::CALL || list[ j ].type == CMNEMONIC_TYPE::JP ) &&
+				list[ j ].condition == CCONDITION::NONE &&
+				list[ j ].operand1.s_value == "CALL_BLIB" ) {
+				list[ j ].operand1.s_value = stub_name[ list[ i ].operand2.s_value ];
+				erase_indexes.push_back( i );
+			}
+		}
+		for( size_t k = erase_indexes.size(); k > 0; k-- ) {
+			list.erase( list.begin() + erase_indexes[ k - 1 ] );
+		}
+	}
+
+	//	トランポリン本体を subroutines の末尾に追加する
+	for( auto &pair : stub_name ) {
+		asm_line.set( "LABEL", "", pair.second, "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "IX", pair.first );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JP", "", "call_blib", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
+}
+
+// --------------------------------------------------------------------
+//	サブルーチンの末尾にある CALL x / RET を JP x に置き換える。
+//	CALL と RET の間にコメント以外の行が無く、RET の直後が
+//	ラベル行かリストの終端である場合 (ブロックの末尾) に限る。
+void CCOMPILER::optimize_tail_call( void ) {
+	std::vector< CASSEMBLER_LINE > *lists[ 2 ] = { &( this->info.assembler_list.body ), &( this->info.assembler_list.subroutines ) };
+	size_t li, i, j, k;
+
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		bool changed = true;
+		while( changed ) {
+			changed = false;
+			for( i = 0; i < list.size(); i++ ) {
+				if( list[ i ].type != CMNEMONIC_TYPE::CALL || list[ i ].condition != CCONDITION::NONE ||
+					list[ i ].operand1.type != COPERAND_TYPE::CONSTANT ) {
+					continue;
+				}
+				j = optimize_next_code_index( list, i );
+				if( j >= list.size() ) {
+					continue;
+				}
+				if( list[ j ].type != CMNEMONIC_TYPE::RET || list[ j ].condition != CCONDITION::NONE ) {
+					continue;
+				}
+				k = optimize_next_code_index( list, j );
+				if( k < list.size() && list[ k ].type != CMNEMONIC_TYPE::LABEL ) {
+					continue;
+				}
+				//	該当: CALL を JP に変えて RET を取り除く
+				list[ i ].type = CMNEMONIC_TYPE::JP;
+				list.erase( list.begin() + j );
+				changed = true;
+				break;
+			}
+		}
+	}
+}
+
+// --------------------------------------------------------------------
+//	ジャンプの整理。
+//	(1) 飛び先が直後のラベルである JP/JR は落下と同じなので取り除く。
+//	(2) 本体が JP/JR 1 個だけの橋渡しブロックは、参照側を最終飛び先に
+//	    書き換え、参照が無くなればブロック自体も取り除く。
+//	    ただしアドレスをデータとして参照されているラベルや、
+//	    落下で到達し得るブロックは取り除かない。
+void CCOMPILER::optimize_jump( void ) {
+	std::vector< CASSEMBLER_LINE > *lists[ 2 ] = { &( this->info.assembler_list.body ), &( this->info.assembler_list.subroutines ) };
+	size_t li, i, j;
+
+	//	(1) 直後のブロックへのジャンプを取り除く
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		for( i = 0; i < list.size(); i++ ) {
+			if( ( list[ i ].type != CMNEMONIC_TYPE::JP && list[ i ].type != CMNEMONIC_TYPE::JR ) ||
+				list[ i ].operand1.type != COPERAND_TYPE::CONSTANT ) {
+				continue;
+			}
+			j = optimize_next_code_index( list, i );
+			if( j < list.size() && list[ j ].type == CMNEMONIC_TYPE::LABEL &&
+				list[ j ].operand1.s_value == list[ i ].operand1.s_value ) {
+				list.erase( list.begin() + i );
+				i--;
+			}
+		}
+	}
+
+	//	(2) 橋渡しブロックのバイパスと除去
+	struct CBLOCK_INFO {
+		int list_id;
+		size_t label_index;
+		size_t end_index;
+		std::string s_name;
+		std::string s_target;
+	};
+	std::vector< CBLOCK_INFO > blocks;
+	std::map< std::string, std::string > bridge_target;
+
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		bool in_block = false;
+		CBLOCK_INFO block = {};
+		for( i = 0; i <= list.size(); i++ ) {
+			if( i == list.size() || list[ i ].type == CMNEMONIC_TYPE::LABEL ) {
+				if( in_block ) {
+					block.end_index = i;
+					blocks.push_back( block );
+					in_block = false;
+				}
+				if( i < list.size() ) {
+					block.list_id = (int)li;
+					block.label_index = i;
+					block.s_name = list[ i ].operand1.s_value;
+					block.s_target = "";
+					in_block = true;
+				}
+			}
+		}
+		//	橋渡し判定: コメントを除いた本体が JP/JR 1 行だけ
+		for( auto &b : blocks ) {
+			if( b.list_id != (int)li ) {
+				continue;
+			}
+			size_t code_count = 0;
+			size_t code_index = 0;
+			for( j = b.label_index + 1; j < b.end_index; j++ ) {
+				if( list[ j ].type != CMNEMONIC_TYPE::COMMENT ) {
+					code_count++;
+					code_index = j;
+				}
+			}
+			if( code_count == 1 &&
+				( list[ code_index ].type == CMNEMONIC_TYPE::JP || list[ code_index ].type == CMNEMONIC_TYPE::JR ) &&
+				list[ code_index ].condition == CCONDITION::NONE &&
+				list[ code_index ].operand1.type == COPERAND_TYPE::CONSTANT &&
+				list[ code_index ].operand1.s_value != b.s_name ) {
+				b.s_target = list[ code_index ].operand1.s_value;
+				bridge_target[ b.s_name ] = b.s_target;
+			}
+		}
+	}
+
+	//	最終飛び先を解決する (循環する橋渡しは対象外)
+	std::map< std::string, std::string > resolved;
+	for( auto &pair : bridge_target ) {
+		std::set< std::string > visited;
+		std::string s_current = pair.first;
+		bool ok = true;
+		while( bridge_target.count( s_current ) != 0 ) {
+			if( visited.count( s_current ) != 0 ) {
+				ok = false;
+				break;
+			}
+			visited.insert( s_current );
+			s_current = bridge_target[ s_current ];
+		}
+		if( ok ) {
+			resolved[ pair.first ] = s_current;
+		}
+	}
+
+	//	参照側 (JP/JR/CALL の飛び先) を最終飛び先に書き換える
+	for( li = 0; li < 2; li++ ) {
+		std::vector< CASSEMBLER_LINE > &list = *lists[ li ];
+		for( i = 0; i < list.size(); i++ ) {
+			if( ( list[ i ].type == CMNEMONIC_TYPE::JP || list[ i ].type == CMNEMONIC_TYPE::JR || list[ i ].type == CMNEMONIC_TYPE::CALL ) &&
+				list[ i ].operand1.type == COPERAND_TYPE::CONSTANT &&
+				resolved.count( list[ i ].operand1.s_value ) != 0 ) {
+				list[ i ].operand1.s_value = resolved[ list[ i ].operand1.s_value ];
+			}
+		}
+	}
+
+	//	参照が無くなった橋渡しブロックを取り除く
+	{
+		std::vector< CASSEMBLER_LINE > *all_lists[] = {
+			&( this->info.assembler_list.header ), &( this->info.assembler_list.define_labels ),
+			&( this->info.assembler_list.body ), &( this->info.assembler_list.subroutines ),
+			&( this->info.assembler_list.datas ), &( this->info.assembler_list.const_single_area ),
+			&( this->info.assembler_list.const_double_area ), &( this->info.assembler_list.const_string_area ),
+			&( this->info.assembler_list.variables_area ), &( this->info.assembler_list.footer )
+		};
+		//	後ろのブロックから順に処理する (インデックスのずれを防ぐ)
+		for( size_t bi = blocks.size(); bi > 0; bi-- ) {
+			CBLOCK_INFO &b = blocks[ bi - 1 ];
+			if( resolved.count( b.s_name ) == 0 ) {
+				continue;
+			}
+			std::vector< CASSEMBLER_LINE > &list = *lists[ b.list_id ];
+			//	ブロック外からの参照が残っていないか調べる。
+			//	p_skip_list/p_skip_index には、定義行そのものを参照と
+			//	誤判定しないよう、調べる名前のラベル行を指定できる。
+			auto is_referenced = [&]( const std::string &s_name,
+				const std::vector< CASSEMBLER_LINE > *p_skip_list, size_t skip_index ) -> bool {
+				for( auto *p_list : all_lists ) {
+					for( size_t t = 0; t < p_list->size(); t++ ) {
+						if( p_list == &list && t >= b.label_index && t < b.end_index ) {
+							continue;
+						}
+						if( p_list == p_skip_list && t == skip_index ) {
+							continue;
+						}
+						CASSEMBLER_LINE &line = (*p_list)[ t ];
+						//	DEFB/DEFW のオペランドは set() で大文字化されないため、
+						//	比較はこちらで大文字化してから行う (例: DEFW data_110)。
+						//	大文字小文字を区別しない ZMA のシンボル解決と合わせる。
+						std::string s_op1 = line.operand1.s_value;
+						std::string s_op2 = line.operand2.s_value;
+						std::transform( s_op1.begin(), s_op1.end(), s_op1.begin(), ::toupper );
+						std::transform( s_op2.begin(), s_op2.end(), s_op2.begin(), ::toupper );
+						if( s_op1 == s_name || s_op2 == s_name ) {
+							return true;
+						}
+						if( ( line.type == CMNEMONIC_TYPE::DEFB || line.type == CMNEMONIC_TYPE::DEFW ) &&
+							( s_op1.find( s_name ) != std::string::npos ||
+							  s_op2.find( s_name ) != std::string::npos ) ) {
+							return true;
+						}
+					}
+				}
+				return false;
+			};
+			if( is_referenced( b.s_name, nullptr, 0 ) ) {
+				continue;
+			}
+			//	body の先頭ブロックはプログラムの入口になり得るので取り除かない
+			if( b.list_id == 0 && b.label_index == 0 ) {
+				continue;
+			}
+			//	落下で到達し得る場合は取り除かない。
+			//	直前の命令 (コメントとラベルを遡る) が無条件 JP/JR か無条件 RET の場合のみ安全。
+			//	ただし、遡る途中のラベルはこのブロックと同じアドレスを指す別名であり、
+			//	そのラベルが参照されている場合はジャンプで到達し得るので取り除かない。
+			//	(IF cond THEN 行番号 の偽側ラベル等がこれに当たる)
+			bool fallthrough_safe = false;
+			bool alias_referenced = false;
+			{
+				int search_list = b.list_id;
+				size_t search_index = b.label_index;
+				while( true ) {
+					std::vector< CASSEMBLER_LINE > &slist = *lists[ search_list ];
+					bool found = false;
+					while( search_index > 0 ) {
+						search_index--;
+						CASSEMBLER_LINE &line = slist[ search_index ];
+						if( line.type == CMNEMONIC_TYPE::COMMENT ) {
+							continue;
+						}
+						if( line.type == CMNEMONIC_TYPE::LABEL ) {
+							if( is_referenced( line.operand1.s_value, &slist, search_index ) ) {
+								alias_referenced = true;
+								found = true;
+								break;
+							}
+							continue;
+						}
+						found = true;
+						if( ( ( line.type == CMNEMONIC_TYPE::JP || line.type == CMNEMONIC_TYPE::JR || line.type == CMNEMONIC_TYPE::RET ) &&
+							line.condition == CCONDITION::NONE ) ) {
+							fallthrough_safe = true;
+						}
+						break;
+					}
+					if( found ) {
+						break;
+					}
+					if( search_list == 1 ) {
+						//	subroutines の前は body を遡る
+						search_list = 0;
+						search_index = lists[ 0 ]->size();
+						continue;
+					}
+					//	body の前は define_labels (命令なし) なので落下しない
+					fallthrough_safe = true;
+					break;
+				}
+			}
+			if( !fallthrough_safe || alias_referenced ) {
+				continue;
+			}
+			list.erase( list.begin() + b.label_index, list.begin() + b.end_index );
 		}
 	}
 }

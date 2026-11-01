@@ -67,7 +67,7 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_POWER::optimization( CCOMPILE_INFO *p_inf
 			this->p_left = nullptr;
 			return p_node;
 		}
-		else if(  std::stod( this->p_left->s_value ) == 0.0 ) {
+		else if(  std::stod( this->p_right->s_value ) == 0.0 ) {
 			//	n^0 の場合
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
 			p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;

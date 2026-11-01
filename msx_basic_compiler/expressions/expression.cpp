@@ -44,6 +44,8 @@
 #include "expression_cvd.h"
 #include "expression_cvi.h"
 #include "expression_cvs.h"
+#include "expression_dskf.h"
+#include "expression_eof.h"
 #include "expression_exp.h"
 #include "expression_fix.h"
 #include "expression_fre.h"
@@ -57,6 +59,8 @@
 #include "expression_irnd.h"
 #include "expression_left.h"
 #include "expression_len.h"
+#include "expression_loc.h"
+#include "expression_lof.h"
 #include "expression_log.h"
 #include "expression_mid.h"
 #include "expression_mkd.h"
@@ -91,6 +95,106 @@
 
 // --------------------------------------------------------------------
 void CEXPRESSION::optimization( void ) {
+}
+
+// --------------------------------------------------------------------
+//	[B4] 式が純粋かどうかを返す。
+//
+//	代入文では従来、代入先アドレスを右辺評価の前に PUSH して保護する
+//	汎用形を生成してきた。しかし右辺が純粋な式であれば、評価の途中で
+//	代入先アドレスが壊れることはあり得ないので、評価後に直接ストア
+//	できる (write_variable_value_direct 参照)。
+//
+//	ここで「純粋」とは、評価が次のホワイトリストだけで構成される
+//	ことを指す。それ以外のノードが1つでも混ざれば対象外 (従来形)。
+//	・数値定数 (CEXPRESSION_TERM)。文字列定数は対象外。
+//	・通常変数の読み取り (CEXPRESSION_VARIABLE で dimension == 0
+//	  かつ数値型)。配列要素は添字式の評価とアドレス計算 (確保済み
+//	  配列への書き込みを伴う場合がある) を含むため対象外。
+//	  文字列変数は読み取り時に文字列テンポラリを作るため対象外。
+//	・二項演算子 (算術・比較・論理) と単項マイナス / NOT。
+//	  ただし左右 (単項は右) の子も再帰的に純粋な場合のみ。
+//	関数呼び出し (USR、PEEK、SIN 等の全関数ノード) は、評価が
+//	任意のメモリ読み書きや文字列テンポラリ生成を行い得るため、
+//	クラス単位で全て対象外とする。
+bool CEXPRESSION_NODE::is_pure( void ) {
+	//	数値定数
+	if( CEXPRESSION_TERM *p_term = dynamic_cast<CEXPRESSION_TERM*>( this ) ) {
+		return p_term->type == CEXPRESSION_TYPE::INTEGER
+			|| p_term->type == CEXPRESSION_TYPE::SINGLE_REAL
+			|| p_term->type == CEXPRESSION_TYPE::DOUBLE_REAL;
+	}
+	//	通常変数の読み取り
+	if( CEXPRESSION_VARIABLE *p_variable = dynamic_cast<CEXPRESSION_VARIABLE*>( this ) ) {
+		return p_variable->variable.dimension == 0
+			&& ( p_variable->variable.type == CVARIABLE_TYPE::INTEGER
+				|| p_variable->variable.type == CVARIABLE_TYPE::SINGLE_REAL
+				|| p_variable->variable.type == CVARIABLE_TYPE::DOUBLE_REAL );
+	}
+	//	二項演算子 (左右とも純粋な場合のみ純粋)
+	if( CEXPRESSION_OPERATOR_ADD *p = dynamic_cast<CEXPRESSION_OPERATOR_ADD*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_SUB *p = dynamic_cast<CEXPRESSION_OPERATOR_SUB*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_MUL *p = dynamic_cast<CEXPRESSION_OPERATOR_MUL*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_DIV *p = dynamic_cast<CEXPRESSION_OPERATOR_DIV*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_INTDIV *p = dynamic_cast<CEXPRESSION_OPERATOR_INTDIV*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_MOD *p = dynamic_cast<CEXPRESSION_OPERATOR_MOD*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_POWER *p = dynamic_cast<CEXPRESSION_OPERATOR_POWER*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_EQU *p = dynamic_cast<CEXPRESSION_OPERATOR_EQU*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_NEQ *p = dynamic_cast<CEXPRESSION_OPERATOR_NEQ*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_GT *p = dynamic_cast<CEXPRESSION_OPERATOR_GT*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_GE *p = dynamic_cast<CEXPRESSION_OPERATOR_GE*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_LT *p = dynamic_cast<CEXPRESSION_OPERATOR_LT*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_LE *p = dynamic_cast<CEXPRESSION_OPERATOR_LE*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_AND *p = dynamic_cast<CEXPRESSION_OPERATOR_AND*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_OR *p = dynamic_cast<CEXPRESSION_OPERATOR_OR*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_XOR *p = dynamic_cast<CEXPRESSION_OPERATOR_XOR*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_IMP *p = dynamic_cast<CEXPRESSION_OPERATOR_IMP*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_EQV *p = dynamic_cast<CEXPRESSION_OPERATOR_EQV*>( this ) ) {
+		return p->p_left != nullptr && p->p_right != nullptr && p->p_left->is_pure() && p->p_right->is_pure();
+	}
+	//	単項演算子 (右項が純粋な場合のみ純粋)
+	if( CEXPRESSION_OPERATOR_MINUS *p = dynamic_cast<CEXPRESSION_OPERATOR_MINUS*>( this ) ) {
+		return p->p_right != nullptr && p->p_right->is_pure();
+	}
+	if( CEXPRESSION_OPERATOR_NOT *p = dynamic_cast<CEXPRESSION_OPERATOR_NOT*>( this ) ) {
+		return p->p_right != nullptr && p->p_right->is_pure();
+	}
+	//	ホワイトリストに無いノード (関数呼び出し等) は対象外
+	return false;
 }
 
 // --------------------------------------------------------------------
@@ -572,6 +676,34 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "DSKF" ) {
+		CEXPRESSION_DSKF *p_term = new CEXPRESSION_DSKF;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "EOF" ) {
+		CEXPRESSION_EOF *p_term = new CEXPRESSION_EOF;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "EXP" ) {
 		CEXPRESSION_EXP *p_term = new CEXPRESSION_EXP;
 		p_result = p_term;
@@ -684,6 +816,14 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !p_info->list.is_end() && p_info->list.p_position->s_word == "," ) {
+			//	INPUT$( 文字数, #ファイル番号 ) のファイル形
+			p_info->list.p_position++;
+			if( !this->check_word( p_info, "#", SYNTAX_ERROR ) ) {
+				return p_result;
+			}
+			p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		}
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
@@ -741,6 +881,34 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "LEN" ) {
 		CEXPRESSION_LEN *p_term = new CEXPRESSION_LEN;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "LOC" ) {
+		CEXPRESSION_LOC *p_term = new CEXPRESSION_LOC;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "LOF" ) {
+		CEXPRESSION_LOF *p_term = new CEXPRESSION_LOF;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {

@@ -113,8 +113,32 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 	asm_line.set( "CALL", "", "sub_file_number" );
 	p_info->assembler_list.body.push_back( asm_line );
 
+	if( p_info->list.is_command_end() ) {
+		//	レコード番号が省略されている場合は、現在のレコード位置 (FCB のランダムレコード番号) の次のレコードを使う
+		p_info->assembler_list.add_label( "work_ptrfil", "0x0f864" );
+		asm_line.set( "LD", "", "HL", "[work_ptrfil]" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "DE", "33" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "ADD", "", "HL", "DE" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "E", "[HL]" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "INC", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "LD", "", "D", "[HL]" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "EX", "", "DE", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "INC", "", "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( "CALL", "", "sub_get" );
+		p_info->assembler_list.body.push_back( asm_line );
+		return true;
+	}
+
 	//	,
-	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "," ) {
+	if( p_info->list.p_position->s_word != "," ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		return true;
 	}

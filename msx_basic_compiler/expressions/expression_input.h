@@ -18,6 +18,7 @@ public:
 		this->release();
 	}
 	CEXPRESSION_NODE *p_operand = nullptr;
+	CEXPRESSION_NODE *p_operand2 = nullptr;	//	ファイル形 INPUT$(n, #f) のファイル番号 (省略時は nullptr)
 
 	CEXPRESSION_NODE* optimization( CCOMPILE_INFO *p_info );
 
@@ -27,6 +28,10 @@ public:
 		if( this->p_operand != nullptr ) {
 			delete this->p_operand;
 			this->p_operand = nullptr;
+		}
+		if( this->p_operand2 != nullptr ) {
+			delete this->p_operand2;
+			this->p_operand2 = nullptr;
 		}
 	}
 };

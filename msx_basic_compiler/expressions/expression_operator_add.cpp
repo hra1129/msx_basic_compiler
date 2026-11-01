@@ -52,6 +52,27 @@ CEXPRESSION_NODE* CEXPRESSION_OPERATOR_ADD::optimization( CCOMPILE_INFO *p_info 
 			return p_term;
 		}
 	}
+	if( this->p_left->is_constant ) {
+		//	左の項が整数の 0 の場合、右の項そのものと等価 (×1 の折り畳みと対称)
+		//	整数の 0 は、相手が整数・単精度・倍精度のいずれでも型変換で厳密に 0 になる
+		CEXPRESSION_TERM *p_left = reinterpret_cast< CEXPRESSION_TERM* >( this->p_left );
+		if( p_left->type == CEXPRESSION_TYPE::INTEGER && p_left->get_value() == 0. &&
+			this->p_right->type != CEXPRESSION_TYPE::STRING ) {
+			CEXPRESSION_NODE *p_node = this->p_right;
+			this->p_right = nullptr;
+			return p_node;
+		}
+	}
+	if( this->p_right->is_constant ) {
+		//	右の項が整数の 0 の場合、左の項そのものと等価
+		CEXPRESSION_TERM *p_right = reinterpret_cast< CEXPRESSION_TERM* >( this->p_right );
+		if( p_right->type == CEXPRESSION_TYPE::INTEGER && p_right->get_value() == 0. &&
+			this->p_left->type != CEXPRESSION_TYPE::STRING ) {
+			CEXPRESSION_NODE *p_node = this->p_left;
+			this->p_left = nullptr;
+			return p_node;
+		}
+	}
 	return nullptr;
 }
 

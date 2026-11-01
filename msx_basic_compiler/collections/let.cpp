@@ -188,16 +188,20 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		}
 		return false;
 	}
-	//	変数を生成する
-	CVARIABLE variable = p_info->p_compiler->get_variable_address();
-	asm_line.set( "PUSH", "", "HL" );
-	p_info->assembler_list.body.push_back( asm_line );
+	//	変数の情報を取得する
+	//	[B4] 直接ストアの可否が決まるまで、アドレス計算のコードは生成しない。
+	//	(従来は get_variable_address() でこの時点でコードを生成していた)
+	std::vector< CEXPRESSION* > dest_exp_list;
+	CVARIABLE variable = p_info->variable_manager.get_variable_info( p_info, dest_exp_list );
 	//	代入処理
+	bool is_valid = true;
 	if( !p_info->list.check_word( &(p_info->errors), "=", SYNTAX_ERROR ) ) {
 		// エラーは、check_word の中で登録される
+		is_valid = false;
 	}
 	else if( p_info->list.is_command_end() ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		is_valid = false;
 	}
 	//	右辺の処理
 	CEXPRESSION_TYPE exp_type;
@@ -208,6 +212,53 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 	case CVARIABLE_TYPE::DOUBLE_REAL:	exp_type = CEXPRESSION_TYPE::DOUBLE_REAL;	break;
 	case CVARIABLE_TYPE::STRING:		exp_type = CEXPRESSION_TYPE::STRING;		break;
 	}
+	//	[B4] 右辺を先に構文解析し、代入先が通常の数値変数で右辺が
+	//	純粋な式なら、アドレスを PUSH しない直接ストアにする。
+	//	それ以外は従来形 (アドレスを PUSH して評価後に間接ストア)。
+	bool is_parsed = false;
+	bool use_direct = false;
+	if( is_valid ) {
+		exp.makeup_node( p_info );
+		if( exp.get_top_node() != nullptr ) {
+			is_parsed = true;
+			if( variable.dimension == 0
+				&& variable.type != CVARIABLE_TYPE::STRING
+				&& variable.type != CVARIABLE_TYPE::UNKNOWN
+				&& exp.get_top_node()->is_pure() ) {
+				use_direct = true;
+			}
+		}
+	}
+	if( use_direct ) {
+		//	直接形: 右辺を評価し、結果をそのまま代入先へ書き込む
+		if( exp.compile( p_info, exp_type ) ) {
+			p_info->p_compiler->write_variable_value_direct( variable );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		}
+		return true;
+	}
+	if( is_valid && !is_parsed ) {
+		//	右辺が解釈できなかった場合は従来通り Syntax error
+		//	(従来は exp.compile() が false を返して同じエラーになっていた)
+		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+		return true;
+	}
+	//	従来形: 代入先アドレスを生成して PUSH し、右辺評価後に間接ストアする
+	//	(get_variable_address() と同じコード生成をここで行う)
+	if( variable.dimension == 0 ) {
+		//	単独変数の場合
+		asm_line.set( "LD", "", "HL", variable.s_label );
+		p_info->assembler_list.body.push_back( asm_line );
+	}
+	else {
+		//	配列変数の場合
+		p_info->variable_manager.compile_array_elements( p_info, dest_exp_list, variable );
+	}
+	asm_line.set( "PUSH", "", "HL" );
+	p_info->assembler_list.body.push_back( asm_line );
 	if( exp.compile( p_info, exp_type ) ) {
 		p_info->p_compiler->write_variable_value( variable );
 		exp.release();

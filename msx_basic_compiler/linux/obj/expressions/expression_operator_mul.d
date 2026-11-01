@@ -10,6 +10,7 @@ obj/expressions/expression_operator_mul.o: \
  ../expressions/../constant_info.h ../expressions/../single_real.h \
  ../expressions/../double_real.h ../expressions/../string_value.h \
  ../expressions/../variable_manager.h ../expressions/expression_term.h \
+ ../expressions/expression_variable.h \
  ../expressions/expression_operator_minus.h
 ../expressions/expression_operator_mul.h:
 ../expressions/expression.h:
@@ -27,4 +28,5 @@ obj/expressions/expression_operator_mul.o: \
 ../expressions/../string_value.h:
 ../expressions/../variable_manager.h:
 ../expressions/expression_term.h:
+../expressions/expression_variable.h:
 ../expressions/expression_operator_minus.h:
