@@ -475,6 +475,10 @@ bool CCALL::exec( CCOMPILE_INFO *p_info ) {
 		this->iotput( p_info );
 		return true;
 	}
+	if( p_info->list.p_position->s_word == "IOTFIND" ) {
+		this->iotfind( p_info );
+		return true;
+	}
 	if( p_info->list.p_position->s_word == "TURBO" ) {
 		this->turbo( p_info );
 		return true;

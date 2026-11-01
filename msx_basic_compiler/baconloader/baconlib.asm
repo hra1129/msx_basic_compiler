@@ -6778,12 +6778,29 @@ sub_open_for_append::
 			ld		de, [ptrfil]
 			call	sub_fopen
 			or		a, a
-			ret		z
+			jr		z, _seek_to_end
 			call	sub_fcreate
 			or		a, a
 			ret		z
 			; オープンに失敗したのでエラー
 			jp		err_device_io
+			; 既存ファイルを開けた場合、書き込み位置をファイルの末尾へ進める。
+			; sub_fopen はランダムレコード番号 (FCB +33～+36) を 0 に初期化するので、
+			; _FOPEN が設定したファイルサイズ (FCB +16～+19) をそこへ写す。
+			; レコードサイズは sub_fopen が 1 に設定するため、レコード番号＝バイト位置になる。
+			; ファイルサイズとランダムレコード番号の位置は DOS1/DOS2 で共通である。
+	_seek_to_end:
+			ld		hl, [ptrfil]			; HL = FCB のアドレス
+			push	hl
+			ld		de, 33
+			add		hl, de
+			ex		de, hl					; DE = FCB + 33 (ランダムレコード番号)
+			pop		hl
+			ld		bc, 16
+			add		hl, bc					; HL = FCB + 16 (ファイルサイズ)
+			ld		bc, 4
+			ldir
+			ret
 			; ID (CRT/GRP/CON/NUL) を調べて一致すればそのまま終わる
 	_id_check:
 			push	hl

@@ -12,7 +12,11 @@
 // --------------------------------------------------------------------
 void CEXPRESSION_TERM::set_double( double r ) {
 
-	if( (double)(int)r == r ) {
+	//	整数定数として扱えるのは、16ビット符号付き整数の範囲内だけ。
+	//	範囲外の値を INTEGER にすると、16ビット即値に収まらないコード
+	//	(LD HL, -123456 など) を生成してアセンブルできなくなるため、
+	//	その場合は実数定数のまま定数プール経由にする。
+	if( (double)(int)r == r && r >= -32768.0 && r <= 32767.0 ) {
 		this->type = CEXPRESSION_TYPE::INTEGER;
 		this->s_value = std::to_string( (int)r );
 		return;

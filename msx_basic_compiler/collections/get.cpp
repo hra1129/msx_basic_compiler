@@ -59,10 +59,12 @@ bool CGET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->assembler_list.body.push_back( asm_line );
 		}
 		else if( p_info->list.p_position->s_word == "," ) {
+			p_info->list.p_position++;
 			if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "A" ) {
 				p_info->errors.add( SYNTAX_ERROR, line_no );
 				return true;
 			}
+			p_info->list.p_position++;
 			asm_line.set( "LD", "", "A", "1" );
 			p_info->assembler_list.body.push_back( asm_line );
 		}
