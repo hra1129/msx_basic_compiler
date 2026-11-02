@@ -21,7 +21,9 @@ obj/collections/let.o: ../collections/let.cpp ../collections/let.h \
  ../collections/../expressions/../single_real.h \
  ../collections/../expressions/../double_real.h \
  ../collections/../expressions/../string_value.h \
- ../collections/../expressions/../variable_manager.h
+ ../collections/../expressions/../variable_manager.h \
+ ../collections/../expressions/expression_term.h \
+ ../collections/../expressions/expression.h
 ../collections/let.h:
 ../collections/../compiler.h:
 ../collections/../compile_info.h:
@@ -51,3 +53,5 @@ obj/collections/let.o: ../collections/let.cpp ../collections/let.h \
 ../collections/../expressions/../double_real.h:
 ../collections/../expressions/../string_value.h:
 ../collections/../expressions/../variable_manager.h:
+../collections/../expressions/expression_term.h:
+../collections/../expressions/expression.h:

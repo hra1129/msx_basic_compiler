@@ -19,6 +19,10 @@ private:
 
 	void exec_header( std::string s_name );
 	void exec_initializer( std::string s_name );
+	void analyze_deffn( void );
+	void analyze_on_error( void );
+	void analyze_labels( void );
+	void finalize_b6( void );
 	void exec_compile_body( void );
 	void exec_terminator( void );
 	void exec_data( void );
@@ -200,6 +204,8 @@ public:
 	//	is_lop = false : 結果を work_logopr (0x0fB02) に格納する。通常はこちら。
 	//	is_lop = true  : 結果を work_lop (0xf570) に格納する。ビットブロックトランスファはこちら。
 	void put_logical_operation( bool is_lop = false );
+	bool check_step( void );
+	void put_step_adjust( const char *s_label );
 
 	bool is_integer( const std::string s );
 };

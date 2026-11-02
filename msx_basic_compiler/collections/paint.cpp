@@ -22,6 +22,9 @@ bool CPAINT::exec( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 	p_info->assembler_list.activate_paint();
 
+	//	STEP (相対座標)
+	bool is_step = p_info->p_compiler->check_step();
+
 	//	(
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
@@ -31,6 +34,9 @@ bool CPAINT::exec( CCOMPILE_INFO *p_info ) {
 
 	//	X
 	if( exp.compile( p_info ) ) {
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
+		}
 		asm_line.set( "LD", "", "[work_gxpos]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();
@@ -49,6 +55,9 @@ bool CPAINT::exec( CCOMPILE_INFO *p_info ) {
 
 	//	Y
 	if( exp.compile( p_info ) ) {
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
+		}
 		asm_line.set( "LD", "", "[work_gypos]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		exp.release();

@@ -232,10 +232,19 @@ bool CPRINT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 	}
 	else {
-		asm_line.set( "LD", "", "H", "A" );
-		p_info->assembler_list.body.push_back( asm_line );
-		asm_line.set( "LD", "", "L", "A" );
-		p_info->assembler_list.body.push_back( asm_line );
+		if( is_printer ) {
+			//	LPRINT の場合、PTRFIL は 0 でなければならない。
+			//	OUTDO (RST 18h) は PRTFLG=1 かつ PTRFIL=0 のときプリンタへ出力する。
+			//	(従来は A=1 のまま HL へ転送して PTRFIL=0101h となり、出力が消えていた)
+			asm_line.set( "LD", "", "HL", "0" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
+		else {
+			asm_line.set( "LD", "", "H", "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "L", "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+		}
 		asm_line.set( "LD", "", "[work_ptrfil]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 	}

@@ -16,14 +16,14 @@ CEXPRESSION_NODE* CEXPRESSION_BASE::optimization( CCOMPILE_INFO *p_info ) {
 	int base_address[] = {
 		//	Name Tbl, Color Tbl, Pattern Tbl, Sp Attr, Sp Pattern
 		0x1800, 0x2000, 0x0000, 0x1E00, 0x3800,		//	SCREEN4
-		0x0000, 0x0000, 0x0000, 0x7600, 0x7400,		//	SCREEN5
-		0x0000, 0x0000, 0x0000, 0x7600, 0x7400,		//	SCREEN6
-		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN7
-		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN8
+		0x0000, 0x0000, 0x0000, 0x7600, 0x7800,		//	SCREEN5 ([B6] SPGT を実機実測に合わせて修正。従来 0x7400 は誤りでライブラリ側とも不一致だった)
+		0x0000, 0x0000, 0x0000, 0x7600, 0x7800,		//	SCREEN6 (同上)
+		0x0000, 0x0000, 0x0000, 0xFA00, 0xF000,		//	SCREEN7 ([B6] SPGT を実機実測に合わせて修正。従来 0xF800 は誤りでライブラリ側とも不一致だった)
+		0x0000, 0x0000, 0x0000, 0xFA00, 0xF000,		//	SCREEN8 (同上)
 		0x0000, 0x0000, 0x0000, 0x0000, 0x0000,		//	-
-		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN10
-		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN11
-		0x0000, 0x0000, 0x0000, 0xFA00, 0xF800,		//	SCREEN12
+		0x0000, 0x0000, 0x0000, 0xFA00, 0xF000,		//	SCREEN10 (同上)
+		0x0000, 0x0000, 0x0000, 0xFA00, 0xF000,		//	SCREEN11 (同上)
+		0x0000, 0x0000, 0x0000, 0xFA00, 0xF000,		//	SCREEN12 (同上)
 	};
 
 	if( this->p_operand == nullptr ) {
@@ -38,7 +38,8 @@ CEXPRESSION_NODE* CEXPRESSION_BASE::optimization( CCOMPILE_INFO *p_info ) {
 		//	定数の場合
 		if( this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
 			int id = std::stoi( this->p_operand->s_value );
-			if( id < 0 || id > 64 ) {
+			if( id < 0 || id > 64 || (id >= 45 && id <= 49) ) {
+				//	[B6] 45..49 は SCREEN9 相当で実機には存在せず Illegal function call になる
 				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
 				return nullptr;
 			}

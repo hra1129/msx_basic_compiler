@@ -2648,6 +2648,297 @@ void CASSEMBLER_LIST::activate_sub_input_file( void ) {
 }
 
 // --------------------------------------------------------------------
+//	LINE INPUT の共通部: work_buf 上の B バイトの文字列を一時文字列化する。
+//	入力: B = 長さ, work_buf = テキスト
+//	出力: HL = 一時文字列ディスクリプタ
+void CASSEMBLER_LIST::activate_sub_line_input( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_line_input" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_line_input" );
+	this->activate_allocate_string();
+	this->activate_assign_string();
+	this->add_label( "bios_inlin", "0x00B1" );
+	this->add_label( "work_buf", "0x0F55E" );
+
+	//	テキストを一時文字列にする
+	asm_line.set( "LABEL", "", "_li_make", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "BC" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "allocate_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "BC" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );			//	ディスクリプタ待避
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "D", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_buf" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "C", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "C" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_li_make_done" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LDIR", "", "", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_li_make_done", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );			//	HL = ディスクリプタ
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET", "", "", "" );
+	this->subroutines.push_back( asm_line );
+
+	//	代入して戻る (HL = ディスクリプタ, [_li_varaddr] = 変数アドレス)
+	asm_line.set( "LABEL", "", "_li_assign", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "EX", "", "DE", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "[_li_varaddr]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "assign_string" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "RET", "", "", "" );
+	this->subroutines.push_back( asm_line );
+
+	asm_line.set( "COMMENT", "", "LINE INPUT instruction entity (keyboard)", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_line_input", "" );
+	this->subroutines.push_back( asm_line );
+	//	変数アドレスを待避 (スタック: [retaddr][varaddr] の順に積まれている)
+	asm_line.set( "POP", "", "HL" );			//	retaddr
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE" );			//	varaddr
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[_li_varaddr]", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );			//	retaddr を戻す
+	this->subroutines.push_back( asm_line );
+	//	1行入力 (INLIN: プロンプト無しの行編集。HL = BUF-1 で戻る)
+	asm_line.set( "CALL", "", "bios_inlin" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );			//	HL = テキスト先頭 (work_buf)
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_li_count", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "[HL]" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_li_counted" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "255" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NZ", "_li_count" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_li_counted", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "_li_make" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "_li_assign" );
+	this->subroutines.push_back( asm_line );
+
+	asm_line.set( "LABEL", "", "_li_varaddr", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "DEFW", "", "0", "" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	DRAW の線分描画トランポリン (プログラム側)
+//	ライブラリ内の GML インタプリタから呼ばれる。LINE (0x58FC) は
+//	メインページ1 のルーチンであり、ライブラリ実行中はページ1 が
+//	BACONLIB 自身になっているため直接呼べない。ここでページ1 を
+//	メインROM へ戻してから LINE を呼び、戻る前にライブラリへ戻す。
+//	入力: BC = 終点X, DE = 終点Y (始点は GXPOS/GYPOS, 色は ATRBYT 設定済)
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_sub_draw_line( void )
+{
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_draw_line_tramp" ) ){
+		return;
+	}
+	this->subrouines_list.push_back( "sub_draw_line_tramp" );
+	this->add_label( "bios_enaslt", "0x0024" );
+	this->add_label( "bios_line", "0x058FC" );
+	this->add_label( "work_mainrom", "0xFCC1" );
+	this->add_label( "work_blibslot", "0xF3D3" );
+
+	asm_line.set( "LABEL", "", "sub_draw_line_tramp" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "bc", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "de", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "a", "[work_mainrom]" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "h", "0x40" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_enaslt", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "de", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "bc", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_line", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "a", "[work_blibslot]" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "h", "0x40" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_enaslt", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" ); this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	DRAW の =変数 変換用トランポリン (プログラム側)
+//	FRCINT (0x2F8A) は内部でページ1 の浮動小数点ルーチンを呼ぶため、
+//	ライブラリ実行中 (ページ1 = BACONLIB) は直接呼べない。
+//	ページ1 をメインROM へ戻してから FRCINT を呼び、結果 (DAC+2) を
+//	HL に入れて戻る。入力: DAC/VALTYP 設定済。出力: HL = 整数値
+// --------------------------------------------------------------------
+void CASSEMBLER_LIST::activate_sub_draw_frcint( void )
+{
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_draw_frcint_tramp" ) ){
+		return;
+	}
+	this->subrouines_list.push_back( "sub_draw_frcint_tramp" );
+	this->add_label( "bios_enaslt", "0x0024" );
+	this->add_label( "bios_frcint", "0x02F8A" );
+	this->add_label( "work_mainrom", "0xFCC1" );
+	this->add_label( "work_blibslot", "0xF3D3" );
+	this->add_label( "work_dac", "0x0F7F6" );
+
+	asm_line.set( "LABEL", "", "sub_draw_frcint_tramp" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "bc", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "de", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "a", "[work_mainrom]" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "h", "0x40" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_enaslt", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_frcint", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "hl", "[work_dac + 2]" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "hl", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "a", "[work_blibslot]" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "h", "0x40" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "bios_enaslt", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "hl", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "de", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "bc", "" ); this->subroutines.push_back( asm_line );
+	asm_line.set( "RET" ); this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
+//	LINE INPUT # の実体。_fi_getc (INPUT# 用) を再利用して1行分を読む。
+//	行末は CR / CRLF / LF のいずれでも可。EOF で行が終わった場合は
+//	読みかけの行を返す。1バイトも読めずに EOF の場合は
+//	Input past end (55) エラー (INPUT# の方針と一致)。
+void CASSEMBLER_LIST::activate_sub_line_input_file( void ) {
+	CASSEMBLER_LINE asm_line;
+
+	if( this->is_registered_subroutine( "sub_line_input_file" ) ) {
+		return;
+	}
+	this->subrouines_list.push_back( "sub_line_input_file" );
+	this->activate_sub_line_input();
+	this->activate_sub_input_file();
+	this->add_label( "bios_errhand", "0x0406F" );
+	this->add_label( "work_buf", "0x0F55E" );
+
+	asm_line.set( "COMMENT", "", "LINE INPUT# instruction entity", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "sub_line_input_file", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "HL" );			//	retaddr
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "POP", "", "DE" );			//	varaddr
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[_li_varaddr]", "DE" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "PUSH", "", "HL" );			//	retaddr を戻す
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "HL", "work_buf" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "B", "0" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_lif_loop", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "_fi_getc" );		//	A = 文字, EOF なら Carry
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "C", "_lif_eof" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "0x0D" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_lif_cr" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "0x0A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_lif_done" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "[HL]", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "HL" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "INC", "", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "255" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NZ", "_lif_loop" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "", "_lif_done" );		//	255文字で打ち切り
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_lif_cr", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "_fi_getc" );		//	CR の後の LF を読み捨てる
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "C", "_lif_done" );		//	EOF ならそれで終わり
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CP", "", "A", "0x0A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "Z", "_lif_done" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "_fi_ungetc" );	//	LF でなければ押し戻す
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "", "_lif_done" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_lif_eof", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "A", "B" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "OR", "", "A", "A" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JR", "NZ", "_lif_done" );	//	読みかけの行は返す
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LD", "", "E", "55" );		//	Input past end
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "bios_errhand" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "LABEL", "", "_lif_done", "" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "CALL", "", "_li_make" );
+	this->subroutines.push_back( asm_line );
+	asm_line.set( "JP", "", "_li_assign" );
+	this->subroutines.push_back( asm_line );
+}
+
+// --------------------------------------------------------------------
 void CASSEMBLER_LIST::activate_sub_input( void ) {
 	CASSEMBLER_LINE asm_line;
 

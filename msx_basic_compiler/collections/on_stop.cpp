@@ -16,7 +16,11 @@ void CONSTOP::stop( CCOMPILE_INFO *p_info ) {
 	p_info->list.p_position++;
 
 	if( p_info->list.is_command_end() ) {
-		p_info->errors.add( SYNTAX_ERROR, line_no );
+		//	裸の STOP。コンパイル済みプログラムでは CONT による再開は
+		//	原理的にできないため、END と同義 (プログラムを終了して
+		//	BASIC へ戻る) として扱う。[Batch 7 の方針決定]
+		asm_line.set( "JP", "", "program_termination" );
+		p_info->assembler_list.body.push_back( asm_line );
 		return;
 	}
 

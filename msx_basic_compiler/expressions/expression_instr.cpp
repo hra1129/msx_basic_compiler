@@ -26,6 +26,13 @@ CEXPRESSION_NODE* CEXPRESSION_INSTR::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand2;
 		this->p_operand2 = p;
 	}
+	if( this->p_operand0 != nullptr ) {
+		p = this->p_operand0->optimization( p_info );
+		if( p != nullptr ) {
+			delete this->p_operand0;
+			this->p_operand0 = p;
+		}
+	}
 	return nullptr;
 }
 
@@ -34,6 +41,61 @@ void CEXPRESSION_INSTR::compile( CCOMPILE_INFO *p_info ) {
 	CASSEMBLER_LINE asm_line;
 
 	if( this->p_operand1 == nullptr || this->p_operand2 == nullptr ) {
+		return;
+	}
+	if( this->p_operand0 != nullptr ) {
+		//	[B6] 3引数形: blib_instr3 (開始位置 BC, 対象文字列 DE, 検索文字列 HL)
+		//	開始位置を処理
+		this->p_operand0->compile( p_info );
+		if( this->p_operand0->type == CEXPRESSION_TYPE::STRING ) {
+			p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
+			return;
+		}
+		this->convert_type( p_info, CEXPRESSION_TYPE::INTEGER, this->p_operand0->type );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		//	対象文字列を処理
+		this->p_operand1->compile( p_info );
+		this->convert_type( p_info, CEXPRESSION_TYPE::STRING, this->p_operand1->type );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		//	検索文字列を処理
+		this->p_operand2->compile( p_info );
+		this->convert_type( p_info, CEXPRESSION_TYPE::STRING, this->p_operand2->type );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "BC", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+
+		p_info->assembler_list.activate_free_string();
+		if( p_info->assembler_list.add_subroutines( "instr_result" ) ) {
+			asm_line.set( "LABEL", "", "instr_result" );
+			p_info->assembler_list.variables_area.push_back( asm_line );
+			asm_line.set( "DEFW", "", "0" );
+			p_info->assembler_list.variables_area.push_back( asm_line );
+		}
+		this->type = CEXPRESSION_TYPE::INTEGER;
+		p_info->assembler_list.add_label( "blib_instr3", "0x04129" );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "IX", COPERAND_TYPE::NONE, "blib_instr3" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[instr_result]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "free_string", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::MEMORY, "[instr_result]" );
+		p_info->assembler_list.body.push_back( asm_line );
 		return;
 	}
 	//	第１引数を処理

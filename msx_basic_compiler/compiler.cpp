@@ -23,6 +23,7 @@
 #include "collections/defdbl.h"
 #include "collections/defint.h"
 #include "collections/defusr.h"
+#include "collections/deffn.h"
 #include "collections/defsng.h"
 #include "collections/defstr.h"
 #include "collections/dim.h"
@@ -43,6 +44,7 @@
 #include "collections/let.h"
 #include "collections/lset.h"
 #include "collections/line.h"
+#include "collections/lineinput.h"
 #include "collections/locate.h"
 #include "collections/name.h"
 #include "collections/next.h"
@@ -53,10 +55,13 @@
 #include "collections/on_sprite.h"
 #include "collections/on_strig.h"
 #include "collections/on_stop.h"
+#include "collections/on_error.h"
+#include "collections/resume.h"
 #include "collections/open.h"
 #include "collections/out.h"
 #include "collections/paint.h"
 #include "collections/play.h"
+#include "collections/draw.h"
 #include "collections/poke.h"
 #include "collections/pokew.h"
 #include "collections/pokes.h"
@@ -76,6 +81,8 @@
 #include "collections/setscreen.h"
 #include "collections/setscroll.h"
 #include "collections/settitle.h"
+#include "collections/setdatetime.h"
+#include "collections/wait.h"
 #include "collections/sound.h"
 #include "collections/swap.h"
 #include "collections/vpoke.h"
@@ -118,6 +125,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CDATA );
 	this->collection.push_back( new CDEFDBL );
 	this->collection.push_back( new CDEFINT );
+	this->collection.push_back( new CDEFFN );		//	DEF FN は DEF USR より先に判定する
 	this->collection.push_back( new CDEFUSR );
 	this->collection.push_back( new CDEFSNG );
 	this->collection.push_back( new CDEFSTR );
@@ -138,6 +146,7 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CKILL );
 	this->collection.push_back( new CLET );
 	this->collection.push_back( new CLSET );
+	this->collection.push_back( new CLINEINPUT );		//	LINE INPUT は LINE より先に判定する
 	this->collection.push_back( new CLINE );
 	this->collection.push_back( new CLOCATE );
 	this->collection.push_back( new CCLOSE );
@@ -149,11 +158,14 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CONSPRITE );
 	this->collection.push_back( new CONSTRIG );
 	this->collection.push_back( new CONSTOP );
+	this->collection.push_back( new CONERROR );			//	ON ERROR は CONGOTO より先 (ERR が式として解釈されるため)
 	this->collection.push_back( new CONGOTO );			//	ON GOTO/GOSUB は、ON～GOSUB より後
+	this->collection.push_back( new CRESUME );
 	this->collection.push_back( new COPEN );
 	this->collection.push_back( new COUT );
 	this->collection.push_back( new CPAINT );
 	this->collection.push_back( new CPLAY );
+	this->collection.push_back( new CDRAW );
 	this->collection.push_back( new CPOKE );
 	this->collection.push_back( new CPOKEW );
 	this->collection.push_back( new CPOKES );
@@ -173,11 +185,13 @@ void CCOMPILER::initialize( void ) {
 	this->collection.push_back( new CSETSCROLL );
 	this->collection.push_back( new CSETSCREEN );
 	this->collection.push_back( new CSETTITLE );
+	this->collection.push_back( new CSETDATETIME );
 	this->collection.push_back( new CSOUND );
 	this->collection.push_back( new CSWAP );
 	this->collection.push_back( new CVPOKE );
 	this->collection.push_back( new CVPOKES );
 	this->collection.push_back( new CWIDTH );
+	this->collection.push_back( new CWAIT );
 }
 
 // --------------------------------------------------------------------
@@ -210,6 +224,24 @@ void CCOMPILER::line_compile( bool is_top ) {
 		//	割り込み処理用のルーチンを呼び出す
 		asm_line.set( "CALL", "", "interrupt_process", "" );
 		this->info.assembler_list.body.push_back( asm_line );
+		//	[B7] ON ERROR 用の文マーカー: この文のレコード位置と
+		//	スタックポインタを控え、エラー時に ERL と RESUME を可能にする
+		if( this->info.use_on_error ) {
+			std::string s_mark = this->info.get_auto_label();
+			asm_line.set( "LABEL", "", s_mark, "" );
+			this->info.assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", s_mark + "_rec" );
+			this->info.assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[svari_error_stmt]", "HL" );
+			this->info.assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "HL", "0" );
+			this->info.assembler_list.body.push_back( asm_line );
+			asm_line.set( "ADD", "", "HL", "SP" );
+			this->info.assembler_list.body.push_back( asm_line );
+			asm_line.set( "LD", "", "[svari_error_sp]", "HL" );
+			this->info.assembler_list.body.push_back( asm_line );
+			this->info.error_mark_list.push_back( std::make_pair( s_mark, this->info.list.get_line_no() ) );
+		}
 		//	命令の処理を生成する
 		for( auto p: this->collection ) {
 			do_exec = p->exec( &(this->info) );
@@ -392,7 +424,7 @@ void CCOMPILER::exec_initializer( std::string s_name ) {
 	this->info.assembler_list.add_label( "work_vartab", "0x0F6C2" );	//	NEWSTT を呼ぶと [VARTAB]→[STREND], [STREND] ～ [STREND] + [VALTYP] を 00h で塗りつぶすため、初期化が必要。
 	this->info.assembler_list.add_label( "work_usrtab", "0x0F39A" );
 	this->info.assembler_list.add_label( "bios_newstt", "0x04601" );
-	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 17" );	// FCB + 16 entries and one terminating entry
+	this->info.assembler_list.add_label( "file_info_size", "37 + 3 * 33" );	// FCB + 32 entries and one terminating entry
 
 	//	初期化処理 (BACONLIB存在確認)
 	//	起動処理の本体は BACONLIB 側 (blib_startup / blib_startup_main) へ移した。
@@ -1204,266 +1236,55 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_stop ) {
-		//	H.TIMI処理ルーチン ( ON STOP 処理 )
+		//	H.TIMI処理ルーチン ( ON STOP PROCESS ------------------- )
+		//	実体は BACONLIB 側へ移した (Batch 7: A3)
 		asm_line.set( "COMMENT", "", "ON STOP PROCESS -------------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[svarb_on_stop_mode]" );	//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.add_label( "blib_htimi_stop", "0x0413e" );
+		asm_line.set( "LD", "", "HL", "interrupt_params_stop" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "A" );
+		asm_line.set( "LD", "", "IX", "blib_htimi_stop" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_end_of_stop", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- CTRL+STOP が押されているか？
-		asm_line.set( "LD", "", "A", "[svarb_on_stop_last]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "D", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xAA]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "0xF0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "6" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "C", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OUT", "", "[0xAA]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xA9]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "0xFD" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "C" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OUT", "", "[0xAA]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xA9]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "0xEF" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "B" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[svarb_on_stop_last]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CP", "", "A", "0xED" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "NZ", "_end_of_stop", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "D" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CP", "", "A", "0xED" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_end_of_stop", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "0xED" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[svarb_on_stop_exec]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LABEL", "", "_end_of_stop", "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_interval ) {
-		//	H.TIMI処理ルーチン ( ON INTERVAL 処理 )
+		//	H.TIMI処理ルーチン ( ON INTERVAL PROCESS --------------- )
+		//	実体は BACONLIB 側へ移した (Batch 7: A3)
 		asm_line.set( "COMMENT", "", "ON INTERVAL PROCESS ---------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );	//	0:OFF, 1:ON, 2:STOP
+		this->info.assembler_list.add_label( "blib_htimi_interval", "0x0413b" );
+		asm_line.set( "LD", "", "HL", "interrupt_params_interval" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "A" );
+		asm_line.set( "LD", "", "IX", "blib_htimi_interval" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_end_of_interval", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- デクリメントカウンターを減算
-		asm_line.set( "LD", "", "HL", "[svari_on_interval_counter]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "L" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "H" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_happned_interval", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "", "_end_of_interval", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LABEL", "", "_happned_interval", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[svarb_on_interval_mode]" );			//	0:OFF, 1:ON, 2:STOP
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "A", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "NZ", "_end_of_interval", "" );					//	STOP なら保留
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "A", "" );									//	1:Execute
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[svarb_on_interval_exec]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "[svari_on_interval_value]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[svari_on_interval_counter]", "HL" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LABEL", "", "_end_of_interval", "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_strig ) {
-		//	H.TIMI処理ルーチン ( ON STRIG 処理 )
+		//	H.TIMI処理ルーチン ( ON STRIG PROCESS ----------------- )
+		//	実体は BACONLIB 側へ移した (Batch 7: A3)
 		asm_line.set( "COMMENT", "", "ON STRIG PROCESS -----------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		this->info.assembler_list.add_label( "bios_gttrig", "0x00D8" );
-		asm_line.set( "LD", "", "HL", "svarf_on_strig0_mode" );
+		this->info.assembler_list.add_label( "blib_htimi_strig", "0x04141" );
+		asm_line.set( "LD", "", "HL", "interrupt_params_strig" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "BC", "0x0500" );
+		asm_line.set( "LD", "", "IX", "blib_htimi_strig" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		//	-- STRIG(n)
-		asm_line.set( "LABEL", "", "_on_strig_loop2", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[HL]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "JR", "Z", "_skip_strig2", "" );					//	0:OFF なら、処理をスキップ
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[HL]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "A" );							//	1つ前の GTTRIG状態を更新
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "C" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "PUSH", "", "BC", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "bios_gttrig", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "POP", "", "BC", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LABEL", "", "_skip_strig2", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "C", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DJNZ", "", "_on_strig_loop2", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-
-		asm_line.set( "LABEL", "", "_end_of_strig", "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	if( this->info.use_on_key ) {
-		//	H.TIMI処理ルーチン ( ON KEY 処理 )
+		//	H.TIMI処理ルーチン ( ON KEY PROCESS ------------------- )
+		//	実体は BACONLIB 側へ移した (Batch 7: A3)
 		asm_line.set( "COMMENT", "", "ON KEY PROCESS -------------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xAA]" );
+		this->info.assembler_list.add_label( "blib_htimi_key", "0x04144" );
+		asm_line.set( "LD", "", "HL", "interrupt_params_key" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "0xF0" );
+		asm_line.set( "LD", "", "IX", "blib_htimi_key" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "6" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OUT", "", "[0xAA]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xA9]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "0x1E" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "RRCA", "", "", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "C", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "B" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "A", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OUT", "", "[0xAA]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "IN", "", "A", "[0xA9]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "OR", "", "A", "0xFC" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "C" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "C", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key06_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x90" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key07_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0xA0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key08_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0xC0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key09_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x81" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key10_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x82" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "C" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "XOR", "", "A", "0x80" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "C", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key01_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x90" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key02_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0xA0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key03_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0xC0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key04_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x81" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "HL", "svarf_on_key05_mode" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "B", "0x82" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "CALL", "", "_on_key_sub", "" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 	//	H.TIMI処理ルーチン終了処理
@@ -1474,42 +1295,16 @@ void CCOMPILER::exec_sub_h_timi( void ) {
 	asm_line.set( "JP", "", "h_timi_backup", "" );		// VDP S#0 の値 (Aレジスタ) を復帰
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	if( this->info.use_on_key ) {
-		//	H.TIMI処理ルーチンの中のサブルーチン
-		asm_line.set( "LABEL", "", "_on_key_sub", "" );
+		//	H.TIMI処理ルーチン ( ON KEY PROCESS ------------------- )
+		//	実体は BACONLIB 側へ移した (Batch 7: A3)
+		asm_line.set( "COMMENT", "", "ON KEY PROCESS -------------------", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "A", "[HL]" );
+		this->info.assembler_list.add_label( "blib_htimi_key", "0x04144" );
+		asm_line.set( "LD", "", "HL", "interrupt_params_key" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "B" );
+		asm_line.set( "LD", "", "IX", "blib_htimi_key" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "INC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "D", "[HL]" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "0" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "RET", "Z", "", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "C" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "RET", "NZ", "", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "A", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "AND", "", "A", "D" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "RET", "NZ", "", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "HL", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "DEC", "", "A", "" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "LD", "", "[HL]", "A" );
-		this->info.assembler_list.subroutines.push_back( asm_line );
-		asm_line.set( "RET" );
+		asm_line.set( "CALL", "", "call_blib", "" );
 		this->info.assembler_list.subroutines.push_back( asm_line );
 	}
 }
@@ -1546,6 +1341,58 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	this->info.assembler_list.add_label( "blib_h_erro_cleanup", "0x04114" );
 	asm_line.set( "LABEL", "", "h_erro_handler", "" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
+	if( this->info.use_on_error ) {
+		//	[B7] ON ERROR のトラップ。入口の約束: E = エラーコード
+		//	(実機プローブで確認済み)。捕捉しない場合は従来経路へ
+		//	レジスタを壊さずに落とす。
+		asm_line.set( "LD", "", "A", "[svarb_error_in_handler]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "NZ", "_he_fatal" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "PUSH", "", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_error_target]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "H" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "OR", "", "A", "L" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "POP", "", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JR", "Z", "_he_fatal" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		//	捕捉する: コードと発生文を控え、文頭の SP へ戻して飛ぶ
+		asm_line.set( "LD", "", "A", "E" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_error_code]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_error_stmt]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svari_error_raised]", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "E", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "INC", "", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "D", "[HL]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svari_error_line]", "DE" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "A", "1" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "[svarb_error_in_handler]", "A" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "SP", "[svari_error_sp]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LD", "", "HL", "[svari_error_target]" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "JP", "", "HL" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+		asm_line.set( "LABEL", "", "_he_fatal", "" );
+		this->info.assembler_list.subroutines.push_back( asm_line );
+	}
 	asm_line.set( "PUSH", "", "HL" );
 	this->info.assembler_list.subroutines.push_back( asm_line );
 	asm_line.set( "PUSH", "", "DE" );
@@ -1572,6 +1419,24 @@ void CCOMPILER::exec_sub_on_error( void ) {
 	this->info.assembler_list.variables_area.push_back( asm_line );
 	asm_line.set( "DEFB", "", "0, 0, 0, 0, 0", "" );
 	this->info.assembler_list.variables_area.push_back( asm_line );
+
+	//	[B7] 文レコード表 {行番号, 再実行アドレス, 次文アドレス}
+	if( this->info.use_on_error ) {
+		size_t i;
+		for( i = 0; i < this->info.error_mark_list.size(); i++ ) {
+			std::string s_next;
+			if( i + 1 < this->info.error_mark_list.size() ) {
+				s_next = this->info.error_mark_list[i + 1].first;
+			}
+			else {
+				s_next = "program_termination";
+			}
+			asm_line.set( "LABEL", "", this->info.error_mark_list[i].first + "_rec", "" );
+			this->info.assembler_list.subroutines.push_back( asm_line );
+			asm_line.set( "DEFW", "", std::to_string( this->info.error_mark_list[i].second ) + ", " + this->info.error_mark_list[i].first + ", " + s_next, "" );
+			this->info.assembler_list.subroutines.push_back( asm_line );
+		}
+	}
 }
 
 // --------------------------------------------------------------------
@@ -1618,6 +1483,47 @@ void CCOMPILER::exec_subroutines( void ) {
 		this->info.assembler_list.const_string_area.push_back( asm_line );
 	}
 
+	if( this->info.assembler_list.is_registered_subroutine( "draw_workspace" ) ) {
+		auto basic_type = []( CVARIABLE_TYPE type ) {
+			switch( type ) {
+			case CVARIABLE_TYPE::INTEGER: return 2;
+			case CVARIABLE_TYPE::STRING: return 3;
+			case CVARIABLE_TYPE::SINGLE_REAL: return 4;
+			case CVARIABLE_TYPE::DOUBLE_REAL: return 8;
+			default: return 0;
+			}
+		};
+		asm_line.set( "LABEL", "", "draw_default_types" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		for( auto type: this->info.variables.def_types ) {
+			asm_line.set( "DEFB", "", std::to_string( basic_type( type ) ) );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+		}
+		asm_line.set( "DEFW", "", "heap_end" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		asm_line.set( "LABEL", "", "draw_variable_table" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+		for( const auto &entry: this->info.variables.dictionary ) {
+			const CVARIABLE &variable = entry.second;
+			if( variable.s_name.empty() || variable.s_name[0] < 'A' || variable.s_name[0] > 'Z' ||
+				basic_type( variable.type ) == 0 ) {
+				continue;
+			}
+			std::string name = variable.s_name;
+			if( name.back() == '%' || name.back() == '!' || name.back() == '#' || name.back() == '$' ) {
+				name.pop_back();
+			}
+			asm_line.set( "DEFB", "", std::to_string( static_cast<unsigned char>( name[0] ) ) + "," +
+				std::to_string( name.size() > 1 ? static_cast<unsigned char>( name[1] ) : 0 ) + "," +
+				std::to_string( basic_type( variable.type ) + (variable.dimension != 0 ? 128 : 0) ) );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+			asm_line.set( "DEFW", "", variable.s_label );
+			this->info.assembler_list.const_string_area.push_back( asm_line );
+		}
+		asm_line.set( "DEFB", "", "0" );
+		this->info.assembler_list.const_string_area.push_back( asm_line );
+	}
+
 	this->exec_sub_run();
 	this->exec_sub_interrupt_process();
 	this->sub_return_line_num();
@@ -1625,6 +1531,219 @@ void CCOMPILER::exec_subroutines( void ) {
 	this->exec_sub_restore_h_timi();
 	this->exec_sub_on_error();
 	this->optimize_remove_interrupt_process();
+}
+
+// --------------------------------------------------------------------
+
+// --------------------------------------------------------------------
+//	次の単語が指定の予約語かどうかを、位置を変えずに調べる
+static bool peek_next_word( CBASIC_LIST &list, const std::string &s_word ) {
+	CBASIC_LIST_POSITION saved_position;
+	bool result;
+
+	if( list.is_end() ) {
+		return false;
+	}
+	saved_position = list.get_position();
+	list.p_position++;
+	result = !list.is_end() && list.p_position->type == CBASIC_WORD_TYPE::RESERVED_WORD && list.p_position->s_word == s_word;
+	list.set_position( saved_position );
+	return result;
+}
+
+// --------------------------------------------------------------------
+//	DEF FN の事前スキャン。本体は呼び出し側でインライン展開するため、
+//	ここでは名前・仮引数変数・本体の位置だけを登録する。
+//	DEF FN 文自体は実行コードを生成しない (CDEFFN)。
+void CCOMPILER::analyze_deffn( void ) {
+	CBASIC_LIST_POSITION saved_position;
+	std::vector< CBASIC_WORD >::const_iterator p;
+
+	saved_position = this->info.list.get_position();
+	this->info.list.reset_position();
+	while( !this->info.list.is_end() ) {
+		p = this->info.list.p_position;
+		if( p->type != CBASIC_WORD_TYPE::RESERVED_WORD || p->s_word != "DEF"
+			|| !peek_next_word( this->info.list, "FN" ) ) {
+			this->info.list.p_position++;
+			continue;
+		}
+		//	DEF FN が見つかった
+		{
+			int def_line_no = p->line_no;
+			std::string s_name;
+			std::string s_key;
+			CEXPRESSION_TYPE result_type = CEXPRESSION_TYPE::DOUBLE_REAL;
+			bool has_suffix = false;
+			std::vector< CEXPRESSION* > exp_list;
+			CVARIABLE param;
+			CCOMPILE_INFO::CFN_DEFINITION definition;
+
+			this->info.list.p_position += 2;
+			this->info.list.update_current_line_no();
+			if( this->info.list.is_end() || this->info.list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+				continue;
+			}
+			s_name = this->info.list.p_position->s_word;
+			std::transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
+			this->info.list.p_position++;
+			if( s_name.size() > 2 && this->info.options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
+				s_name.resize( 2 );
+			}
+			s_key = "FN" + s_name;
+			if( !this->info.list.is_end() ) {
+				if( this->info.list.p_position->s_word == "%" ) {
+					s_key += "%";	result_type = CEXPRESSION_TYPE::INTEGER;		has_suffix = true;	this->info.list.p_position++;
+				}
+				else if( this->info.list.p_position->s_word == "!" ) {
+					s_key += "!";	result_type = CEXPRESSION_TYPE::SINGLE_REAL;	has_suffix = true;	this->info.list.p_position++;
+				}
+				else if( this->info.list.p_position->s_word == "#" ) {
+					s_key += "#";	result_type = CEXPRESSION_TYPE::DOUBLE_REAL;	has_suffix = true;	this->info.list.p_position++;
+				}
+				else if( this->info.list.p_position->s_word == "$" ) {
+					s_key += "$";	result_type = CEXPRESSION_TYPE::STRING;		has_suffix = true;	this->info.list.p_position++;
+				}
+			}
+			if( !has_suffix && s_name.size() > 0 ) {
+				switch( this->info.variables.def_types[ s_name[0] - 'A' ] ) {
+				case CVARIABLE_TYPE::INTEGER:		s_key += "%";	result_type = CEXPRESSION_TYPE::INTEGER;		break;
+				case CVARIABLE_TYPE::SINGLE_REAL:	s_key += "!";	result_type = CEXPRESSION_TYPE::SINGLE_REAL;	break;
+				case CVARIABLE_TYPE::STRING:		s_key += "$";	result_type = CEXPRESSION_TYPE::STRING;		break;
+				default:							s_key += "#";	result_type = CEXPRESSION_TYPE::DOUBLE_REAL;	break;
+				}
+			}
+			//	"(" 仮引数 ")"
+			if( this->info.list.is_end() || this->info.list.p_position->s_word != "(" ) {
+				continue;
+			}
+			this->info.list.p_position++;
+			param = this->info.variable_manager.get_variable_info( &(this->info), exp_list, false );
+			for( CEXPRESSION *p_exp: exp_list ) {
+				delete p_exp;
+			}
+			if( param.type == CVARIABLE_TYPE::UNKNOWN || param.dimension != 0 ) {
+				continue;
+			}
+			if( this->info.list.is_end() || this->info.list.p_position->s_word != ")" ) {
+				continue;
+			}
+			this->info.list.p_position++;
+			if( this->info.list.is_end() || this->info.list.p_position->s_word != "=" ) {
+				continue;
+			}
+			this->info.list.p_position++;
+			definition.param = param;
+			definition.result_type = result_type;
+			definition.def_line_no = def_line_no;
+			definition.p_body = this->info.list.p_position;
+			this->info.fn_definitions[ s_key ] = definition;
+		}
+	}
+	this->info.list.set_position( saved_position );
+}
+
+// --------------------------------------------------------------------
+//	ON ERROR の事前スキャン。文マーカーはプログラム先頭から必要なので、
+//	本体コンパイル前に使用有無だけを判定する。
+void CCOMPILER::analyze_on_error( void ) {
+	CBASIC_LIST_POSITION saved_position;
+	std::vector< CBASIC_WORD >::const_iterator p;
+
+	saved_position = this->info.list.get_position();
+	this->info.list.reset_position();
+	while( !this->info.list.is_end() ) {
+		p = this->info.list.p_position;
+		if( p->type == CBASIC_WORD_TYPE::RESERVED_WORD && p->s_word == "ON"
+			&& peek_next_word( this->info.list, "ERROR" ) ) {
+			this->info.use_on_error = true;
+			break;
+		}
+		this->info.list.p_position++;
+	}
+	this->info.list.set_position( saved_position );
+}
+
+// --------------------------------------------------------------------
+//	ラベル飛び先の事前スキャン (B6 の「ループ途中への飛び込み」判定用)。
+//	飛び先として参照されている *ラベル の定義行を集める。
+void CCOMPILER::analyze_labels( void ) {
+	CBASIC_LIST_POSITION saved_position;
+	std::map< std::string, int > defs;
+	std::set< std::string > targets;
+	CBASIC_WORD prev;
+	bool is_first = true;
+
+	saved_position = this->info.list.get_position();
+	this->info.list.reset_position();
+	while( !this->info.list.is_end() ) {
+		const CBASIC_WORD &word = *(this->info.list.p_position);
+		if( word.type == CBASIC_WORD_TYPE::LINE_NO && !word.s_word.empty() && word.s_word[0] == '*' ) {
+			bool is_def = is_first || prev.line_no != word.line_no || prev.s_word == ":";
+			if( is_def ) {
+				defs[ word.s_word ] = word.line_no;
+			}
+			else {
+				targets.insert( word.s_word );
+			}
+		}
+		prev = word;
+		is_first = false;
+		this->info.list.p_position++;
+	}
+	for( auto &entry: defs ) {
+		if( targets.count( entry.first ) ) {
+			this->info.label_target_lines.push_back( entry.second );
+		}
+	}
+	this->info.list.set_position( saved_position );
+}
+
+// --------------------------------------------------------------------
+//	[B6] 静的ペアリングが成立した FOR の、セル保存コードを取り除く。
+//	optimize() の先頭で呼ぶ (他の最適化が body を触る前に行う)。
+void CCOMPILER::finalize_b6( void ) {
+	std::vector< CASSEMBLER_LINE > &body = this->info.assembler_list.body;
+	int i;
+
+	if( this->info.options.optimize_level != COPTIMIZE_LEVEL::DEEP ) {
+		return;
+	}
+	auto to_upper = []( std::string v ) {
+		std::transform( v.begin(), v.end(), v.begin(), ::toupper );
+		return v;
+	};
+	//	後ろから消す (前方のインデックスがずれないように)
+	for( i = (int)this->info.for_b6_records.size() - 1; i >= 0; i-- ) {
+		CCOMPILE_INFO::CFOR_B6_RECORD &rec = this->info.for_b6_records[i];
+		std::string s_next_upper;
+		std::string s_cell_operand;
+		size_t best, k;
+		if( !rec.paired ) {
+			continue;
+		}
+		if( this->info.b6_cell_used_vars.count( rec.s_cell_label ) ) {
+			continue;		//	セル経由の NEXT が残っているので保存は必要
+		}
+		s_next_upper = to_upper( rec.s_next_label );
+		s_cell_operand = "[" + to_upper( rec.s_cell_label ) + "]";
+		//	保存コードのペア (LD HL, s_next / LD [cell], HL) を内容で探す。
+		//	記録した位置に最も近い一致を1つだけ消す。
+		best = (size_t)-1;
+		for( k = 0; k + 1 < body.size(); k++ ) {
+			if( body[k].type == CMNEMONIC_TYPE::LD && to_upper( body[k].operand2.s_value ) == s_next_upper
+				&& body[k + 1].type == CMNEMONIC_TYPE::LD && to_upper( body[k + 1].operand1.s_value ) == s_cell_operand ) {
+				if( best == (size_t)-1
+					|| (k >= rec.store_body_index && best < rec.store_body_index)
+					|| (k < rec.store_body_index && best >= rec.store_body_index && (rec.store_body_index - k) < (best - rec.store_body_index)) ) {
+					best = k;
+				}
+			}
+		}
+		if( best != (size_t)-1 ) {
+			body.erase( body.begin() + best, body.begin() + best + 2 );
+		}
+	}
 }
 
 // --------------------------------------------------------------------
@@ -1638,6 +1757,9 @@ bool CCOMPILER::exec( std::string s_name ) {
 	//	実装をシンプルにするために、途中で変わることは想定しない。
 	this->info.list.reset_position();
 	this->info.variable_manager.analyze_defvars( &(this->info) );
+	this->analyze_deffn();
+	this->analyze_on_error();
+	this->analyze_labels();
 
 	//	空文字列を文字列プールに追加
 	CSTRING value;
@@ -1653,6 +1775,15 @@ bool CCOMPILER::exec( std::string s_name ) {
 	this->exec_terminator();
 	this->exec_data();
 
+	if( this->info.use_on_error ) {
+		this->info.variable_manager.put_special_variable( &(this->info), "error_target", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_code", CVARIABLE_TYPE::UNSIGNED_BYTE );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_line", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_sp", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_stmt", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_raised", CVARIABLE_TYPE::INTEGER );
+		this->info.variable_manager.put_special_variable( &(this->info), "error_in_handler", CVARIABLE_TYPE::UNSIGNED_BYTE );
+	}
 	//	割り込みフラグ
 	if( this->info.use_on_interval ) {
 		this->info.variable_manager.put_special_variable( &(this->info), "on_interval_mode", CVARIABLE_TYPE::UNSIGNED_BYTE );
@@ -1804,6 +1935,44 @@ bool CCOMPILER::exec( std::string s_name ) {
 		this->info.assembler_list.variables_area.push_back( asm_line );
 	}
 
+	//	H.TIMI ポーリング処理の実体は BACONLIB 側へ移した (Batch 7: A3)。
+	//	プログラム固有の特殊変数アドレスを種類ごとのパラメータブロックで渡す。
+	//	並び順は baconlib.asm の sub_htimi_* と一致させること。
+	if( this->info.use_on_interval ) {
+		asm_line.set( "LABEL", "", "interrupt_params_interval", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarb_on_interval_mode" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svari_on_interval_counter" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarb_on_interval_exec" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svari_on_interval_value" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+	if( this->info.use_on_stop ) {
+		asm_line.set( "LABEL", "", "interrupt_params_stop", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarb_on_stop_mode" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarb_on_stop_last" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarb_on_stop_exec" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+	if( this->info.use_on_strig ) {
+		asm_line.set( "LABEL", "", "interrupt_params_strig", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarf_on_strig0_mode" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+	if( this->info.use_on_key ) {
+		asm_line.set( "LABEL", "", "interrupt_params_key", "" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+		asm_line.set( "DEFW", "", "svarf_on_key01_mode" );
+		this->info.assembler_list.variables_area.push_back( asm_line );
+	}
+
 	if( this->info.errors.list.size() ) {
 		//	エラーがある場合終了する
 		return false;
@@ -1820,6 +1989,7 @@ bool CCOMPILER::exec( std::string s_name ) {
 void CCOMPILER::optimize( void ) {
 	int i;
 
+	this->finalize_b6();
 	this->optimize_interrupt_process();
 	for( i = 0; i < 3; i++ ) {
 		this->optimize_calculation();
@@ -2950,6 +3120,32 @@ void CCOMPILER::optimize_remove_interrupt_process( void ) {
 }
 
 // --------------------------------------------------------------------
+// --------------------------------------------------------------------
+//	STEP キーワードがあれば消費して true を返す。
+//	グラフィックス文の STEP 形 (相対座標) は全てこの共通処理で受ける。
+bool CCOMPILER::check_step( void ) {
+	if( !this->info.list.is_command_end() && this->info.list.p_position->s_word == "STEP" ) {
+		this->info.list.p_position++;
+		return true;
+	}
+	return false;
+}
+
+// --------------------------------------------------------------------
+//	STEP 形の座標調整: 評価済みの座標 (HL) に基点座標を加える。
+//	s_label は基点となるワークエリア (work_gxpos / work_gypos /
+//	work_grpacx / work_grpacy のいずれか) のラベル名。
+//	基点は「最後に参照したグラフィックス座標」であり、各文が自分が
+//	維持する座標系に対してこの調整を適用する。
+void CCOMPILER::put_step_adjust( const char *s_label ) {
+	CASSEMBLER_LINE asm_line;
+
+	asm_line.set( "LD", "", "DE", "[" + std::string( s_label ) + "]" );
+	this->info.assembler_list.body.push_back( asm_line );
+	asm_line.set( "ADD", "", "HL", "DE" );
+	this->info.assembler_list.body.push_back( asm_line );
+}
+
 void CCOMPILER::put_logical_operation( bool is_lop ) {
 	CASSEMBLER_LINE asm_line;
 	const char* s_rop[] = {

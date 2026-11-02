@@ -5,8 +5,10 @@
 // --------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <cmath>
 #include "expression_abs.h"
 #include "expression_term.h"
+#include "../double_real.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_ABS::optimization( CCOMPILE_INFO *p_info ) {
@@ -25,9 +27,26 @@ CEXPRESSION_NODE* CEXPRESSION_ABS::optimization( CCOMPILE_INFO *p_info ) {
 		//	定数の場合
 		if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
 			//	数値の場合
+			//	[B6] 従来は std::stol で切り捨てていたため、実数定数や
+			//	-32768 を正しく扱えなかった。値ベースで畳み込む。
 			CEXPRESSION_TERM *p_term = new CEXPRESSION_TERM();
-			p_term->type = this->p_operand->type;
-			p_term->s_value = std::to_string( labs( std::stol( this->p_operand->s_value ) ) );
+			CEXPRESSION_TERM *p_operand_term = dynamic_cast<CEXPRESSION_TERM*>( this->p_operand );
+			if( p_operand_term == nullptr ) {
+				delete p_term;
+				return nullptr;
+			}
+			double value = fabs( p_operand_term->get_value() );
+			p_term->set_double( value );
+			if( this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
+				if( p_operand_term->get_value() == -32768.0 ) {
+					//	ABS(-32768) は整数に収まらないため倍精度に昇格 (実機互換)
+					p_term->type = CEXPRESSION_TYPE::DOUBLE_REAL;
+				}
+			}
+			else {
+				//	実数定数は元の型を維持する
+				p_term->type = this->p_operand->type;
+			}
 			return p_term;
 		}
 	}
@@ -78,7 +97,40 @@ void CEXPRESSION_ABS::compile( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label, COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
-		this->type = CEXPRESSION_TYPE::INTEGER;
+		//	[B6] 実機互換のため、整数の絶対値は倍精度へ昇格させる。
+		//	通常は FRCDL で変換するが、-32768 の絶対値 32768 は
+		//	整数を経由できないため倍精度定数を直接使う。
+		std::string s_label_convert = p_info->get_auto_label();
+		std::string s_label_done = p_info->get_auto_label();
+		p_info->assembler_list.add_label( "bios_frcdbl", "0x0303a" );
+		CDOUBLE_REAL const_32768;
+		const_32768.set( "32768" );
+		std::string s_const_32768 = p_info->constants.add( const_32768 );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "H" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NC, COPERAND_TYPE::CONSTANT, s_label_convert, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, s_const_32768 );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_done, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_convert, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_dac + 2]", COPERAND_TYPE::REGISTER, "HL" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "2" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_valtyp]", COPERAND_TYPE::MEMORY, "A" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_frcdbl", COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, "work_dac" );
+		p_info->assembler_list.body.push_back( asm_line );
+		asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_done, COPERAND_TYPE::NONE, "" );
+		p_info->assembler_list.body.push_back( asm_line );
+		this->type = CEXPRESSION_TYPE::DOUBLE_REAL;
 	}
 	else if( this->p_operand->type == CEXPRESSION_TYPE::SINGLE_REAL ) {
 		asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "4" );

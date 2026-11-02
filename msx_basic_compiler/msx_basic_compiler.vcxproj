@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -182,6 +182,7 @@
     <ClCompile Include="collections\defstr.cpp" />
     <ClCompile Include="collections\defusr.cpp" />
     <ClCompile Include="collections\dim.cpp" />
+    <ClCompile Include="collections\draw.cpp" />
     <ClCompile Include="collections\end.cpp" />
     <ClCompile Include="collections\erase.cpp" />
     <ClCompile Include="collections\error.cpp" />
@@ -237,6 +238,14 @@
     <ClCompile Include="collections\vpoke.cpp" />
     <ClCompile Include="collections\vpokes.cpp" />
     <ClCompile Include="collections\width.cpp" />
+    <ClCompile Include="collections\wait.cpp" />
+    <ClCompile Include="collections\deffn.cpp" />
+    <ClCompile Include="collections\on_error.cpp" />
+    <ClCompile Include="collections\resume.cpp" />
+    <ClCompile Include="expressions\expression_err.cpp" />
+    <ClCompile Include="expressions\expression_fncall.cpp" />
+    <ClCompile Include="collections\setdatetime.cpp" />
+    <ClCompile Include="collections\lineinput.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="double_real.cpp" />
     <ClCompile Include="error_list.cpp" />
@@ -262,6 +271,8 @@
     <ClCompile Include="expressions\expression_fix.cpp" />
     <ClCompile Include="expressions\expression_fre.cpp" />
     <ClCompile Include="expressions\expression_play.cpp" />
+    <ClCompile Include="expressions\expression_frnd.cpp" />
+    <ClCompile Include="expressions\expression_getsprite.cpp" />
     <ClCompile Include="expressions\expression_hex.cpp" />
     <ClCompile Include="expressions\expression_hexchr.cpp" />
     <ClCompile Include="expressions\expression_inkey.cpp" />
@@ -275,6 +286,8 @@
     <ClCompile Include="expressions\expression_loc.cpp" />
     <ClCompile Include="expressions\expression_lof.cpp" />
     <ClCompile Include="expressions\expression_log.cpp" />
+    <ClCompile Include="expressions\expression_lpos.cpp" />
+    <ClCompile Include="expressions\expression_max.cpp" />
     <ClCompile Include="expressions\expression_mid.cpp" />
     <ClCompile Include="expressions\expression_mkd.cpp" />
     <ClCompile Include="expressions\expression_mki.cpp" />
@@ -302,15 +315,18 @@
     <ClCompile Include="expressions\expression_operator_sub.cpp" />
     <ClCompile Include="expressions\expression_operator_xor.cpp" />
     <ClCompile Include="expressions\expression_pad.cpp" />
+    <ClCompile Include="expressions\expression_pdl.cpp" />
     <ClCompile Include="expressions\expression_peek.cpp" />
     <ClCompile Include="expressions\expression_peeks.cpp" />
     <ClCompile Include="expressions\expression_peekw.cpp" />
     <ClCompile Include="expressions\expression_point.cpp" />
+    <ClCompile Include="expressions\expression_pos.cpp" />
     <ClCompile Include="expressions\expression_right.cpp" />
     <ClCompile Include="expressions\expression_rnd.cpp" />
     <ClCompile Include="expressions\expression_sgn.cpp" />
     <ClCompile Include="expressions\expression_sin.cpp" />
     <ClCompile Include="expressions\expression_space.cpp" />
+    <ClCompile Include="expressions\expression_spc.cpp" />
     <ClCompile Include="expressions\expression_sqr.cpp" />
     <ClCompile Include="expressions\expression_stick.cpp" />
     <ClCompile Include="expressions\expression_str.cpp" />
@@ -355,6 +371,7 @@
     <ClInclude Include="collections\defstr.h" />
     <ClInclude Include="collections\defusr.h" />
     <ClInclude Include="collections\dim.h" />
+    <ClInclude Include="collections\draw.h" />
     <ClInclude Include="collections\end.h" />
     <ClInclude Include="collections\erase.h" />
     <ClInclude Include="collections\error.h" />
@@ -410,6 +427,14 @@
     <ClInclude Include="collections\vpoke.h" />
     <ClInclude Include="collections\vpokes.h" />
     <ClInclude Include="collections\width.h" />
+    <ClInclude Include="collections\wait.h" />
+    <ClInclude Include="collections\deffn.h" />
+    <ClInclude Include="collections\on_error.h" />
+    <ClInclude Include="collections\resume.h" />
+    <ClInclude Include="expressions\expression_err.h" />
+    <ClInclude Include="expressions\expression_fncall.h" />
+    <ClInclude Include="collections\setdatetime.h" />
+    <ClInclude Include="collections\lineinput.h" />
     <ClInclude Include="compiler.h" />
     <ClInclude Include="compile_info.h" />
     <ClInclude Include="constant_info.h" />
@@ -437,6 +462,8 @@
     <ClInclude Include="expressions\expression_fix.h" />
     <ClInclude Include="expressions\expression_fre.h" />
     <ClInclude Include="expressions\expression_play.h" />
+    <ClInclude Include="expressions\expression_frnd.h" />
+    <ClInclude Include="expressions\expression_getsprite.h" />
     <ClInclude Include="expressions\expression_hex.h" />
     <ClInclude Include="expressions\expression_hexchr.h" />
     <ClInclude Include="expressions\expression_inkey.h" />
@@ -450,6 +477,8 @@
     <ClInclude Include="expressions\expression_loc.h" />
     <ClInclude Include="expressions\expression_lof.h" />
     <ClInclude Include="expressions\expression_log.h" />
+    <ClInclude Include="expressions\expression_lpos.h" />
+    <ClInclude Include="expressions\expression_max.h" />
     <ClInclude Include="expressions\expression_mid.h" />
     <ClInclude Include="expressions\expression_mkd.h" />
     <ClInclude Include="expressions\expression_mki.h" />
@@ -477,15 +506,18 @@
     <ClInclude Include="expressions\expression_operator_sub.h" />
     <ClInclude Include="expressions\expression_operator_xor.h" />
     <ClInclude Include="expressions\expression_pad.h" />
+    <ClInclude Include="expressions\expression_pdl.h" />
     <ClInclude Include="expressions\expression_peek.h" />
     <ClInclude Include="expressions\expression_peeks.h" />
     <ClInclude Include="expressions\expression_peekw.h" />
     <ClInclude Include="expressions\expression_point.h" />
+    <ClInclude Include="expressions\expression_pos.h" />
     <ClInclude Include="expressions\expression_right.h" />
     <ClInclude Include="expressions\expression_rnd.h" />
     <ClInclude Include="expressions\expression_sgn.h" />
     <ClInclude Include="expressions\expression_sin.h" />
     <ClInclude Include="expressions\expression_space.h" />
+    <ClInclude Include="expressions\expression_spc.h" />
     <ClInclude Include="expressions\expression_sqr.h" />
     <ClInclude Include="expressions\expression_stick.h" />
     <ClInclude Include="expressions\expression_str.h" />

@@ -30,6 +30,7 @@ calatr		:= 0x0087
 grpprt		:= 0x008D
 strtms		:= 0x0099
 chget		:= 0x009F
+gtpdl		:= 0x00DE
 putq		:= 0x00F9
 lftq		:= 0x00F6
 readc		:= 0x011D
@@ -423,6 +424,28 @@ blib_entries::
 			jp		sub_free_heap
 	blib_check_array:
 			jp		sub_check_array
+	blib_instr3:
+			jp		sub_instr3
+	blib_getsprite:
+			jp		sub_getsprite
+	blib_pdl:
+			jp		sub_pdl
+	blib_frnd:
+			jp		sub_frnd
+	blib_set_date:
+			jp		sub_set_date
+	blib_set_time:
+			jp		sub_set_time
+	blib_htimi_interval:
+			jp		sub_htimi_interval
+	blib_htimi_stop:
+			jp		sub_htimi_stop
+	blib_htimi_strig:
+			jp		sub_htimi_strig
+	blib_htimi_key:
+			jp		sub_htimi_key
+	blib_draw:
+			jp		sub_draw
 
 ; =============================================================================
 ;	ROMカートリッジで用意した場合の初期化ルーチン
@@ -6037,11 +6060,11 @@ sub_umul::
 ; =============================================================================
 			scope	sub_get_date
 date_save	= buf + 9
-date_day1	= date_save + 0
+date_day1	= _sd_save + 0
 date_day10	= date_save + 1
-date_mon1	= date_save + 2
+date_mon1	= _sd_save + 2
 date_mon10	= date_save + 3
-date_year1	= date_save + 4
+date_year1	= _sd_save + 4
 date_year10	= date_save + 5
 sub_get_date::
 			di
@@ -6057,7 +6080,7 @@ sub_get_date::
 			or		a, d
 			out		[rtc_data], a
 			; Data
-			ld		hl, date_save
+			ld		hl, _sd_save
 			ld		d, 7
 			out		[c], d				; R#7 1-day counter
 			in		a, [rtc_data]
@@ -6177,11 +6200,11 @@ sub_get_date::
 ; =============================================================================
 			scope	sub_get_time
 time_save	= buf + 9
-time_sec1	= time_save + 0
+time_sec1	= _sd_save + 0
 time_sec10	= time_save + 1
-time_min1	= time_save + 2
+time_min1	= _sd_save + 2
 time_min10	= time_save + 3
-time_hur1	= time_save + 4
+time_hur1	= _sd_save + 4
 time_hur10	= time_save + 5
 sub_get_time::
 			di
@@ -6197,7 +6220,7 @@ sub_get_time::
 			or		a, d
 			out		[rtc_data], a
 			; Data
-			ld		hl, time_save
+			ld		hl, _sd_save
 			ld		d, 0
 			out		[c], d				; R#0 1-second counter
 			in		a, [rtc_data]
@@ -9286,4 +9309,1519 @@ s_nul::
 			db		"NUL:", 255
 s_space::
 			db		" "
+			endscope
+
+; =============================================================================
+;	INSTR(開始位置, 対象文字列, 検索文字列) (B6)
+;	input:
+;		BC .... 開始位置 (1-255)
+;		DE .... 対象文字列
+;		HL .... 検索文字列
+;	output:
+;		HL .... 見つかった位置 (1始まり)。見つからなければ 0
+;	break:
+;		all
+;	comment:
+;		実機 (MSX-BASIC) の仕様:
+;		開始位置が 1..255 の範囲外なら Illegal function call エラー
+;		開始位置が対象文字列長より大きいと、検索文字列が空でも 0
+;		検索文字列が空で開始位置が長さ以内なら、開始位置を返す
+; =============================================================================
+			scope	sub_instr3
+	_i3_hay_length	:= buf + 240
+	_i3_hay_pointer	:= buf + 241
+	_i3_needle_length	:= buf + 243
+	_i3_needle_pointer	:= buf + 244
+	_i3_remaining	:= buf + 246
+	_i3_start	:= buf + 247
+sub_instr3::
+			ld		a, b	; 開始位置の範囲チェック (1..255)
+			or		a, a
+			jp		nz, err_illegal_function_call
+			ld		a, c
+			or		a, a
+			jp		z, err_illegal_function_call
+			ld		[_i3_start], a
+
+			ld		a, [de]
+			ld		[_i3_hay_length], a
+			inc		de
+			ld		a, [de]
+			ld		[_i3_hay_pointer], a
+			inc		de
+			ld		a, [de]
+			ld		[_i3_hay_pointer+1], a
+
+			ld		a, [hl]
+			ld		[_i3_needle_length], a
+			inc		hl
+			ld		a, [hl]
+			ld		[_i3_needle_pointer], a
+			inc		hl
+			ld		a, [hl]
+			ld		[_i3_needle_pointer+1], a
+
+			ld		a, [_i3_start]	; 開始位置 > 対象長 なら 0 (空の検索文字列でも)
+			ld		c, a
+			ld		a, [_i3_hay_length]
+			cp		a, c
+			jr		c, _not_found
+
+			ld		a, [_i3_needle_length]	; 検索文字列が空なら開始位置を返す
+			or		a, a
+			jr		z, _empty_needle
+			ld		c, a
+			ld		a, [_i3_hay_length]
+			cp		a, c
+			jr		c, _not_found
+			sub		a, c
+			inc		a	; A = 最終開始位置
+			ld		c, a
+			ld		a, [_i3_start]
+			cp		a, c
+			jr		z, _i3_start_ok
+			jr		nc, _not_found
+	_i3_start_ok:
+			ld		a, [_i3_start]
+			ld		b, a
+			ld		a, c
+			sub		a, b
+			inc		a
+			ld		[_i3_remaining], a
+			ld		c, b
+
+	_search_loop:
+			ld		a, [_i3_remaining]
+			or		a, a
+			jr		z, _not_found
+			ld		hl, [_i3_hay_pointer]
+			ld		a, c
+			dec		a
+			ld		e, a
+			ld		d, 0
+			add		hl, de
+			push		hl
+			ld		hl, [_i3_needle_pointer]
+			push		hl
+			pop		ix
+			pop		hl
+			ld		a, [_i3_needle_length]
+			ld		b, a
+	_compare:
+			ld		a, [hl]
+			cp		a, [ix+0]
+			jr		nz, _no_match
+			inc		hl
+			inc		ix
+			djnz		_compare
+			ld		l, c
+			ld		h, 0
+			ret
+
+	_no_match:
+			ld		a, [_i3_remaining]
+			dec		a
+			ld		[_i3_remaining], a
+			inc		c
+			jr		_search_loop
+
+	_empty_needle:
+			ld		a, [_i3_start]
+			ld		l, a
+			ld		h, 0
+			ret
+
+	_not_found:
+			ld		hl, 0
+			ret
+			endscope
+
+; =============================================================================
+;	SPRITE$ の読み取り (B6)
+;	input:
+;		E ..... スプライト番号
+;		HL .... バッファ (BASIC形式: [長さ][データ...])
+;	output:
+;		HL .... バッファ
+;	break:
+;		all
+;	comment:
+;		スプライトパターンを VRAM からバッファへ読み取る。
+;		サイズは sub_setsprite と同じく SCREENモードと RG1SAV から決まる。
+; =============================================================================
+			scope	sub_getsprite
+sub_getsprite::
+			ld		a, [scrmod]
+			dec		a
+			cp		a, 12
+			jp		nc, err_syntax
+			ld		a, e
+			push		hl
+			call		calpat
+
+			ld		a, [rg1sav]	; 1スプライトのサイズ: 8x8 なら 8byte, 16x16 なら 32byte
+			rlca
+			rlca
+			rlca
+			rlca
+			and		a, 32
+			jr		nz, _skip2
+			ld		a, 8
+	_skip2:
+			ld		b, a
+
+			pop		de	; DE = バッファ
+			push		de
+			ld		a, b
+			ld		[de], a	; バッファ先頭に長さをセット
+			inc		de
+			ld		c, b
+			ld		b, 0	; BC = 長さ
+			call		ldirmv	; VRAM(HL) → RAM(DE)
+			pop		hl
+			ret
+			endscope
+
+; =============================================================================
+;	PDL(番号) (B6)
+;	input:
+;		HL .... パドル番号 (1-12)
+;	output:
+;		HL .... パドルの値
+;	break:
+;		all
+;	comment:
+;		番号が 1..12 の範囲外なら Illegal function call エラー。
+;		BIOS GTPDL は A = 番号-1 で呼ぶ。
+; =============================================================================
+			scope	sub_pdl
+sub_pdl::
+			ld		a, h
+			or		a, a
+			jp		nz, err_illegal_function_call
+			ld		a, l
+			dec		a
+			cp		a, 12
+			jp		nc, err_illegal_function_call
+			call		gtpdl
+			ld		l, a
+			ld		h, 0
+			ret
+			endscope
+
+; =============================================================================
+;	FRND() (B6)
+;	input:
+;		none
+;	output:
+;		HL .... DAC (F7F6h)。[0,1) の倍精度実数が格納される
+;	break:
+;		all
+;	comment:
+;		高速版の乱数。RND と同じワークエリア RNDX を使うため、
+;		両方使う場合は要注意 (sub_irnd の注意書きと同じ)。
+;		DAC に倍精度形式 (指数部 64 = 0.d1d2... × 10^0) で 14桁の
+;		BCD 仮数を生成する。各桁は 250 以上のバイトを棄却して
+;		10 で割った余りとし、一様性を保つ。
+; =============================================================================
+			scope	sub_frnd
+sub_frnd::
+			ld		hl, dac
+			ld		[hl], 64	; 指数部: 0.d1d2... × 10^0 → [0,1)
+			inc		hl
+			ld		b, 7	; 仮数部は 7 バイト (14桁)
+	_mantissa_loop:
+			push		bc
+			push		hl
+			call		_frnd_digit
+			rlca
+			rlca
+			rlca
+			rlca
+			ld		c, a	; 上位桁 << 4
+			call		_frnd_digit
+			or		a, c
+			pop		hl
+			ld		[hl], a
+			inc		hl
+			pop		bc
+			djnz		_mantissa_loop
+			ld		a, 8
+			ld		[valtyp], a
+			ld		hl, dac
+			ret
+
+;	1桁 (0..9) を生成する
+	_frnd_digit:
+			call		_frnd_byte
+			cp		a, 250
+			jr		nc, _frnd_digit
+	_mod10:
+			sub		a, 10
+			jr		nc, _mod10
+			add		a, 10
+			ret
+
+;	sub_irnd と同じスクランブルで RNDX を進め、新しい L を返す
+	_frnd_byte:
+			ld		hl, [rndx + 2]
+			ld		de, [rndx + 4]
+			ld		a, l
+			xor		a, 0x53
+			rrca
+			add		a, 29
+			xor		a, d
+			rlca
+			ld		l, a
+			ld		a, h
+			xor		a, 0xA8
+			rlca
+			add		a, 53
+			xor		a, e
+			rlca
+			ld		h, a
+			ld		[rndx + 4], hl
+			ld		[rndx + 2], de
+			ld		a, l
+			ret
+			endscope
+
+; =============================================================================
+;	SET DATE / SET TIME 用の共通処理と作業エリア
+; =============================================================================
+_sd_save	:= buf + 9		; GET DATE/TIME と共用のスクラッチ (day/sec の1の位から6バイト)
+_rtc_r13	:= buf + 260		; R#13 の待避
+_sd_data	:= buf + 261		; 文字列データのアドレス (2バイト)
+_sd_off_y	:= buf + 263		; 年フィールドのオフセット
+_sd_off_m	:= buf + 264		; 月フィールドのオフセット
+_sd_off_d	:= buf + 265		; 日フィールドのオフセット
+_sd_value	:= buf + 266		; フィールドの10進値
+
+;	数字1文字を検証して 0-9 を返す。数字でなければ Illegal function call。
+;	input: A = 文字 / output: A = 0-9 / break: F
+rtc_digit:
+			sub		a, 0x30
+			jp		c, err_illegal_function_call
+			cp		a, 10
+			jp		nc, err_illegal_function_call
+			ret
+
+;	2文字の数字を読み、(1の位, 10の位) の順に格納先へ書く。
+;	input: HL = 文字へのポインタ, DE = 格納先
+;	output: A = 10進値, HL += 2, DE += 2 / break: BC, F
+rtc_store_pair:
+			ld		a, [hl]
+			call	rtc_digit
+			ld		c, a				; C = 10の位
+			inc		hl
+			ld		a, [hl]
+			call	rtc_digit
+			ld		b, a				; B = 1の位
+			inc		hl
+			ld		a, b
+			ld		[de], a
+			inc		de
+			ld		a, c
+			ld		[de], a
+			inc		de
+			add		a, a
+			ld		e, a
+			add		a, a
+			add		a, a
+			add		a, e
+			add		a, b				; A = C*10 + B
+			ret
+
+;	[_sd_data] + A の位置にあるフィールドを読み、DE の格納先へ書く。
+;	input: A = オフセット, DE = 格納先 / output: A = 10進値 / break: all
+rtc_field:
+			ld		hl, [_sd_data]
+			add		a, l
+			ld		l, a
+			jr		nc, _rtc_field_go
+			inc		h
+	_rtc_field_go:
+			call	rtc_store_pair
+			ret
+
+;	TimerEN を止めて6レジスタへ書き込み、R#13 を復帰する。
+;	input: D = 先頭レジスタ番号, HL = 格納エリア (6バイト) / break: all
+rtc_write6:
+			ld		c, rtc_reg
+			ld		a, 13
+			out		[c], a
+			in		a, [rtc_data]
+			ld		[_rtc_r13], a
+			and		a, 0b0000_0100		; TimerEN=0, AlarmEN は維持, Block=0
+			out		[rtc_data], a
+			ld		b, 6
+	_rtc_write_loop:
+			ld		a, d
+			out		[c], a
+			ld		a, [hl]
+			out		[rtc_data], a
+			inc		hl
+			inc		d
+			djnz	_rtc_write_loop
+			ld		a, 13
+			out		[c], a
+			ld		a, [_rtc_r13]
+			out		[rtc_data], a
+			ret
+
+;	ディスクリプタを検証し、8文字のフィールド文字列として用意する。
+;	input: HL = ディスクリプタ / output: HL = データ, [_sd_data] にも保存
+;		長さが 8 でなければ Illegal function call。区切りは [2] と [5]。
+;	input2: A = 区切り文字
+rtc_setup8:
+			ld		b, a				; B = 区切り文字
+			ld		a, [hl]
+			cp		a, 8
+			jp		nz, err_illegal_function_call
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl
+			ld		[_sd_data], hl
+			push	hl
+			inc		hl
+			inc		hl
+			ld		a, [hl]
+			cp		a, b
+			jp		nz, err_illegal_function_call
+			inc		hl
+			inc		hl
+			inc		hl
+			ld		a, [hl]
+			cp		a, b
+			jp		nz, err_illegal_function_call
+			pop		hl
+			ret
+
+; =============================================================================
+;	SET DATE
+;	input:
+;		HL .... 日付文字列のディスクリプタ (長さ, アドレス)
+;				書式は GET DATE が返す並び (国IDで 年/月/日 の順が変わる)、
+;				区切りは '/'、各フィールド2桁。
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		書式違い・範囲外 (月 1-12, 日 1-31) は Illegal function call エラー。
+; =============================================================================
+			scope	sub_set_date
+sub_set_date::
+			di
+			ld		a, '/'
+			call	rtc_setup8
+			; 国IDで並びを決める (sub_get_date と同じ判定)
+			ld		a, [id_byte0]
+			and		a, 0b0111_0000
+			cp		a, 1 << 4
+			jr		z, _mdy
+			jr		nc, _dmy
+			; YMD
+			ld		a, 0
+			ld		[_sd_off_y], a
+			ld		a, 3
+			ld		[_sd_off_m], a
+			ld		a, 6
+			ld		[_sd_off_d], a
+			jr		_parse
+		_mdy:
+			ld		a, 6
+			ld		[_sd_off_y], a
+			ld		a, 0
+			ld		[_sd_off_m], a
+			ld		a, 3
+			ld		[_sd_off_d], a
+			jr		_parse
+		_dmy:
+			ld		a, 6
+			ld		[_sd_off_y], a
+			ld		a, 3
+			ld		[_sd_off_m], a
+			ld		a, 0
+			ld		[_sd_off_d], a
+		_parse:
+			; 年 (範囲チェックなし: 00-99)
+			ld		a, [_sd_off_y]
+			ld		de, _sd_save + 4
+			call	rtc_field
+			; 月 (1-12)
+			ld		a, [_sd_off_m]
+			ld		de, _sd_save + 2
+			call	rtc_field
+			cp		a, 1
+			jp		c, err_illegal_function_call
+			cp		a, 13
+			jp		nc, err_illegal_function_call
+			; 日 (1-31)
+			ld		a, [_sd_off_d]
+			ld		de, _sd_save + 0
+			call	rtc_field
+			cp		a, 1
+			jp		c, err_illegal_function_call
+			cp		a, 32
+			jp		nc, err_illegal_function_call
+			; RTC R#7..R#12 へ書き込み (_sd_save の並びと一致)
+			ld		hl, _sd_save
+			ld		d, 7
+			call	rtc_write6
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	SET TIME
+;	input:
+;		HL .... 時刻文字列のディスクリプタ (長さ, アドレス)
+;				書式は "HH:MM:SS" (GET TIME が返す形)。
+;	output:
+;		none
+;	break:
+;		all
+;	comment:
+;		書式違い・範囲外 (時 0-23, 分・秒 0-59) は Illegal function call エラー。
+; =============================================================================
+			scope	sub_set_time
+sub_set_time::
+			di
+			ld		a, ':'
+			call	rtc_setup8
+			; 時 (0-23)
+			ld		a, 0
+			ld		de, _sd_save + 4
+			call	rtc_field
+			cp		a, 24
+			jp		nc, err_illegal_function_call
+			; 分 (0-59)
+			ld		a, 3
+			ld		de, _sd_save + 2
+			call	rtc_field
+			cp		a, 60
+			jp		nc, err_illegal_function_call
+			; 秒 (0-59)
+			ld		a, 6
+			ld		de, _sd_save + 0
+			call	rtc_field
+			cp		a, 60
+			jp		nc, err_illegal_function_call
+			; RTC R#0..R#5 へ書き込み (_sd_save の並びと一致)
+			ld		hl, _sd_save
+			ld		d, 0
+			call	rtc_write6
+			ei
+			ret
+			endscope
+
+; =============================================================================
+;	H.TIMI 割り込みポーリング処理 (Batch 7, A3)
+;	プログラム側 h_timi_handler から call_blib 経由で呼ばれる。
+;	プログラム固有の特殊変数アドレスは、パラメータブロックで受け取る。
+;	処理内容は、従来プログラム側に展開していたコードと等価である。
+; =============================================================================
+gttrig			:= 0x00D8
+
+; -----------------------------------------------------------------------------
+;	ON INTERVAL ポーリング
+;	in:		HL = パラメータブロック { &mode, &counter, &exec, &value }
+			scope	sub_htimi_interval
+sub_htimi_interval::
+			push	hl
+			pop		ix
+			ld		l, [ix+0]
+			ld		h, [ix+1]		; HL = &mode
+			ld		a, [hl]
+			or		a, a
+			ret		z				; OFF なら何もしない
+			ld		l, [ix+2]
+			ld		h, [ix+3]		; HL = &counter
+			ld		c, [hl]
+			inc		hl
+			ld		b, [hl]			; BC = counter
+			ld		a, c
+			or		a, b
+			jr		nz, ihti_dec
+			; 発生
+			ld		l, [ix+0]
+			ld		h, [ix+1]		; HL = &mode
+			ld		a, [hl]
+			dec		a
+			ret		nz				; STOP なら保留
+			inc		a				; A = 1 (Execute)
+			ld		l, [ix+4]
+			ld		h, [ix+5]		; HL = &exec
+			ld		[hl], a
+			ld		l, [ix+6]
+			ld		h, [ix+7]		; HL = &value
+			ld		c, [hl]
+			inc		hl
+			ld		b, [hl]			; BC = value
+			ld		l, [ix+2]
+			ld		h, [ix+3]		; HL = &counter
+			ld		[hl], c
+			inc		hl
+			ld		[hl], b
+			ret
+ihti_dec:
+			dec		bc
+			ld		l, [ix+2]
+			ld		h, [ix+3]		; HL = &counter
+			ld		[hl], c
+			inc		hl
+			ld		[hl], b
+			ret
+			endscope
+
+; -----------------------------------------------------------------------------
+;	ON STOP ポーリング (CTRL+STOP 検出)
+;	in:		HL = パラメータブロック { &mode, &last, &exec }
+			scope	sub_htimi_stop
+sub_htimi_stop::
+			push	hl
+			pop		ix
+			ld		l, [ix+0]
+			ld		h, [ix+1]		; HL = &mode
+			ld		a, [hl]
+			or		a, a
+			ret		z				; OFF なら何もしない
+			ld		l, [ix+2]
+			ld		h, [ix+3]		; HL = &last
+			ld		a, [hl]
+			ld		d, a			; D = 前回の状態
+			in		a, [0xAA]
+			and		a, 0xF0
+			or		a, 6
+			ld		c, a
+			out		[0xAA], a
+			in		a, [0xA9]
+			or		a, 0xFD
+			ld		b, a
+			ld		a, c
+			inc		a
+			out		[0xAA], a
+			in		a, [0xA9]
+			or		a, 0xEF
+			and		a, b
+			ld		l, [ix+2]
+			ld		h, [ix+3]		; HL = &last
+			ld		[hl], a
+			cp		a, 0xED
+			ret		nz
+			ld		a, d
+			cp		a, 0xED
+			ret		z				; 押しっぱなしは無視
+			ld		a, 0xED
+			ld		l, [ix+4]
+			ld		h, [ix+5]		; HL = &exec
+			ld		[hl], a
+			ret
+			endscope
+
+; -----------------------------------------------------------------------------
+;	ON STRIG ポーリング
+;	in:		HL = パラメータブロック { &strig_table }
+;	テーブルは 4バイト x 5: { mode, current, previous, - }
+			scope	sub_htimi_strig
+sub_htimi_strig::
+			push	hl
+			pop		ix
+			ld		l, [ix+0]
+			ld		h, [ix+1]		; HL = テーブル先頭
+			ld		bc, 0x0500		; B = 5 (個数), C = STRIG番号
+ihtg_loop:
+			ld		a, [hl]
+			inc		hl
+			or		a, a
+			jr		z, ihtg_skip	; OFF ならスキップ
+			ld		a, [hl]
+			inc		hl
+			ld		[hl], a			; current を previous へコピー
+			dec		hl
+			ld		a, c
+			push	bc
+			call	gttrig
+			pop		bc
+			ld		[hl], a			; current を更新
+ihtg_skip:
+			inc		hl
+			inc		hl
+			inc		hl
+			inc		c
+			djnz	ihtg_loop
+			ret
+			endscope
+
+; -----------------------------------------------------------------------------
+;	ON KEY ポーリング (F1..F10 検出)
+;	in:		HL = パラメータブロック { &key_table }
+;	テーブルは 4バイト x 10: { mode, exec, work, - } (key01..key10 の順)
+			scope	sub_htimi_key
+sub_htimi_key::
+			push	hl
+			pop		ix
+			in		a, [0xAA]
+			and		a, 0xF0
+			or		a, 6
+			ld		b, a
+			out		[0xAA], a
+			in		a, [0xA9]
+			or		a, 0x1E
+			rrca
+			ld		c, a
+			ld		a, b
+			inc		a
+			out		[0xAA], a
+			in		a, [0xA9]
+			or		a, 0xFC
+			and		a, c
+			ld		c, a			; C = スキャン結果
+			; key06..key10 (テーブル +20 から)
+			ld		l, [ix+0]
+			ld		h, [ix+1]
+			ld		de, 20
+			add		hl, de
+			call	ihtk_group
+			; key01..key05
+			ld		a, c
+			xor		a, 0x80
+			ld		c, a
+			ld		l, [ix+0]
+			ld		h, [ix+1]
+			call	ihtk_group
+			ret
+;	5キー分を処理する。HL = 先頭エントリ, C = スキャン結果
+ihtk_group:
+			ld		de, ihtk_masks
+			ld		a, 5
+ihtk_gloop:
+			push	af
+			push	hl
+			push	de
+			ld		a, [de]
+			ld		b, a			; B = キーマスク
+			call	ihtk_sub
+			pop		de
+			pop		hl
+			inc		de
+			inc		hl
+			inc		hl
+			inc		hl
+			inc		hl				; 次のエントリ (+4)
+			pop		af
+			dec		a
+			jr		nz, ihtk_gloop
+			ret
+ihtk_masks:
+			db		0x90, 0xA0, 0xC0, 0x81, 0x82
+;	1キー分の判定。HL = エントリ, B = キーマスク, C = スキャン結果
+ihtk_sub:
+			ld		a, [hl]			; mode
+			and		a, b
+			inc		hl
+			inc		hl
+			ld		d, [hl]			; work を退避
+			ld		[hl], 0
+			ret		z				; mode & mask == 0 なら対象外
+			and		a, c
+			ret		nz				; 押されていない
+			dec		hl
+			dec		a				; A = 0xFF
+			ld		[hl], a			; exec = 0xFF
+			ret
+			endscope
+
+; =============================================================================
+;	DRAW (GML interpreter) (Batch 7)
+;	in:		HL = draw_workspace (state + string buffer)
+;			DE = variable table, BC = default types table
+;	workspace layout:
+;	  +0 init flag, +1 angle, +2 scale, +3 color
+;	  +4..+7 pos_x (fixed point, *256), +8..+11 pos_y
+;	  +12 frac_x, +13 frac_y
+;	  +14..+29 X stack (4 levels x 4 bytes), +30 X depth
+;	  +32..+33 variable table, +34..+35 default types
+;	  +36..+37 parse ptr, +38..+39 parse end
+;	  +40 blank flag, +41 no-update flag, +42/+43 unit vector, +44 temp
+;	  +45..+48 move magnitude (fixed), +49..+56 saved pos (for N)
+;	  +64 length, +65.. string body
+; =============================================================================
+gxpos_w			:= 0xFCB3
+gypos_w			:= 0xFCB5
+grpacx_w		:= 0xFCB7
+grpacy_w		:= 0xFCB9
+atrbyt_w		:= 0xF3F2
+bios_setatr		:= 0x011A
+bios_line		:= 0x58FC
+bios_frcint		:= 0x2F8A
+
+			scope	sub_draw
+sub_draw::
+			push	hl
+			pop		ix
+			ld		[ix+32], e
+			ld		[ix+33], d		; variable table
+			ld		[ix+34], c
+			ld		[ix+35], b		; default types
+			; 初期化 (初回のみ)
+			ld		a, [ix+0]
+			or		a, a
+			jr		nz, dr_ready
+			ld		[ix+0], 1
+			ld		[ix+1], 0		; angle = 0
+			ld		[ix+2], 4		; scale = 4
+dr_ready:
+			; 角度・拡大率とも DRAW 文をまたいで保持される (インタプリタ実測: ANG1/ANG2)
+			ld		a, [atrbyt_w]
+			ld		[ix+3], a		; color = current attribute
+			ld		[ix+30], 0		; X depth = 0
+			ld		[ix+40], 0
+			ld		[ix+41], 0
+			; parse ptr = workspace + 65, end = ptr + length
+			push	ix
+			pop		hl
+			ld		de, 65
+			add		hl, de
+			ld		[ix+36], l
+			ld		[ix+37], h
+			ld		a, [ix+64]
+			ld		e, a
+			ld		d, 0
+			add		hl, de
+			ld		[ix+38], l
+			ld		[ix+39], h
+dr_loop:
+			; 終端チェック (X スタックのポップもここで行う)
+			ld		l, [ix+36]
+			ld		h, [ix+37]
+			ld		e, [ix+38]
+			ld		d, [ix+39]
+			or		a, a
+			sbc		hl, de
+			jr		nz, dr_next
+			ld		a, [ix+30]
+			or		a, a
+			jr		z, dr_finish
+			dec		a
+			ld		[ix+30], a
+			; スタックから (ptr, end) を復帰
+			ld		hl, 0
+			ld		l, a
+			add		hl, hl
+			add		hl, hl
+			push	ix
+			pop		de
+			add		hl, de
+			ld		de, 14
+			add		hl, de			; HL = &slot
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			inc		hl
+			ld		[ix+36], e
+			ld		[ix+37], d
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ld		[ix+38], e
+			ld		[ix+39], d
+			jr		dr_loop
+dr_finish:
+			ret
+dr_next:
+			call	dr_fetch		; A = 次の文字 (大文字化済み)
+			cp		a, ';'
+			jp		z, dr_loop
+			cp		a, 'B'
+			jp		z, dr_set_blank
+			cp		a, 'N'
+			jp		z, dr_set_noupd
+			cp		a, 'U'
+			jp		z, dr_mv_u
+			cp		a, 'D'
+			jp		z, dr_mv_d
+			cp		a, 'L'
+			jp		z, dr_mv_l
+			cp		a, 'R'
+			jp		z, dr_mv_r
+			cp		a, 'E'
+			jp		z, dr_mv_e
+			cp		a, 'F'
+			jp		z, dr_mv_f
+			cp		a, 'G'
+			jp		z, dr_mv_g
+			cp		a, 'H'
+			jp		z, dr_mv_h
+			cp		a, 'M'
+			jp		z, dr_m
+			cp		a, 'C'
+			jp		z, dr_c
+			cp		a, 'S'
+			jp		z, dr_s
+			cp		a, 'A'
+			jp		z, dr_a
+			cp		a, 'X'
+			jp		z, dr_x
+			jp		err_illegal_function_call
+dr_set_blank:
+			ld		[ix+40], 1
+			jp		dr_loop
+dr_set_noupd:
+			ld		[ix+41], 1
+			jp		dr_loop
+dr_mv_u:
+			ld		[ix+42], 0
+			ld		[ix+43], -1
+			jp		dr_move
+dr_mv_d:
+			ld		[ix+42], 0
+			ld		[ix+43], 1
+			jp		dr_move
+dr_mv_l:
+			ld		[ix+42], -1
+			ld		[ix+43], 0
+			jp		dr_move
+dr_mv_r:
+			ld		[ix+42], 1
+			ld		[ix+43], 0
+			jp		dr_move
+dr_mv_e:
+			ld		[ix+42], 1
+			ld		[ix+43], -1
+			jp		dr_move
+dr_mv_f:
+			ld		[ix+42], 1
+			ld		[ix+43], 1
+			jp		dr_move
+dr_mv_g:
+			ld		[ix+42], -1
+			ld		[ix+43], 1
+			jp		dr_move
+dr_mv_h:
+			ld		[ix+42], -1
+			ld		[ix+43], -1
+			jp		dr_move
+dr_c:
+			call	dr_number_req
+			ld		[ix+3], l		; color = value (下位バイト)
+			jp		dr_loop
+dr_s:
+			call	dr_number_req
+			ld		[ix+2], l		; scale
+			jp		dr_loop
+dr_a:
+			call	dr_number_req
+			ld		a, l
+			and		a, 3
+			ld		[ix+1], a		; angle
+			jp		dr_loop
+
+;	次の1文字を得る (空白と ';' を読み飛ばし、大文字化)。呼び出し時点で
+;	終端でないことは dr_loop が保証するが、数値・名前の読み取り用に
+;	終端ではキャリーフラグを立てて戻る形にも対応する。
+dr_fetch:
+			ld		l, [ix+36]
+			ld		h, [ix+37]
+			ld		e, [ix+38]
+			ld		d, [ix+39]
+			or		a, a
+			sbc		hl, de
+			jr		nz, drf_get
+			scf
+			ret
+drf_get:
+			ld		l, [ix+36]
+			ld		h, [ix+37]
+			ld		a, [hl]
+			inc		hl
+			ld		[ix+36], l
+			ld		[ix+37], h
+			cp		a, ' '
+			jr		z, dr_fetch
+			cp		a, 'a'
+			jr		c, drf_done
+			cp		a, 'z'+1
+			jr		nc, drf_done
+			sub		a, 0x20
+drf_done:
+			or		a, a			; キャリークリア
+			ret
+;	次の1文字を消費せずに見る (空白・';' は読み飛ばす)
+dr_peek:
+			ld		l, [ix+36]
+			ld		h, [ix+37]
+			ld		e, [ix+38]
+			ld		d, [ix+39]
+drp_loop:
+			or		a, a
+			sbc		hl, de
+			jr		nz, drp_get
+			scf
+			ret
+drp_get:
+			ld		l, [ix+36]		; SBC で壊れた HL を戻す
+			ld		h, [ix+37]		; (DE は end のまま)
+			push	hl
+drp_skip:
+			ld		a, [hl]
+			cp		a, ' '
+			jr		nz, drp_found
+drp_next:
+			inc		hl
+			or		a, a
+			sbc		hl, de
+			jr		z, drp_end
+			add		hl, de
+			jr		drp_skip
+drp_end:
+			pop		hl
+			scf
+			ret
+drp_found:
+			pop		hl
+			; A = 文字 (大文字化)
+			cp		a, 'a'
+			jr		c, drp_done
+			cp		a, 'z'+1
+			jr		nc, drp_done
+			sub		a, 0x20
+drp_done:
+			or		a, a
+			ret
+;	数値を読む。数値がなければ HL = 1 を返す (移動命令の既定値)。
+;	'=' 形式と10進数に対応する。
+dr_number:
+			call	dr_peek
+			jr		c, drn_default
+			cp		a, '='
+			jr		z, drn_equal
+			cp		a, '0'
+			jr		c, drn_default
+			cp		a, '9'+1
+			jr		nc, drn_default
+			call	dr_digits
+			ret
+drn_default:
+			ld		hl, 1
+			ret
+drn_equal:
+			call	dr_fetch		; '=' を消費
+			call	dr_value		; =変数 の値 → HL
+			ld		a, h
+			or		a, a
+			ret		p
+			ld		[ix+58], 1		; 負数フラグ (移動命令で方向反転)
+			ex		de, hl
+			ld		hl, 0
+			or		a, a
+			sbc		hl, de
+			ret
+;	数値必須版 (C/S/A 用)。なければ Illegal function call。
+dr_number_req:
+			call	dr_peek
+			jr		c, drn_err
+			cp		a, '='
+			jr		z, drn_equal
+			cp		a, '0'
+			jr		c, drn_err
+			cp		a, '9'+1
+			jr		nc, drn_err
+			call	dr_digits
+			ret
+drn_err:
+			jp		err_illegal_function_call
+;	10進数を HL へ読む
+dr_digits:
+			ld		hl, 0
+drd_loop:
+			push	hl			; 蓄積値は HL。peek/fetch が HL を壊すので退避
+			call	dr_peek
+			jr		c, drd_peek_end
+			cp		a, '0'
+			jr		c, drd_peek_end
+			cp		a, '9'+1
+			jr		nc, drd_peek_end
+			call	dr_fetch		; 数字を消費
+			pop		hl
+			sub		a, '0'
+			ld		e, a
+			ld		d, 0
+			push	de
+			add		hl, hl
+			ld		e, l
+			ld		d, h
+			add		hl, hl
+			add		hl, hl
+			add		hl, de		; HL = HL * 10
+			pop		de
+			add		hl, de
+			jr		drd_loop
+drd_peek_end:
+			pop		hl
+drd_done:
+			ret
+;	変数名を読む: [ix+44] = 1文字目, [ix+45] = 2文字目 (なければ 0),
+;	戻り値 A = 型コード (2/3/4/8)。名前でなければエラー。
+dr_name:
+			call	dr_fetch
+			cp		a, 'A'
+			jr		c, drn_err
+			cp		a, 'Z'+1
+			jr		nc, drn_err
+			ld		[ix+44], a
+			ld		[ix+45], 0
+			call	dr_peek
+			jr		c, drname_type
+			cp		a, 'A'
+			jr		c, drname_suffix
+			cp		a, 'Z'+1
+			jr		c, drname_second
+			cp		a, '0'
+			jr		c, drname_suffix
+			cp		a, '9'+1
+			jr		nc, drname_suffix
+drname_second:
+			call	dr_fetch
+			ld		[ix+45], a
+drname_suffix:
+			call	dr_peek
+			jr		c, drname_type
+			cp		a, '$'
+			jr		z, drname_t3
+			cp		a, '%'
+			jr		z, drname_t2
+			cp		a, '!'
+			jr		z, drname_t4
+			cp		a, '#'
+			jr		z, drname_t8
+drname_type:
+			; 既定の型 (default types 表)
+			ld		e, [ix+34]
+			ld		d, [ix+35]
+			ld		a, [ix+44]
+			sub		a, 'A'
+			ld		l, a
+			ld		h, 0
+			add		hl, de
+			ld		a, [hl]
+			ret
+drname_t3:
+			call	dr_fetch
+			ld		a, 3
+			ret
+drname_t2:
+			call	dr_fetch
+			ld		a, 2
+			ret
+drname_t4:
+			call	dr_fetch
+			ld		a, 4
+			ret
+drname_t8:
+			call	dr_fetch
+			ld		a, 8
+			ret
+;	変数を探す。in: [ix+44]/[ix+45] = 名前, A = 型。
+;	out: HL = 変数のアドレス (見つからなければ 0)
+dr_lookup:
+			ld		c, a			; C = 型
+			ld		l, [ix+32]
+			ld		h, [ix+33]
+drl_loop:
+			ld		a, [hl]
+			or		a, a
+			jr		z, drl_notfound
+			cp		a, [ix+44]
+			jr		nz, drl_next
+			inc		hl
+			ld		a, [hl]
+			dec		hl
+			cp		a, [ix+45]
+			jr		nz, drl_next
+			inc		hl
+			inc		hl
+			ld		a, [hl]
+			dec		hl
+			dec		hl
+			bit		7, a			; 配列は対象外
+			jr		nz, drl_next
+			and		a, 0x7F
+			cp		a, c
+			jr		nz, drl_next
+			inc		hl
+			inc		hl
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl
+			ret
+drl_next:
+			ld		de, 5
+			add		hl, de
+			jr		drl_loop
+drl_notfound:
+			ld		hl, 0
+			ret
+;	=変数 の値を得る → HL (符号付き)。文字列型はエラー。
+;	見つからない変数は 0 (インタプリタの自動生成と同じ扱い)。
+dr_value:
+			call	dr_name			; A = 型
+			ld		c, a
+			call	dr_lookup		; HL = アドレス or 0
+			ld		a, h
+			or		a, l
+			jr		nz, drv_found
+			ld		hl, 0
+			ret
+drv_found:
+			ld		a, c
+			cp		a, 2
+			jr		z, drv_int
+			cp		a, 3
+			jp		z, drn_err		; 文字列は数値化できない
+			; 実数: DAC へコピーして FRCINT
+			ld		de, dac
+			cp		a, 4
+			jr		z, drv_sng
+			ld		bc, 8
+			ldir
+			ld		a, 8
+			jr		drv_conv
+drv_sng:
+			ld		bc, 4
+			ldir
+			ld		a, 4
+drv_conv:
+			ld		[valtyp], a
+			; FRCINT は内部でページ1 のルーチンを呼ぶため、プログラム側の
+			; トランポリン (ワークスペース +55) 経由で呼ぶ。HL = 整数値
+			call	dr_call_frcint
+			ret
+drv_int:
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]
+			ex		de, hl
+			ret
+
+;	移動命令の実行。[ix+42]/[ix+43] = 単位ベクトル (角度回転前)
+dr_move:
+			; 角度で回転: (dx, dy) := (dy, -dx) を angle 回
+			ld		a, [ix+1]
+			or		a, a
+			jr		z, drm_norot
+			ld		[ix+44], a		; 回転カウンタ
+drm_rot:
+			ld		a, [ix+42]
+			neg
+			ld		[ix+45], a		; -dx
+			ld		a, [ix+43]
+			ld		[ix+42], a		; dx := dy
+			ld		a, [ix+45]
+			ld		[ix+43], a		; dy := -dx
+			ld		a, [ix+44]
+			dec		a
+			ld		[ix+44], a
+			jr		nz, drm_rot
+drm_norot:
+			ld		[ix+58], 0		; =変数 の負数フラグをクリア
+			call	dr_number		; HL = n (既定 1)
+			ld		a, [ix+58]
+			or		a, a
+			jr		z, drm_noflip
+			ld		a, [ix+42]		; 負数なら単位ベクトルを反転
+			neg
+			ld		[ix+42], a
+			ld		a, [ix+43]
+			neg
+			ld		[ix+43], a
+drm_noflip:
+			; 大きさ = n * scale / 4 (切り捨て)。[ix+45..47] = 大きさ (24ビット)
+			ld		a, [ix+2]		; scale
+			call	dr_mul_n_scale
+			; N 指定時はカーソルを退避
+			ld		a, [ix+45]
+			ld		a, [ix+42]
+			call	dr_save_pos
+			; 終点 X = GRPACX + dx * 大きさ
+			ld		hl, [grpacx_w]
+			ld		a, [ix+42]
+			call	dr_apply_axis	; HL = 終点 X
+			ld		c, l
+			ld		b, h
+			; 終点 Y = GRPACY + dy * 大きさ
+			ld		hl, [grpacy_w]
+			ld		a, [ix+43]
+			call	dr_apply_axis	; HL = 終点 Y
+			ld		e, l
+			ld		d, h
+			call	dr_draw_seg
+			jp		dr_loop
+;	N 指定時のカーソル退避 (指定がなければ何もしない)
+dr_save_pos:
+			ld		a, [ix+41]
+			or		a, a
+			ret		z
+			ld		hl, [grpacx_w]
+			ld		[ix+49], l
+			ld		[ix+50], h
+			ld		hl, [grpacy_w]
+			ld		[ix+51], l
+			ld		[ix+52], h
+			ret
+;	1軸分の終点計算。in: HL = 現在座標, A = 単位 (-1/0/1)
+;	大きさは [ix+45..47] (24ビット, リトルエンディアン)。out: HL = 終点
+dr_apply_axis:
+			or		a, a
+			ret		z
+			jp		m, dra_sub_axis
+			ld		a, [ix+45]
+			add		a, l
+			ld		l, a
+			ld		a, [ix+46]
+			adc		a, h
+			ld		h, a
+			ret
+dra_sub_axis:
+			ld		a, l
+			sub		a, [ix+45]
+			ld		l, a
+			ld		a, h
+			sbc		a, [ix+46]
+			ld		h, a
+			ret
+;	線分描画 (または移動のみ)。in: BC = 終点 x, DE = 終点 y。
+;	B フラグ時はカーソル移動のみ。N フラグ時はカーソルを復帰。
+dr_draw_seg:
+			ld		a, [ix+40]
+			or		a, a
+			jr		nz, drd_blank
+			; 描画パス。SETATR がレジスタを壊すので BC/DE (終点) を退避する
+			push	bc
+			push	de
+			; GXPOS/GYPOS = 現在のカーソル
+			ld		hl, [grpacx_w]
+			ld		[gxpos_w], hl
+			ld		hl, [grpacy_w]
+			ld		[gypos_w], hl
+			ld		a, [ix+3]		; 色
+			call	bios_setatr
+			pop		de
+			pop		bc
+			; LINE (0x58FC) はページ1 のルーチンで、ライブラリ実行中は
+			; ページ1 がライブラリ自身のため、プログラム側のトランポリン
+			; (ワークスペース +53) 経由で呼ぶ。BC = x2, DE = y2
+			push	bc			; LINE が BC/DE を壊すので終点を退避
+			push	de
+			call	dr_call_seg
+			pop		de
+			pop		bc
+			jr		drd_after
+;	FRCINT トランポリン呼び出しスタブ
+dr_call_frcint:
+			ld		l, [ix+55]
+			ld		h, [ix+56]
+			ld		a, l
+			or		a, h
+			ret		z
+			jp		hl
+;	トランポリン呼び出しスタブ (CALL で戻り番地を積むので全レジスタが保たれる)
+dr_call_seg:
+			ld		l, [ix+53]
+			ld		h, [ix+54]
+			ld		a, l
+			or		a, h
+			ret		z
+			jp		hl
+drd_blank:
+			ld		[grpacx_w], bc
+			ld		[grpacy_w], de
+drd_after:
+			; カーソルを終点へ進める (描画・ブランク共通)
+			ld		[grpacx_w], bc
+			ld		[grpacy_w], de
+			ld		[ix+40], 0
+			ld		a, [ix+41]
+			or		a, a
+			jr		z, drsg_done
+			ld		[ix+41], 0
+			; カーソルを復帰
+			ld		l, [ix+49]
+			ld		h, [ix+50]
+			ld		[grpacx_w], hl
+			ld		l, [ix+51]
+			ld		h, [ix+52]
+			ld		[grpacy_w], hl
+drsg_done:
+			ret
+;	HL = n に対して [ix+45..47] = n * scale / 4 (切り捨て) を計算する。
+;	in: HL = n, A = scale
+dr_mul_n_scale:
+			ld		[ix+45], 0
+			ld		[ix+46], 0
+			ld		[ix+47], 0
+			or		a, a
+			ret		z				; scale = 0 → 大きさ 0
+			ld		b, a			; B = scale (カウンタ)
+			ld		e, l
+			ld		d, h			; DE = n
+drmul_loop:
+			ld		a, [ix+45]
+			add		a, e
+			ld		[ix+45], a
+			ld		a, [ix+46]
+			adc		a, d
+			ld		[ix+46], a
+			ld		a, [ix+47]
+			adc		a, 0
+			ld		[ix+47], a
+			djnz	drmul_loop
+			; 2ビット右シフト (/4, 切り捨て)
+			ld		b, 2
+drmul_shift:
+			and		a, a
+			ld		a, [ix+47]
+			rra
+			ld		[ix+47], a
+			ld		a, [ix+46]
+			rra
+			ld		[ix+46], a
+			ld		a, [ix+45]
+			rra
+			ld		[ix+45], a
+			djnz	drmul_shift
+			ret
+;	M 命令: M x,y (符号付きなら相対)
+dr_m:
+			call	dr_coord		; HL = x, A = 符号があったか
+			ld		[ix+57], a
+			push	hl
+			call	dr_fetch		; ',' を消費 (なければエラー)
+			cp		a, ','
+			jp		nz, err_illegal_function_call
+			call	dr_coord		; HL = y
+			pop		bc				; BC = x
+			ex		de, hl			; DE = y
+			ld		a, [ix+57]
+			or		a, a
+			jr		z, drm_absolute2
+			; 相対: 現在のカーソルへ加算
+			ld		hl, [grpacx_w]
+			add		hl, bc
+			ld		c, l
+			ld		b, h
+			ld		hl, [grpacy_w]
+			add		hl, de
+			ld		e, l
+			ld		d, h
+drm_absolute2:
+			call	dr_save_pos
+			call	dr_draw_seg
+			jp		dr_loop
+;	座標を読む (符号 / '=' / 数値)。out: HL = 値, A = 符号フラグ (0 = なし)
+dr_coord:
+			call	dr_peek
+			jp		c, err_illegal_function_call
+			cp		a, '+'
+			jr		z, drc_signed
+			cp		a, '-'
+			jr		z, drc_signed
+			cp		a, '='
+			jr		z, drc_equal
+			call	dr_digits_req
+			ld		a, 0
+			ret
+drc_signed:
+			ld		[ix+45], a		; 符号を退避 (大きさ計算と無関係の領域)
+			call	dr_fetch		; 符号を消費
+			call	dr_peek
+			cp		a, '='
+			jr		z, drc_signed_eq
+			call	dr_digits_req
+			jr		drc_sign_apply
+drc_signed_eq:
+			call	dr_fetch		; '=' を消費
+			call	dr_value
+drc_sign_apply:
+			ld		a, [ix+45]
+			cp		a, '-'
+			jr		nz, drc_plus
+			ex		de, hl
+			ld		hl, 0
+			or		a, a
+			sbc		hl, de
+drc_plus:
+			ld		a, 1			; 符号があった
+			ret
+drc_equal:
+			call	dr_fetch		; '=' を消費
+			call	dr_value
+			ld		a, 0
+			ret
+;	数値必須の数字読み取り
+dr_digits_req:
+			call	dr_peek
+			jp		c, err_illegal_function_call
+			cp		a, '0'
+			jp		c, err_illegal_function_call
+			cp		a, '9'+1
+			jp		nc, err_illegal_function_call
+			call	dr_digits
+			ret
+;	X 命令: X 文字列変数名 — 部分文字列を実行する
+dr_x:
+			call	dr_name			; A = 型
+			cp		a, 3
+			jp		nz, err_illegal_function_call
+			call	dr_lookup		; HL = ディスクリプタ or 0
+			ld		a, h
+			or		a, l
+			jp		z, dr_loop		; 未定義なら空文字列と同じ (何もしない)
+			push	hl				; ディスクリプタを退避
+			ld		a, [ix+30]
+			cp		a, 4
+			jp		nc, err_illegal_function_call
+			; 現在の (ptr, end) をスタックへ
+			ld		l, a
+			ld		h, 0
+			add		hl, hl
+			add		hl, hl
+			push	ix
+			pop		de
+			add		hl, de
+			ld		de, 14
+			add		hl, de			; HL = &slot
+			ld		a, [ix+36]
+			ld		[hl], a
+			inc		hl
+			ld		a, [ix+37]
+			ld		[hl], a
+			inc		hl
+			ld		a, [ix+38]
+			ld		[hl], a
+			inc		hl
+			ld		a, [ix+39]
+			ld		[hl], a
+			ld		a, [ix+30]
+			inc		a
+			ld		[ix+30], a
+			pop		hl				; ディスクリプタ
+			ld		a, [hl]			; 長さ
+			inc		hl
+			ld		e, [hl]
+			inc		hl
+			ld		d, [hl]			; DE = データ先頭
+			ld		[ix+36], e
+			ld		[ix+37], d
+			ld		l, a
+			ld		h, 0
+			add		hl, de
+			ld		[ix+38], l
+			ld		[ix+39], h
+			jp		dr_loop
 			endscope

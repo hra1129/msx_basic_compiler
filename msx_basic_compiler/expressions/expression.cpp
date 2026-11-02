@@ -26,6 +26,8 @@
 #include "expression_operator_minus.h"
 #include "expression_operator_power.h"
 #include "expression_play.h"
+#include "expression_err.h"
+#include "expression_fncall.h"
 #include "expression_term.h"
 #include "expression_variable.h"
 
@@ -49,6 +51,8 @@
 #include "expression_exp.h"
 #include "expression_fix.h"
 #include "expression_fre.h"
+#include "expression_frnd.h"
+#include "expression_getsprite.h"
 #include "expression_hex.h"
 #include "expression_hexchr.h"
 #include "expression_inkey.h"
@@ -62,6 +66,8 @@
 #include "expression_loc.h"
 #include "expression_lof.h"
 #include "expression_log.h"
+#include "expression_lpos.h"
+#include "expression_max.h"
 #include "expression_mid.h"
 #include "expression_mkd.h"
 #include "expression_mki.h"
@@ -69,10 +75,12 @@
 #include "expression_msxver.h"
 #include "expression_oct.h"
 #include "expression_pad.h"
+#include "expression_pdl.h"
 #include "expression_peek.h"
 #include "expression_peekw.h"
 #include "expression_peeks.h"
 #include "expression_point.h"
+#include "expression_pos.h"
 #include "expression_right.h"
 #include "expression_rnd.h"
 #include "expression_sgn.h"
@@ -81,6 +89,7 @@
 #include "expression_sgn.h"
 #include "expression_sin.h"
 #include "expression_space.h"
+#include "expression_spc.h"
 #include "expression_sqr.h"
 #include "expression_stick.h"
 #include "expression_strig.h"
@@ -746,6 +755,19 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "FRND" ) {
+		CEXPRESSION_FRND *p_term = new CEXPRESSION_FRND;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		if( !this->check_word( p_info, ")", SYNTAX_ERROR ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "IRND" ) {
 		CEXPRESSION_IRND *p_term = new CEXPRESSION_IRND;
 		p_result = p_term;
@@ -856,6 +878,17 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return p_result;
 		}
 		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		if( this->check_word( p_info, ")", NO_ERROR ) ) {
+			//	第3引数が省略されている場合 (2引数形)
+			return p_result;
+		}
+		if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		//	[B6] 3引数形: 第1引数は開始位置だったので繰り下げる
+		p_term->p_operand0 = p_term->p_operand1;
+		p_term->p_operand1 = p_term->p_operand2;
+		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
@@ -932,6 +965,46 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "LPOS" ) {
+		CEXPRESSION_LPOS *p_term = new CEXPRESSION_LPOS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "MAX" ) {
+		CEXPRESSION_MAX *p_term = new CEXPRESSION_MAX;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		for( ; ; ) {
+			CEXPRESSION_NODE *p_operand = this->makeup_node_operator_eqv( p_info );
+			if( p_operand == nullptr ) {
+				return p_result;
+			}
+			p_term->operands.push_back( p_operand );
+			if( this->check_word( p_info, ")", NO_ERROR ) ) {
+				break;
+			}
+			if( !this->check_word( p_info, ",", MISSING_OPERAND ) ) {
+				return p_result;
+			}
+		}
+		if( p_term->operands.size() < 2 ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
 		}
 		return p_result;
 	}
@@ -1045,6 +1118,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		}
 		return p_result;
 	}
+	else if( s_operator == "PDL" ) {
+		CEXPRESSION_PDL *p_term = new CEXPRESSION_PDL;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
 	else if( s_operator == "PLAY" ) {
 		int line_no = p_info->list.get_line_no();
 		CEXPRESSION_PLAY *p_term = new CEXPRESSION_PLAY;
@@ -1125,6 +1212,20 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 			return nullptr;
 		}
 		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "POS" ) {
+		CEXPRESSION_POS *p_term = new CEXPRESSION_POS;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
 		}
@@ -1248,6 +1349,35 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 	}
 	else if( s_operator == "STR$" ) {
 		CEXPRESSION_STR *p_term = new CEXPRESSION_STR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "SPC(" ) {
+		CEXPRESSION_SPC *p_term = new CEXPRESSION_SPC;
+		p_result = p_term;
+		p_info->list.p_position++;
+		p_term->p_operand = this->makeup_node_operator_eqv( p_info );
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "SPRITE" ) {
+		p_info->list.p_position++;
+		if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "$" ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			return nullptr;
+		}
+		CEXPRESSION_GETSPRITE *p_term = new CEXPRESSION_GETSPRITE;
 		p_result = p_term;
 		p_info->list.p_position++;
 		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
@@ -1434,6 +1564,133 @@ CEXPRESSION_NODE *CEXPRESSION::makeup_node_term( CCOMPILE_INFO *p_info ) {
 		p_term->p_operand2 = this->makeup_node_operator_eqv( p_info );
 		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
 			return p_result;
+		}
+		return p_result;
+	}
+	else if( s_operator == "ERR" ) {
+		//	ERR: 捕捉したエラーコード
+		CEXPRESSION_ERR *p_term = new CEXPRESSION_ERR;
+		p_result = p_term;
+		p_info->list.p_position++;
+		p_info->use_on_error = true;
+		return p_result;
+	}
+	else if( s_operator == "ERL" ) {
+		//	ERL: エラーが発生した行番号
+		CEXPRESSION_ERL *p_term = new CEXPRESSION_ERL;
+		p_result = p_term;
+		p_info->list.p_position++;
+		p_info->use_on_error = true;
+		return p_result;
+	}
+	else if( s_operator == "FN" ) {
+		//	DEF FN 呼び出し: 定義本体をインライン展開する
+		CEXPRESSION_FNCALL *p_term = new CEXPRESSION_FNCALL;
+		std::string s_name;
+		std::string s_key;
+		int call_line;
+		std::map< std::string, CCOMPILE_INFO::CFN_DEFINITION >::iterator it_fn;
+
+		p_result = p_term;
+		p_info->list.p_position++;			//	"FN" を読み飛ばす
+		if( p_info->list.is_command_end() || p_info->list.p_position->type != CBASIC_WORD_TYPE::UNKNOWN_NAME ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		s_name = p_info->list.p_position->s_word;
+		std::transform( s_name.begin(), s_name.end(), s_name.begin(), ::toupper );
+		p_info->list.p_position++;
+		if( s_name.size() > 2 && p_info->options.compile_mode == CCOMPILE_MODE::COMPATIBLE ) {
+			s_name.resize( 2 );
+		}
+		//	型識別子 (明示が無ければ DEFxxx の設定に従う。登録時と同じ規則でキーを作る)
+		s_key = "FN" + s_name;
+		if( !p_info->list.is_command_end() ) {
+			if( p_info->list.p_position->s_word == "%" ) {
+				s_key += "%";
+				p_info->list.p_position++;
+			}
+			else if( p_info->list.p_position->s_word == "!" ) {
+				s_key += "!";
+				p_info->list.p_position++;
+			}
+			else if( p_info->list.p_position->s_word == "#" ) {
+				s_key += "#";
+				p_info->list.p_position++;
+			}
+			else if( p_info->list.p_position->s_word == "$" ) {
+				s_key += "$";
+				p_info->list.p_position++;
+			}
+			else {
+				switch( p_info->variables.def_types[ s_name[0] - 'A' ] ) {
+				case CVARIABLE_TYPE::INTEGER:		s_key += "%";	break;
+				case CVARIABLE_TYPE::SINGLE_REAL:	s_key += "!";	break;
+				case CVARIABLE_TYPE::STRING:		s_key += "$";	break;
+				default:							s_key += "#";	break;
+				}
+			}
+		}
+		it_fn = p_info->fn_definitions.find( s_key );
+		if( it_fn == p_info->fn_definitions.end() ) {
+			//	未定義の FN 関数
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		//	定義前使用の検出 (展開の起点行より前に定義が無ければエラー。
+		//	インタプリタの「DEF 実行後に呼び出し可能」とは厳密には異なるが、
+		//	通常のプログラムでは一致する近似とした)
+		if( p_info->fn_expanding.empty() ) {
+			p_info->fn_root_line = p_info->list.get_line_no();
+		}
+		call_line = p_info->fn_root_line;
+		if( it_fn->second.def_line_no > call_line ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		//	再帰呼び出しの禁止
+		for( std::string &s_expanding: p_info->fn_expanding ) {
+			if( s_expanding == s_key ) {
+				p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+				delete p_term;
+				return nullptr;
+			}
+		}
+		if( !this->check_word( p_info, "(", SYNTAX_ERROR ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->p_arg = this->makeup_node_operator_eqv( p_info );
+		if( p_term->p_arg == nullptr ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
+		}
+		if( !this->check_word( p_info, ")", MISSING_OPERAND ) ) {
+			delete p_term;
+			return nullptr;
+		}
+		p_term->param = it_fn->second.param;
+		p_term->result_type = it_fn->second.result_type;
+		//	定義本体をその位置で解析する
+		{
+			CBASIC_LIST_POSITION saved_position = p_info->list.get_position();
+			CBASIC_LIST_POSITION body_position;
+			body_position.p_position = it_fn->second.p_body;
+			body_position.current_line_no = it_fn->second.def_line_no;
+			p_info->list.set_position( body_position );
+			p_info->fn_expanding.push_back( s_key );
+			p_term->p_body = this->makeup_node_operator_eqv( p_info );
+			p_info->fn_expanding.pop_back();
+			p_info->list.set_position( saved_position );
+		}
+		if( p_term->p_body == nullptr ) {
+			p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
+			delete p_term;
+			return nullptr;
 		}
 		return p_result;
 	}

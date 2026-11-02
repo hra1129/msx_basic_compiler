@@ -26,10 +26,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 		return false;
 	}
 	//	STEP
-	if( p_info->list.p_position->s_word == "STEP" ) {
-		is_step = true;
-		p_info->list.p_position++;
-	}
+	is_step = p_info->p_compiler->check_step();
 	//	(
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
 		p_info->errors.add( SYNTAX_ERROR, p_info->list.get_line_no() );
@@ -50,10 +47,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		if (is_step) {
-			asm_line.set( "LD", "", "DE", "[work_gxpos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "ADD", "", "HL", "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
 		}
 		asm_line.set( "LD", "", "[work_circle_centerx]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -72,10 +66,7 @@ bool CCIRCLE::exec( CCOMPILE_INFO *p_info ) {
 	if( exp.compile( p_info ) ) {
 		exp.release();
 		if (is_step) {
-			asm_line.set( "LD", "", "DE", "[work_gypos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( "ADD", "", "HL", "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
 		}
 		asm_line.set( "LD", "", "[work_circle_centery]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );

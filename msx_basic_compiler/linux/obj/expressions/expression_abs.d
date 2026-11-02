@@ -8,7 +8,8 @@ obj/expressions/expression_abs.o: ../expressions/expression_abs.cpp \
  ../expressions/../assembler/../basic_types.h \
  ../expressions/../constant_info.h ../expressions/../single_real.h \
  ../expressions/../double_real.h ../expressions/../string_value.h \
- ../expressions/../variable_manager.h ../expressions/expression_term.h
+ ../expressions/../variable_manager.h ../expressions/expression_term.h \
+ ../expressions/../double_real.h
 ../expressions/expression_abs.h:
 ../expressions/expression.h:
 ../expressions/../compile_info.h:
@@ -25,3 +26,4 @@ obj/expressions/expression_abs.o: ../expressions/expression_abs.cpp \
 ../expressions/../string_value.h:
 ../expressions/../variable_manager.h:
 ../expressions/expression_term.h:
+../expressions/../double_real.h:

@@ -104,10 +104,8 @@ bool CINPUT::exec( CCOMPILE_INFO *p_info ) {
 		p_info->errors.add( SYNTAX_ERROR, line_no );
 		return true;
 	}
-	if( variable_count > 8 ) {
-		p_info->errors.add( OVERFLOW_ERROR, line_no );
-		return true;
-	}
+	//	項目数の上限は設けない (型リストは動的に構築され、実行時も
+	//	型リスト駆動で個数に依存しない)。[Batch 7 で上限緩和]
 	p_info->assembler_list.body.insert( p_info->assembler_list.body.end(), assembler_list_buffer.begin(), assembler_list_buffer.end() );
 
 	s_data = s_data + ", 0";

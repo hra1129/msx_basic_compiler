@@ -6,6 +6,7 @@
 
 #include "let.h"
 #include "../expressions/expression.h"
+#include "../expressions/expression_term.h"
 
 // --------------------------------------------------------------------
 //  [LET] {変数名}[(配列要素, 配列要素 ...)] = 式
@@ -154,6 +155,123 @@ bool CLET::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( CMNEMONIC_TYPE::CALL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "call_blib", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
+		return true;
+	}
+	if( p_info->list.p_position->s_word == "BASE" ) {
+		//	[B6] BASE(n) への代入。実機インタプリタは代入形そのものを Illegal
+		//	function call にするが、読み取り形が既にあるため、書き込み可能な
+		//	0..19 (F3B3h のテーブル) のみ対応する。20..64 は BACON 内部に
+		//	保持場所が無いためコンパイル時エラーにする。
+		p_info->list.p_position++;
+		if( !p_info->list.check_word( &(p_info->errors), "(" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		exp.makeup_node( p_info );
+		CEXPRESSION_NODE *p_node = exp.get_top_node();
+		bool is_constant_id = false;
+		int const_id = 0;
+		if( p_node != nullptr && p_node->is_constant && p_node->type == CEXPRESSION_TYPE::INTEGER ) {
+			is_constant_id = true;
+			const_id = std::stoi( p_node->s_value );
+		}
+		if( is_constant_id && const_id >= 0 ) {
+			//	定数インデックスの場合
+			exp.release();
+			if( const_id > 64 || (const_id >= 45 && const_id <= 49) || const_id >= 20 ) {
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, line_no );
+				return true;
+			}
+			if( !p_info->list.check_word( &(p_info->errors), ")" ) ) {
+				p_info->errors.add( SYNTAX_ERROR, line_no );
+				return true;
+			}
+			if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+				p_info->errors.add( SYNTAX_ERROR, line_no );
+				return true;
+			}
+			if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+				p_info->assembler_list.add_label( "work_basetbl", "0x0f3b3" );
+				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_basetbl + " + std::to_string( const_id * 2 ) + "]", COPERAND_TYPE::REGISTER, "HL" );
+				p_info->assembler_list.body.push_back( asm_line );
+				exp.release();
+			}
+			else {
+				p_info->errors.add( SYNTAX_ERROR, line_no );
+			}
+			return true;
+		}
+		//	変数インデックスの場合: 範囲チェックは実行時に行う
+		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), ")" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( !p_info->list.check_word( &(p_info->errors), "=" ) ) {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+			return true;
+		}
+		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			std::string s_label_err = p_info->get_auto_label();
+			std::string s_label_done = p_info->get_auto_label();
+			p_info->assembler_list.add_label( "bios_errhand", "0x0406f" );
+			asm_line.set( CMNEMONIC_TYPE::POP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "D" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::OR, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NZ, COPERAND_TYPE::CONSTANT, s_label_err, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "E" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::CP, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "20" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NC, COPERAND_TYPE::CONSTANT, s_label_err, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::REGISTER, "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::CONSTANT, "0xb3" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "A", COPERAND_TYPE::REGISTER, "E" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::REGISTER, "A" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "D", COPERAND_TYPE::CONSTANT, "0xf3" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "E" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::INC, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[HL]", COPERAND_TYPE::REGISTER, "D" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::JR, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_done, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_err, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "E", COPERAND_TYPE::CONSTANT, "5" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::JP, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, "bios_errhand", COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			asm_line.set( CMNEMONIC_TYPE::LABEL, CCONDITION::NONE, COPERAND_TYPE::CONSTANT, s_label_done, COPERAND_TYPE::NONE, "" );
+			p_info->assembler_list.body.push_back( asm_line );
+			exp.release();
+		}
+		else {
+			p_info->errors.add( SYNTAX_ERROR, line_no );
+		}
 		return true;
 	}
 	if( p_info->list.p_position->s_word == "MAXFILES" ) {

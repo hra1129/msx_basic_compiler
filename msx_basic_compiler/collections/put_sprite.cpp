@@ -47,11 +47,19 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		return true;
 	}
 	p_info->list.p_position++;
-	//	第2引数 ( <X座標>, <Y座標> )
+	//	第2引数 [STEP] ( <X座標>, <Y座標> )
+	bool is_step = p_info->p_compiler->check_step();
+	if( is_step ) {
+		p_info->assembler_list.add_label( "work_grpacx", "0x0FCB7" );
+		p_info->assembler_list.add_label( "work_grpacy", "0x0FCB9" );
+	}
 	if( p_info->list.p_position->s_word == "(" ) {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
 			//	X座標
+			if( is_step ) {
+				p_info->p_compiler->put_step_adjust( "work_grpacx" );
+			}
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();
@@ -67,6 +75,9 @@ bool CPUTSPRITE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 		if( exp.compile( p_info ) ) {
 			//	Y座標
+			if( is_step ) {
+				p_info->p_compiler->put_step_adjust( "work_grpacy" );
+			}
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
 			exp.release();

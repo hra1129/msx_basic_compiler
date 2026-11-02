@@ -18,18 +18,20 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
  ../collections/color.h ../collections/color_sprite.h \
  ../collections/copy.h ../collections/comment.h ../collections/data.h \
  ../collections/defdbl.h ../collections/defint.h ../collections/defusr.h \
- ../collections/defsng.h ../collections/defstr.h ../collections/dim.h \
- ../collections/end.h ../collections/erase.h ../collections/error.h \
- ../collections/field.h ../collections/files.h ../collections/for.h \
- ../collections/get.h ../collections/goto.h ../collections/gosub.h \
- ../collections/if.h ../collections/input.h ../collections/irandomize.h \
- ../collections/key.h ../collections/kill.h ../collections/let.h \
- ../collections/lset.h ../collections/line.h ../collections/locate.h \
- ../collections/name.h ../collections/next.h ../collections/mid.h \
- ../collections/on_goto.h ../collections/on_interval.h \
- ../collections/on_key.h ../collections/on_sprite.h \
- ../collections/on_strig.h ../collections/on_stop.h ../collections/open.h \
- ../collections/out.h ../collections/paint.h ../collections/play.h \
+ ../collections/deffn.h ../collections/defsng.h ../collections/defstr.h \
+ ../collections/dim.h ../collections/end.h ../collections/erase.h \
+ ../collections/error.h ../collections/field.h ../collections/files.h \
+ ../collections/for.h ../collections/get.h ../collections/goto.h \
+ ../collections/gosub.h ../collections/if.h ../collections/input.h \
+ ../collections/irandomize.h ../collections/key.h ../collections/kill.h \
+ ../collections/let.h ../collections/lset.h ../collections/line.h \
+ ../collections/lineinput.h ../collections/locate.h ../collections/name.h \
+ ../collections/next.h ../collections/mid.h ../collections/on_goto.h \
+ ../collections/on_interval.h ../collections/on_key.h \
+ ../collections/on_sprite.h ../collections/on_strig.h \
+ ../collections/on_stop.h ../collections/on_error.h \
+ ../collections/resume.h ../collections/open.h ../collections/out.h \
+ ../collections/paint.h ../collections/play.h ../collections/draw.h \
  ../collections/poke.h ../collections/pokew.h ../collections/pokes.h \
  ../collections/print.h ../collections/pset.h ../collections/put.h \
  ../collections/put_sprite.h ../collections/read.h \
@@ -38,6 +40,7 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
  ../collections/setbeep.h ../collections/setpage.h \
  ../collections/setprompt.h ../collections/setscreen.h \
  ../collections/setscroll.h ../collections/settitle.h \
+ ../collections/setdatetime.h ../collections/wait.h \
  ../collections/sound.h ../collections/swap.h ../collections/vpoke.h \
  ../collections/vpokes.h ../collections/width.h \
  .././expressions/expression.h .././expressions/../compile_info.h \
@@ -93,6 +96,7 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
 ../collections/defdbl.h:
 ../collections/defint.h:
 ../collections/defusr.h:
+../collections/deffn.h:
 ../collections/defsng.h:
 ../collections/defstr.h:
 ../collections/dim.h:
@@ -113,6 +117,7 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
 ../collections/let.h:
 ../collections/lset.h:
 ../collections/line.h:
+../collections/lineinput.h:
 ../collections/locate.h:
 ../collections/name.h:
 ../collections/next.h:
@@ -123,10 +128,13 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
 ../collections/on_sprite.h:
 ../collections/on_strig.h:
 ../collections/on_stop.h:
+../collections/on_error.h:
+../collections/resume.h:
 ../collections/open.h:
 ../collections/out.h:
 ../collections/paint.h:
 ../collections/play.h:
+../collections/draw.h:
 ../collections/poke.h:
 ../collections/pokew.h:
 ../collections/pokes.h:
@@ -146,6 +154,8 @@ obj/compiler.o: ../compiler.cpp ../compiler.h ../compile_info.h \
 ../collections/setscreen.h:
 ../collections/setscroll.h:
 ../collections/settitle.h:
+../collections/setdatetime.h:
+../collections/wait.h:
 ../collections/sound.h:
 ../collections/swap.h:
 ../collections/vpoke.h:

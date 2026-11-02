@@ -17,6 +17,7 @@ public:
 	~CEXPRESSION_INSTR() {
 		this->release();
 	}
+	CEXPRESSION_NODE *p_operand0 = nullptr;		//	[B6] 3引数形の開始位置 (nullptr なら2引数形)
 	CEXPRESSION_NODE *p_operand1 = nullptr;
 	CEXPRESSION_NODE *p_operand2 = nullptr;
 
@@ -25,6 +26,10 @@ public:
 	void compile( CCOMPILE_INFO *p_info );
 
 	void release( void ) {
+		if( this->p_operand0 != nullptr ) {
+			delete this->p_operand0;
+			this->p_operand0 = nullptr;
+		}
 		if( this->p_operand1 != nullptr ) {
 			delete this->p_operand1;
 			this->p_operand1 = nullptr;

@@ -4,6 +4,8 @@
 //	2023/July/20th  t.hara 
 // --------------------------------------------------------------------
 
+#include <map>
+#include <set>
 #include "basic_types.h"
 #include "basic_list.h"
 #include "error_list.h"
@@ -79,6 +81,21 @@ public:
 	std::vector< CVARIABLE > for_variable_array;
 
 	// ----------------------------------------------------------------
+	//	DEF FN の定義情報 (事前スキャンで登録し、呼び出し側で本体を
+	//	インライン展開する。再帰呼び出しは展開中の名前で禁止する)
+	// ----------------------------------------------------------------
+	class CFN_DEFINITION {
+	public:
+		CVARIABLE param;										//	引数変数
+		CEXPRESSION_TYPE result_type = CEXPRESSION_TYPE::DOUBLE_REAL;
+		int def_line_no = 0;									//	定義した行番号 (定義前使用の検出用)
+		std::vector< CBASIC_WORD >::const_iterator p_body;		//	本体式の先頭位置
+	};
+	std::map< std::string, CFN_DEFINITION > fn_definitions;
+	std::vector< std::string > fn_expanding;
+	int fn_root_line = 0;		//	展開の起点となった呼び出し行 (定義前使用の判定用)
+
+	// ----------------------------------------------------------------
 	//	OPEN/CLOSE/MAXFILES文の使用フラグ
 	// ----------------------------------------------------------------
 	bool use_file_access = false;
@@ -93,6 +110,30 @@ public:
 	bool use_on_stop = false;
 	bool use_return_line_no = false;
 	bool use_input = false;
+	bool use_on_error = false;
+
+	// ----------------------------------------------------------------
+	//	ON ERROR 用の文マーカー一覧 (出現順: ラベル, 行番号)
+	// ----------------------------------------------------------------
+	std::vector< std::pair< std::string, int > > error_mark_list;
+
+	// ----------------------------------------------------------------
+	//	[B6] FOR/NEXT 静的ペアリング用 (O3 のみ)
+	// ----------------------------------------------------------------
+	class CFOR_B6_RECORD {
+	public:
+		std::string s_var_label;		//	ループ変数のラベル
+		std::string s_cell_label;		//	_LABEL セルのラベル
+		std::string s_next_label;		//	NEXT ブロックのラベル
+		size_t store_body_index = 0;	//	FOR 側セル保存コードの body 位置
+		int for_line_no = 0;
+		int next_line_no = 0;
+		bool paired = false;
+	};
+	std::vector< CFOR_B6_RECORD > for_b6_records;
+	std::vector< int > for_b6_stack;					//	for_variable_array と並行
+	std::set< std::string > b6_cell_used_vars;			//	セル経由で参照された _LABEL セル
+	std::vector< int > label_target_lines;				//	飛び先になっているラベルの定義行
 
 	bool is_interrupt_use( void ) const {
 		return( this->use_on_interval || this->use_on_strig || this->use_on_sprite || this->use_on_stop || this->use_on_key );

@@ -35,12 +35,18 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.add_label( "bios_linebf", "0x058C1" );
 	p_info->assembler_list.add_label( "bios_setatr", "0x0011A" );
 
+	//	始点の STEP (相対座標)。基点は現在のグラフィックス座標。
+	bool has_start_step = p_info->p_compiler->check_step();
+
 	if( p_info->list.p_position->s_word == "(" ) {
 		//	始点座標の指定がある場合
 		//	(
 		p_info->list.p_position++;
 		//	X座標
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			if( has_start_step ) {
+				p_info->p_compiler->put_step_adjust( "work_gxpos" );
+			}
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_gxpos]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_grpacx]", COPERAND_TYPE::REGISTER, "HL" );
@@ -59,6 +65,9 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 		p_info->list.p_position++;
 		//	Y座標
 		if( exp.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
+			if( has_start_step ) {
+				p_info->p_compiler->put_step_adjust( "work_gypos" );
+			}
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_gypos]", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
 			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::MEMORY, "[work_grpacy]", COPERAND_TYPE::REGISTER, "HL" );
@@ -130,10 +139,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gxpos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -142,10 +148,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gypos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -203,10 +206,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			if( has_step ) {
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gxpos]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-				p_info->assembler_list.body.push_back( asm_line );
+				p_info->p_compiler->put_step_adjust( "work_gxpos" );
 			}
 			asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -215,10 +215,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 				return true;
 			}
 			if( has_step ) {
-				asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gypos]" );
-				p_info->assembler_list.body.push_back( asm_line );
-				asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-				p_info->assembler_list.body.push_back( asm_line );
+				p_info->p_compiler->put_step_adjust( "work_gypos" );
 			}
 			asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 			p_info->assembler_list.body.push_back( asm_line );
@@ -263,10 +260,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gxpos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -275,10 +269,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gypos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -314,10 +305,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gxpos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -326,10 +314,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gypos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
 		}
 		std::string s_label1 = p_info->get_auto_label();
 		std::string s_label2 = p_info->get_auto_label();
@@ -380,10 +365,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gxpos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gxpos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::PUSH, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::NONE, "" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -392,10 +374,7 @@ bool CLINE::exec( CCOMPILE_INFO *p_info ) {
 			return true;
 		}
 		if( has_step ) {
-			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::MEMORY, "[work_gypos]" );
-			p_info->assembler_list.body.push_back( asm_line );
-			asm_line.set( CMNEMONIC_TYPE::ADD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::REGISTER, "DE" );
-			p_info->assembler_list.body.push_back( asm_line );
+			p_info->p_compiler->put_step_adjust( "work_gypos" );
 		}
 		asm_line.set( CMNEMONIC_TYPE::EX, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "DE", COPERAND_TYPE::REGISTER, "HL" );
 		p_info->assembler_list.body.push_back( asm_line );

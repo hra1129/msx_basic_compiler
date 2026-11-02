@@ -92,14 +92,14 @@ bool CFIELD::exec( CCOMPILE_INFO *p_info ) {
 		p_info->assembler_list.body.push_back( asm_line );
 		var_count++;
 
-	} while( !p_info->list.is_command_end() && var_count < 16 );
+	} while( !p_info->list.is_command_end() && var_count < 32 );
 
 	if( !p_info->list.is_command_end() ) {
-		//	16個だったら、FIELD命令の記述が終わってることも確かめる。終わってなければ、SUBSCRIPT_OUT_OF_RANGE を出す。
+		//	32個だったら、FIELD命令の記述が終わってることも確かめる。終わってなければ、SUBSCRIPT_OUT_OF_RANGE を出す。
 		p_info->errors.add( SUBSCRIPT_OUT_OF_RANGE, p_info->list.get_line_no() );
 		return true;
 	}
-	// Terminate the field list, including when all 16 entries are used.
+	// Terminate the field list, including when all 32 entries are used.
 	asm_line.set( "LD", "", "[HL]", "0" );
 	p_info->assembler_list.body.push_back( asm_line );
 	return true;

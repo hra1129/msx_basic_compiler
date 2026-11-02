@@ -7,6 +7,7 @@
 #include <vector>
 #include "expression_len.h"
 #include "expression_term.h"
+#include "expression_variable.h"
 
 // --------------------------------------------------------------------
 CEXPRESSION_NODE* CEXPRESSION_LEN::optimization( CCOMPILE_INFO *p_info ) {
@@ -31,6 +32,22 @@ void CEXPRESSION_LEN::compile( CCOMPILE_INFO *p_info ) {
 	this->p_operand->compile( p_info );
 
 	if( this->p_operand->type != CEXPRESSION_TYPE::STRING ) {
+		//	[B6] 数値変数・配列要素なら、その型のサイズを返す (BACON拡張。
+		//	実機インタプリタは数値形を Type mismatch にするが、提案に基づき対応)
+		CEXPRESSION_VARIABLE *p_variable = dynamic_cast<CEXPRESSION_VARIABLE*>( this->p_operand );
+		if( p_variable != nullptr && p_variable->variable.type != CVARIABLE_TYPE::STRING ) {
+			int size = 2;
+			if( p_variable->variable.type == CVARIABLE_TYPE::SINGLE_REAL ) {
+				size = 4;
+			}
+			else if( p_variable->variable.type == CVARIABLE_TYPE::DOUBLE_REAL ) {
+				size = 8;
+			}
+			asm_line.set( CMNEMONIC_TYPE::LD, CCONDITION::NONE, COPERAND_TYPE::REGISTER, "HL", COPERAND_TYPE::CONSTANT, std::to_string( size ) );
+			p_info->assembler_list.body.push_back( asm_line );
+			this->type = CEXPRESSION_TYPE::INTEGER;
+			return;
+		}
 		p_info->errors.add( TYPE_MISMATCH, p_info->list.get_line_no() );
 		return;
 	}

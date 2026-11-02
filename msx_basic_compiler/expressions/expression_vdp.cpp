@@ -19,6 +19,19 @@ CEXPRESSION_NODE* CEXPRESSION_VDP::optimization( CCOMPILE_INFO *p_info ) {
 		delete this->p_operand;
 		this->p_operand = p;
 	}
+	//	[B6] 定数インデックスの範囲チェック (BASE の読み取り側に合わせる)。
+	//	実機で有効なのは 0..24, 26, 27, 28 のみで、それ以外は
+	//	Illegal function call になる。負数と変数インデックスは実機でも
+	//	エラーにならない (隣接ワークを読む) ため、従来通り通す。
+	if( (p_info->options.optimize_level >= COPTIMIZE_LEVEL::NODE_ONLY) && this->p_operand->is_constant ) {
+		if( this->p_operand->type == CEXPRESSION_TYPE::INTEGER ) {
+			int id = std::stoi( this->p_operand->s_value );
+			if( id >= 0 && !((id <= 24) || id == 26 || id == 27 || id == 28) ) {
+				p_info->errors.add( ILLEGAL_FUNCTION_CALL, p_info->list.get_line_no() );
+				return nullptr;
+			}
+		}
+	}
 	//	VDP関数は最適化で消滅することはない
 	return nullptr;
 }

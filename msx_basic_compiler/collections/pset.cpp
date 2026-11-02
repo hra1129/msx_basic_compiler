@@ -22,6 +22,8 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 	is_preset = (p_info->list.p_position->s_word == "PRESET");
 
 	p_info->list.p_position++;
+	//	STEP (相対座標)
+	bool is_step = p_info->p_compiler->check_step();
 	if( p_info->list.is_command_end() || p_info->list.p_position->s_word != "(" ) {
 		//	PSET だけで終わってる場合は Syntax error.
 		p_info->errors.add( SYNTAX_ERROR, line_no );
@@ -82,6 +84,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_grpacx" );
+		}
 		asm_line.set( "LD", "", "[work_grpacx]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
@@ -90,6 +95,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
+		}
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_grpacy" );
 		}
 		asm_line.set( "LD", "", "[work_grpacy]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
@@ -144,6 +152,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
 		}
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_grpacx" );
+		}
 		asm_line.set( "LD", "", "[work_grpacx]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );
 		asm_line.set( "LD", "", "[work_cloc]", "HL" );
@@ -152,6 +163,9 @@ bool CPSET::exec( CCOMPILE_INFO *p_info ) {
 		if( !exp_y.compile( p_info, CEXPRESSION_TYPE::INTEGER ) ) {
 			p_info->errors.add( SYNTAX_ERROR, line_no );
 			return true;
+		}
+		if( is_step ) {
+			p_info->p_compiler->put_step_adjust( "work_grpacy" );
 		}
 		asm_line.set( "LD", "", "[work_grpacy]", "HL" );
 		p_info->assembler_list.body.push_back( asm_line );

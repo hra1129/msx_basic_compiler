@@ -144,6 +144,18 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	//	飛び先ラベル生成
 	s_body = p_info->get_auto_label();
 	s_next = p_info->get_auto_label();
+	//	[B6] O3 では静的ペアリング用に記録する (保存コードの位置を含む)
+	int b6_record_index = -1;
+	if( p_info->options.optimize_level == COPTIMIZE_LEVEL::DEEP ) {
+		CCOMPILE_INFO::CFOR_B6_RECORD rec;
+		rec.s_var_label = variable_loop.s_label;
+		rec.s_cell_label = variable_loopl.s_label;
+		rec.s_next_label = s_next;
+		rec.store_body_index = p_info->assembler_list.body.size();
+		rec.for_line_no = line_no;
+		p_info->for_b6_records.push_back( rec );
+		b6_record_index = (int)p_info->for_b6_records.size() - 1;
+	}
 	//	戻りアドレスの設定
 	asm_line.set( "LD", "", "HL", s_next );
 	p_info->assembler_list.body.push_back( asm_line );
@@ -340,5 +352,8 @@ bool CFOR::exec( CCOMPILE_INFO *p_info ) {
 	p_info->assembler_list.body.push_back( asm_line );
 	//	FOR文のループ変数を積んでおく
 	p_info->for_variable_array.push_back( variable_loop );
+	if( b6_record_index >= 0 ) {
+		p_info->for_b6_stack.push_back( b6_record_index );
+	}
 	return true;
 }
