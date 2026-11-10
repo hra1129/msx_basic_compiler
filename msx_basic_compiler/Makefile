@@ -20,6 +20,7 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/defstr.cpp \
 	collections/defusr.cpp \
 	collections/dim.cpp \
+	collections/draw.cpp \
 	collections/end.cpp \
 	collections/erase.cpp \
 	collections/error.cpp \
@@ -75,6 +76,14 @@ SRCS =	assembler/assembler_line.cpp \
 	collections/vpoke.cpp \
 	collections/vpokes.cpp \
 	collections/width.cpp \
+	collections/wait.cpp \
+	collections/deffn.cpp \
+	collections/on_error.cpp \
+	collections/resume.cpp \
+	expressions/expression_err.cpp \
+	expressions/expression_fncall.cpp \
+	collections/setdatetime.cpp \
+	collections/lineinput.cpp \
 	compiler.cpp \
 	double_real.cpp \
 	error_list.cpp \
@@ -94,10 +103,14 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_cvd.cpp \
 	expressions/expression_cvi.cpp \
 	expressions/expression_cvs.cpp \
+	expressions/expression_dskf.cpp \
+	expressions/expression_eof.cpp \
 	expressions/expression_exp.cpp \
 	expressions/expression_fix.cpp \
 	expressions/expression_fre.cpp \
 	expressions/expression_play.cpp \
+	expressions/expression_frnd.cpp \
+	expressions/expression_getsprite.cpp \
 	expressions/expression_hex.cpp \
 	expressions/expression_hexchr.cpp \
 	expressions/expression_inkey.cpp \
@@ -108,7 +121,11 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_irnd.cpp \
 	expressions/expression_left.cpp \
 	expressions/expression_len.cpp \
+	expressions/expression_loc.cpp \
+	expressions/expression_lof.cpp \
 	expressions/expression_log.cpp \
+	expressions/expression_lpos.cpp \
+	expressions/expression_max.cpp \
 	expressions/expression_mid.cpp \
 	expressions/expression_mkd.cpp \
 	expressions/expression_mki.cpp \
@@ -136,15 +153,18 @@ SRCS =	assembler/assembler_line.cpp \
 	expressions/expression_operator_sub.cpp \
 	expressions/expression_operator_xor.cpp \
 	expressions/expression_pad.cpp \
+	expressions/expression_pdl.cpp \
 	expressions/expression_peek.cpp \
 	expressions/expression_peeks.cpp \
 	expressions/expression_peekw.cpp \
 	expressions/expression_point.cpp \
+	expressions/expression_pos.cpp \
 	expressions/expression_right.cpp \
 	expressions/expression_rnd.cpp \
 	expressions/expression_sgn.cpp \
 	expressions/expression_sin.cpp \
 	expressions/expression_space.cpp \
+	expressions/expression_spc.cpp \
 	expressions/expression_sqr.cpp \
 	expressions/expression_stick.cpp \
 	expressions/expression_str.cpp \

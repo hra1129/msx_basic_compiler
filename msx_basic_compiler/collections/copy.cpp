@@ -402,7 +402,7 @@ bool CCOPY::exec( CCOMPILE_INFO *p_info ) {
 				asm_line.set( "POP", "", "HL" );
 				p_info->assembler_list.body.push_back( asm_line );
 			}
-			p_info->assembler_list.add_label( "blib_copy_file_to_pos", "0x051f5" );
+			p_info->assembler_list.add_label( "blib_copy_file_to_pos", "0x040c0" );
 			p_info->assembler_list.activate_copy_string_to_buffer();
 			asm_line.set( "PUSH", "", "HL" );
 			p_info->assembler_list.body.push_back( asm_line );

@@ -10,8 +10,9 @@ WORK_TXTTAB                     = 0X0F676
 WORK_VARTAB                     = 0X0F6C2
 WORK_USRTAB                     = 0X0F39A
 BIOS_NEWSTT                     = 0X04601
-FILE_INFO_SIZE                  = 37 + 3 * 16
-BLIB_INIT_NCALBAS               = 0X0404E
+FILE_INFO_SIZE                  = 37 + 3 * 33
+BLIB_STARTUP                    = 0X04105
+BLIB_STARTUP_MAIN               = 0X04108
 BIOS_SYNTAX_ERROR               = 0X4055
 BIOS_CALSLT                     = 0X001C
 BIOS_ENASLT                     = 0X0024
@@ -33,6 +34,8 @@ BIOS_WRTVDP                     = 0X00047
 WORK_CLIKSW                     = 0X0F3DB
 BLIB_WIDTH                      = 0X0403C
 BIOS_ERRHAND                    = 0X0406F
+BLIB_ALLOCATE_HEAP              = 0X04120
+BLIB_FREE_HEAP                  = 0X04123
 BLIB_SETSPRITE                  = 0X04042
 BIOS_POSIT                      = 0X000C6
 WORK_CSRY                       = 0X0F3DC
@@ -46,9 +49,12 @@ WORK_DAC                        = 0X0F7F6
 WORK_VALTYP                     = 0X0F663
 BLIB_PUT_DIGITS                 = 0X040F6
 BLIB_PUTSPRITE                  = 0X04045
-BLIB_INPUT                      = 0X0407E
+BIOS_CHGET                      = 0X009F
 WORK_FILTAB                     = 0XF860
+BLIB_TERMINATION                = 0X04117
+BLIB_SETUP_H_ERRO               = 0X0410E
 WORK_ERRFLG                     = 0X0F414
+BLIB_H_ERRO_CLEANUP             = 0X04114
 ; BSAVE header -----------------------------------------------------------
         DEFB        0xfe
         DEFW        start_address
@@ -56,51 +62,16 @@ WORK_ERRFLG                     = 0X0F414
         DEFW        start_address
         ORG         0X8010
 START_ADDRESS:
-        LD          HL, 0X8001
-        LD          [WORK_TXTTAB], HL
-        LD          HL, 0
-        LD          [0X8001], HL
-        LD          [0X8002], HL
-        LD          HL, [WORK_USRTAB + 0]
-        LD          [SVARI_USR0_BACKUP], HL
-        LD          HL, HEAP_START
-        LD          [WORK_VARTAB], HL
-        LD          HL, _BASIC_START
-        CALL        BIOS_NEWSTT
-_BASIC_START_RET:
-        LD          HL, [SVARI_USR0_BACKUP]
-        LD          [WORK_USRTAB + 0], HL
-        LD          A, 1
-        LD          [WORK_MAXFIL], A
-        LD          SP, [WORK_HIMEM]
         CALL        CHECK_BLIB
         JP          NZ, BIOS_SYNTAX_ERROR
-        LD          IX, BLIB_INIT_NCALBAS
+        LD          HL, STARTUP_PARAMS
+        LD          IX, BLIB_STARTUP
+        JP          CALL_BLIB
+_BASIC_START_RET:
+        LD          HL, STARTUP_PARAMS
+        LD          IX, BLIB_STARTUP_MAIN
         CALL        CALL_BLIB
-        LD          HL, WORK_H_TIMI
-        LD          DE, H_TIMI_BACKUP
-        LD          BC, 5
-        LDIR        
-        DI          
-        CALL        SETUP_H_TIMI
-        LD          DE, PROGRAM_START
         JP          PROGRAM_RUN
-SETUP_H_TIMI:
-        LD          HL, H_TIMI_HANDLER
-        LD          [WORK_H_TIMI + 1], HL
-        LD          A, 0XC3
-        LD          [WORK_H_TIMI], A
-        RET         
-SETUP_H_ERRO:
-        LD          HL, WORK_H_ERRO
-        LD          DE, H_ERRO_BACKUP
-        LD          BC, 5
-        LDIR        
-        LD          HL, H_ERRO_HANDLER
-        LD          [WORK_H_ERRO + 1], HL
-        LD          A, 0XC3
-        LD          [WORK_H_ERRO], A
-        RET         
 JP_HL:
         JP          HL
 _BASIC_START:
@@ -150,9 +121,16 @@ LINE_110:
         LD          A, 255
         POP         DE
         CALL        STRING_A
+        PUSH        HL
+        LD          DE, LEGACY_STRING_BUFFER
+        CALL        COPY_STRING_TO_BUFFER
+        POP         BC
         POP         DE
+        PUSH        BC
         LD          IX, BLIB_SETSPRITE
         CALL        CALL_BLIB
+        POP         HL
+        CALL        FREE_STRING
 LINE_120:
         LD          HL, 5
         LD          [VARI_I], HL
@@ -160,8 +138,6 @@ LINE_120:
         LD          [SVARI_I_FOR_END], HL
         LD          HL, -1
         LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT3
-        LD          [SVARI_I_LABEL], HL
         JR          _PT2
 _PT3:
         LD          HL, [VARI_I]
@@ -213,27 +189,17 @@ _PT2:
         LD          A, 0
         LD          L, 7
         RL          L
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
+        CALL        BLIB_PUTSPRITE_STUB
 LINE_130:
         LD          HL, VARS_I
         PUSH        HL
         LD          A, 1
         CALL        ALLOCATE_STRING
-        LD          IX, BLIB_INPUT
-        CALL        CALL_BLIB
+        CALL        SUB_INPUT_STRING_GETCHAR
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        FREE_STRING
-        LD          HL, [SVARI_I_LABEL]
-        CALL        JP_HL
+        CALL        ASSIGN_STRING
+        CALL        _PT3
 LINE_140:
         LD          HL, -40
         LD          [VARI_I], HL
@@ -241,8 +207,6 @@ LINE_140:
         LD          [SVARI_I_FOR_END], HL
         LD          HL, 1
         LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT7
-        LD          [SVARI_I_LABEL], HL
         JR          _PT6
 _PT7:
         LD          HL, [VARI_I]
@@ -289,27 +253,17 @@ _PT6:
         LD          A, 0
         LD          L, 1
         RL          L
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
+        CALL        BLIB_PUTSPRITE_STUB
 LINE_150:
         LD          HL, VARS_I
         PUSH        HL
         LD          A, 1
         CALL        ALLOCATE_STRING
-        LD          IX, BLIB_INPUT
-        CALL        CALL_BLIB
+        CALL        SUB_INPUT_STRING_GETCHAR
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        FREE_STRING
-        LD          HL, [SVARI_I_LABEL]
-        CALL        JP_HL
+        CALL        ASSIGN_STRING
+        CALL        _PT7
 LINE_160:
         LD          HL, -250
         LD          [VARI_I], HL
@@ -317,8 +271,6 @@ LINE_160:
         LD          [SVARI_I_FOR_END], HL
         LD          HL, -1
         LD          [SVARI_I_FOR_STEP], HL
-        LD          HL, _PT11
-        LD          [SVARI_I_LABEL], HL
         JR          _PT10
 _PT11:
         LD          HL, [VARI_I]
@@ -370,50 +322,21 @@ _PT10:
         LD          A, 0
         LD          L, 7
         RL          L
-        LD          IX, BLIB_PUTSPRITE
-        CALL        CALL_BLIB
+        CALL        BLIB_PUTSPRITE_STUB
 LINE_170:
         LD          HL, VARS_I
         PUSH        HL
         LD          A, 1
         CALL        ALLOCATE_STRING
-        LD          IX, BLIB_INPUT
-        CALL        CALL_BLIB
+        CALL        SUB_INPUT_STRING_GETCHAR
         POP         DE
         EX          DE, HL
-        LD          C, [HL]
-        LD          [HL], E
-        INC         HL
-        LD          B, [HL]
-        LD          [HL], D
-        LD          L, C
-        LD          H, B
-        CALL        FREE_STRING
-        LD          HL, [SVARI_I_LABEL]
-        CALL        JP_HL
+        CALL        ASSIGN_STRING
+        CALL        _PT11
 PROGRAM_TERMINATION:
-        CALL        SUB_TERMINATION
-        LD          SP, [WORK_HIMEM]
-        LD          HL, _BASIC_END
-        JP          BIOS_NEWSTT
-SUB_TERMINATION:
-        XOR         A, A
-        LD          [WORK_MAXFIL], A
-        LD          HL, [WORK_HIMEM]
-        LD          DE, 267
-        SBC         HL, DE
-        LD          [WORK_FILTAB], HL
-        LD          L, E
-        LD          H, D
-        INC         DE
-        INC         DE
-        LD          [HL], E
-        INC         HL
-        CALL        RESTORE_H_ERRO
-        CALL        RESTORE_H_TIMI
-        LD          HL, 0X8001
-        LD          [WORK_TXTTAB], HL
-        RET         
+        LD          HL, STARTUP_PARAMS
+        LD          IX, BLIB_TERMINATION
+        JP          CALL_BLIB
 _BASIC_END:
         DEFB        ':', 0x92, ':', 0x94, ':', 0x81, 0x00
 ERR_RETURN_WITHOUT_GOSUB:
@@ -447,48 +370,169 @@ CALL_BLIB:
         CALL        BIOS_CALSLT
         EI          
         RET         
+ALLOCATE_HEAP:
+        LD          HL, HEAP_PARAMS
+        LD          IX, BLIB_ALLOCATE_HEAP
+        JP          CALL_BLIB
 ; Allocate memory for strings. A: Length
 ALLOCATE_STRING:
-        LD          HL, [HEAP_NEXT]
-        PUSH        HL
-        LD          E, A
-        LD          C, A
-        LD          D, 0
-        ADD         HL, DE
-        INC         HL
-        LD          DE, [HEAP_END]
+        PUSH        AF
+        LD          HL, STRING_TEMP_AREA
+_ALLOCATE_STRING_SCAN:
+        LD          DE, STRING_TEMP_AREA_END
         RST         0X20
-        JR          NC, _ALLOCATE_STRING_ERROR
-        LD          [HEAP_NEXT], HL
+        JP          NC, _ALLOCATE_STRING_ERROR
+        PUSH        HL
+        INC         HL
+        LD          A, [HL]
+        INC         HL
+        OR          A, [HL]
         POP         HL
-        LD          [HL], C
+        JR          Z, _ALLOCATE_STRING_FOUND
+        LD          DE, 3
+        ADD         HL, DE
+        JR          _ALLOCATE_STRING_SCAN
+_ALLOCATE_STRING_FOUND:
+        POP         AF
+        LD          [HL], A
+        PUSH        HL
+        OR          A, A
+        JR          Z, _ALLOCATE_STRING_EMPTY
+        LD          C, A
+        LD          B, 0
+        CALL        ALLOCATE_HEAP
+        JR          _ALLOCATE_STRING_STORE
+_ALLOCATE_STRING_EMPTY:
+        LD          HL, STR_0_DATA
+_ALLOCATE_STRING_STORE:
+        EX          DE, HL
+        POP         HL
+        INC         HL
+        LD          [HL], E
+        INC         HL
+        LD          [HL], D
+        DEC         HL
+        DEC         HL
         RET         
 _ALLOCATE_STRING_ERROR:
+        POP         AF
         LD          E, 7
         JP          BIOS_ERRHAND
+FREE_STRING:
+        LD          DE, HEAP_START
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        DEC         HL
+        DEC         HL
+        PUSH        HL
+        EX          DE, HL
+        LD          DE, HEAP_START
+        RST         0X20
+        JR          C, _FREE_STRING_CLEAR
+        LD          DE, [HEAP_NEXT]
+        RST         0X20
+        JR          NC, _FREE_STRING_CLEAR
+        POP         HL
+        LD          C, [HL]
+        LD          B, 0
+        PUSH        HL
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        CALL        FREE_HEAP
+        POP         HL
+        JR          _FREE_STRING_RELEASE_TEMP
+_FREE_STRING_CLEAR:
+        POP         HL
+_FREE_STRING_RELEASE_TEMP:
+RELEASE_STRING_TEMP:
+        LD          DE, STRING_TEMP_AREA
+        RST         0X20
+        RET         C
+        LD          DE, STRING_TEMP_AREA_END
+        RST         0X20
+        RET         NC
+        LD          [HL], 0
+        INC         HL
+        LD          [HL], 0
+        INC         HL
+        LD          [HL], 0
+        RET         
+FREE_HEAP:
+        EX          DE, HL
+        LD          HL, HEAP_PARAMS
+        LD          IX, BLIB_FREE_HEAP
+        JP          CALL_BLIB
 STRING:
         LD          A, [HL]
         OR          A, A
+        JR          Z, _STRING_ERROR
+        PUSH        DE
+        PUSH        HL
         INC         HL
+        LD          C, [HL]
+        INC         HL
+        LD          B, [HL]
+        LD          H, B
+        LD          L, C
         LD          A, [HL]
-        JR          NZ, STRING_A
-        LD          E, 5
-        JP          BIOS_ERRHAND
+        POP         HL
+        PUSH        AF
+        CALL        FREE_STRING
+        POP         AF
+        POP         DE
 STRING_A:
         PUSH        AF
         LD          A, E
         CALL        ALLOCATE_STRING
-        POP         AF
+        LD          B, [HL]
         PUSH        HL
         INC         HL
-        LD          B, C
-        INC         B
-        JR          STRING_LOOP_ENTER
-STRING_LOOP:
-        LD          [HL], A
+        LD          E, [HL]
         INC         HL
-STRING_LOOP_ENTER:
+        LD          D, [HL]
+        EX          DE, HL
+        POP         DE
+        POP         AF
+        LD          C, A
+        LD          A, B
+        OR          A, A
+        JR          Z, _STRING_DONE
+STRING_LOOP:
+        LD          [HL], C
+        INC         HL
         DJNZ        STRING_LOOP
+_STRING_DONE:
+        EX          DE, HL
+        RET         
+_STRING_ERROR:
+        LD          E, 5
+        JP          BIOS_ERRHAND
+COPY_STRING_TO_BUFFER:
+        LD          A, [HL]
+        PUSH        DE
+        LD          [DE], A
+        INC         DE
+        PUSH        DE
+        OR          A, A
+        JR          Z, _COPY_STRING_TO_BUFFER_EMPTY
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+        POP         DE
+        LD          C, A
+        LD          B, 0
+        LDIR        
+        POP         HL
+        RET         
+_COPY_STRING_TO_BUFFER_EMPTY:
+        POP         DE
         POP         HL
         RET         
 STR:
@@ -516,130 +560,65 @@ PUT_INTEGER:
         LD          IX, BLIB_PUT_DIGITS
         JP          CALL_BLIB
 PUTS:
-        LD          B, [HL]
-        INC         B
-        DEC         B
+        LD          C, [HL]
+        LD          B, C
+        LD          A, C
+        OR          A, A
         RET         Z
-_PUTS_LOOP:
         INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EX          DE, HL
+_PUTS_LOOP:
         LD          A, [HL]
         RST         0X18
+        INC         HL
         DJNZ        _PUTS_LOOP
         RET         
-FREE_STRING:
-        LD          DE, HEAP_START
-        RST         0X20
-        RET         C
-        LD          DE, [HEAP_NEXT]
-        RST         0X20
-        RET         NC
-        LD          C, [HL]
-        LD          B, 0
-        INC         BC
-        JP          FREE_HEAP
-FREE_HEAP:
+; Read a fixed-length string from the keyboard
+SUB_INPUT_STRING_GETCHAR:
         PUSH        HL
-        ADD         HL, BC
-        LD          [HEAP_MOVE_SIZE], BC
-        LD          [HEAP_REMAP_ADDRESS], HL
-        EX          DE, HL
-        LD          HL, [HEAP_NEXT]
-        SBC         HL, DE
-        LD          C, L
-        LD          B, H
-        POP         HL
-        EX          DE, HL
+        LD          C, [HL]
         LD          A, C
-        OR          A, B
-        JR          Z, _FREE_HEAP_LOOP0
+        OR          A, A
+        JR          Z, _INPUT_STRING_GETCHAR_DONE
+        INC         HL
+        LD          E, [HL]
+        INC         HL
+        LD          D, [HL]
+        EI          
+_INPUT_STRING_GETCHAR_LOOP:
+        PUSH        BC
+        PUSH        DE
+        CALL        BIOS_CHGET
+        POP         DE
+        POP         BC
+        LD          [DE], A
+        INC         DE
+        DEC         C
+        JR          NZ, _INPUT_STRING_GETCHAR_LOOP
+_INPUT_STRING_GETCHAR_DONE:
+        POP         HL
+        RET         
+ASSIGN_STRING:
+        LD          [STRING_ASSIGN_DESTINATION], HL
+        LD          [STRING_ASSIGN_SOURCE], DE
+        OR          A, A
+        SBC         HL, DE
+        RET         Z
+        LD          HL, [STRING_ASSIGN_DESTINATION]
+        LD          DE, STRING_ASSIGN_OLD
+        LD          BC, 3
         LDIR        
-_FREE_HEAP_LOOP0:
-        LD          [HEAP_NEXT], DE
-        LD          HL, VARS_AREA_START
-_FREE_HEAP_LOOP1:
-        LD          DE, VARSA_AREA_END
-        RST         0X20
-        JR          NC, _FREE_HEAP_LOOP1_END
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [HEAP_REMAP_ADDRESS]
-        EX          DE, HL
-        RST         0X20
-        JR          C, _FREE_HEAP_LOOP1_NEXT
-        LD          DE, [HEAP_MOVE_SIZE]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_FREE_HEAP_LOOP1_NEXT:
-        POP         HL
-        INC         HL
-        JR          _FREE_HEAP_LOOP1
-_FREE_HEAP_LOOP1_END:
-        LD          HL, VARSA_AREA_START
-_FREE_HEAP_LOOP2:
-        LD          DE, VARSA_AREA_END
-        RST         0X20
-        RET         NC
-        LD          E, [HL]
-        LD          A, E
-        INC         HL
-        LD          D, [HL]
-        OR          A, D
-        INC         HL
-        JR          Z, _FREE_HEAP_LOOP2
-        PUSH        HL
-        EX          DE, HL
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        INC         HL
-        LD          C, [HL]
-        INC         HL
-        LD          B, 0
-        ADD         HL, BC
-        ADD         HL, BC
-        EX          DE, HL
-        SBC         HL, BC
-        SBC         HL, BC
-        RR          H
-        RR          L
-        LD          C, L
-        LD          B, H
-        EX          DE, HL
-_FREE_HEAP_SARRAY_ELEMENTS:
-        LD          E, [HL]
-        INC         HL
-        LD          D, [HL]
-        PUSH        HL
-        LD          HL, [HEAP_REMAP_ADDRESS]
-        EX          DE, HL
-        RST         0X20
-        JR          C, _FREE_HEAP_LOOP2_NEXT
-        LD          DE, [HEAP_MOVE_SIZE]
-        SBC         HL, DE
-        POP         DE
-        EX          DE, HL
-        DEC         HL
-        LD          [HL], E
-        INC         HL
-        LD          [HL], D
-        PUSH        HL
-_FREE_HEAP_LOOP2_NEXT:
-        POP         HL
-        INC         HL
-        DEC         BC
-        LD          A, C
-        OR          A, B
-        JR          NZ, _FREE_HEAP_SARRAY_ELEMENTS
-        POP         HL
-        JR          _FREE_HEAP_LOOP2
+        LD          HL, [STRING_ASSIGN_SOURCE]
+        LD          DE, [STRING_ASSIGN_DESTINATION]
+        LD          BC, 3
+        LDIR        
+        LD          HL, [STRING_ASSIGN_SOURCE]
+        CALL        RELEASE_STRING_TEMP
+        LD          HL, STRING_ASSIGN_OLD
+        JP          FREE_STRING
 PROGRAM_RUN:
         LD          HL, HEAP_START
         LD          [HEAP_NEXT], HL
@@ -653,51 +632,49 @@ PROGRAM_RUN:
         SBC         HL, DE
         LD          [HEAP_END], HL
         DI          
-        CALL        SETUP_H_ERRO
+        LD          HL, STARTUP_PARAMS
+        LD          IX, BLIB_SETUP_H_ERRO
+        CALL        CALL_BLIB
         EI          
         LD          HL, VAR_AREA_START
         LD          DE, VAR_AREA_START + 1
-        LD          BC, VARSA_AREA_END - VAR_AREA_START - 1
+        LD          BC, STRING_TEMP_AREA_END - VAR_AREA_START - 1
         LD          [HL], 0
         LDIR        
         LD          HL, STR_0
-        LD          [VARS_AREA_START], HL
+        LD          DE, VARS_AREA_START
+        LD          BC, 3
+        LDIR        
         RET         
 ; H.TIMI PROCESS -----------------
 H_TIMI_HANDLER:
         JP          H_TIMI_BACKUP
-RESTORE_H_TIMI:
-        DI          
-        LD          HL, H_TIMI_BACKUP
-        LD          DE, WORK_H_TIMI
-        LD          BC, 5
-        LDIR        
-        EI          
-        RET         
-RESTORE_H_ERRO:
-        DI          
-        LD          HL, H_ERRO_BACKUP
-        LD          DE, WORK_H_ERRO
-        LD          BC, 5
-        LDIR        
-        EI          
 _CODE_RET:
         RET         
 H_ERRO_HANDLER:
         PUSH        HL
         PUSH        DE
         PUSH        BC
-        CALL        RESTORE_H_TIMI
-        CALL        RESTORE_H_ERRO
-        CALL        SUB_TERMINATION
+        LD          HL, STARTUP_PARAMS
+        LD          IX, BLIB_H_ERRO_CLEANUP
+        CALL        CALL_BLIB
         POP         BC
         POP         DE
         POP         HL
         JP          WORK_H_ERRO
+BLIB_PUTSPRITE_STUB:
+        LD          IX, BLIB_PUTSPRITE
+        JP          CALL_BLIB
 STR_0:
         DEFB        0X00
+        DEFW        STR_0_DATA
+STR_0_DATA:
+        DEFB        0
 STR_1:
-        DEFB        0X02, 0X0D, 0X0A
+        DEFB        0X02
+        DEFW        STR_1_DATA
+STR_1_DATA:
+        DEFB        0X0D, 0X0A
 HEAP_NEXT:
         DEFW        0
 HEAP_END:
@@ -705,6 +682,154 @@ HEAP_END:
 HEAP_MOVE_SIZE:
         DEFW        0
 HEAP_REMAP_ADDRESS:
+        DEFW        0
+LEGACY_STRING_BUFFER:
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+        DEFW        0
+STRING_ASSIGN_SOURCE:
+        DEFW        0
+STRING_ASSIGN_DESTINATION:
+        DEFW        0
+STRING_ASSIGN_OLD:
+        DEFB        0
+        DEFW        0
+STARTUP_PARAMS:
+        DEFW        heap_start
+        DEFW        svari_usr0_backup
+        DEFW        _BASIC_START
+        DEFW        h_timi_handler
+        DEFW        h_timi_backup
+        DEFW        h_erro_handler
+        DEFW        h_erro_backup
+        DEFW        program_start
+        DEFW        program_run
+        DEFW        _basic_end
         DEFW        0
 VAR_AREA_START:
 SVARI_I_FOR_END:
@@ -720,15 +845,206 @@ VARI_I:
 VAR_AREA_END:
 VARS_AREA_START:
 VARS_I:
+        DEFB        0
         DEFW        0
 VARS_AREA_END:
 VARA_AREA_START:
 VARA_AREA_END:
 VARSA_AREA_START:
 VARSA_AREA_END:
+STRING_TEMP_AREA:
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+        DEFB        0
+        DEFW        0
+STRING_TEMP_AREA_END:
 H_TIMI_BACKUP:
         DEFB        0, 0, 0, 0, 0
 H_ERRO_BACKUP:
         DEFB        0, 0, 0, 0, 0
+HEAP_REMAP_END:
+        DEFW        0
+HEAP_PARAMS:
+        DEFW        heap_next
+        DEFW        heap_end
+        DEFW        heap_start
+        DEFW        string_temp_area
+        DEFW        string_temp_area_end
+        DEFW        vars_area_start
+        DEFW        vars_area_end
+        DEFW        vara_area_start
+        DEFW        vara_area_end
+        DEFW        varsa_area_start
+        DEFW        varsa_area_end
+        DEFW        heap_move_size
+        DEFW        heap_remap_address
+        DEFW        heap_remap_end
+        DEFW        0
 HEAP_START:
 END_ADDRESS:
